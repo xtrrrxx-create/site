@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import json,sys; data=json.load\\(sys.stdin\\); cats=set\\(p.get\\('category',''\\) for p in data\\); print\\(sorted\\(cats\\)\\)\")",
+      "Bash(python -c \"import json,sys; data=json.load\\(sys.stdin\\); slides=[p for p in data if 'yeezy' in p.get\\('title',''\\).lower\\(\\) or 'slide' in p.get\\('title',''\\).lower\\(\\)]; print\\(json.dumps\\(slides[:5], indent=2\\)\\)\")",
+      "Bash(python -c ':*)",
+      "Read(//c/Users/kevin/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/b822fcb5-9ec4-4140-ac9f-2c04e9f7ebea/7465d8e9-05b8-481e-bf97-51f49bc70131/skills/xlsx/**)",
+      "Bash(python -u -c ':*)",
+      "Bash(python -u fix_images.py)"
+    ]
+  }
+}
