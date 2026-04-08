@@ -1,5 +1,5 @@
 let exchangeRates = { CNY: 1, USD: 0.14, EUR: 0.13, RON: 0.65, PLN: 0.55 };
-let currentCurrency = localStorage.getItem('currency') || 'CNY';
+let currentCurrency = localStorage.getItem('currency') || 'USD';
 
 async function fetchRates() {
     try {
@@ -146,6 +146,7 @@ function updateThemeIcon(isLightMode) {
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
 const CATEGORIES = ['All', 'Shoes', 'Shorts', 'Pants', 'T-shirts', 'Hoodies', 'Jackets', 'Accessories'];
+const CAT_ICONS = { All: '🛍️', Shoes: '👟', Shorts: '🩳', Pants: '👖', 'T-shirts': '👕', Hoodies: '🧥', Jackets: '🧣', Accessories: '⌚' };
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
@@ -204,20 +205,59 @@ function injectFilterStyles() {
             border-radius: 99px; font-size: 0.7rem; font-weight: 700;
             padding: 1px 6px; min-width: 16px; text-align: center;
         }
-        .kf-cat-row {
-            display: flex; flex-wrap: wrap; gap: 0.45rem; margin-bottom: 1.5rem;
+        .kf-cat-slider-wrap {
+            position: relative; margin-bottom: 1.5rem;
         }
+        .kf-cat-slider {
+            display: flex; gap: 0.75rem; overflow-x: auto; scroll-behavior: smooth;
+            padding-bottom: 6px; scrollbar-width: none;
+        }
+        .kf-cat-slider::-webkit-scrollbar { display: none; }
+        .kf-cat-slide {
+            flex-shrink: 0; display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-end;
+            width: 100px; height: 110px; border-radius: 18px;
+            border: 1.5px solid var(--border-color);
+            background: var(--nav-bg); cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16,1,0.3,1);
+            overflow: hidden; position: relative; padding-bottom: 10px;
+        }
+        .kf-cat-slide:hover { border-color: var(--text-primary); transform: translateY(-3px); }
+        .kf-cat-slide.active {
+            border-color: var(--text-primary);
+            background: var(--text-primary);
+        }
+        .kf-cat-slide.active .kf-cat-slide-icon { filter: invert(1) brightness(0) invert(1); }
+        .kf-cat-slide.active .kf-cat-slide-label { color: var(--bg-color); }
+        .kf-cat-slide-icon {
+            font-size: 2rem; position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -60%);
+            transition: transform 0.2s;
+        }
+        .kf-cat-slide:hover .kf-cat-slide-icon { transform: translate(-50%, -65%) scale(1.1); }
+        .kf-cat-slide.active .kf-cat-slide-icon { transform: translate(-50%, -60%) scale(1.05); filter: none; }
+        .kf-cat-slide-label {
+            font-size: 0.72rem; font-weight: 700; color: var(--text-secondary);
+            font-family: 'Inter', sans-serif; letter-spacing: 0.02em; z-index: 1;
+        }
+        .kf-slider-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: var(--nav-bg); border: 1px solid var(--border-color);
+            border-radius: 50%; width: 28px; height: 28px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 5; color: var(--text-primary);
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .kf-slider-arrow:hover { background: var(--text-primary); color: var(--bg-color); border-color: var(--text-primary); }
+        .kf-slider-arrow.left { left: -14px; }
+        .kf-slider-arrow.right { right: -14px; }
+        /* old chip kept for modal */
         .kf-cat-chip {
             background: var(--nav-bg); border: 1px solid var(--border-color);
             border-radius: 99px; padding: 0.38rem 0.9rem;
             color: var(--text-secondary); font-family: 'Inter', sans-serif;
             font-size: 0.82rem; font-weight: 600; cursor: pointer;
-            transition: all 0.15s; white-space: nowrap;
-        }
-        .kf-cat-chip:hover { border-color: var(--text-primary); color: var(--text-primary); }
-        .kf-cat-chip.active {
-            background: var(--text-primary); border-color: var(--text-primary);
-            color: var(--bg-color);
+            transition: all 0.15s; white-space: nowrap; display: none;
         }
         .kf-results-info {
             font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.5rem;
@@ -340,10 +380,21 @@ function buildFilterUI() {
             </button>
         </div>
 
-        <div class="kf-cat-row">
-            ${CATEGORIES.map(cat => `
-                <button class="kf-cat-chip ${filterState.category === cat ? 'active' : ''}" data-cat="${cat}">${cat}</button>
-            `).join('')}
+        <div class="kf-cat-slider-wrap">
+            <button class="kf-slider-arrow left" id="kf-slide-left" aria-label="Scroll left">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <div class="kf-cat-slider" id="kf-cat-slider">
+                ${CATEGORIES.map(cat => `
+                    <button class="kf-cat-slide ${filterState.category === cat ? 'active' : ''}" data-cat="${cat}">
+                        <span class="kf-cat-slide-icon">${CAT_ICONS[cat] || '🏷️'}</span>
+                        <span class="kf-cat-slide-label">${cat}</span>
+                    </button>
+                `).join('')}
+            </div>
+            <button class="kf-slider-arrow right" id="kf-slide-right" aria-label="Scroll right">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
         </div>
 
         <div class="kf-results-info" id="kf-results-info"></div>
@@ -397,15 +448,23 @@ function bindFilterEvents() {
         renderFilteredProducts();
     });
 
-    document.querySelectorAll('.kf-cat-chip').forEach(btn => {
+    document.querySelectorAll('.kf-cat-slide').forEach(btn => {
         btn.addEventListener('click', () => {
             filterState.category = btn.dataset.cat;
-            document.querySelectorAll('.kf-cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === filterState.category));
+            document.querySelectorAll('.kf-cat-slide').forEach(b => b.classList.toggle('active', b.dataset.cat === filterState.category));
             document.querySelectorAll('.kf-modal-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.modalCat === filterState.category));
             updateFilterBadge();
             renderFilteredProducts();
         });
     });
+
+    const slider = document.getElementById('kf-cat-slider');
+    const slideLeft = document.getElementById('kf-slide-left');
+    const slideRight = document.getElementById('kf-slide-right');
+    if (slider && slideLeft && slideRight) {
+        slideLeft.addEventListener('click', () => slider.scrollBy({ left: -220, behavior: 'smooth' }));
+        slideRight.addEventListener('click', () => slider.scrollBy({ left: 220, behavior: 'smooth' }));
+    }
 
     const openModal = () => document.getElementById('kf-modal-overlay').classList.add('open');
     const closeModal = () => document.getElementById('kf-modal-overlay').classList.remove('open');
@@ -420,7 +479,7 @@ function bindFilterEvents() {
         btn.addEventListener('click', () => {
             filterState.category = btn.dataset.modalCat;
             document.querySelectorAll('.kf-modal-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.modalCat === filterState.category));
-            document.querySelectorAll('.kf-cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === filterState.category));
+            document.querySelectorAll('.kf-cat-slide').forEach(b => b.classList.toggle('active', b.dataset.cat === filterState.category));
         });
     });
 
@@ -436,7 +495,7 @@ function bindFilterEvents() {
         filterState.batch = 'All Tags';
         document.querySelectorAll('.kf-modal-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.modalCat === 'All'));
         document.querySelectorAll('.kf-batch-btn').forEach(b => b.classList.toggle('active', b.dataset.batch === 'All Tags'));
-        document.querySelectorAll('.kf-cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === 'All'));
+        document.querySelectorAll('.kf-cat-slide').forEach(b => b.classList.toggle('active', b.dataset.cat === 'All'));
         updateFilterBadge();
     });
 
