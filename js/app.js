@@ -64,6 +64,43 @@ function formatPrice(cnyPriceStr) {
     }
 }
 
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
+function safeExternalUrl(rawUrl) {
+    const value = String(rawUrl || "").trim();
+    if (!value) return "#";
+    try {
+        const parsed = new URL(value);
+        if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return "#";
+        return parsed.toString();
+    } catch {
+        return "#";
+    }
+}
+
+function appendAffcodeIfMissing(rawUrl) {
+    const clean = safeExternalUrl(rawUrl);
+    if (clean === "#") return "#";
+    try {
+        const parsed = new URL(clean);
+        const host = parsed.hostname.toLowerCase();
+        const isKakoLink = host.includes("ikako.vip") || host.includes("kakobuy.com");
+        if (isKakoLink && !parsed.searchParams.has("affcode")) {
+            parsed.searchParams.set("affcode", "keviinn");
+        }
+        return parsed.toString();
+    } catch {
+        return "#";
+    }
+}
+
 const langMap = {
     loading: { EN: "Loading from database...", PLN: "Ładowanie z bazy...", EUR: "Loading from database...", USD: "Loading from database...", RON: "Se încarcă din baza de date...", CNY: "正在从数据库加载..." },
     paste_link: { EN: "Paste the link to change it to your agent's version.", PLN: "Wklej link, żeby zmienić go na wersję Twojego agenta.", RON: "Lipește linkul pentru a-l schimba în versiunea agentului tău.", CNY: "粘贴链接以将其更改为代理的版本。" },
@@ -497,6 +534,7 @@ function renderFilteredProducts() {
     }
 
     container.innerHTML = filtered.map(p => {
+        const safeTitle = escapeHtml(p.title || "Untitled");
         const rawImg = (p.img || '').trim();
         const isHttp = rawImg.startsWith('http');
         const isKnownPlaceholder =
@@ -504,20 +542,17 @@ function renderFilteredProducts() {
             /s\.yupoo\.com\/website\/.*\/logo_/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
-            ? `<img src="${safeImg}" alt="${p.title}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>No image</div>');" />`
+            ? `<img src="${safeExternalUrl(safeImg)}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>No image</div>');" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">No image</div>`;
 
-        let kakobuy = p.kakobuy || '#';
-        if (kakobuy !== '#' && !kakobuy.includes('affcode=')) {
-            kakobuy += (kakobuy.includes('?') ? '&' : '?') + 'affcode=keviinn';
-        }
-        const picksly = p.picksly || '#';
+        const kakobuy = appendAffcodeIfMissing(p.kakobuy || '#');
+        const picksly = safeExternalUrl(p.picksly || '#');
 
         return `
             <div class="product-card" style="animation: fadeIn 0.4s ease-out backwards;">
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
-                    <h3 class="product-title">${p.title}</h3>
+                    <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
                     <div class="product-actions">
                         <a href="${kakobuy}" target="_blank" class="btn-primary" style="flex:2;text-align:center;text-decoration:none;border-radius:8px;padding:0.75rem;">${t('btn_buy')}</a>
@@ -1086,6 +1121,31 @@ window.convertLink = function () {
         resultDiv.style.background = 'rgba(239,68,68,0.1)';
         resultDiv.style.color = '#ef4444';
         resultDiv.innerHTML = `<strong>Error:</strong> Please enter a valid item link first!`;
+        resultDiv.style.display = 'block';
+        return;
+    }
+
+    let parsedInput;
+    try {
+        parsedInput = new URL(input);
+        if (!['http:', 'https:'].includes(parsedInput.protocol)) throw new Error('bad protocol');
+    } catch {
+        resultDiv.style.border = '1px solid rgba(239,68,68,0.3)';
+        resultDiv.style.background = 'rgba(239,68,68,0.1)';
+        resultDiv.style.color = '#ef4444';
+        resultDiv.innerHTML = `<strong>Error:</strong> Invalid URL. Use a full http/https product link.`;
+        resultDiv.style.display = 'block';
+        return;
+    }
+
+    const validHosts = ['weidian.com', 'taobao.com', 'tmall.com', '1688.com'];
+    const host = parsedInput.hostname.toLowerCase();
+    const hostAllowed = validHosts.some(h => host.includes(h));
+    if (!hostAllowed) {
+        resultDiv.style.border = '1px solid rgba(239,68,68,0.3)';
+        resultDiv.style.background = 'rgba(239,68,68,0.1)';
+        resultDiv.style.color = '#ef4444';
+        resultDiv.innerHTML = `<strong>Error:</strong> Unsupported domain. Use Weidian, Taobao, Tmall, or 1688 links.`;
         resultDiv.style.display = 'block';
         return;
     }
