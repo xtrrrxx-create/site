@@ -1,7 +1,21 @@
-let exchangeRates = { CNY: 1, USD: 0.14, EUR: 0.13, RON: 0.65, PLN: 0.55 };
+// Fixed Kakobuy-like conversion rates from CNY base.
+// 1 USD ~= 6.31 CNY  =>  1 CNY ~= 0.1585 USD
+const USE_FIXED_KAKOBUY_RATES = true;
+const FIXED_KAKOBUY_RATES = {
+    CNY: 1,
+    USD: 1 / 6.31,
+    EUR: (1 / 6.31) * 0.92, // USD -> EUR approximation
+    RON: (1 / 6.31) * 4.58, // USD -> RON approximation
+    PLN: (1 / 6.31) * 3.98  // USD -> PLN approximation
+};
+let exchangeRates = { ...FIXED_KAKOBUY_RATES };
 let currentCurrency = localStorage.getItem('currency') || 'USD';
 
 async function fetchRates() {
+    if (USE_FIXED_KAKOBUY_RATES) {
+        exchangeRates = { ...FIXED_KAKOBUY_RATES };
+        return;
+    }
     try {
         const res = await fetch('https://api.exchangerate-api.com/v4/latest/CNY');
         const data = await res.json();
