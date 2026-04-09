@@ -6,7 +6,8 @@
       "Bash(python -c ':*)",
       "Read(//c/Users/kevin/AppData/Roaming/Claude/local-agent-mode-sessions/skills-plugin/b822fcb5-9ec4-4140-ac9f-2c04e9f7ebea/7465d8e9-05b8-481e-bf97-51f49bc70131/skills/xlsx/**)",
       "Bash(python -u -c ':*)",
-      "Bash(python -u fix_images.py)"
+      "Bash(python -u fix_images.py)",
+      "Read(//c/Users/kevin/Desktop/site/**)"
     ]
   }
 }
