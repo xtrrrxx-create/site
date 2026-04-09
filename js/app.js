@@ -201,6 +201,26 @@ const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
 let allProductsCache = [];
+let productsRefreshTimer = null;
+
+async function refreshProductsFromServer(silent = false) {
+    try {
+        const res = await fetch(`products.json?_=${Date.now()}`);
+        const data = await res.json();
+        allProductsCache = data;
+        renderFilteredProducts();
+        const info = document.getElementById('kf-results-info');
+        if (info) {
+            const filtered = getFiltered();
+            info.textContent = `Showing ${filtered.length} of ${data.length} products`;
+        }
+        if (!silent) {
+            console.log('Products refreshed from server.');
+        }
+    } catch (err) {
+        console.warn('Auto-refresh failed:', err);
+    }
+}
 
 // ─── FILTER UI INJECTION ───────────────────────────────────────────────────
 function injectFilterStyles() {
@@ -1043,6 +1063,10 @@ function initApp() {
     const navLinks = document.querySelectorAll('.nav-links a');
 
     function renderPage(pageId) {
+        if (productsRefreshTimer) {
+            clearInterval(productsRefreshTimer);
+            productsRefreshTimer = null;
+        }
         // Inject home styles before rendering home page
         if (pageId === 'home') injectHomeStyles();
 
@@ -1068,6 +1092,11 @@ function initApp() {
 
                     const info = document.getElementById('kf-results-info');
                     if (info) info.textContent = `Showing ${data.length} of ${data.length} products`;
+
+                    // Keep products synced without manual refresh (every 5 min).
+                    productsRefreshTimer = setInterval(() => {
+                        refreshProductsFromServer(true);
+                    }, 5 * 60 * 1000);
                 })
                 .catch(err => {
                     const container = document.getElementById('products-container');
