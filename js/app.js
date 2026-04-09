@@ -553,7 +553,10 @@ function renderFilteredProducts() {
         const isHttp = rawImg.startsWith('http');
         const isKnownPlaceholder =
             /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) ||
-            /s\.yupoo\.com\/website\/.*\/logo_/i.test(rawImg);
+            /s\.yupoo\.com\/website\/.*\/logo_/i.test(rawImg) ||
+            /picks\.ly\/marketplace-logos\//i.test(rawImg) ||
+            /picks\.ly\/agent-logos\//i.test(rawImg) ||
+            /picks\.ly\/twitter-image/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
             ? `<img src="${safeExternalUrl(safeImg)}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>No image</div>');" />`

@@ -16,6 +16,7 @@ def is_bad_or_empty(url: str) -> bool:
         "hz_img_",
         "nstatic.kakobuy.com/banner/",
         "og-image.jpg",
+        "picks.ly/marketplace-logos/",
         "picks.ly/agent-logos/",
         "picks.ly/twitter-image",
     )
@@ -33,6 +34,8 @@ def score_image(url: str) -> int:
         score += 30
     if "imgextra" in u or "/tfs/" in u or "og-image.jpg" in u:
         score -= 200
+    if "picks.ly/marketplace-logos/" in u:
+        score -= 350
     if "picks.ly/agent-logos/" in u or "picks.ly/twitter-image" in u:
         score -= 300
     # avoid tiny icon-like files
