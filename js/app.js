@@ -257,7 +257,7 @@ function injectFilterStyles() {
             padding: 0.7rem 1rem;
             transition: border-color 0.2s;
         }
-        .kf-search-box:focus-within { border-color: var(--text-primary); }
+        .kf-search-box:focus-within { border-color: var(--accent-color); }
         .kf-search-box svg { flex-shrink: 0; color: var(--text-secondary); }
         .kf-search-box input {
             flex: 1; background: transparent; border: none; outline: none;
@@ -279,7 +279,7 @@ function injectFilterStyles() {
             white-space: nowrap; transition: border-color 0.2s, background 0.2s;
         }
         .kf-filter-btn:hover, .kf-filter-btn.active {
-            border-color: var(--text-primary);
+            border-color: var(--accent-color);
         }
         .kf-refresh-btn {
             display: flex; align-items: center; gap: 0.4rem;
@@ -289,9 +289,9 @@ function injectFilterStyles() {
             font-size: 0.9rem; font-weight: 600; cursor: pointer;
             white-space: nowrap; transition: border-color 0.2s, background 0.2s;
         }
-        .kf-refresh-btn:hover { border-color: var(--text-primary); }
+        .kf-refresh-btn:hover { border-color: var(--accent-color); }
         .kf-filter-badge {
-            background: var(--text-primary); color: var(--bg-color);
+            background: var(--accent-color); color: var(--bg-color);
             border-radius: 99px; font-size: 0.7rem; font-weight: 700;
             padding: 1px 6px; min-width: 16px; text-align: center;
         }
@@ -305,9 +305,9 @@ function injectFilterStyles() {
             font-size: 0.82rem; font-weight: 600; cursor: pointer;
             transition: all 0.15s; white-space: nowrap;
         }
-        .kf-cat-chip:hover { border-color: var(--text-primary); color: var(--text-primary); }
+        .kf-cat-chip:hover { border-color: var(--accent-color); color: var(--accent-color); }
         .kf-cat-chip.active {
-            background: var(--text-primary); border-color: var(--text-primary);
+            background: var(--accent-color); border-color: var(--accent-color);
             color: var(--bg-color);
         }
         .kf-results-info {
@@ -342,7 +342,7 @@ function injectFilterStyles() {
             align-items: center; justify-content: center;
             cursor: pointer; transition: background 0.15s, color 0.15s;
         }
-        .kf-modal-close:hover { background: var(--text-primary); color: var(--bg-color); }
+        .kf-modal-close:hover { background: var(--accent-color); color: var(--bg-color); }
         .kf-section-label {
             font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
             text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.75rem;
@@ -357,10 +357,10 @@ function injectFilterStyles() {
             font-size: 0.9rem; font-weight: 600; text-align: left; cursor: pointer;
             transition: all 0.15s;
         }
-        .kf-modal-cat-btn:hover { color: var(--text-primary); }
+        .kf-modal-cat-btn:hover { color: var(--accent-color); }
         .kf-modal-cat-btn.active {
-            border-color: var(--text-primary);
-            background: transparent; color: var(--text-primary);
+            border-color: var(--accent-color);
+            background: transparent; color: var(--accent-color);
         }
         .kf-batch-grid {
             display: grid; grid-template-columns: 1fr 1fr;
@@ -373,10 +373,10 @@ function injectFilterStyles() {
             font-size: 0.85rem; font-weight: 600; text-align: center;
             cursor: pointer; transition: all 0.15s;
         }
-        .kf-batch-btn:hover { color: var(--text-primary); }
+        .kf-batch-btn:hover { color: var(--accent-color); }
         .kf-batch-btn.active {
-            border-color: var(--text-primary);
-            background: transparent; color: var(--text-primary);
+            border-color: var(--accent-color);
+            background: transparent; color: var(--accent-color);
         }
         .kf-modal-actions { display: flex; gap: 0.65rem; }
         .kf-btn-clear {
@@ -386,9 +386,9 @@ function injectFilterStyles() {
             font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 700;
             cursor: pointer; transition: all 0.15s;
         }
-        .kf-btn-clear:hover { color: var(--text-primary); border-color: var(--text-primary); }
+        .kf-btn-clear:hover { color: var(--accent-color); border-color: var(--accent-color); }
         .kf-btn-show {
-            flex: 2; background: var(--text-primary);
+            flex: 2; background: var(--accent-color);
             border: none; border-radius: 99px; padding: 0.75rem;
             color: var(--bg-color); font-family: 'Inter', sans-serif;
             font-size: 0.9rem; font-weight: 700; cursor: pointer;
@@ -782,7 +782,7 @@ function injectHomeStyles() {
             display: inline-flex;
             align-items: center;
             gap: 9px;
-            background: var(--text-primary);
+            background: var(--accent-color);
             color: var(--bg-color);
             font-family: 'Inter', sans-serif;
             font-weight: 700;
@@ -947,7 +947,7 @@ function getPages() {
                 background: transparent;
             }
             .htb-link:hover {
-                border-color: var(--text-primary);
+                border-color: var(--accent-color);
             }
             .htb-img {
                 margin-top: 0.35rem;
@@ -996,9 +996,9 @@ function getPages() {
             }
             .htb-cta .htb-link {
                 margin: 0 auto;
-                background: var(--text-primary);
+                background: var(--accent-color);
                 color: var(--bg-color);
-                border-color: var(--text-primary);
+                border-color: var(--accent-color);
             }
         </style>
         <div class="htb-wrap">
@@ -1128,7 +1128,7 @@ function getPages() {
                 transition: border-color 0.2s;
                 box-sizing: border-box;
             }
-            .converter-input:focus { border-color: var(--text-primary); }
+            .converter-input:focus { border-color: var(--accent-color); }
             .converter-input::placeholder { color: var(--text-secondary); opacity: 0.6; }
             .agent-dropdown-wrap {
                 position: relative;
@@ -1154,7 +1154,7 @@ function getPages() {
                 justify-content: space-between;
                 box-sizing: border-box;
             }
-            .agent-dropdown-btn:hover { border-color: var(--text-primary); }
+            .agent-dropdown-btn:hover { border-color: var(--accent-color); }
             .agent-logo-kakobuy {
                 background: #e8192c;
                 display: inline-flex; align-items: center; justify-content: center;
@@ -1184,7 +1184,7 @@ function getPages() {
             .agent-option:hover { background: var(--border-color); }
             .agent-option.selected { background: var(--border-color); }
             .convert-btn {
-                background: var(--text-primary);
+                background: var(--accent-color);
                 color: var(--bg-color);
                 border: none;
                 border-radius: 14px;
@@ -1230,7 +1230,7 @@ function getPages() {
                 transition: border-color 0.2s;
                 box-sizing: border-box;
             }
-            .tracking-input:focus { border-color: var(--text-primary); }
+            .tracking-input:focus { border-color: var(--accent-color); }
             .tracking-input::placeholder { color: var(--text-secondary); opacity: 0.6; }
             .tracker-grid {
                 display: grid;
@@ -1250,7 +1250,7 @@ function getPages() {
                 transition: border-color 0.2s, transform 0.2s;
             }
             .tracker-card:hover {
-                border-color: var(--text-primary);
+                border-color: var(--accent-color);
                 transform: translateY(-2px);
             }
             .tracker-icon {
