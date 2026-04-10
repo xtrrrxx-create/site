@@ -453,6 +453,9 @@ body.light-mode #bg-canvas {
     /* Show bottom nav */
     .bottom-nav { display: flex; }
 
+    /* Disable canvas animation on mobile */
+    #bg-canvas { display: none; }
+
     /* Main gets padding for bottom nav */
     main { padding-bottom: 72px; }
 
