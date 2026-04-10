@@ -1,15 +1,15 @@
 :root {
     --bg-color: #0a0a0f;
-    --nav-bg: rgba(18, 18, 26, 0.85);
-    --border-color: #1e1e2e;
+    --nav-bg: rgba(10, 18, 0, 0.85);
+    --border-color: #141f00;
     --text-primary: #ffffff;
     --text-secondary: #71717a;
-    --accent-color: #7c3aed;
-    --accent-secondary: #a855f7;
-    --accent-glow: rgba(124, 58, 237, 0.15);
-    --glow-color: rgba(124, 58, 237, 0.12);
-    --card-bg: rgba(14, 14, 22, 0.9);
-    --gradient-accent: linear-gradient(135deg, #7c3aed, #a855f7);
+    --accent-color: #B5E853;
+    --accent-secondary: #d4f57a;
+    --accent-glow: rgba(181, 232, 83, 0.15);
+    --glow-color: rgba(181, 232, 83, 0.10);
+    --card-bg: rgba(10, 18, 0, 0.88);
+    --gradient-accent: linear-gradient(135deg, #0A1200, #B5E853);
 }
 
 body.light-mode {
@@ -41,8 +41,8 @@ body {
     display: flex;
     flex-direction: column;
     background-image:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(124, 58, 237, 0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(181, 232, 83, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 90%, rgba(10, 18, 0, 0.8) 0%, transparent 50%);
 }
 
 /* Subtle dot grid background */
@@ -157,7 +157,7 @@ body.light-mode .nav-links a:hover {
 .nav-links a.active {
     background: var(--gradient-accent);
     color: #fff;
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 0 20px rgba(181, 232, 83, 0.25);
 }
 
 .nav-actions {
@@ -184,7 +184,7 @@ body.light-mode .nav-links a:hover {
     background: var(--gradient-accent);
     border-color: transparent;
     color: #fff;
-    box-shadow: 0 0 16px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 16px rgba(181, 232, 83, 0.35);
 }
 
 main {
@@ -257,13 +257,13 @@ body.light-mode .giant-logo {
     border: none;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
-    box-shadow: 0 0 30px rgba(124, 58, 237, 0.35), 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 0 30px rgba(181, 232, 83, 0.3), 0 4px 15px rgba(0,0,0,0.3);
     position: relative;
 }
 
 .btn-explore:hover {
     transform: scale(1.04) translateY(-1px);
-    box-shadow: 0 0 40px rgba(124, 58, 237, 0.5), 0 8px 25px rgba(0,0,0,0.3);
+    box-shadow: 0 0 40px rgba(181, 232, 83, 0.45), 0 8px 25px rgba(0,0,0,0.3);
 }
 
 .btn-explore:active {
@@ -329,8 +329,8 @@ body.light-mode .glass-card::before {
 
 .product-card:hover {
     transform: translateY(-6px);
-    border-color: rgba(124, 58, 237, 0.4);
-    box-shadow: 0 12px 40px rgba(124, 58, 237, 0.12), 0 4px 16px rgba(0,0,0,0.3);
+    border-color: rgba(181, 232, 83, 0.45);
+    box-shadow: 0 12px 40px rgba(181, 232, 83, 0.1), 0 4px 16px rgba(0,0,0,0.3);
 }
 
 .product-image {
@@ -407,13 +407,13 @@ body.light-mode .glass-card::before {
     font-weight: 700;
     cursor: pointer;
     transition: opacity 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 0 20px rgba(181, 232, 83, 0.25);
 }
 
 .btn-primary:hover {
     opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 0 30px rgba(124, 58, 237, 0.45);
+    box-shadow: 0 0 30px rgba(181, 232, 83, 0.4);
 }
 
 .btn-primary:active { transform: scale(0.97); }
