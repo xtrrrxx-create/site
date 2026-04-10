@@ -5559,10 +5559,11 @@
     {
         "title": "ERD Long-Sleeve",
         "price": "440",
-        "img": "https://oss.acbuy.com/temp/pda_17724114323251F8349AB-19CC-4EA7-BD17-2110B02C0276.jpg",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/29f3e150-3229-4fe2-8636-c441b54eb36b.webp",
         "kakobuy": "https://ikako.vip/78ech4",
         "picksly": "https://picks.ly/item/TB987629045690",
-        "category": "Long-sleeve"
+        "category": "Long-sleeve",
+        "batch": "Best Batch"
     },
     {
         "title": "ERD Long-Sleeve",
