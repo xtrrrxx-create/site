@@ -302,6 +302,24 @@ HTML = """
       box-shadow: 0 4px 16px rgba(0,0,0,0.5);
       font-weight: 600;
     }
+    .table-search-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 16px 0 10px;
+    }
+    .table-search-row input[type="search"] {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 12px;
+      font-size: 15px;
+    }
+    .table-search-row .search-meta {
+      font-size: 13px;
+      color: #9a9aaa;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -323,6 +341,10 @@ HTML = """
       </div>
       <p class="small">Tip: form stays at top while you scroll. Saves trigger git commit + push to origin (~4s after your last change) so Vercel can deploy. Set env ADMIN_AUTO_GIT_PUSH=0 to disable.</p>
     </div>
+    <div class="table-search-row">
+      <input type="search" id="tableSearch" placeholder="Search products (title, category, price…)" autocomplete="off"/>
+      <span class="search-meta" id="tableSearchCount"></span>
+    </div>
     <table id="tbl">
       <thead><tr><th>#</th><th>Title</th><th>Price</th><th>Category</th><th>Batch</th><th>Actions</th></tr></thead>
       <tbody></tbody>
@@ -332,6 +354,7 @@ HTML = """
   <script>
     let products = [];
     let selectedIndex = -1;
+    let tableSearchQuery = "";
     const statusEl = document.getElementById("status");
 
     const fields = {
@@ -375,9 +398,30 @@ HTML = """
       fields.batch.innerHTML = m.batches.map(v => `<option value="${v}">${v || "(empty)"}</option>`).join("");
     }
 
+    function getFilteredTableRows() {
+      const q = tableSearchQuery.trim().toLowerCase();
+      const out = [];
+      for (let i = 0; i < products.length; i++) {
+        const p = products[i];
+        if (!q) {
+          out.push({ p, i });
+          continue;
+        }
+        const hay = [
+          p.title || "",
+          p.category || "",
+          p.batch || "",
+          String(p.price || ""),
+        ].join(" ").toLowerCase();
+        if (hay.includes(q)) out.push({ p, i });
+      }
+      return out;
+    }
+
     function render() {
       const tbody = document.querySelector("#tbl tbody");
-      tbody.innerHTML = products.map((p, i) => `
+      const rows = getFilteredTableRows();
+      tbody.innerHTML = rows.map(({ p, i }) => `
         <tr>
           <td>${i}</td>
           <td>${(p.title || "").replace(/</g, "&lt;")}</td>
@@ -390,6 +434,12 @@ HTML = """
           </td>
         </tr>
       `).join("");
+      const cm = document.getElementById("tableSearchCount");
+      if (cm) {
+        cm.textContent = tableSearchQuery.trim()
+          ? `Showing ${rows.length} of ${products.length} (filtered)`
+          : `Showing ${products.length} products`;
+      }
     }
 
     async function loadProducts() {
@@ -454,6 +504,11 @@ HTML = """
     document.getElementById("cancelBtn").onclick = clearForm;
 
     document.getElementById("jumpForm").onclick = () => focusEditorBar();
+
+    document.getElementById("tableSearch").addEventListener("input", (e) => {
+      tableSearchQuery = e.target.value || "";
+      render();
+    });
 
     function connectWs() {
       const proto = location.protocol === "https:" ? "wss" : "ws";
