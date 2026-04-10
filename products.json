@@ -6287,10 +6287,11 @@
     {
         "title": "Chrome Hearts Hoodie / BUDGET",
         "price": "125",
-        "img": "https://cbu01.alicdn.com/img/ibank/O1CN01CkaZWf1arvGsRaB1c_!!2218394303384-0-cib.jpg_90x90q85.jpg_.webp",
+        "img": "https://cbu01.alicdn.com/img/ibank/O1CN01CkaZWf1arvGsRaB1c_!!2218394303384-0-cib.jpg",
         "kakobuy": "https://ikako.vip/fzwcz",
-        "picksly": "",
-        "category": "Hoodies"
+        "picksly": "https://picks.ly/item/AL935108830430",
+        "category": "Hoodies",
+        "batch": "Best Batch"
     },
     {
         "title": "Derschutze Hoodie",
