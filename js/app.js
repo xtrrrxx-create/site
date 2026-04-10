@@ -198,10 +198,12 @@ function updateThemeIcon(isLightMode) {
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
 const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
+const SEARCH_DEBOUNCE_MS = 140;
 
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
 let allProductsCache = [];
 let productsRefreshTimer = null;
+let searchInputTimer = null;
 
 /** How often the Products page re-fetches products.json (admin saves to this file locally). */
 const PRODUCTS_POLL_MS = 30 * 1000;
@@ -460,9 +462,13 @@ function bindFilterEvents() {
     if (!input) return;
 
     input.addEventListener('input', () => {
-        filterState.search = input.value;
-        clearBtn.style.display = filterState.search ? 'flex' : 'none';
-        renderFilteredProducts();
+        const next = input.value;
+        clearBtn.style.display = next ? 'flex' : 'none';
+        clearTimeout(searchInputTimer);
+        searchInputTimer = setTimeout(() => {
+            filterState.search = next;
+            renderFilteredProducts();
+        }, SEARCH_DEBOUNCE_MS);
     });
     clearBtn.addEventListener('click', () => {
         filterState.search = '';
@@ -586,14 +592,14 @@ function renderFilteredProducts() {
             /picks\.ly\/twitter-image/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
-            ? `<img src="${safeExternalUrl(safeImg)}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>No image</div>');" />`
+            ? `<img src="${safeExternalUrl(safeImg)}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>No image</div>');" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">No image</div>`;
 
         const kakobuy = appendAffcodeIfMissing(p.kakobuy || '#');
         const picksly = safeExternalUrl(p.picksly || '#');
 
         return `
-            <div class="product-card" style="animation: fadeIn 0.4s ease-out backwards;">
+            <div class="product-card">
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
                     <h3 class="product-title">${safeTitle}</h3>
