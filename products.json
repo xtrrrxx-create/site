@@ -5424,10 +5424,11 @@
     {
         "title": "ERD Long-Sleeve",
         "price": "184",
-        "img": "https://img.alicdn.com/bao/uploaded/i2/2216268737739/O1CN01uZ41JH272WGRROp6f_!!2216268737739.jpg_400x400q85.jpg_.webp",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/6ae7510d-85d1-43b9-8037-c062949a0f7c.webp",
         "kakobuy": "https://ikako.vip/a33jw",
-        "picksly": "",
-        "category": "Long-sleeve"
+        "picksly": "https://picks.ly/item/TB992619181467",
+        "category": "Long-sleeve",
+        "batch": "Best Batch"
     },
     {
         "title": "ERD Long-Sleeve",
