@@ -7975,10 +7975,11 @@
     {
         "title": "Purple Jeans Slim/Skinny",
         "price": "126",
-        "img": "https://cbu01.alicdn.com/img/ibank/O1CN01b2yFeP1NJUYu4qA6V_!!2219724861549-0-cib.jpg_90x90q85.jpg_.webp",
+        "img": "https://cbu01.alicdn.com/img/ibank/O1CN01b2yFeP1NJUYu4qA6V_!!2219724861549-0-cib.jpg",
         "kakobuy": "https://ikako.vip/quxq3",
-        "picksly": "",
-        "category": "Pants"
+        "picksly": "https://picks.ly/item/AL925177720568",
+        "category": "Pants",
+        "batch": "Best Batch"
     },
     {
         "title": "Rick Owens Bolan Jeans Slim/Skinny",
