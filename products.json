@@ -5658,10 +5658,11 @@
     {
         "title": "Stone Island Long-Sleeve",
         "price": "194",
-        "img": "https://oss.acbuy.com/temp/pda_177271017939598CD163F-15B4-4652-A37F-01BE729276FC.jpg",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/6420b5c9-d642-4675-b9b4-04054c770d36.webp",
         "kakobuy": "https://ikako.vip/8bh72",
         "picksly": "https://picks.ly/item/TB781027464161",
-        "category": "Long-sleeve"
+        "category": "Long-sleeve",
+        "batch": "Best Batch"
     },
     {
         "title": "Stone Island Long-Sleeve",
