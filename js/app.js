@@ -199,11 +199,13 @@ function updateThemeIcon(isLightMode) {
 const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 const SEARCH_DEBOUNCE_MS = 140;
+const PRODUCTS_RENDER_STEP = 30;
 
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
 let allProductsCache = [];
 let productsRefreshTimer = null;
 let searchInputTimer = null;
+let visibleProductsLimit = PRODUCTS_RENDER_STEP;
 
 /** How often the Products page re-fetches products.json (admin saves to this file locally). */
 const PRODUCTS_POLL_MS = 30 * 1000;
@@ -467,6 +469,7 @@ function bindFilterEvents() {
         clearTimeout(searchInputTimer);
         searchInputTimer = setTimeout(() => {
             filterState.search = next;
+            resetVisibleProductsLimit();
             renderFilteredProducts();
         }, SEARCH_DEBOUNCE_MS);
     });
@@ -474,6 +477,7 @@ function bindFilterEvents() {
         filterState.search = '';
         input.value = '';
         clearBtn.style.display = 'none';
+        resetVisibleProductsLimit();
         renderFilteredProducts();
     });
 
@@ -483,6 +487,7 @@ function bindFilterEvents() {
             document.querySelectorAll('.kf-cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === filterState.category));
             document.querySelectorAll('.kf-modal-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.modalCat === filterState.category));
             updateFilterBadge();
+            resetVisibleProductsLimit();
             renderFilteredProducts();
         });
     });
@@ -502,6 +507,7 @@ function bindFilterEvents() {
             document.querySelectorAll('.kf-modal-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.modalCat === filterState.category));
             document.querySelectorAll('.kf-cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === filterState.category));
             updateFilterBadge();
+            resetVisibleProductsLimit();
             renderFilteredProducts();
         });
     });
@@ -511,6 +517,7 @@ function bindFilterEvents() {
             filterState.batch = btn.dataset.batch;
             document.querySelectorAll('.kf-batch-btn').forEach(b => b.classList.toggle('active', b.dataset.batch === filterState.batch));
             updateFilterBadge();
+            resetVisibleProductsLimit();
             renderFilteredProducts();
         });
     });
@@ -526,6 +533,7 @@ function bindFilterEvents() {
 
     document.getElementById('kf-show-results').addEventListener('click', () => {
         updateFilterBadge();
+        resetVisibleProductsLimit();
         renderFilteredProducts();
         closeModal();
     });
@@ -558,14 +566,19 @@ function getFiltered() {
     });
 }
 
+function resetVisibleProductsLimit() {
+    visibleProductsLimit = PRODUCTS_RENDER_STEP;
+}
+
 function renderFilteredProducts() {
     const container = document.getElementById('products-container');
     const info = document.getElementById('kf-results-info');
     if (!container) return;
 
     const filtered = getFiltered();
+    const visible = filtered.slice(0, visibleProductsLimit);
     if (info) {
-        info.textContent = `Showing ${filtered.length} of ${allProductsCache.length} products`;
+        info.textContent = `Showing ${visible.length} of ${filtered.length} products`;
     }
 
     if (filtered.length === 0) {
@@ -580,7 +593,7 @@ function renderFilteredProducts() {
         return;
     }
 
-    container.innerHTML = filtered.map(p => {
+    container.innerHTML = visible.map(p => {
         const safeTitle = escapeHtml(p.title || "Untitled");
         const rawImg = (p.img || '').trim();
         const isHttp = rawImg.startsWith('http');
@@ -611,7 +624,25 @@ function renderFilteredProducts() {
                 </div>
             </div>
         `;
-    }).join('');
+    }).join('') + (
+        filtered.length > visible.length
+            ? `
+            <div style="grid-column:1/-1;display:flex;justify-content:center;padding-top:8px;">
+                <button id="kf-load-more" class="btn-secondary" style="padding:0.8rem 1.1rem;border-radius:10px;border:none;cursor:pointer;">
+                    Load more (${filtered.length - visible.length} left)
+                </button>
+            </div>
+            `
+            : ''
+    );
+
+    const loadMoreBtn = document.getElementById('kf-load-more');
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            visibleProductsLimit += PRODUCTS_RENDER_STEP;
+            renderFilteredProducts();
+        });
+    }
 }
 
 // ─── HOME PAGE STYLES ──────────────────────────────────────────────────────
