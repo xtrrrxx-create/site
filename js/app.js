@@ -202,6 +202,10 @@ const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
 let allProductsCache = [];
 let productsRefreshTimer = null;
+let productsVisibilityCleanup = null;
+
+/** How often the Products page re-fetches products.json (admin saves to this file locally). */
+const PRODUCTS_POLL_MS = 30 * 1000;
 
 async function refreshProductsFromServer(silent = false) {
     try {
@@ -1067,6 +1071,10 @@ function initApp() {
             clearInterval(productsRefreshTimer);
             productsRefreshTimer = null;
         }
+        if (productsVisibilityCleanup) {
+            productsVisibilityCleanup();
+            productsVisibilityCleanup = null;
+        }
         // Inject home styles before rendering home page
         if (pageId === 'home') injectHomeStyles();
 
@@ -1093,10 +1101,20 @@ function initApp() {
                     const info = document.getElementById('kf-results-info');
                     if (info) info.textContent = `Showing ${data.length} of ${data.length} products`;
 
-                    // Keep products synced without manual refresh (every 5 min).
+                    // Re-fetch products.json often so local admin edits show up without manual refresh.
                     productsRefreshTimer = setInterval(() => {
                         refreshProductsFromServer(true);
-                    }, 5 * 60 * 1000);
+                    }, PRODUCTS_POLL_MS);
+
+                    const onVis = () => {
+                        if (document.visibilityState === 'visible') {
+                            refreshProductsFromServer(true);
+                        }
+                    };
+                    document.addEventListener('visibilitychange', onVis);
+                    productsVisibilityCleanup = () => {
+                        document.removeEventListener('visibilitychange', onVis);
+                    };
                 })
                 .catch(err => {
                     const container = document.getElementById('products-container');
