@@ -4964,7 +4964,8 @@
         "img": "https://oss.acbuy.com/temp/pda_17745093909799B82AD23-FD8E-4EE5-B679-79D1785D934B.jpg",
         "kakobuy": "https://ikako.vip/unhhq",
         "picksly": "https://picks.ly/item/TB997693183845",
-        "category": "T-shirts"
+        "category": "T-shirts",
+        "batch": "Best Batch"
     },
     {
         "title": "Balenciaga Tee",
@@ -8399,6 +8400,15 @@
         "kakobuy": "https://ikako.vip/eu276",
         "picksly": "https://picks.ly/item/TB947037952550",
         "category": "Shoes",
+        "batch": "Best Batch"
+    },
+    {
+        "title": "Balenciaga Tee",
+        "price": "85",
+        "img": "https://cbu01.alicdn.com/img/ibank/O1CN01tTEVgp1KNfLviNv4k_!!2217551301152-0-cib.jpg_400x400q85.jpg_.webp",
+        "kakobuy": "https://ikako.vip/d4eqc",
+        "picksly": "",
+        "category": "T-shirts",
         "batch": "Best Batch"
     }
 ]
