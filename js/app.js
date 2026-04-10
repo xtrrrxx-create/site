@@ -496,6 +496,8 @@ function bindFilterEvents() {
             filterState.category = btn.dataset.modalCat;
             document.querySelectorAll('.kf-modal-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.modalCat === filterState.category));
             document.querySelectorAll('.kf-cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === filterState.category));
+            updateFilterBadge();
+            renderFilteredProducts();
         });
     });
 
@@ -503,6 +505,8 @@ function bindFilterEvents() {
         btn.addEventListener('click', () => {
             filterState.batch = btn.dataset.batch;
             document.querySelectorAll('.kf-batch-btn').forEach(b => b.classList.toggle('active', b.dataset.batch === filterState.batch));
+            updateFilterBadge();
+            renderFilteredProducts();
         });
     });
 
@@ -1087,7 +1091,7 @@ function initApp() {
         if (pageId === 'products') {
             filterState = { search: '', category: 'All', batch: 'All Tags' };
 
-            fetch('products.json')
+            fetch(`products.json?_=${Date.now()}`)
                 .then(res => res.json())
                 .then(data => {
                     allProductsCache = data;
