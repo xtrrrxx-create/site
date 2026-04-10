@@ -6126,10 +6126,11 @@
     {
         "title": "Bape Hoodie / BEST",
         "price": "401",
-        "img": "https://img.alicdn.com/bao/uploaded/i4/2220556893518/O1CN01ffUHad1brIRmp6zki_!!2220556893518.jpg_400x400q85.jpg_.webp",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/049668c1-f44b-4038-a585-64e1c737e2c9.webp",
         "kakobuy": "https://ikako.vip/wsm6u",
-        "picksly": "",
-        "category": "Hoodies"
+        "picksly": "https://picks.ly/item/TB968489236130",
+        "category": "Hoodies",
+        "batch": "Best Batch"
     },
     {
         "title": "CDG Hoodie",
