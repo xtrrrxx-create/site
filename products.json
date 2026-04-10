@@ -6927,10 +6927,11 @@
     {
         "title": "Vetements Hoodie",
         "price": "342",
-        "img": "https://oss.acbuy.com/temp/pda_1775714405737E9E720CD-6320-4D12-9A84-1E4B6F70E80F.jpg",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/4aeb915c-1bd2-4cd6-afb7-7505e8dc6bd3.webp",
         "kakobuy": "https://ikako.vip/ez725",
         "picksly": "https://picks.ly/item/TB966694304235",
-        "category": "Hoodies"
+        "category": "Hoodies",
+        "batch": "Best Batch"
     },
     {
         "title": "Vetements Hoodie",
