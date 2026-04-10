@@ -208,9 +208,6 @@ let searchInputTimer = null;
 let visibleProductsLimit = PRODUCTS_RENDER_STEP;
 let lastProductsSignature = '';
 
-/** How often the Products page re-fetches products.json (admin saves to this file locally). */
-const PRODUCTS_POLL_MS = 30 * 1000;
-
 async function refreshProductsFromServer(silent = false) {
     try {
         const res = await fetch(`products.json?_=${Date.now()}`);
@@ -283,6 +280,15 @@ function injectFilterStyles() {
         .kf-filter-btn:hover, .kf-filter-btn.active {
             border-color: var(--text-primary);
         }
+        .kf-refresh-btn {
+            display: flex; align-items: center; gap: 0.4rem;
+            background: var(--nav-bg); border: 1px solid var(--border-color);
+            border-radius: 14px; padding: 0.7rem 1rem;
+            color: var(--text-primary); font-family: 'Inter', sans-serif;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            white-space: nowrap; transition: border-color 0.2s, background 0.2s;
+        }
+        .kf-refresh-btn:hover { border-color: var(--text-primary); }
         .kf-filter-badge {
             background: var(--text-primary); color: var(--bg-color);
             border-radius: 99px; font-size: 0.7rem; font-weight: 700;
@@ -422,6 +428,12 @@ function buildFilterUI() {
                 Filters
                 ${active > 0 ? `<span class="kf-filter-badge">${active}</span>` : ''}
             </button>
+            <button class="kf-refresh-btn" id="kf-refresh-products" title="Refresh products now">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/>
+                </svg>
+                Refresh
+            </button>
         </div>
 
         <div class="kf-cat-row">
@@ -502,6 +514,9 @@ function bindFilterEvents() {
     const closeModal = () => document.getElementById('kf-modal-overlay').classList.remove('open');
 
     document.getElementById('kf-open-filters').addEventListener('click', openModal);
+    document.getElementById('kf-refresh-products').addEventListener('click', async () => {
+        await refreshProductsFromServer(false);
+    });
     document.getElementById('kf-modal-close').addEventListener('click', closeModal);
     document.getElementById('kf-modal-overlay').addEventListener('click', e => {
         if (e.target === document.getElementById('kf-modal-overlay')) closeModal();
@@ -1144,10 +1159,8 @@ function initApp() {
                     const info = document.getElementById('kf-results-info');
                     if (info) info.textContent = `Showing ${data.length} of ${data.length} products`;
 
-                    // Re-fetch products.json often so local admin edits show up without manual refresh.
-                    productsRefreshTimer = setInterval(() => {
-                        refreshProductsFromServer(true);
-                    }, PRODUCTS_POLL_MS);
+                    // No periodic rerender while browsing: manual refresh only to keep scrolling smooth.
+                    productsRefreshTimer = null;
                 })
                 .catch(err => {
                     const container = document.getElementById('products-container');
