@@ -949,6 +949,19 @@ function getPages() {
             .htb-link:hover {
                 border-color: var(--text-primary);
             }
+            .htb-img {
+                margin-top: 0.35rem;
+                border-radius: 14px;
+                overflow: hidden;
+                border: 1px solid var(--border-color);
+                background: #0f0f12;
+            }
+            .htb-img img {
+                display: block;
+                width: 100%;
+                height: auto;
+                vertical-align: middle;
+            }
             .htb-coupon {
                 margin-top: 0.35rem;
                 display: inline-flex;
@@ -1001,7 +1014,8 @@ function getPages() {
                         <h3>Create your Kakobuy account</h3>
                     </div>
                     <p>Start by creating an account so you can place orders, store warehouse items, and manage shipping.</p>
-                    <a class="htb-link" href="https://ikako.vip/rabx8" target="_blank" rel="noopener">Sign up now</a>
+                    <div class="htb-img"><img src="images/how-to-buy/step-1.jpg" alt="Step 1 — create Kakobuy account" loading="lazy" decoding="async" /></div>
+                    <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">Sign up now</a>
                 </section>
 
                 <section class="htb-step">
@@ -1010,7 +1024,7 @@ function getPages() {
                         <h3>Browse products on Jarvis Finder</h3>
                     </div>
                     <p>Use categories and search to find items quickly, then click Buy Now to open the item in Kakobuy.</p>
-                    <a class="htb-link" href="#" onclick="document.querySelector('[data-page=products]').click(); return false;">Browse products</a>
+                    <div class="htb-img"><img src="images/how-to-buy/step-2.jpg" alt="Step 2 — browse products" loading="lazy" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1023,6 +1037,7 @@ function getPages() {
                         <li>Open product page via Buy Now.</li>
                         <li>Complete checkout in Kakobuy.</li>
                     </ul>
+                    <div class="htb-img"><img src="images/how-to-buy/step-3.jpg" alt="Step 3 — cart and submit" loading="lazy" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1035,6 +1050,7 @@ function getPages() {
                         <li>Select shipping line and parcel options.</li>
                         <li>Pay shipping fee and track package.</li>
                     </ul>
+                    <div class="htb-img"><img src="images/how-to-buy/step-4.jpg" alt="Step 4 — choose shipping line" loading="lazy" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1043,14 +1059,15 @@ function getPages() {
                         <h3>Apply coupon before payment</h3>
                     </div>
                     <p>Use this coupon in Kakobuy checkout for extra discounts:</p>
-                    <div class="htb-coupon">DAPHNE</div>
+                    <div class="htb-coupon">keviinn</div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-5.jpg" alt="Step 5 — apply coupon and submit" loading="lazy" decoding="async" /></div>
                 </section>
             </div>
 
             <div class="htb-cta">
                 <h3>READY TO START YOUR HAUL?</h3>
                 <p>Create your Kakobuy account and start building your order.</p>
-                <a class="htb-link" href="https://ikako.vip/rabx8" target="_blank" rel="noopener">Create Kakobuy account</a>
+                <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">Create Kakobuy account</a>
             </div>
         </div>
     `,
