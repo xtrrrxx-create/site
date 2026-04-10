@@ -1,6 +1,8 @@
 import asyncio
 import json
+import os
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +12,12 @@ from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, field_validator
 
 DB_PATH = Path(__file__).parent / "products.json"
+REPO_ROOT = DB_PATH.parent
+
+# After each save, run git add/commit/push on products.json (set ADMIN_AUTO_GIT_PUSH=0 to disable).
+_GIT_PUSH_DEBOUNCE_S = 4.0
+_git_push_task: asyncio.Task[None] | None = None
+_git_push_lock = asyncio.Lock()
 
 CATEGORIES = ["", "Shoes", "Slides", "Shorts", "Pants", "T-shirts", "Long-sleeve", "Hoodies", "Jackets", "Accessories"]
 BATCHES = ["", "Best Batch", "Budget Batch", "Random Batch"]
@@ -25,6 +33,77 @@ def load_products() -> list[dict[str, Any]]:
 def save_products(products: list[dict[str, Any]]) -> None:
     with DB_PATH.open("w", encoding="utf-8") as f:
         json.dump(products, f, indent=4, ensure_ascii=False)
+
+
+def _git_commit_push_sync() -> None:
+    if os.environ.get("ADMIN_AUTO_GIT_PUSH", "1").strip().lower() in ("0", "false", "no", "off"):
+        return
+    repo = REPO_ROOT
+    try:
+        subprocess.run(
+            ["git", "add", "--", "products.json"],
+            cwd=repo,
+            capture_output=True,
+            timeout=30,
+            check=False,
+        )
+        diff = subprocess.run(
+            ["git", "diff", "--cached", "--quiet"],
+            cwd=repo,
+            timeout=30,
+        )
+        if diff.returncode == 0:
+            return
+        commit = subprocess.run(
+            [
+                "git",
+                "commit",
+                "-m",
+                "catalog: update products.json (admin auto)",
+            ],
+            cwd=repo,
+            capture_output=True,
+            timeout=60,
+            text=True,
+        )
+        if commit.returncode != 0:
+            return
+        br = subprocess.run(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+            cwd=repo,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        branch = (br.stdout or "").strip() or "main"
+        subprocess.run(
+            ["git", "push", "origin", branch],
+            cwd=repo,
+            capture_output=True,
+            timeout=120,
+            text=True,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+
+async def schedule_git_push() -> None:
+    global _git_push_task
+
+    if os.environ.get("ADMIN_AUTO_GIT_PUSH", "1").strip().lower() in ("0", "false", "no", "off"):
+        return
+
+    async def _debounced() -> None:
+        try:
+            await asyncio.sleep(_GIT_PUSH_DEBOUNCE_S)
+        except asyncio.CancelledError:
+            return
+        async with _git_push_lock:
+            await asyncio.to_thread(_git_commit_push_sync)
+
+    if _git_push_task is not None and not _git_push_task.done():
+        _git_push_task.cancel()
+    _git_push_task = asyncio.create_task(_debounced())
 
 
 def clean_text(value: str) -> str:
@@ -140,6 +219,7 @@ async def add_product(payload: ProductIn) -> dict[str, Any]:
         products.append(payload.model_dump())
         save_products(products)
     await manager.broadcast({"type": "products_updated", "count": len(products)})
+    await schedule_git_push()
     return {"ok": True, "count": len(products)}
 
 
@@ -152,6 +232,7 @@ async def update_product(index: int, payload: ProductIn) -> dict[str, Any]:
         products[index] = payload.model_dump()
         save_products(products)
     await manager.broadcast({"type": "products_updated", "count": len(products)})
+    await schedule_git_push()
     return {"ok": True, "count": len(products)}
 
 
@@ -164,6 +245,7 @@ async def delete_product(index: int) -> dict[str, Any]:
         products.pop(index)
         save_products(products)
     await manager.broadcast({"type": "products_updated", "count": len(products)})
+    await schedule_git_push()
     return {"ok": True, "count": len(products)}
 
 
@@ -239,7 +321,7 @@ HTML = """
         <button id="updateBtn" class="secondary" disabled>Update selected</button>
         <button id="cancelBtn" class="secondary" disabled>Cancel edit</button>
       </div>
-      <p class="small">Tip: form stays at top while you scroll the table. Edit loads fields here.</p>
+      <p class="small">Tip: form stays at top while you scroll. Saves trigger git commit + push to origin (~4s after your last change) so Vercel can deploy. Set env ADMIN_AUTO_GIT_PUSH=0 to disable.</p>
     </div>
     <table id="tbl">
       <thead><tr><th>#</th><th>Title</th><th>Price</th><th>Category</th><th>Batch</th><th>Actions</th></tr></thead>
