@@ -200,6 +200,7 @@ const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Lo
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 const SEARCH_DEBOUNCE_MS = 140;
 const PRODUCTS_RENDER_STEP = 30;
+const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
 
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
 let allProductsCache = [];
@@ -1172,8 +1173,10 @@ function initApp() {
                     const info = document.getElementById('kf-results-info');
                     if (info) info.textContent = `Showing ${data.length} of ${data.length} products`;
 
-                    // No periodic rerender while browsing: manual refresh only to keep scrolling smooth.
-                    productsRefreshTimer = null;
+                    // Lightweight periodic sync.
+                    productsRefreshTimer = setInterval(() => {
+                        refreshProductsFromServer(true);
+                    }, PRODUCTS_AUTO_REFRESH_MS);
                 })
                 .catch(err => {
                     const container = document.getElementById('products-container');
