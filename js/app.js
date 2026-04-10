@@ -616,6 +616,8 @@ function renderFilteredProducts() {
 
     container.innerHTML = visible.map(p => {
         const safeTitle = escapeHtml(p.title || "Untitled");
+        const batchRaw = (p.batch || '').trim();
+        const batch = batchRaw.toLowerCase();
         const rawImg = (p.img || '').trim();
         const isHttp = rawImg.startsWith('http');
         const isKnownPlaceholder =
@@ -631,11 +633,22 @@ function renderFilteredProducts() {
 
         const kakobuy = appendAffcodeIfMissing(p.kakobuy || '#');
         const picksly = safeExternalUrl(p.picksly || '#');
+        let batchFlair = '';
+        if (batch === 'best batch') {
+            batchFlair = '<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#1f5130;color:#b8f7cc;border:1px solid #2a7a47;">BEST BATCH</span>';
+        } else if (batch === 'budget batch') {
+            batchFlair = '<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#51411f;color:#ffe3ab;border:1px solid #8a6b2a;">BUDGET</span>';
+        } else if (batch === 'random batch') {
+            batchFlair = '<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#2a2f42;color:#c7d2ff;border:1px solid #4d5a96;">RANDOM</span>';
+        } else if (batchRaw) {
+            batchFlair = `<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#2c2d34;color:#d9d9df;border:1px solid #4b4d59;">${escapeHtml(batchRaw).toUpperCase()}</span>`;
+        }
 
         return `
             <div class="product-card">
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
+                    <div style="margin-bottom:0.4rem;min-height:18px;">${batchFlair}</div>
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
                     <div class="product-actions">
