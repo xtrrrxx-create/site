@@ -6513,10 +6513,11 @@
     {
         "title": "HBA Hoodie",
         "price": "485",
-        "img": "",
+        "img": "https://img.alicdn.com/imgextra/i3/2219610476937/O1CN01KXfOGJ217CZNIpEez_!!2219610476937.jpg",
         "kakobuy": "https://ikako.vip/tna7a",
         "picksly": "https://picks.ly/item/TB910562026477",
-        "category": "Hoodies"
+        "category": "Hoodies",
+        "batch": "Best Batch"
     },
     {
         "title": "Maison Margiela Hoodie",
