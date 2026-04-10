@@ -8001,10 +8001,11 @@
     {
         "title": "Saint Laurent Jeans Slim/Skinny",
         "price": "402",
-        "img": "https://si.geilicdn.com/wdseller1656512709-433e0000019904e656d90a23037f_1290_1720.jpg.webp?w=30&amp;h=30&amp;cp=1",
+        "img": "https://si.geilicdn.com/wdseller1656512709-433e0000019904e656d90a23037f_1290_1720.jpg",
         "kakobuy": "https://ikako.vip/qwze5n",
-        "picksly": "",
-        "category": "Pants"
+        "picksly": "https://picks.ly/item/WD7462121852",
+        "category": "Pants",
+        "batch": "Best Batch"
     },
     {
         "title": "CELINE Jeans Straight",
