@@ -36,15 +36,6 @@
         "batch": "Budget Batch"
     },
     {
-        "title": "Air Jordan 1 Low DT-Budget Batch",
-        "price": "250",
-        "img": "https://si.geilicdn.com/wdseller1845163825-6d74000001947e5929400a23138d_1179_1179.jpg",
-        "kakobuy": "https://ikako.vip/zg275",
-        "picksly": "https://picks.ly/item/WD7614459018",
-        "category": "Shoes",
-        "batch": "Budget Batch"
-    },
-    {
         "title": "Balenciaga Runner LED XA-Second Best Batch",
         "price": "460",
         "img": "https://si.geilicdn.com/pcitem1994488306-34fb0000019d31efff6e0a20e273-unadjust_404_287.png",
@@ -52,6 +43,15 @@
         "picksly": "https://picks.ly/item/WD7611429331",
         "category": "Shoes",
         "batch": "Best Batch"
+    },
+    {
+        "title": "Air Jordan 1 Low DT-Budget Batch",
+        "price": "250",
+        "img": "https://si.geilicdn.com/wdseller1845163825-6d74000001947e5929400a23138d_1179_1179.jpg",
+        "kakobuy": "https://ikako.vip/zg275",
+        "picksly": "https://picks.ly/item/WD7614459018",
+        "category": "Shoes",
+        "batch": "Budget Batch"
     },
     {
         "title": "Dior Jordan 1 LW-Best Batch",
