@@ -206,6 +206,7 @@ let allProductsCache = [];
 let productsRefreshTimer = null;
 let searchInputTimer = null;
 let visibleProductsLimit = PRODUCTS_RENDER_STEP;
+let lastProductsSignature = '';
 
 /** How often the Products page re-fetches products.json (admin saves to this file locally). */
 const PRODUCTS_POLL_MS = 30 * 1000;
@@ -214,6 +215,11 @@ async function refreshProductsFromServer(silent = false) {
     try {
         const res = await fetch(`products.json?_=${Date.now()}`);
         const data = await res.json();
+        const nextSignature = JSON.stringify(data);
+        if (nextSignature === lastProductsSignature) {
+            return;
+        }
+        lastProductsSignature = nextSignature;
         allProductsCache = data;
         renderFilteredProducts();
         const info = document.getElementById('kf-results-info');
@@ -1126,6 +1132,7 @@ function initApp() {
             fetch(`products.json?_=${Date.now()}`)
                 .then(res => res.json())
                 .then(data => {
+                    lastProductsSignature = JSON.stringify(data);
                     allProductsCache = data;
 
                     const loader = document.getElementById('loading-text');
