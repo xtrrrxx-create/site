@@ -4943,10 +4943,11 @@
     {
         "title": "Balenciaga Tee",
         "price": "293",
-        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/11f3da52-4ff4-434c-9fb0-524817cf84c1.webp",
+        "img": "https://img.alicdn.com/imgextra/i4/3182757274/O1CN01EmavLi23bY6JhgPFm_!!3182757274.jpg",
         "kakobuy": "https://ikako.vip/jgkkpd",
         "picksly": "https://picks.ly/item/TB1014393085438",
-        "category": "T-shirts"
+        "category": "T-shirts",
+        "batch": ""
     },
     {
         "title": "Balenciaga Tee",
