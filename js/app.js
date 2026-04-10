@@ -1353,6 +1353,10 @@ function initApp() {
             link.classList.toggle('active', link.getAttribute('data-page') === pageId);
         });
 
+        document.querySelectorAll('.bottom-nav-item').forEach(item => {
+            item.classList.toggle('active', item.getAttribute('data-page') === pageId);
+        });
+
         if (pageId === 'products') {
             filterState = { search: '', category: 'All', batch: 'All Tags' };
 
@@ -1387,6 +1391,13 @@ function initApp() {
         link.addEventListener('click', e => {
             e.preventDefault();
             renderPage(link.getAttribute('data-page'));
+        });
+    });
+
+    document.querySelectorAll('.bottom-nav-item').forEach(item => {
+        item.addEventListener('click', e => {
+            e.preventDefault();
+            renderPage(item.getAttribute('data-page'));
         });
     });
 
