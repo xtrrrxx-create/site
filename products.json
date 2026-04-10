@@ -6603,10 +6603,11 @@
     {
         "title": "Rick Owens Hoodie",
         "price": "289",
-        "img": "https://si.geilicdn.com/poseidon-5225000001670381adfe0a02853e-unadjust_74_74.png",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/34d6534f-dfa7-4a51-9138-8d249bab9c7e.webp",
         "kakobuy": "https://ikako.vip/ujghe",
         "picksly": "https://picks.ly/item/WD4512579259",
-        "category": "Hoodies"
+        "category": "Hoodies",
+        "batch": "Best Batch"
     },
     {
         "title": "Rick Owens Hoodie",
