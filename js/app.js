@@ -859,17 +859,198 @@ function getPages() {
         </div>
     `,
         tutorials: `
-        <div class="section-container" style="animation: fadeIn 0.4s ease-out;">
-            <h2 style="font-size:2.5rem;margin-bottom:1.5rem;font-weight:800;letter-spacing:-1px;">${t('title_tutorials')}</h2>
-            <div class="glass-card">
-                <h3 style="color:var(--text-primary);margin-bottom:1rem;font-size:1.5rem;">${t('tut_title')}</h3>
-                <ol style="color:var(--text-secondary);line-height:1.8;margin-left:1.5rem;display:flex;flex-direction:column;gap:0.5rem;">
-                    <li>${t('tut_1')}</li>
-                    <li>${t('tut_2')}</li>
-                    <li>${t('tut_3')}</li>
-                    <li>${t('tut_4')}</li>
-                    <li>${t('tut_5')}</li>
-                </ol>
+        <style>
+            .htb-wrap {
+                max-width: 980px;
+                margin: 0 auto;
+                padding: 3.2rem 1.4rem 2.6rem;
+                animation: fadeIn 0.35s ease-out;
+            }
+            .htb-head {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+            .htb-title {
+                font-size: clamp(2rem, 4.3vw, 3rem);
+                line-height: 1;
+                font-weight: 900;
+                letter-spacing: -1.4px;
+                margin-bottom: 0.7rem;
+                color: var(--text-primary);
+            }
+            .htb-sub {
+                color: var(--text-secondary);
+                max-width: 720px;
+                margin: 0 auto;
+                font-size: 0.98rem;
+            }
+            .htb-steps {
+                display: grid;
+                gap: 0.85rem;
+            }
+            .htb-step {
+                background: var(--nav-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                padding: 1.05rem 1.15rem;
+                display: grid;
+                gap: 0.5rem;
+            }
+            .htb-step-top {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 0.8rem;
+            }
+            .htb-num {
+                font-size: 0.72rem;
+                font-weight: 800;
+                letter-spacing: 0.09em;
+                text-transform: uppercase;
+                color: var(--text-secondary);
+            }
+            .htb-step h3 {
+                font-size: 1.03rem;
+                margin: 0;
+                color: var(--text-primary);
+                font-weight: 800;
+                letter-spacing: -0.2px;
+            }
+            .htb-step p {
+                margin: 0;
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                line-height: 1.55;
+            }
+            .htb-list {
+                margin: 0.2rem 0 0;
+                padding-left: 1.05rem;
+                color: var(--text-secondary);
+                display: grid;
+                gap: 0.3rem;
+                font-size: 0.88rem;
+            }
+            .htb-link {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.45rem;
+                margin-top: 0.45rem;
+                width: fit-content;
+                text-decoration: none;
+                border-radius: 999px;
+                padding: 0.52rem 0.9rem;
+                font-size: 0.82rem;
+                font-weight: 800;
+                border: 1px solid var(--border-color);
+                color: var(--text-primary);
+                background: transparent;
+            }
+            .htb-link:hover {
+                border-color: var(--text-primary);
+            }
+            .htb-coupon {
+                margin-top: 0.35rem;
+                display: inline-flex;
+                align-items: center;
+                border-radius: 12px;
+                border: 1px dashed #4f5d87;
+                color: #dbe3ff;
+                padding: 0.4rem 0.65rem;
+                font-size: 0.84rem;
+                font-weight: 900;
+                letter-spacing: 0.06em;
+            }
+            .htb-cta {
+                margin-top: 1.05rem;
+                background: var(--nav-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 18px;
+                padding: 1.2rem;
+                text-align: center;
+            }
+            .htb-cta h3 {
+                margin: 0 0 0.45rem;
+                color: var(--text-primary);
+                font-size: 1.18rem;
+                font-weight: 900;
+                letter-spacing: -0.4px;
+            }
+            .htb-cta p {
+                margin: 0 0 0.85rem;
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+            }
+            .htb-cta .htb-link {
+                margin: 0 auto;
+                background: var(--text-primary);
+                color: var(--bg-color);
+                border-color: var(--text-primary);
+            }
+        </style>
+        <div class="htb-wrap">
+            <div class="htb-head">
+                <h2 class="htb-title">HOW TO BUY</h2>
+                <p class="htb-sub">Follow this 5-step guide to buy products using Kakobuy and ship them internationally.</p>
+            </div>
+
+            <div class="htb-steps">
+                <section class="htb-step">
+                    <div class="htb-step-top">
+                        <span class="htb-num">01</span>
+                        <h3>Create your Kakobuy account</h3>
+                    </div>
+                    <p>Start by creating an account so you can place orders, store warehouse items, and manage shipping.</p>
+                    <a class="htb-link" href="https://ikako.vip/rabx8" target="_blank" rel="noopener">Sign up now</a>
+                </section>
+
+                <section class="htb-step">
+                    <div class="htb-step-top">
+                        <span class="htb-num">02</span>
+                        <h3>Browse products on Jarvis Finder</h3>
+                    </div>
+                    <p>Use categories and search to find items quickly, then click Buy Now to open the item in Kakobuy.</p>
+                    <a class="htb-link" href="#" onclick="document.querySelector('[data-page=products]').click(); return false;">Browse products</a>
+                </section>
+
+                <section class="htb-step">
+                    <div class="htb-step-top">
+                        <span class="htb-num">03</span>
+                        <h3>Purchase your items</h3>
+                    </div>
+                    <ul class="htb-list">
+                        <li>Check title, batch and price.</li>
+                        <li>Open product page via Buy Now.</li>
+                        <li>Complete checkout in Kakobuy.</li>
+                    </ul>
+                </section>
+
+                <section class="htb-step">
+                    <div class="htb-step-top">
+                        <span class="htb-num">04</span>
+                        <h3>International shipping</h3>
+                    </div>
+                    <ul class="htb-list">
+                        <li>Wait for warehouse arrival and QC photos.</li>
+                        <li>Select shipping line and parcel options.</li>
+                        <li>Pay shipping fee and track package.</li>
+                    </ul>
+                </section>
+
+                <section class="htb-step">
+                    <div class="htb-step-top">
+                        <span class="htb-num">05</span>
+                        <h3>Apply coupon before payment</h3>
+                    </div>
+                    <p>Use this coupon in Kakobuy checkout for extra discounts:</p>
+                    <div class="htb-coupon">DAPHNE</div>
+                </section>
+            </div>
+
+            <div class="htb-cta">
+                <h3>READY TO START YOUR HAUL?</h3>
+                <p>Create your Kakobuy account and start building your order.</p>
+                <a class="htb-link" href="https://ikako.vip/rabx8" target="_blank" rel="noopener">Create Kakobuy account</a>
             </div>
         </div>
     `,
