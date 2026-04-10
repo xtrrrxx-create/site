@@ -7930,10 +7930,11 @@
     {
         "title": "Celine Jeans Slim/Skinny",
         "price": "372",
-        "img": "https://si.geilicdn.com/wdseller1585884659-2641000001834749aa0f0a231447_1170_1560.jpg.webp?w=30&amp;h=30&amp;cp=1",
+        "img": "https://si.geilicdn.com/wdseller1585884659-2641000001834749aa0f0a231447_1170_1560.jpg",
         "kakobuy": "https://ikako.vip/cpyqs",
         "picksly": "https://picks.ly/item/WD5535781062",
-        "category": "Pants"
+        "category": "Pants",
+        "batch": "Best Batch"
     },
     {
         "title": "Saint Laurent Biker Jeans Slim/Skinny",
