@@ -159,6 +159,11 @@ class ProductIn(BaseModel):
         return v
 
 
+class ReorderIn(BaseModel):
+    from_index: int
+    to_index: int
+
+
 class WSManager:
     def __init__(self) -> None:
         self._clients: set[WebSocket] = set()
@@ -243,6 +248,25 @@ async def delete_product(index: int) -> dict[str, Any]:
         if index < 0 or index >= len(products):
             raise HTTPException(status_code=404, detail="Product index not found")
         products.pop(index)
+        save_products(products)
+    await manager.broadcast({"type": "products_updated", "count": len(products)})
+    await schedule_git_push()
+    return {"ok": True, "count": len(products)}
+
+
+@app.post("/api/products/reorder")
+async def reorder_product(payload: ReorderIn) -> dict[str, Any]:
+    async with db_lock:
+        products = load_products()
+        n = len(products)
+        if payload.from_index < 0 or payload.from_index >= n:
+            raise HTTPException(status_code=404, detail="Source index not found")
+        if payload.to_index < 0 or payload.to_index >= n:
+            raise HTTPException(status_code=404, detail="Target index not found")
+        if payload.from_index == payload.to_index:
+            return {"ok": True, "count": n}
+        item = products.pop(payload.from_index)
+        products.insert(payload.to_index, item)
         save_products(products)
     await manager.broadcast({"type": "products_updated", "count": len(products)})
     await schedule_git_push()
@@ -431,6 +455,8 @@ HTML = """
           <td>${p.category || ""}</td>
           <td>${p.batch || ""}</td>
           <td>
+            <button class="secondary" onclick="moveRow(${i}, -1)">↑</button>
+            <button class="secondary" onclick="moveRow(${i}, 1)">↓</button>
             <button class="secondary" onclick="selectRow(${i})">Edit</button>
             <button class="danger" onclick="deleteRow(${i})">Delete</button>
           </td>
@@ -481,6 +507,24 @@ HTML = """
       if (!r.ok) return setStatus("Delete failed", false);
       scheduleLoadProducts(false);
       clearForm();
+    }
+
+    window.moveRow = async function (i, delta) {
+      const toIndex = i + delta;
+      if (toIndex < 0 || toIndex >= products.length) return;
+      const r = await fetch("/api/products/reorder", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ from_index: i, to_index: toIndex })
+      });
+      if (!r.ok) {
+        const e = await r.json().catch(() => ({}));
+        return setStatus(`Reorder failed: ${JSON.stringify(e.detail || e)}`, false);
+      }
+      selectedIndex = -1;
+      document.getElementById("updateBtn").disabled = true;
+      document.getElementById("cancelBtn").disabled = true;
+      scheduleLoadProducts(false);
     }
 
     document.getElementById("addBtn").onclick = async () => {
