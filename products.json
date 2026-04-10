@@ -5298,10 +5298,11 @@
     {
         "title": "Balenciaga Long-Sleeve",
         "price": "385",
-        "img": "https://cbu01.alicdn.com/img/ibank/O1CN01t7IaoY1wslgnXoi8i_!!4611686018427386076-2-overseas_pic.png",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/1deb2467-837b-44ee-9314-694b95f999ac.webp",
         "kakobuy": "https://ikako.vip/ahfzg",
-        "picksly": "",
-        "category": "Long-sleeve"
+        "picksly": "https://picks.ly/item/AL833603366133",
+        "category": "Long-sleeve",
+        "batch": "Best Batch"
     },
     {
         "title": "Chrome Hearts Long-Sleeve",
