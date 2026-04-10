@@ -5061,10 +5061,11 @@
     {
         "title": "Vetements Tee",
         "price": "129",
-        "img": "https://si.geilicdn.com/poseidon-5225000001670381adfe0a02853e-unadjust_74_74.png",
+        "img": "https://si.geilicdn.com/pcitem901749534407-79db0000019618830c520a2304aa_1284_2259.jpg",
         "kakobuy": "https://ikako.vip/zjddx",
-        "picksly": "",
-        "category": "T-shirts"
+        "picksly": "https://picks.ly/item/WD7442740037",
+        "category": "T-shirts",
+        "batch": "Best Batch"
     },
     {
         "title": "Acne Long-Sleeve",
