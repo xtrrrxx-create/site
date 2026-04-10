@@ -202,7 +202,6 @@ const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
 let allProductsCache = [];
 let productsRefreshTimer = null;
-let productsVisibilityCleanup = null;
 
 /** How often the Products page re-fetches products.json (admin saves to this file locally). */
 const PRODUCTS_POLL_MS = 30 * 1000;
@@ -1075,10 +1074,6 @@ function initApp() {
             clearInterval(productsRefreshTimer);
             productsRefreshTimer = null;
         }
-        if (productsVisibilityCleanup) {
-            productsVisibilityCleanup();
-            productsVisibilityCleanup = null;
-        }
         // Inject home styles before rendering home page
         if (pageId === 'home') injectHomeStyles();
 
@@ -1109,16 +1104,6 @@ function initApp() {
                     productsRefreshTimer = setInterval(() => {
                         refreshProductsFromServer(true);
                     }, PRODUCTS_POLL_MS);
-
-                    const onVis = () => {
-                        if (document.visibilityState === 'visible') {
-                            refreshProductsFromServer(true);
-                        }
-                    };
-                    document.addEventListener('visibilitychange', onVis);
-                    productsVisibilityCleanup = () => {
-                        document.removeEventListener('visibilitychange', onVis);
-                    };
                 })
                 .catch(err => {
                     const container = document.getElementById('products-container');
