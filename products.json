@@ -7876,10 +7876,11 @@
     {
         "title": "Clawmark Jeans Slim/Skinny",
         "price": "244",
-        "img": "",
+        "img": "https://img.alicdn.com/bao/uploaded/i3/2209619269329/O1CN01HerVCu2Imk0vIMS0H_!!2209619269329.jpg",
         "kakobuy": "https://ikako.vip/zx49f",
         "picksly": "",
-        "category": "Pants"
+        "category": "Pants",
+        "batch": ""
     },
     {
         "title": "TSBU Jeans Slim/Skinny",
