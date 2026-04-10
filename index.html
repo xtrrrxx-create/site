@@ -125,9 +125,16 @@
         const canvas = document.getElementById('bg-canvas');
         const ctx = canvas.getContext('2d');
         let W, H, shapes = [];
+        let mouseX = -9999, mouseY = -9999;
 
         const SHAPE_COUNT = 28;
+        const REPEL_RADIUS = 140;
+        const REPEL_STRENGTH = 5;
+        const RETURN_SPEED = 0.06;
         const TYPES = ['triangle', 'diamond', 'line', 'square'];
+
+        window.addEventListener('mousemove', e => { mouseX = e.clientX; mouseY = e.clientY; });
+        window.addEventListener('mouseleave', () => { mouseX = -9999; mouseY = -9999; });
 
         function resize() {
             W = canvas.width = window.innerWidth;
@@ -143,23 +150,20 @@
             const type = TYPES[Math.floor(Math.random() * TYPES.length)];
             const tailLen = randBetween(40, 130);
             const alpha = randBetween(0.4, 1);
+            const bvx = -Math.cos(angle) * speed;
+            const bvy = Math.sin(angle) * speed;
 
             let x, y;
             if (fromScratch) {
                 x = randBetween(0, W);
                 y = randBetween(0, H);
             } else {
-                // spawn off top-right edge
-                if (Math.random() < 0.5) {
-                    x = randBetween(0, W);
-                    y = -20;
-                } else {
-                    x = W + 20;
-                    y = randBetween(0, H);
-                }
+                if (Math.random() < 0.5) { x = randBetween(0, W); y = -20; }
+                else { x = W + 20; y = randBetween(0, H); }
             }
 
-            return { x, y, vx: -Math.cos(angle) * speed, vy: Math.sin(angle) * speed, size, type, tailLen, alpha, trail: [] };
+            // bvx/bvy = base trajectory, rvx/rvy = repulsion offset (decays back to 0)
+            return { x, y, bvx, bvy, rvx: 0, rvy: 0, size, type, tailLen, alpha, trail: [] };
         }
 
         function init() {
@@ -207,10 +211,10 @@
             ctx.restore();
         }
 
-        function drawShape(s, alpha, color) {
-            if (s.type === 'triangle') drawTriangle(s.x, s.y, s.size, alpha, color);
-            else if (s.type === 'diamond') drawDiamond(s.x, s.y, s.size, alpha, color);
-            else if (s.type === 'square') drawSquare(s.x, s.y, s.size, alpha, color);
+        function drawShape(s, color) {
+            if (s.type === 'triangle') drawTriangle(s.x, s.y, s.size, s.alpha, color);
+            else if (s.type === 'diamond') drawDiamond(s.x, s.y, s.size, s.alpha, color);
+            else if (s.type === 'square') drawSquare(s.x, s.y, s.size, s.alpha, color);
         }
 
         function drawTail(s, color) {
@@ -241,22 +245,33 @@
             for (let i = 0; i < shapes.length; i++) {
                 const s = shapes[i];
 
+                // mouse repulsion
+                const dx = s.x - mouseX;
+                const dy = s.y - mouseY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < REPEL_RADIUS && dist > 0) {
+                    const force = (1 - dist / REPEL_RADIUS) * REPEL_STRENGTH;
+                    s.rvx += (dx / dist) * force;
+                    s.rvy += (dy / dist) * force;
+                }
+                // decay repulsion offset back toward 0
+                s.rvx += (0 - s.rvx) * RETURN_SPEED;
+                s.rvy += (0 - s.rvy) * RETURN_SPEED;
+
+                const vx = s.bvx + s.rvx;
+                const vy = s.bvy + s.rvy;
+
                 s.trail.push({ x: s.x, y: s.y });
-                const maxTrail = Math.floor(s.tailLen / Math.hypot(s.vx, s.vy));
+                const maxTrail = Math.floor(s.tailLen / Math.hypot(vx, vy));
                 if (s.trail.length > maxTrail) s.trail.shift();
 
-                // line type: just draw the tail
-                if (s.type === 'line') {
-                    drawTail(s, color);
-                } else {
-                    drawTail(s, color);
-                    drawShape(s, s.alpha, color);
-                }
+                drawTail(s, color);
+                if (s.type !== 'line') drawShape(s, color);
 
-                s.x += s.vx;
-                s.y += s.vy;
+                s.x += vx;
+                s.y += vy;
 
-                if (s.x < -50 || s.y > H + 50) {
+                if (s.x < -100 || s.y > H + 100 || s.x > W + 100) {
                     shapes[i] = spawnShape(false);
                 }
             }
