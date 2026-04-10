@@ -189,7 +189,19 @@ HTML = """
   <title>Realtime Admin</title>
   <style>
     body { font-family: Inter, Arial, sans-serif; background:#101014; color:#f1f1f1; margin:0; }
-    .wrap { max-width:1200px; margin:24px auto; padding:0 16px; }
+    .wrap { max-width:1200px; margin:24px auto; padding:0 16px; padding-bottom:80px; }
+    .editor-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #101014;
+      padding: 12px 0 14px;
+      margin: 0 -16px;
+      padding-left: 16px;
+      padding-right: 16px;
+      border-bottom: 1px solid #2c2c35;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    }
     .row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
     input, select { background:#19191f; border:1px solid #333; color:#fff; padding:8px; border-radius:8px; }
     button { background:#2d6cdf; color:#fff; border:none; border-radius:8px; padding:9px 12px; cursor:pointer; }
@@ -198,32 +210,43 @@ HTML = """
     table { width:100%; border-collapse:collapse; font-size:14px; }
     th, td { border-bottom:1px solid #2c2c35; padding:8px; text-align:left; }
     tr:hover { background:#171722; }
-    .status { margin:8px 0 14px; color:#96f7a5; }
-    .small { font-size:12px; color:#aaa; }
+    .status { margin:0 0 10px; color:#96f7a5; }
+    .small { font-size:12px; color:#aaa; margin:0; }
+    #jumpForm {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      z-index: 60;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <h2>Jarvis Finder Realtime Admin</h2>
-    <div class="status" id="status">Connecting...</div>
-    <div class="row">
-      <input id="title" placeholder="Title" style="min-width:220px;flex:2"/>
-      <input id="price" placeholder="Price (CNY)" style="width:120px"/>
-      <input id="img" placeholder="Image URL" style="min-width:220px;flex:2"/>
-      <input id="kakobuy" placeholder="Kakobuy URL" style="min-width:220px;flex:2"/>
-      <input id="picksly" placeholder="Picksly URL" style="min-width:220px;flex:2"/>
-      <select id="category"></select>
-      <select id="batch"></select>
-      <button id="addBtn">Add</button>
-      <button id="updateBtn" class="secondary" disabled>Update selected</button>
-      <button id="cancelBtn" class="secondary" disabled>Cancel edit</button>
+    <div class="editor-sticky" id="editorBar">
+      <div class="status" id="status">Connecting...</div>
+      <div class="row">
+        <input id="title" placeholder="Title" style="min-width:220px;flex:2"/>
+        <input id="price" placeholder="Price (CNY)" style="width:120px"/>
+        <input id="img" placeholder="Image URL" style="min-width:220px;flex:2"/>
+        <input id="kakobuy" placeholder="Kakobuy URL" style="min-width:220px;flex:2"/>
+        <input id="picksly" placeholder="Picksly URL" style="min-width:220px;flex:2"/>
+        <select id="category"></select>
+        <select id="batch"></select>
+        <button id="addBtn">Add</button>
+        <button id="updateBtn" class="secondary" disabled>Update selected</button>
+        <button id="cancelBtn" class="secondary" disabled>Cancel edit</button>
+      </div>
+      <p class="small">Tip: form stays at top while you scroll the table. Edit loads fields here.</p>
     </div>
-    <div class="small">Tip: select a row to edit/delete. Any change auto-updates products.json in real-time.</div>
     <table id="tbl">
       <thead><tr><th>#</th><th>Title</th><th>Price</th><th>Category</th><th>Batch</th><th>Actions</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
+  <button type="button" id="jumpForm" class="secondary" title="Jump to form at top">↑ Form</button>
   <script>
     let products = [];
     let selectedIndex = -1;
@@ -294,12 +317,19 @@ HTML = """
       setStatus(`Loaded ${products.length} products`);
     }
 
+    function focusEditorBar() {
+      const bar = document.getElementById("editorBar");
+      bar.scrollIntoView({ behavior: "smooth", block: "start" });
+      try { fields.title.focus({ preventScroll: true }); } catch (_) { fields.title.focus(); }
+    }
+
     window.selectRow = function (i) {
       selectedIndex = i;
       const p = products[i];
       Object.keys(fields).forEach(k => fields[k].value = p[k] || "");
       document.getElementById("updateBtn").disabled = false;
       document.getElementById("cancelBtn").disabled = false;
+      focusEditorBar();
     }
 
     window.deleteRow = async function (i) {
@@ -340,6 +370,8 @@ HTML = """
     };
 
     document.getElementById("cancelBtn").onclick = clearForm;
+
+    document.getElementById("jumpForm").onclick = () => focusEditorBar();
 
     function connectWs() {
       const proto = location.protocol === "https:" ? "wss" : "ws";
