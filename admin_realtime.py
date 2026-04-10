@@ -355,6 +355,8 @@ HTML = """
     let products = [];
     let selectedIndex = -1;
     let tableSearchQuery = "";
+    let loadProductsDebounce = null;
+    let wsPingInterval = null;
     const statusEl = document.getElementById("status");
 
     const fields = {
@@ -442,11 +444,20 @@ HTML = """
       }
     }
 
-    async function loadProducts() {
+    async function loadProducts(silent) {
       const r = await fetch("/api/products");
       products = await r.json();
       render();
-      setStatus(`Loaded ${products.length} products`);
+      if (!silent) setStatus(`Loaded ${products.length} products`);
+    }
+
+    /** Merges burst events (HTTP + WebSocket) into one fetch. */
+    function scheduleLoadProducts(silent) {
+      clearTimeout(loadProductsDebounce);
+      loadProductsDebounce = setTimeout(() => {
+        loadProductsDebounce = null;
+        loadProducts(silent);
+      }, 250);
     }
 
     function focusEditorBar() {
@@ -468,7 +479,7 @@ HTML = """
       if (!confirm("Delete selected product?")) return;
       const r = await fetch(`/api/products/${i}`, { method: "DELETE" });
       if (!r.ok) return setStatus("Delete failed", false);
-      await loadProducts();
+      scheduleLoadProducts(false);
       clearForm();
     }
 
@@ -482,7 +493,7 @@ HTML = """
         const e = await r.json().catch(() => ({}));
         return setStatus(`Add failed: ${JSON.stringify(e.detail || e)}`, false);
       }
-      await loadProducts();
+      scheduleLoadProducts(false);
       clearForm();
     };
 
@@ -497,7 +508,7 @@ HTML = """
         const e = await r.json().catch(() => ({}));
         return setStatus(`Update failed: ${JSON.stringify(e.detail || e)}`, false);
       }
-      await loadProducts();
+      scheduleLoadProducts(false);
       clearForm();
     };
 
@@ -515,12 +526,25 @@ HTML = """
       const ws = new WebSocket(`${proto}://${location.host}/ws`);
       ws.onopen = () => {
         setStatus("Realtime connected");
-        setInterval(() => { try { ws.send("ping"); } catch {} }, 15000);
+        if (wsPingInterval) clearInterval(wsPingInterval);
+        wsPingInterval = setInterval(() => {
+          try { ws.send("ping"); } catch (_) {}
+        }, 60000);
       };
-      ws.onmessage = async () => {
-        await loadProducts();
+      ws.onmessage = (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          if (data.type !== "products_updated") return;
+        } catch (_) {
+          return;
+        }
+        scheduleLoadProducts(true);
       };
       ws.onclose = () => {
+        if (wsPingInterval) {
+          clearInterval(wsPingInterval);
+          wsPingInterval = null;
+        }
         setStatus("Realtime disconnected, retrying...", false);
         setTimeout(connectWs, 1500);
       };
@@ -528,7 +552,7 @@ HTML = """
 
     (async () => {
       await loadMeta();
-      await loadProducts();
+      await loadProducts(false);
       connectWs();
     })();
   </script>
