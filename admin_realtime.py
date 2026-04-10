@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 
 DB_PATH = Path(__file__).parent / "products.json"
 
-CATEGORIES = ["", "Shoes", "Slides", "Shorts", "Pants", "T-shirts", "Hoodies", "Jackets", "Accessories"]
+CATEGORIES = ["", "Shoes", "Slides", "Shorts", "Pants", "T-shirts", "Long-sleeve", "Hoodies", "Jackets", "Accessories"]
 BATCHES = ["", "Best Batch", "Budget Batch", "Random Batch"]
 
 

@@ -5,7 +5,7 @@ import os
 
 DB_FILE = "products.json"
 
-CATEGORIES = ["", "Shoes", "Shorts", "Pants", "T-shirts", "Hoodies", "Jackets", "Accessories"]
+CATEGORIES = ["", "Shoes", "Shorts", "Pants", "T-shirts", "Long-sleeve", "Hoodies", "Jackets", "Accessories"]
 BATCHES    = ["", "Best Batch", "Budget Batch", "Random Batch"]
 
 class AdminApp(tk.Tk):

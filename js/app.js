@@ -196,7 +196,7 @@ function updateThemeIcon(isLightMode) {
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
-const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Hoodies', 'Jackets', 'Accessories'];
+const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
