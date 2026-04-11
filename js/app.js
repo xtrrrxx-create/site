@@ -202,7 +202,7 @@ const SEARCH_DEBOUNCE_MS = 140;
 /** Short text fields (search, tracking #) — avoids UI lag on huge paste. */
 const INPUT_MAX_LEN = 35;
 /** Link converter field max length (paste / lag guard). */
-const LINK_INPUT_MAX_LEN = 50;
+const LINK_INPUT_MAX_LEN = 100;
 const PRODUCTS_RENDER_STEP = 30;
 const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
 
