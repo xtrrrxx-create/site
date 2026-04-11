@@ -119,6 +119,10 @@ const langMap = {
     loading: { EN: "Loading from database...", PLN: "Ładowanie z bazy...", EUR: "Loading from database...", USD: "Loading from database...", RON: "Se încarcă din baza de date...", CNY: "正在从数据库加载..." },
     paste_link: { EN: "Paste the link to change it to your agent's version.", PLN: "Wklej link, żeby zmienić go na wersję Twojego agenta.", RON: "Lipește linkul pentru a-l schimba în versiunea agentului tău.", CNY: "粘贴链接以将其更改为代理的版本。" },
     tools_subtitle: { EN: "Check the status of your packages", PLN: "Sprawdź status swoich paczek", RON: "Verifică statusul pachetelor tale", CNY: "检查您的包裹状态" },
+    tool_eyebrow: { EN: "Tool", PLN: "Narzędzie", RON: "Unealtă", CNY: "工具" },
+    link_converter_subtitle: { EN: "Paste the link to change it to your agent's version.", PLN: "Wklej link, żeby zmienić go na wersję Twojego agenta.", RON: "Lipește linkul pentru a-l schimba în versiunea agentului tău.", CNY: "粘贴链接以将其更改为代理的版本。" },
+    link_placeholder: { EN: "Paste link from Weidian / Taobao...", PLN: "Wklej link z Weidian / Taobao...", RON: "Lipește link din Weidian / Taobao...", CNY: "粘贴来自微店/淘宝的链接..." },
+    tracking_placeholder: { EN: "Enter your tracking number...", PLN: "Wprowadź numer śledzenia...", RON: "Introdu numărul de tracking...", CNY: "输入追踪号码..." },
     page: { EN: "Page", PLN: "Strona", RON: "Pagina", CNY: "页" },
     of: { EN: "of", PLN: "z", RON: "din", CNY: "的" },
     nav_home: { EN: "Home", PLN: "Główna", RON: "Acasă", CNY: "首页" },
@@ -1291,27 +1295,27 @@ function getPages() {
 
         <div class="tools-wrap">
             <div class="tool-card">
-                <div class="tool-eyebrow">Unealtă</div>
+                <div class="tool-eyebrow">${t('tool_eyebrow')}</div>
                 <h2 class="tool-title">Link Converter</h2>
-                <p class="tool-subtitle">Lipește linkul pentru a-l schimba în versiunea agentului tău.</p>
+                <p class="tool-subtitle">${t('link_converter_subtitle')}</p>
                 <div class="converter-row">
-                    <input class="converter-input" id="link-input" type="text" placeholder="Lipește link din Weidian / Taobao..." maxlength="${LINK_INPUT_MAX_LEN}" autocomplete="off" />
+                    <input class="converter-input" id="link-input" type="text" placeholder="${t('link_placeholder')}" maxlength="${LINK_INPUT_MAX_LEN}" autocomplete="off" />
                     <div class="agent-dropdown-wrap">
                         <button class="agent-dropdown-btn" id="agent-dropdown-btn" onclick="toggleAgentDropdown()">
                             <span style="display:flex;align-items:center;gap:0.45rem;" id="agent-selected-label">
-                                <img src="https://imgs.search.brave.com/D05tpNGI8SA8XupcUCbBCVB5QVqXwl6kD7ppIXBhI_Q/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmU3YWZjMzBlMGExMWEzNGFiOGIwMjU0MjM1M2JjM2YwZGI3ODFmZWNmYjIyMTE3OWUwMGM1MWFjYzM0ZDZkMy93d3cua2Frb2J1eS5jb20v" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
+                                <img src="https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
                             </span>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                         <div class="agent-dropdown-menu" id="agent-dropdown-menu">
-                            <div class="agent-option selected" data-value="kakobuy" onclick="selectAgent('kakobuy','KakoBuy','https://imgs.search.brave.com/D05tpNGI8SA8XupcUCbBCVB5QVqXwl6kD7ppIXBhI_Q/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmU3YWZjMzBlMGExMWEzNGFiOGIwMjU0MjM1M2JjM2YwZGI3ODFmZWNmYjIyMTE3OWUwMGM1MWFjYzM0ZDZkMy93d3cua2Frb2J1eS5jb20v')">
-                                <img src="https://imgs.search.brave.com/D05tpNGI8SA8XupcUCbBCVB5QVqXwl6kD7ppIXBhI_Q/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmU3YWZjMzBlMGExMWEzNGFiOGIwMjU0MjM1M2JjM2YwZGI3ODFmZWNmYjIyMTE3OWUwMGM1MWFjYzM0ZDZkMy93d3cua2Frb2J1eS5jb20v" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
+                            <div class="agent-option selected" data-value="kakobuy" onclick="selectAgent('kakobuy','KakoBuy','https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64')">
+                                <img src="https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
                             </div>
-                            <div class="agent-option" data-value="acbuy" onclick="selectAgent('acbuy','ACBuy','https://imgs.search.brave.com/iJC6m3Ly1EB4QRmswZ26FmiKGchtSx_BkBUCd-qHAzw/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvN2JiZTFkNmRlYjQyNWVlZDY3OWZiM2Y2M2I1OTdlN2U5ZmFkYTI0OTJiZDg1ZmNlOWNmNmI2OTQyZmExZTM5Yi93d3cuYWNidXkuY29tLw')">
-                                <img src="https://imgs.search.brave.com/iJC6m3Ly1EB4QRmswZ26FmiKGchtSx_BkBUCd-qHAzw/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvN2JiZTFkNmRlYjQyNWVlZDY3OWZiM2Y2M2I1OTdlN2U5ZmFkYTI0OTJiZDg1ZmNlOWNmNmI2OTQyZmExZTM5Yi93d3cuYWNidXkuY29tLw" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ACBuy
+                            <div class="agent-option" data-value="acbuy" onclick="selectAgent('acbuy','ACBuy','https://www.google.com/s2/favicons?domain=acbuy.com&sz=64')">
+                                <img src="https://www.google.com/s2/favicons?domain=acbuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ACBuy
                             </div>
-                            <div class="agent-option" data-value="mulebuy" onclick="selectAgent('mulebuy','Mulebuy','https://imgs.search.brave.com/kquWHr5W9cbXvUZic-HvVgAX1jxF5Gjggd_emrn63yQ/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmQ3NzlhOGY3Y2M3NTQ4MjQwMWU4NGIzMmYwYjMwYTcyYzA3OWM4NGNlYmJkNzMzYTQ0YjI3MjgxZWJhZTcxNi9tdWxlYnV5LmNvbS8')">
-                                <img src="https://imgs.search.brave.com/kquWHr5W9cbXvUZic-HvVgAX1jxF5Gjggd_emrn63yQ/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmQ3NzlhOGY3Y2M3NTQ4MjQwMWU4NGIzMmYwYjMwYTcyYzA3OWM4NGNlYmJkNzMzYTQ0YjI3MjgxZWJhZTcxNi9tdWxlYnV5LmNvbS8" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> Mulebuy
+                            <div class="agent-option" data-value="mulebuy" onclick="selectAgent('mulebuy','Mulebuy','https://www.google.com/s2/favicons?domain=mulebuy.com&sz=64')">
+                                <img src="https://www.google.com/s2/favicons?domain=mulebuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> Mulebuy
                             </div>
                         </div>
                     </div>
@@ -1322,16 +1326,16 @@ function getPages() {
 
             <div class="tracking-card">
                 <h2 class="tool-title">Package Tracking</h2>
-                <p class="tool-subtitle" style="margin-bottom:1.25rem;">Verifică statusul pachetelor tale.</p>
-                <input class="tracking-input" type="text" placeholder="Introdu numărul de tracking..." id="tracking-input" maxlength="${INPUT_MAX_LEN}" oninput="updateTrackerLinks(this.value.trim())" />
+                <p class="tool-subtitle" style="margin-bottom:1.25rem;">${t('tools_subtitle')}</p>
+                <input class="tracking-input" type="text" placeholder="${t('tracking_placeholder')}" id="tracking-input" maxlength="${INPUT_MAX_LEN}" oninput="updateTrackerLinks(this.value.trim())" />
                 <div class="tracker-grid">
                     <a class="tracker-card" href="https://t.17track.net/en" target="_blank" rel="noopener" id="track-17">
-                        <div class="tracker-icon" style="background:#fff;display:flex;align-items:center;justify-content:center;"><img src="https://imgs.search.brave.com/pRxCUpS__1CAxV52UiIg68dWHGfqDvMf7iSVWvPpFQQ/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvMjJlOWRhNjlkOTdiMTg5ZGRhZTFmMTRiODU4NmM0NjFiOTJmOTFkMmFmZmMzNjFmZDM5Y2EwOTcwYWFjNTkxMC93d3cuMTd0cmFjay5uZXQv" style="width:28px;height:28px;object-fit:contain;" /></div>
+                        <div class="tracker-icon" style="background:#fff;display:flex;align-items:center;justify-content:center;"><img src="https://www.google.com/s2/favicons?domain=17track.net&sz=64" style="width:28px;height:28px;object-fit:contain;" /></div>
                         <span class="tracker-name">17TRACK</span>
                         <span class="tracker-open-btn">Open</span>
                     </a>
                     <a class="tracker-card" href="https://www.dhl.de/en/privatkunden/pakete-empfangen/verfolgen.html" target="_blank" rel="noopener" id="track-dhl">
-                        <div class="tracker-icon" style="background:#FFCC00;display:flex;align-items:center;justify-content:center;padding:4px;"><img src="https://imgs.search.brave.com/XotgOD_Xpv2yQm5oRsjcJThfTE-8lo2q7IplEkFs5PY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9sb2dvZG93bmxvYWQub3JnL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDE1LzEyL2RobC1sb2dvLTAtMS5wbmc" style="height:22px;object-fit:contain;" /></div>
+                        <div class="tracker-icon" style="background:#FFCC00;display:flex;align-items:center;justify-content:center;padding:4px;"><img src="https://www.google.com/s2/favicons?domain=dhl.com&sz=64" style="width:28px;height:28px;object-fit:contain;" /></div>
                         <span class="tracker-name">DHL Express</span>
                         <span class="tracker-open-btn">Open</span>
                     </a>
