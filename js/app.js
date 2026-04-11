@@ -199,6 +199,7 @@ function updateThemeIcon(isLightMode) {
 const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 const SEARCH_DEBOUNCE_MS = 140;
+const SEARCH_INPUT_MAX_LEN = 20;
 const PRODUCTS_RENDER_STEP = 30;
 const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
 
@@ -415,7 +416,7 @@ function buildFilterUI() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <input type="text" id="kf-search-input" placeholder="Search products..." value="" autocomplete="off" spellcheck="false"/>
+                <input type="text" id="kf-search-input" placeholder="Search products..." value="" maxlength="20" autocomplete="off" spellcheck="false"/>
                 <button class="kf-search-clear" id="kf-search-clear" style="display:none">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -483,7 +484,11 @@ function bindFilterEvents() {
     if (!input) return;
 
     input.addEventListener('input', () => {
-        const next = input.value;
+        let next = input.value;
+        if (next.length > SEARCH_INPUT_MAX_LEN) {
+            next = next.slice(0, SEARCH_INPUT_MAX_LEN);
+            input.value = next;
+        }
         clearBtn.style.display = next ? 'flex' : 'none';
         clearTimeout(searchInputTimer);
         searchInputTimer = setTimeout(() => {
@@ -578,7 +583,7 @@ function updateFilterBadge() {
 
 function getFiltered() {
     return allProductsCache.filter(p => {
-        const s = filterState.search.toLowerCase();
+        const s = filterState.search.toLowerCase().slice(0, SEARCH_INPUT_MAX_LEN);
         const matchSearch = !s || p.title.toLowerCase().includes(s);
         const matchCategory = filterState.category === 'All' ||
             (p.category || '').toLowerCase() === filterState.category.toLowerCase();
