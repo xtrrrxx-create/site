@@ -7179,10 +7179,11 @@
     {
         "title": "Supreme Jacket",
         "price": "298",
-        "img": "https://cbu01.alicdn.com/img/ibank/O1CN01t7IaoY1wslgnXoi8i_!!4611686018427386076-2-overseas_pic.png",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/a313b95f-67a9-4dea-bfc1-2d1a84842c1b.webp",
         "kakobuy": "https://ikako.vip/2865v",
-        "picksly": "",
-        "category": "Jackets"
+        "picksly": "https://picks.ly/item/AL946393421794",
+        "category": "Jackets",
+        "batch": "Best Batch"
     },
     {
         "title": "Supreme Jacket",
