@@ -7143,10 +7143,11 @@
     {
         "title": "Moncler Jacket",
         "price": "605",
-        "img": "https://oss.acbuy.com/temp/pda_1768099005458A1478E08-442A-47E8-9C56-29A44B0579DC.jpg",
+        "img": "https://mlisoplacqdyoapetyfm.supabase.co/storage/v1/object/public/qc-images/319481a6-cca3-44ca-8f74-10aa2af66448.webp",
         "kakobuy": "https://ikako.vip/vhe4e",
         "picksly": "https://picks.ly/item/TB994031516215",
-        "category": "Jackets"
+        "category": "Jackets",
+        "batch": "Best Batch"
     },
     {
         "title": "Moncler Jacket",
