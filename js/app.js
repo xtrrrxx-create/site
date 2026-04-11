@@ -201,8 +201,8 @@ const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 const SEARCH_DEBOUNCE_MS = 140;
 /** Short text fields (search, tracking #) — avoids UI lag on huge paste. */
 const INPUT_MAX_LEN = 35;
-/** Product links can be long; cap paste size so convert doesn’t choke. */
-const LINK_INPUT_MAX_LEN = 2048;
+/** Link converter field max length (paste / lag guard). */
+const LINK_INPUT_MAX_LEN = 50;
 const PRODUCTS_RENDER_STEP = 30;
 const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
 
