@@ -1299,19 +1299,19 @@ function getPages() {
                     <div class="agent-dropdown-wrap">
                         <button class="agent-dropdown-btn" id="agent-dropdown-btn" onclick="toggleAgentDropdown()">
                             <span style="display:flex;align-items:center;gap:0.45rem;" id="agent-selected-label">
-                                <span class="agent-logo-kakobuy">K</span> KakoBuy
+                                <img src="https://imgs.search.brave.com/D05tpNGI8SA8XupcUCbBCVB5QVqXwl6kD7ppIXBhI_Q/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmU3YWZjMzBlMGExMWEzNGFiOGIwMjU0MjM1M2JjM2YwZGI3ODFmZWNmYjIyMTE3OWUwMGM1MWFjYzM0ZDZkMy93d3cua2Frb2J1eS5jb20v" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
                             </span>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                         <div class="agent-dropdown-menu" id="agent-dropdown-menu">
-                            <div class="agent-option selected" data-value="kakobuy" onclick="selectAgent('kakobuy','KakoBuy','K','#e8192c')">
-                                <span class="agent-logo-kakobuy">K</span> KakoBuy
+                            <div class="agent-option selected" data-value="kakobuy" onclick="selectAgent('kakobuy','KakoBuy','https://imgs.search.brave.com/D05tpNGI8SA8XupcUCbBCVB5QVqXwl6kD7ppIXBhI_Q/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmU3YWZjMzBlMGExMWEzNGFiOGIwMjU0MjM1M2JjM2YwZGI3ODFmZWNmYjIyMTE3OWUwMGM1MWFjYzM0ZDZkMy93d3cua2Frb2J1eS5jb20v')">
+                                <img src="https://imgs.search.brave.com/D05tpNGI8SA8XupcUCbBCVB5QVqXwl6kD7ppIXBhI_Q/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmU3YWZjMzBlMGExMWEzNGFiOGIwMjU0MjM1M2JjM2YwZGI3ODFmZWNmYjIyMTE3OWUwMGM1MWFjYzM0ZDZkMy93d3cua2Frb2J1eS5jb20v" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
                             </div>
-                            <div class="agent-option" data-value="acbuy" onclick="selectAgent('acbuy','ACBuy','A','#2563eb')">
-                                <span class="agent-logo-kakobuy" style="background:#2563eb;">A</span> ACBuy
+                            <div class="agent-option" data-value="acbuy" onclick="selectAgent('acbuy','ACBuy','https://imgs.search.brave.com/iJC6m3Ly1EB4QRmswZ26FmiKGchtSx_BkBUCd-qHAzw/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvN2JiZTFkNmRlYjQyNWVlZDY3OWZiM2Y2M2I1OTdlN2U5ZmFkYTI0OTJiZDg1ZmNlOWNmNmI2OTQyZmExZTM5Yi93d3cuYWNidXkuY29tLw')">
+                                <img src="https://imgs.search.brave.com/iJC6m3Ly1EB4QRmswZ26FmiKGchtSx_BkBUCd-qHAzw/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvN2JiZTFkNmRlYjQyNWVlZDY3OWZiM2Y2M2I1OTdlN2U5ZmFkYTI0OTJiZDg1ZmNlOWNmNmI2OTQyZmExZTM5Yi93d3cuYWNidXkuY29tLw" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ACBuy
                             </div>
-                            <div class="agent-option" data-value="mulebuy" onclick="selectAgent('mulebuy','Mulebuy','M','#16a34a')">
-                                <span class="agent-logo-kakobuy" style="background:#16a34a;">M</span> Mulebuy
+                            <div class="agent-option" data-value="mulebuy" onclick="selectAgent('mulebuy','Mulebuy','https://imgs.search.brave.com/kquWHr5W9cbXvUZic-HvVgAX1jxF5Gjggd_emrn63yQ/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmQ3NzlhOGY3Y2M3NTQ4MjQwMWU4NGIzMmYwYjMwYTcyYzA3OWM4NGNlYmJkNzMzYTQ0YjI3MjgxZWJhZTcxNi9tdWxlYnV5LmNvbS8')">
+                                <img src="https://imgs.search.brave.com/kquWHr5W9cbXvUZic-HvVgAX1jxF5Gjggd_emrn63yQ/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvYmQ3NzlhOGY3Y2M3NTQ4MjQwMWU4NGIzMmYwYjMwYTcyYzA3OWM4NGNlYmJkNzMzYTQ0YjI3MjgxZWJhZTcxNi9tdWxlYnV5LmNvbS8" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> Mulebuy
                             </div>
                         </div>
                     </div>
@@ -1326,12 +1326,12 @@ function getPages() {
                 <input class="tracking-input" type="text" placeholder="Introdu numărul de tracking..." id="tracking-input" maxlength="${INPUT_MAX_LEN}" oninput="updateTrackerLinks(this.value.trim())" />
                 <div class="tracker-grid">
                     <a class="tracker-card" href="https://t.17track.net/en" target="_blank" rel="noopener" id="track-17">
-                        <div class="tracker-icon" style="background:#1d4ed8;color:white;font-size:1.3rem;">17</div>
+                        <div class="tracker-icon" style="background:#fff;display:flex;align-items:center;justify-content:center;"><img src="https://imgs.search.brave.com/pRxCUpS__1CAxV52UiIg68dWHGfqDvMf7iSVWvPpFQQ/rs:fit:32:32:1:0/g:ce/aHR0cDovL2Zhdmljb25zLnNlYXJjaC5icmF2ZS5jb20vaWNvbnMvMjJlOWRhNjlkOTdiMTg5ZGRhZTFmMTRiODU4NmM0NjFiOTJmOTFkMmFmZmMzNjFmZDM5Y2EwOTcwYWFjNTkxMC93d3cuMTd0cmFjay5uZXQv" style="width:28px;height:28px;object-fit:contain;" /></div>
                         <span class="tracker-name">17TRACK</span>
                         <span class="tracker-open-btn">Open</span>
                     </a>
                     <a class="tracker-card" href="https://www.dhl.de/en/privatkunden/pakete-empfangen/verfolgen.html" target="_blank" rel="noopener" id="track-dhl">
-                        <div class="tracker-icon" style="background:#FFCC00;color:#D40511;font-size:1rem;font-weight:900;letter-spacing:-0.5px;">DHL</div>
+                        <div class="tracker-icon" style="background:#FFCC00;display:flex;align-items:center;justify-content:center;padding:4px;"><img src="https://imgs.search.brave.com/XotgOD_Xpv2yQm5oRsjcJThfTE-8lo2q7IplEkFs5PY/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9sb2dvZG93bmxvYWQub3JnL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDE1LzEyL2RobC1sb2dvLTAtMS5wbmc" style="height:22px;object-fit:contain;" /></div>
                         <span class="tracker-name">DHL Express</span>
                         <span class="tracker-open-btn">Open</span>
                     </a>
@@ -1440,10 +1440,10 @@ document.addEventListener('click', (e) => {
     }
 });
 
-window.selectAgent = function (value, label, letter, color) {
+window.selectAgent = function (value, label, imgSrc) {
     selectedAgent = value;
     const btn = document.getElementById('agent-selected-label');
-    if (btn) btn.innerHTML = `<span class="agent-logo-kakobuy" style="background:${color};">${letter}</span> ${label}`;
+    if (btn) btn.innerHTML = `<img src="${imgSrc}" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ${label}`;
     document.querySelectorAll('.agent-option').forEach(o => {
         o.classList.toggle('selected', o.dataset.value === value);
     });
