@@ -9,6 +9,7 @@ import time
 from collections import defaultdict, deque
 from pathlib import Path
 from typing import Annotated, Any
+from urllib.parse import urlparse
 
 from fastapi import Depends, FastAPI, HTTPException, Path, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +19,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 DB_PATH = Path(__file__).parent / "products.json"
 REPO_ROOT = DB_PATH.parent
@@ -31,11 +33,13 @@ CATEGORIES = ["", "Shoes", "Slides", "Shorts", "Pants", "T-shirts", "Long-sleeve
 BATCHES = ["", "Best Batch", "Budget Batch", "Random Batch"]
 
 MAX_BODY_BYTES = int(os.environ.get("ADMIN_MAX_BODY_BYTES", "262144"))
-_WS_ACCEPT_PER_MIN = int(os.environ.get("ADMIN_WS_ACCEPT_PER_MIN", "20"))
-_WS_MAX_PER_IP = int(os.environ.get("ADMIN_WS_MAX_PER_IP", "8"))
+_GLOBAL_RPM = max(60, int(os.environ.get("ADMIN_GLOBAL_RPM", "400")))
+_WS_ACCEPT_PER_MIN = int(os.environ.get("ADMIN_WS_ACCEPT_PER_MIN", "15"))
+_WS_MAX_PER_IP = int(os.environ.get("ADMIN_WS_MAX_PER_IP", "6"))
 
 _ws_accept_log: dict[str, deque[float]] = defaultdict(deque)
 _ws_active_by_ip: dict[str, int] = defaultdict(int)
+_global_burst_log: dict[str, deque[float]] = defaultdict(deque)
 
 
 def _rate_limit_client_key(request: Request) -> str:
@@ -49,17 +53,114 @@ def _rate_limit_client_key(request: Request) -> str:
 limiter = Limiter(key_func=_rate_limit_client_key, headers_enabled=True)
 
 
-class LimitRequestBodyMiddleware(BaseHTTPMiddleware):
+class LimitUploadSizeMiddleware:
+    """Cap request bodies using Content-Length or buffering + replay (chunked / missing CL)."""
+
+    def __init__(self, app: ASGIApp, max_bytes: int) -> None:
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        method = scope.get("method", "GET").upper()
+        if method not in ("POST", "PUT", "PATCH"):
+            await self.app(scope, receive, send)
+            return
+
+        headers = {k.decode().lower(): v.decode() for k, v in scope.get("headers", [])}
+        cl = headers.get("content-length")
+        if cl is not None:
+            try:
+                n = int(cl)
+                if n > self.max_bytes:
+                    await self._send_json(send, 413, {"detail": "Payload too large"})
+                    return
+                if n < 0:
+                    await self._send_json(send, 400, {"detail": "Invalid Content-Length"})
+                    return
+            except ValueError:
+                await self._send_json(send, 400, {"detail": "Invalid Content-Length"})
+                return
+            await self.app(scope, receive, send)
+            return
+
+        parts: list[bytes] = []
+        while True:
+            message = await receive()
+            if message["type"] != "http.request":
+                backlog: list[dict[str, Any]] = [message]
+
+                async def replay_then_stream() -> dict[str, Any]:
+                    if backlog:
+                        return backlog.pop(0)
+                    return await receive()
+
+                await self.app(scope, replay_then_stream, send)
+                return
+            chunk = message.get("body", b"")
+            if sum(map(len, parts)) + len(chunk) > self.max_bytes:
+                await self._send_json(send, 413, {"detail": "Payload too large"})
+                return
+            parts.append(chunk)
+            if not message.get("more_body", False):
+                break
+
+        full = b"".join(parts)
+        sent = False
+
+        async def replay_receive() -> dict[str, Any]:
+            nonlocal sent
+            if not sent:
+                sent = True
+                return {"type": "http.request", "body": full, "more_body": False}
+            return {"type": "http.disconnect"}
+
+        await self.app(scope, replay_receive, send)
+
+    @staticmethod
+    async def _send_json(send: Send, status: int, payload: dict[str, str]) -> None:
+        raw = json.dumps(payload).encode("utf-8")
+        await send(
+            {
+                "type": "http.response.start",
+                "status": status,
+                "headers": [
+                    (b"content-type", b"application/json; charset=utf-8"),
+                    (b"content-length", str(len(raw)).encode("ascii")),
+                ],
+            }
+        )
+        await send({"type": "http.response.body", "body": raw, "more_body": False})
+
+
+class GlobalBurstMiddleware(BaseHTTPMiddleware):
+    """Per-IP ceiling on all HTTP requests (abuse / cheap DoS on the admin process)."""
+
     async def dispatch(self, request: Request, call_next):
-        if request.method in ("POST", "PUT", "PATCH"):
-            cl = request.headers.get("content-length")
-            if cl:
-                try:
-                    if int(cl) > MAX_BODY_BYTES:
-                        return JSONResponse({"detail": "Payload too large"}, status_code=413)
-                except ValueError:
-                    return JSONResponse({"detail": "Invalid Content-Length"}, status_code=400)
+        ip = _rate_limit_client_key(request)
+        now = time.monotonic()
+        q = _global_burst_log[ip]
+        while q and now - q[0] > 60.0:
+            q.popleft()
+        if len(q) >= _GLOBAL_RPM:
+            return JSONResponse({"detail": "Too many requests"}, status_code=429)
+        q.append(now)
         return await call_next(request)
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        h = response.headers
+        h["X-Content-Type-Options"] = "nosniff"
+        h["X-Frame-Options"] = "DENY"
+        h["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        h["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+        h["Cross-Origin-Opener-Policy"] = "same-origin"
+        h["Cache-Control"] = "no-store"
+        return response
 
 
 def _strip_htmlish(s: str) -> str:
@@ -209,6 +310,9 @@ def validate_url(value: str) -> str:
         return ""
     if not re.match(r"^https?://", v, re.IGNORECASE):
         raise ValueError("URL must start with http:// or https://")
+    p = urlparse(v)
+    if p.username is not None or p.password is not None:
+        raise ValueError("URL must not contain embedded credentials")
     return v
 
 
@@ -297,6 +401,9 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 _cors_raw = os.environ.get("ADMIN_CORS_ORIGINS", "").strip()
 _cors_origins = [o.strip() for o in _cors_raw.split(",") if o.strip()] if _cors_raw else ["*"]
 
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(GlobalBurstMiddleware)
+app.add_middleware(LimitUploadSizeMiddleware, max_bytes=MAX_BODY_BYTES)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins,
@@ -304,7 +411,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(LimitRequestBodyMiddleware)
 
 manager = WSManager()
 db_lock = asyncio.Lock()
