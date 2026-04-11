@@ -1,6 +1,5 @@
 // Fixed Kakobuy-like conversion rates from CNY base.
 // 1 USD ~= 6.31 CNY  =>  1 CNY ~= 0.1585 USD
-const USE_FIXED_KAKOBUY_RATES = true;
 const FIXED_KAKOBUY_RATES = {
     CNY: 1,
     USD: 1 / 6.31,
@@ -10,21 +9,6 @@ const FIXED_KAKOBUY_RATES = {
 };
 let exchangeRates = { ...FIXED_KAKOBUY_RATES };
 let currentCurrency = localStorage.getItem('currency') || 'USD';
-
-async function fetchRates() {
-    if (USE_FIXED_KAKOBUY_RATES) {
-        exchangeRates = { ...FIXED_KAKOBUY_RATES };
-        return;
-    }
-    try {
-        const res = await fetch('https://api.exchangerate-api.com/v4/latest/CNY');
-        const data = await res.json();
-        exchangeRates = data.rates;
-    } catch (e) {
-        console.warn("Failed to fetch live rates, using fallback.", e);
-    }
-}
-fetchRates();
 
 // Cursor glow tracking
 document.addEventListener('mousemove', (e) => {
@@ -149,10 +133,10 @@ const langMap = {
         CNY: "在淘宝，微店或直接在我们的<strong>产品</strong>页面上找到您喜欢的商品。"
     },
     tut_2: {
-        EN: 'Copy the item link and paste it into our <strong>Link Converter</strong> on the <a href="#" style="color: var(--text-primary);" onclick="document.querySelector(\'[data-page=tools]\').click(); return false;">Tools</a> page.',
-        RON: 'Copiază linkul articolului și lipește-l în <strong>Convertorul de Linkuri</strong> de pe pagina de <a href="#" style="color: var(--text-primary);" onclick="document.querySelector(\'[data-page=tools]\').click(); return false;">Unelte</a>.',
-        PLN: 'Skopiuj link do przedmiotu i wklej go do naszego <strong>Konwertera Linków</strong> na stronie <a href="#" style="color: var(--text-primary);" onclick="document.querySelector(\'[data-page=tools]\').click(); return false;">Narzędzia</a>.',
-        CNY: '复制商品链接并将其粘贴到我们<a href="#" style="color: var(--text-primary);" onclick="document.querySelector(\'[data-page=tools]\').click(); return false;">工具</a>页面的<strong>链接转换器</strong>中。'
+        EN: 'Copy the item link and paste it into our <strong>Link Converter</strong> on the <a href="#" style="color: var(--text-primary);" data-action="go-tools">Tools</a> page.',
+        RON: 'Copiază linkul articolului și lipește-l în <strong>Convertorul de Linkuri</strong> de pe pagina de <a href="#" style="color: var(--text-primary);" data-action="go-tools">Unelte</a>.',
+        PLN: 'Skopiuj link do przedmiotu i wklej go do naszego <strong>Konwertera Linków</strong> na stronie <a href="#" style="color: var(--text-primary);" data-action="go-tools">Narzędzia</a>.',
+        CNY: '复制商品链接并将其粘贴到我们<a href="#" style="color: var(--text-primary);" data-action="go-tools">工具</a>页面的<strong>链接转换器</strong>中。'
     },
     tut_3: {
         EN: "Select your preferred shopping agent (e.g. PandaBuy, SugarGoo).",
@@ -654,7 +638,7 @@ function renderFilteredProducts() {
         } else if (batch === 'random batch') {
             batchFlair = '<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#2a2f42;color:#c7d2ff;border:1px solid #4d5a96;">RANDOM</span>';
         } else if (batchRaw) {
-            batchFlair = `<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#2c2d34;color:#d9d9df;border:1px solid #4b4d59;">${escapeHtml(batchRaw).toUpperCase()}</span>`;
+            batchFlair = `<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#2c2d34;color:#d9d9df;border:1px solid #4b4d59;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
         }
 
         return `
@@ -849,7 +833,7 @@ function getPages() {
                 <span class="jf-title-line">finder</span>
             </h1>
             <p class="jf-sub">${t('hero_desc')}</p>
-            <button class="jf-btn" onclick="document.querySelector('[data-page=products]').click();">
+            <button class="jf-btn" data-action="go-products">
                 ${t('btn_explore')}
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"/>
@@ -1360,6 +1344,14 @@ function initApp() {
         if (pageId === 'home') injectHomeStyles();
 
         mainContent.innerHTML = getPages()[pageId] || getPages().home;
+
+        // CSP-safe: handle data-action buttons instead of inline onclick
+        mainContent.querySelectorAll('[data-action="go-products"]').forEach(el => {
+            el.addEventListener('click', e => { e.preventDefault(); renderPage('products'); });
+        });
+        mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
+            el.addEventListener('click', e => { e.preventDefault(); renderPage('tools'); });
+        });
 
         navLinks.forEach(link => {
             link.classList.toggle('active', link.getAttribute('data-page') === pageId);
