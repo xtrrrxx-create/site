@@ -199,7 +199,10 @@ function updateThemeIcon(isLightMode) {
 const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 const SEARCH_DEBOUNCE_MS = 140;
-const SEARCH_INPUT_MAX_LEN = 35;
+/** Short text fields (search, tracking #) — avoids UI lag on huge paste. */
+const INPUT_MAX_LEN = 35;
+/** Product links can be long; cap paste size so convert doesn’t choke. */
+const LINK_INPUT_MAX_LEN = 2048;
 const PRODUCTS_RENDER_STEP = 30;
 const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
 
@@ -416,7 +419,7 @@ function buildFilterUI() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <input type="text" id="kf-search-input" placeholder="Search products..." value="" maxlength="35" autocomplete="off" spellcheck="false"/>
+                <input type="text" id="kf-search-input" placeholder="Search products..." value="" maxlength="${INPUT_MAX_LEN}" autocomplete="off" spellcheck="false"/>
                 <button class="kf-search-clear" id="kf-search-clear" style="display:none">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -485,8 +488,8 @@ function bindFilterEvents() {
 
     input.addEventListener('input', () => {
         let next = input.value;
-        if (next.length > SEARCH_INPUT_MAX_LEN) {
-            next = next.slice(0, SEARCH_INPUT_MAX_LEN);
+        if (next.length > INPUT_MAX_LEN) {
+            next = next.slice(0, INPUT_MAX_LEN);
             input.value = next;
         }
         clearBtn.style.display = next ? 'flex' : 'none';
@@ -583,7 +586,7 @@ function updateFilterBadge() {
 
 function getFiltered() {
     return allProductsCache.filter(p => {
-        const s = filterState.search.toLowerCase().slice(0, SEARCH_INPUT_MAX_LEN);
+        const s = filterState.search.toLowerCase().slice(0, INPUT_MAX_LEN);
         const matchSearch = !s || p.title.toLowerCase().includes(s);
         const matchCategory = filterState.category === 'All' ||
             (p.category || '').toLowerCase() === filterState.category.toLowerCase();
@@ -1292,7 +1295,7 @@ function getPages() {
                 <h2 class="tool-title">Link Converter</h2>
                 <p class="tool-subtitle">Lipește linkul pentru a-l schimba în versiunea agentului tău.</p>
                 <div class="converter-row">
-                    <input class="converter-input" id="link-input" type="text" placeholder="Lipește link din Weidian / Taobao..." autocomplete="off" />
+                    <input class="converter-input" id="link-input" type="text" placeholder="Lipește link din Weidian / Taobao..." maxlength="${LINK_INPUT_MAX_LEN}" autocomplete="off" />
                     <div class="agent-dropdown-wrap">
                         <button class="agent-dropdown-btn" id="agent-dropdown-btn" onclick="toggleAgentDropdown()">
                             <span style="display:flex;align-items:center;gap:0.45rem;" id="agent-selected-label">
@@ -1320,7 +1323,7 @@ function getPages() {
             <div class="tracking-card">
                 <h2 class="tool-title">Package Tracking</h2>
                 <p class="tool-subtitle" style="margin-bottom:1.25rem;">Verifică statusul pachetelor tale.</p>
-                <input class="tracking-input" type="text" placeholder="Introdu numărul de tracking..." id="tracking-input" oninput="updateTrackerLinks(this.value.trim())" />
+                <input class="tracking-input" type="text" placeholder="Introdu numărul de tracking..." id="tracking-input" maxlength="${INPUT_MAX_LEN}" oninput="updateTrackerLinks(this.value.trim())" />
                 <div class="tracker-grid">
                     <a class="tracker-card" href="https://t.17track.net/en" target="_blank" rel="noopener" id="track-17">
                         <div class="tracker-icon" style="background:#1d4ed8;color:white;font-size:1.3rem;">17</div>
@@ -1450,7 +1453,7 @@ window.selectAgent = function (value, label, letter, color) {
 
 // ─── LINK CONVERTER ────────────────────────────────────────────────────────
 window.convertLink = function () {
-    const input = document.getElementById('link-input').value.trim();
+    const input = document.getElementById('link-input').value.trim().slice(0, LINK_INPUT_MAX_LEN);
     const agentValue = selectedAgent;
     const agentNames = { kakobuy: 'KakoBuy', acbuy: 'ACBuy', mulebuy: 'Mulebuy' };
     const agentText = agentNames[agentValue] || agentValue;
@@ -1531,6 +1534,8 @@ window.updateTrackerLinks = function (code) {
     const trackDhl = document.getElementById('track-dhl');
 
     if (!track17 || !trackDhl) return;
+
+    code = (code || '').slice(0, INPUT_MAX_LEN);
 
     if (code) {
         track17.href = `https://t.17track.net/en#nums=${encodeURIComponent(code)}`;
