@@ -1,15 +1,23 @@
 import asyncio
+import hashlib
 import json
 import os
 import re
+import secrets
 import subprocess
+import time
+from collections import defaultdict, deque
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any
 
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import Depends, FastAPI, HTTPException, Path, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field, field_validator
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+from starlette.middleware.base import BaseHTTPMiddleware
 
 DB_PATH = Path(__file__).parent / "products.json"
 REPO_ROOT = DB_PATH.parent
@@ -21,6 +29,90 @@ _git_push_lock = asyncio.Lock()
 
 CATEGORIES = ["", "Shoes", "Slides", "Shorts", "Pants", "T-shirts", "Long-sleeve", "Hoodies", "Jackets", "Accessories"]
 BATCHES = ["", "Best Batch", "Budget Batch", "Random Batch"]
+
+MAX_BODY_BYTES = int(os.environ.get("ADMIN_MAX_BODY_BYTES", "262144"))
+_WS_ACCEPT_PER_MIN = int(os.environ.get("ADMIN_WS_ACCEPT_PER_MIN", "20"))
+_WS_MAX_PER_IP = int(os.environ.get("ADMIN_WS_MAX_PER_IP", "8"))
+
+_ws_accept_log: dict[str, deque[float]] = defaultdict(deque)
+_ws_active_by_ip: dict[str, int] = defaultdict(int)
+
+
+def _rate_limit_client_key(request: Request) -> str:
+    if os.environ.get("ADMIN_TRUST_X_FORWARDED", "").strip().lower() in ("1", "true", "yes"):
+        xff = request.headers.get("x-forwarded-for", "")
+        if xff.strip():
+            return xff.split(",")[0].strip()
+    return get_remote_address(request)
+
+
+limiter = Limiter(key_func=_rate_limit_client_key, headers_enabled=True)
+
+
+class LimitRequestBodyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        if request.method in ("POST", "PUT", "PATCH"):
+            cl = request.headers.get("content-length")
+            if cl:
+                try:
+                    if int(cl) > MAX_BODY_BYTES:
+                        return JSONResponse({"detail": "Payload too large"}, status_code=413)
+                except ValueError:
+                    return JSONResponse({"detail": "Invalid Content-Length"}, status_code=400)
+        return await call_next(request)
+
+
+def _strip_htmlish(s: str) -> str:
+    return re.sub(r"<[^>]+>", "", s, flags=re.IGNORECASE)
+
+
+def _constant_time_token_match(got: str, expected: str) -> bool:
+    return secrets.compare_digest(
+        hashlib.sha256(got.encode("utf-8")).digest(),
+        hashlib.sha256(expected.encode("utf-8")).digest(),
+    )
+
+
+async def require_read_token(request: Request) -> None:
+    if os.environ.get("ADMIN_REQUIRE_TOKEN_FOR_READ", "").strip().lower() not in ("1", "true", "yes"):
+        return
+    token = os.environ.get("ADMIN_API_TOKEN", "").strip()
+    if not token:
+        return
+    got = request.headers.get("x-admin-token") or ""
+    if not _constant_time_token_match(got, token):
+        raise HTTPException(status_code=403, detail="Invalid or missing admin token")
+
+
+async def require_write_token(request: Request) -> None:
+    token = os.environ.get("ADMIN_API_TOKEN", "").strip()
+    if not token:
+        return
+    got = request.headers.get("x-admin-token") or ""
+    if not _constant_time_token_match(got, token):
+        raise HTTPException(status_code=403, detail="Invalid or missing admin token")
+
+
+def _ws_client_ip(ws: WebSocket) -> str:
+    if os.environ.get("ADMIN_TRUST_X_FORWARDED", "").strip().lower() in ("1", "true", "yes"):
+        xff = ws.headers.get("x-forwarded-for", "")
+        if xff.strip():
+            return xff.split(",")[0].strip()
+    host = ws.client.host if ws.client else ""
+    return host or "unknown"
+
+
+def _ws_allow_new_connection(ip: str) -> bool:
+    now = time.monotonic()
+    q = _ws_accept_log[ip]
+    while q and now - q[0] > 60.0:
+        q.popleft()
+    if len(q) >= _WS_ACCEPT_PER_MIN:
+        return False
+    if _ws_active_by_ip[ip] >= _WS_MAX_PER_IP:
+        return False
+    q.append(now)
+    return True
 
 
 def load_products() -> list[dict[str, Any]]:
@@ -132,9 +224,11 @@ class ProductIn(BaseModel):
     @field_validator("title", "price", mode="before")
     @classmethod
     def _clean_required(cls, value: Any) -> str:
-        v = clean_text(str(value or ""))
+        v = _strip_htmlish(clean_text(str(value or "")))
         if not v:
             raise ValueError("Field is required")
+        if len(v) > 180:
+            raise ValueError("Title too long")
         return v
 
     @field_validator("img", "kakobuy", "picksly", mode="before")
@@ -160,8 +254,17 @@ class ProductIn(BaseModel):
 
 
 class ReorderIn(BaseModel):
-    from_index: int
-    to_index: int
+    from_index: int = Field(ge=0, le=1_000_000)
+    to_index: int = Field(ge=0, le=1_000_000)
+
+
+class AdminPasswordIn(BaseModel):
+    password: str = Field(default="", max_length=256)
+
+    @field_validator("password", mode="before")
+    @classmethod
+    def _pw(cls, value: Any) -> str:
+        return clean_text(str(value or ""))[:256]
 
 
 class WSManager:
@@ -169,8 +272,7 @@ class WSManager:
         self._clients: set[WebSocket] = set()
         self._lock = asyncio.Lock()
 
-    async def connect(self, ws: WebSocket) -> None:
-        await ws.accept()
+    async def register(self, ws: WebSocket) -> None:
         async with self._lock:
             self._clients.add(ws)
 
@@ -189,36 +291,71 @@ class WSManager:
 
 
 app = FastAPI(title="Jarvis Finder Realtime Admin")
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+_cors_raw = os.environ.get("ADMIN_CORS_ORIGINS", "").strip()
+_cors_origins = [o.strip() for o in _cors_raw.split(",") if o.strip()] if _cors_raw else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_cors_origins,
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(LimitRequestBodyMiddleware)
 
 manager = WSManager()
 db_lock = asyncio.Lock()
 
 
 @app.get("/", response_class=HTMLResponse)
-async def admin_page() -> str:
+@limiter.limit("60/minute")
+async def admin_page(request: Request) -> str:
     return HTML
 
 
 @app.get("/api/meta")
-async def meta() -> dict[str, Any]:
+@limiter.limit("120/minute")
+async def meta(request: Request, _: None = Depends(require_read_token)) -> dict[str, Any]:
     return {"categories": CATEGORIES, "batches": BATCHES}
 
 
 @app.get("/api/products")
-async def get_products() -> list[dict[str, Any]]:
+@limiter.limit("120/minute")
+async def get_products(request: Request, _: None = Depends(require_read_token)) -> list[dict[str, Any]]:
     async with db_lock:
         return load_products()
 
 
+@app.post("/api/admin/authenticate")
+@limiter.limit("5/15minutes")
+async def admin_authenticate(request: Request, body: AdminPasswordIn) -> dict[str, Any]:
+    expected = os.environ.get("ADMIN_PASSWORD", "").strip()
+    if not expected:
+        raise HTTPException(status_code=400, detail="Password authentication not configured")
+    token = os.environ.get("ADMIN_API_TOKEN", "").strip()
+    if not token:
+        raise HTTPException(status_code=503, detail="Server missing ADMIN_API_TOKEN")
+    got = body.password.encode("utf-8")
+    exp = expected.encode("utf-8")
+    if len(got) > 512:
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+    gh = hashlib.sha256(got).digest()
+    eh = hashlib.sha256(exp).digest()
+    if not secrets.compare_digest(gh, eh):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    return {"ok": True, "token": token}
+
+
 @app.post("/api/products")
-async def add_product(payload: ProductIn) -> dict[str, Any]:
+@limiter.limit("60/minute")
+async def add_product(
+    request: Request,
+    payload: ProductIn,
+    _: None = Depends(require_write_token),
+) -> dict[str, Any]:
     async with db_lock:
         products = load_products()
         products.append(payload.model_dump())
@@ -229,7 +366,13 @@ async def add_product(payload: ProductIn) -> dict[str, Any]:
 
 
 @app.put("/api/products/{index}")
-async def update_product(index: int, payload: ProductIn) -> dict[str, Any]:
+@limiter.limit("60/minute")
+async def update_product(
+    request: Request,
+    index: Annotated[int, Path(ge=0, le=5_000_000)],
+    payload: ProductIn,
+    _: None = Depends(require_write_token),
+) -> dict[str, Any]:
     async with db_lock:
         products = load_products()
         if index < 0 or index >= len(products):
@@ -242,7 +385,12 @@ async def update_product(index: int, payload: ProductIn) -> dict[str, Any]:
 
 
 @app.delete("/api/products/{index}")
-async def delete_product(index: int) -> dict[str, Any]:
+@limiter.limit("60/minute")
+async def delete_product(
+    request: Request,
+    index: Annotated[int, Path(ge=0, le=5_000_000)],
+    _: None = Depends(require_write_token),
+) -> dict[str, Any]:
     async with db_lock:
         products = load_products()
         if index < 0 or index >= len(products):
@@ -255,7 +403,12 @@ async def delete_product(index: int) -> dict[str, Any]:
 
 
 @app.post("/api/products/reorder")
-async def reorder_product(payload: ReorderIn) -> dict[str, Any]:
+@limiter.limit("60/minute")
+async def reorder_product(
+    request: Request,
+    payload: ReorderIn,
+    _: None = Depends(require_write_token),
+) -> dict[str, Any]:
     async with db_lock:
         products = load_products()
         n = len(products)
@@ -275,14 +428,36 @@ async def reorder_product(payload: ReorderIn) -> dict[str, Any]:
 
 @app.websocket("/ws")
 async def websocket_updates(ws: WebSocket) -> None:
-    await manager.connect(ws)
+    ip = _ws_client_ip(ws)
+    if not _ws_allow_new_connection(ip):
+        await ws.close(code=1008)
+        return
+    if os.environ.get("ADMIN_REQUIRE_TOKEN_FOR_READ", "").strip().lower() in ("1", "true", "yes"):
+        tok = os.environ.get("ADMIN_API_TOKEN", "").strip()
+        if tok:
+            q = ws.query_params.get("token") or ""
+            if not _constant_time_token_match(q, tok):
+                await ws.close(code=4401)
+                return
+    await ws.accept()
+    _ws_active_by_ip[ip] += 1
+    await manager.register(ws)
     try:
         while True:
-            # Keep connection alive; client may send pings.
-            await ws.receive_text()
+            msg = await ws.receive()
+            if msg.get("type") == "websocket.receive":
+                t = msg.get("text")
+                b = msg.get("bytes")
+                if t is not None and len(t) > 4096:
+                    break
+                if b is not None and len(b) > 4096:
+                    break
     except WebSocketDisconnect:
-        await manager.disconnect(ws)
+        pass
     except Exception:
+        pass
+    finally:
+        _ws_active_by_ip[ip] = max(0, _ws_active_by_ip[ip] - 1)
         await manager.disconnect(ws)
 
 
@@ -349,6 +524,14 @@ HTML = """
 <body>
   <div class="wrap">
     <h2>Jarvis Finder Realtime Admin</h2>
+    <div class="row" id="authBar" style="align-items:center;margin-bottom:16px;padding:10px 12px;background:#19191f;border-radius:10px;border:1px solid #2c2c35">
+      <input type="password" id="adminPassword" placeholder="Admin password" autocomplete="current-password" style="min-width:160px"/>
+      <button type="button" id="loginBtn">Sign in</button>
+      <input id="adminTokenInput" placeholder="Or paste API token" autocomplete="off" style="min-width:220px;flex:1"/>
+      <button type="button" id="saveTokenBtn" class="secondary">Save token</button>
+      <button type="button" id="clearTokenBtn" class="secondary">Clear</button>
+      <span class="small" id="authHint" style="flex-basis:100%"></span>
+    </div>
     <div class="editor-sticky" id="editorBar">
       <div class="status" id="status">Connecting...</div>
       <div class="row">
@@ -381,7 +564,21 @@ HTML = """
     let tableSearchQuery = "";
     let loadProductsDebounce = null;
     let wsPingInterval = null;
+    let activeWs = null;
     const statusEl = document.getElementById("status");
+
+    function getStoredToken() {
+      try { return localStorage.getItem("adminApiToken") || ""; } catch (_) { return ""; }
+    }
+    function setStoredToken(t) {
+      try { localStorage.setItem("adminApiToken", (t || "").trim()); } catch (_) {}
+    }
+    function authHeaders(extra) {
+      const h = Object.assign({}, extra || {});
+      const t = getStoredToken();
+      if (t) h["X-Admin-Token"] = t;
+      return h;
+    }
 
     const fields = {
       title: document.getElementById("title"),
@@ -418,7 +615,12 @@ HTML = """
     }
 
     async function loadMeta() {
-      const r = await fetch("/api/meta");
+      const r = await fetch("/api/meta", { headers: authHeaders() });
+      if (r.status === 403) {
+        setStatus("API refused: set token or sign in (see bar above)", false);
+        throw new Error("auth");
+      }
+      if (!r.ok) throw new Error("meta");
       const m = await r.json();
       fields.category.innerHTML = m.categories.map(v => `<option value="${v}">${v || "(empty)"}</option>`).join("");
       fields.batch.innerHTML = m.batches.map(v => `<option value="${v}">${v || "(empty)"}</option>`).join("");
@@ -471,7 +673,11 @@ HTML = """
     }
 
     async function loadProducts(silent) {
-      const r = await fetch("/api/products");
+      const r = await fetch("/api/products", { headers: authHeaders() });
+      if (r.status === 403) {
+        if (!silent) setStatus("API refused: set token or sign in", false);
+        throw new Error("auth");
+      }
       products = await r.json();
       render();
       if (!silent) setStatus(`Loaded ${products.length} products`);
@@ -503,7 +709,7 @@ HTML = """
 
     window.deleteRow = async function (i) {
       if (!confirm("Delete selected product?")) return;
-      const r = await fetch(`/api/products/${i}`, { method: "DELETE" });
+      const r = await fetch(`/api/products/${i}`, { method: "DELETE", headers: authHeaders() });
       if (!r.ok) return setStatus("Delete failed", false);
       scheduleLoadProducts(false);
       clearForm();
@@ -514,7 +720,7 @@ HTML = """
       if (toIndex < 0 || toIndex >= products.length) return;
       const r = await fetch("/api/products/reorder", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: authHeaders({"Content-Type": "application/json"}),
         body: JSON.stringify({ from_index: i, to_index: toIndex })
       });
       if (!r.ok) {
@@ -530,7 +736,7 @@ HTML = """
     document.getElementById("addBtn").onclick = async () => {
       const r = await fetch("/api/products", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: authHeaders({"Content-Type": "application/json"}),
         body: JSON.stringify(formPayload())
       });
       if (!r.ok) {
@@ -545,7 +751,7 @@ HTML = """
       if (selectedIndex < 0) return;
       const r = await fetch(`/api/products/${selectedIndex}`, {
         method: "PUT",
-        headers: {"Content-Type": "application/json"},
+        headers: authHeaders({"Content-Type": "application/json"}),
         body: JSON.stringify(formPayload())
       });
       if (!r.ok) {
@@ -566,11 +772,22 @@ HTML = """
     });
 
     function connectWs() {
+      if (activeWs) {
+        activeWs.onclose = null;
+        try { activeWs.close(); } catch (_) {}
+        activeWs = null;
+      }
+      if (wsPingInterval) {
+        clearInterval(wsPingInterval);
+        wsPingInterval = null;
+      }
       const proto = location.protocol === "https:" ? "wss" : "ws";
-      const ws = new WebSocket(`${proto}://${location.host}/ws`);
+      const t = getStoredToken();
+      const qs = t ? ("?token=" + encodeURIComponent(t)) : "";
+      const ws = new WebSocket(`${proto}://${location.host}/ws${qs}`);
+      activeWs = ws;
       ws.onopen = () => {
         setStatus("Realtime connected");
-        if (wsPingInterval) clearInterval(wsPingInterval);
         wsPingInterval = setInterval(() => {
           try { ws.send("ping"); } catch (_) {}
         }, 60000);
@@ -585,6 +802,7 @@ HTML = """
         scheduleLoadProducts(true);
       };
       ws.onclose = () => {
+        activeWs = null;
         if (wsPingInterval) {
           clearInterval(wsPingInterval);
           wsPingInterval = null;
@@ -594,9 +812,48 @@ HTML = """
       };
     }
 
+    document.getElementById("saveTokenBtn").onclick = () => {
+      setStoredToken(document.getElementById("adminTokenInput").value || "");
+      document.getElementById("authHint").textContent = "Token saved in this browser.";
+      connectWs();
+      loadMeta().then(() => loadProducts(false)).catch(() => {});
+    };
+    document.getElementById("clearTokenBtn").onclick = () => {
+      setStoredToken("");
+      document.getElementById("adminTokenInput").value = "";
+      document.getElementById("authHint").textContent = "Token cleared.";
+      connectWs();
+    };
+    document.getElementById("loginBtn").onclick = async () => {
+      const pw = document.getElementById("adminPassword").value || "";
+      const r = await fetch("/api/admin/authenticate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ password: pw })
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        document.getElementById("authHint").textContent = data.detail || "Sign in failed";
+        return setStatus("Sign in failed", false);
+      }
+      if (data.token) setStoredToken(data.token);
+      document.getElementById("adminPassword").value = "";
+      document.getElementById("adminTokenInput").value = getStoredToken();
+      document.getElementById("authHint").textContent = "Signed in; token stored locally.";
+      connectWs();
+      try {
+        await loadMeta();
+        await loadProducts(false);
+        setStatus("Signed in");
+      } catch (_) {}
+    };
+
     (async () => {
-      await loadMeta();
-      await loadProducts(false);
+      document.getElementById("adminTokenInput").value = getStoredToken();
+      try {
+        await loadMeta();
+        await loadProducts(false);
+      } catch (_) {}
       connectWs();
     })();
   </script>

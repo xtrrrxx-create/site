@@ -80,7 +80,8 @@ def make_kakobuy(url: str) -> str:
     if not url:
         return ""
     encoded = urllib.parse.quote(url, safe="")
-    return f"https://www.kakobuy.com/item/details?url={encoded}&affcode=keviinn"
+    aff = os.environ.get("KAKOBUY_AFFCODE", "keviinn").strip() or "keviinn"
+    return f"https://www.kakobuy.com/item/details?url={encoded}&affcode={aff}"
 
 def _extract_first_url(text: str) -> str:
     if not text:
