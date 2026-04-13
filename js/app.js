@@ -194,6 +194,21 @@ const LINK_INPUT_MAX_LEN = 100;
 const PRODUCTS_RENDER_STEP = 30;
 const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
 
+// Supabase config
+const SUPABASE_URL = 'https://jcfcyqnuhufmtoxlqknt.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_1u-Oyiiswh68aD5aa80I1g_iJoLjc1T';
+
+async function fetchFromSupabase() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=title,price,img,kakobuy,picksly,category,batch&order=id.asc&limit=1000`, {
+        headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+        }
+    });
+    if (!res.ok) throw new Error('Supabase fetch failed');
+    return res.json();
+}
+
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
 let allProductsCache = [];
 let productsRefreshTimer = null;
@@ -203,8 +218,7 @@ let lastProductsSignature = '';
 
 async function refreshProductsFromServer(silent = false) {
     try {
-        const res = await fetch(`products.json?_=${Date.now()}`);
-        const data = await res.json();
+        const data = await fetchFromSupabase();
         const nextSignature = JSON.stringify(data);
         if (nextSignature === lastProductsSignature) {
             return;
@@ -1364,8 +1378,7 @@ function initApp() {
         if (pageId === 'products') {
             filterState = { search: '', category: 'All', batch: 'All Tags' };
 
-            fetch(`products.json?_=${Date.now()}`)
-                .then(res => res.json())
+            fetchFromSupabase()
                 .then(data => {
                     lastProductsSignature = JSON.stringify(data);
                     allProductsCache = data;
