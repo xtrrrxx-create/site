@@ -196,7 +196,7 @@ const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
 
 // Supabase config
 const SUPABASE_URL = 'https://jcfcyqnuhufmtoxlqknt.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_1u-Oyiiswh68aD5aa80I1g_iJoLjc1T';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjZmN5cW51aHVmbXRveGxxa250Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNjg4NzksImV4cCI6MjA5MTY0NDg3OX0.T40EwnvdZYI4n_Jm2Tnt1lBeGt46AHLWsTy_wP1Z-d0';
 
 async function fetchFromSupabase() {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/products?select=title,price,img,kakobuy,picksly,category,batch&order=id.asc&limit=1000`, {
