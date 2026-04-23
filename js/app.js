@@ -184,7 +184,7 @@ function updateThemeIcon(isLightMode) {
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
-const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
+const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Merch', 'Accessories'];
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 const SEARCH_DEBOUNCE_MS = 140;
 /** Short text fields (search, tracking #) — avoids UI lag on huge paste. */
