@@ -44,6 +44,7 @@ function updateNavbarLanguage() {
         if (page === 'home') a.innerHTML = t('nav_home');
         if (page === 'products') a.innerHTML = t('nav_products');
         if (page === 'tutorials') a.innerHTML = t('nav_tutorials');
+        if (page === 'qccheck') a.innerHTML = t('nav_qc');
         if (page === 'tools') a.innerHTML = t('nav_tools');
     });
 }
@@ -112,6 +113,7 @@ const langMap = {
     nav_home: { EN: "Home", PLN: "Główna", RON: "Acasă", CNY: "首页" },
     nav_products: { EN: "Products", PLN: "Produkty", RON: "Produse", CNY: "产品" },
     nav_tutorials: { EN: "Tutorials", PLN: "Poradniki", RON: "Tutoriale", CNY: "教程" },
+    nav_qc: { EN: "QC Check", PLN: "QC Check", RON: "Verificare QC", CNY: "QC 检查" },
     nav_tools: { EN: "Tools", PLN: "Narzędzia", RON: "Unelte", CNY: "工具" },
     hero_desc: {
         EN: "The best items finder site. Find top tier items<br>and order with confidence.",
@@ -1088,6 +1090,79 @@ function getPages() {
             </div>
         </div>
     `,
+        qccheck: `
+        <style>
+            .qc-wrap { max-width: 1100px; margin: 0 auto; padding: 5rem 1.5rem 3rem;
+                display: flex; flex-direction: column; gap: 1.5rem;
+                animation: fadeIn 0.4s ease-out; }
+            .qc-card { background: var(--nav-bg); border: 1px solid var(--border-color);
+                border-radius: 24px; padding: 2.5rem 2.5rem 2rem; }
+            .qc-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
+                text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
+            .qc-title { font-size: 2.6rem; font-weight: 900; letter-spacing: -1.5px;
+                color: var(--text-primary); margin-bottom: 0.4rem; line-height: 1; }
+            .qc-subtitle { color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.75rem; }
+            .qc-row { display: flex; gap: 0.75rem; align-items: stretch; }
+            .qc-input { flex: 1; background: var(--bg-color); border: 1px solid var(--border-color);
+                border-radius: 14px; padding: 0 1.1rem; height: 52px; color: var(--text-primary);
+                font-family: 'Inter', sans-serif; font-size: 0.92rem; outline: none;
+                transition: border-color 0.2s; box-sizing: border-box; }
+            .qc-input:focus { border-color: var(--text-primary); }
+            .qc-input::placeholder { color: var(--text-secondary); opacity: 0.6; }
+            .qc-btn { background: var(--text-primary); color: var(--bg-color); border: none;
+                border-radius: 14px; padding: 0 1.5rem; height: 52px; font-family: 'Inter', sans-serif;
+                font-size: 0.92rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+                transition: opacity 0.15s, transform 0.1s; box-sizing: border-box; }
+            .qc-btn:hover { opacity: 0.85; } .qc-btn:active { transform: scale(0.97); }
+            .qc-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+            .qc-status { margin-top: 1rem; padding: 0.9rem 1.1rem; border-radius: 12px;
+                background: rgba(128,128,128,0.08); border: 1px solid var(--border-color);
+                color: var(--text-primary); font-size: 0.9rem; display: none; }
+            .qc-status.err { border-color: #c04040; color: #ff8a8a; }
+            .qc-groups { display: flex; flex-direction: column; gap: 2rem; margin-top: 2rem; }
+            .qc-group-head { display: flex; align-items: center; justify-content: space-between;
+                margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
+            .qc-group-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); }
+            .qc-group-meta { font-size: 0.82rem; color: var(--text-secondary); }
+            .qc-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+                gap: 0.75rem; }
+            .qc-img-wrap { position: relative; aspect-ratio: 1/1; border-radius: 14px;
+                overflow: hidden; cursor: pointer; background: var(--bg-color);
+                border: 1px solid var(--border-color); transition: transform 0.15s, border-color 0.2s; }
+            .qc-img-wrap:hover { transform: translateY(-2px); border-color: var(--text-primary); }
+            .qc-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+            .qc-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+                z-index: 9999; display: none; align-items: center; justify-content: center; padding: 2rem; }
+            .qc-lightbox.open { display: flex; }
+            .qc-lightbox img { max-width: 95%; max-height: 95vh; border-radius: 12px; }
+            .qc-lightbox-close { position: absolute; top: 1rem; right: 1.25rem; color: #fff;
+                font-size: 2rem; background: none; border: none; cursor: pointer; }
+            .qc-spinner { width: 36px; height: 36px; border: 3px solid var(--border-color);
+                border-top-color: var(--text-primary); border-radius: 50%;
+                animation: qcspin 0.8s linear infinite; margin: 2rem auto; display: none; }
+            .qc-spinner.on { display: block; }
+            @keyframes qcspin { to { transform: rotate(360deg); } }
+        </style>
+
+        <div class="qc-wrap">
+            <div class="qc-card">
+                <div class="qc-eyebrow">QC PHOTOS</div>
+                <h2 class="qc-title">QC Checker</h2>
+                <p class="qc-subtitle">Paste any Weidian / Taobao / 1688 / picks.ly link to view QC photos from sellers.</p>
+                <div class="qc-row">
+                    <input class="qc-input" id="qc-input" type="text" placeholder="https://weidian.com/... or https://picks.ly/item/..." maxlength="500" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();runQcCheck();}" />
+                    <button class="qc-btn" id="qc-submit" onclick="runQcCheck()">Check QC</button>
+                </div>
+                <div class="qc-status" id="qc-status"></div>
+                <div class="qc-spinner" id="qc-spinner"></div>
+                <div class="qc-groups" id="qc-groups"></div>
+            </div>
+        </div>
+        <div class="qc-lightbox" id="qc-lightbox" onclick="if(event.target===this)this.classList.remove('open')">
+            <button class="qc-lightbox-close" onclick="document.getElementById('qc-lightbox').classList.remove('open')">×</button>
+            <img id="qc-lightbox-img" alt="" />
+        </div>
+    `,
         tools: `
         <style>
             .tools-wrap {
@@ -1465,6 +1540,93 @@ window.selectAgent = function (value, label, imgSrc) {
     });
     const menu = document.getElementById('agent-dropdown-menu');
     if (menu) menu.classList.remove('open');
+};
+
+// ─── QC CHECKER ────────────────────────────────────────────────────────────
+function qcPickslyToSource(url) {
+    const m = url.match(/picks\.ly\/item\/(WD|TB|1688|AL)(\d+)/i);
+    if (!m) return null;
+    const prefix = m[1].toUpperCase(), id = m[2];
+    if (prefix === 'WD') return `https://weidian.com/item.html?itemID=${id}`;
+    if (prefix === 'TB') return `https://item.taobao.com/item.htm?id=${id}`;
+    if (prefix === '1688' || prefix === 'AL') return `https://detail.1688.com/offer/${id}.html`;
+    return null;
+}
+function qcNormalizeSource(raw) {
+    const u = (raw || '').trim();
+    if (!u) return null;
+    if (/picks\.ly\/item\//i.test(u)) return qcPickslyToSource(u);
+    // Already weidian/taobao/1688 URL — pass through
+    if (/weidian\.com|taobao\.com|tmall\.com|1688\.com/i.test(u)) return u;
+    return null;
+}
+window.runQcCheck = async function () {
+    const input = document.getElementById('qc-input');
+    const statusEl = document.getElementById('qc-status');
+    const spinner = document.getElementById('qc-spinner');
+    const groupsEl = document.getElementById('qc-groups');
+    const btn = document.getElementById('qc-submit');
+    const raw = (input.value || '').trim().slice(0, 500);
+
+    statusEl.style.display = 'none';
+    statusEl.classList.remove('err');
+    groupsEl.innerHTML = '';
+
+    const src = qcNormalizeSource(raw);
+    if (!src) {
+        statusEl.textContent = 'Invalid link. Paste a Weidian, Taobao, 1688, or picks.ly item URL.';
+        statusEl.classList.add('err');
+        statusEl.style.display = 'block';
+        return;
+    }
+
+    btn.disabled = true; spinner.classList.add('on');
+    try {
+        const api = `https://picks.ly/api/qc?url=${encodeURIComponent(src)}`;
+        const r = await fetch(api);
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        const data = await r.json();
+        if (!data.success) throw new Error(data.message || 'No QC data');
+
+        const groups = data.groups || [];
+        if (!groups.length) {
+            statusEl.textContent = 'No QC photos available for this item yet.';
+            statusEl.classList.add('err');
+            statusEl.style.display = 'block';
+            return;
+        }
+
+        groupsEl.innerHTML = groups.map((g, gi) => {
+            const imgs = (g.images || []).filter(i => i && i.url);
+            if (!imgs.length) return '';
+            const label = g.label || g.title || `Batch ${gi + 1}`;
+            const date = g.date || g.time || '';
+            const imgsHtml = imgs.map((im, idx) =>
+                `<div class="qc-img-wrap" onclick="openQcLightbox('${im.url.replace(/'/g, "\\'")}')">
+                    <img src="${im.url}" loading="lazy" alt="QC ${gi}-${idx}"/>
+                </div>`).join('');
+            return `<div class="qc-group">
+                <div class="qc-group-head">
+                    <div class="qc-group-title">${label}</div>
+                    <div class="qc-group-meta">${date} · ${imgs.length} photos</div>
+                </div>
+                <div class="qc-images">${imgsHtml}</div>
+            </div>`;
+        }).join('');
+
+        statusEl.textContent = `Found ${groups.length} QC batch${groups.length > 1 ? 'es' : ''}.`;
+        statusEl.style.display = 'block';
+    } catch (err) {
+        statusEl.textContent = `Failed to load QC: ${err.message}`;
+        statusEl.classList.add('err');
+        statusEl.style.display = 'block';
+    } finally {
+        btn.disabled = false; spinner.classList.remove('on');
+    }
+};
+window.openQcLightbox = function (url) {
+    document.getElementById('qc-lightbox-img').src = url;
+    document.getElementById('qc-lightbox').classList.add('open');
 };
 
 // ─── LINK CONVERTER ────────────────────────────────────────────────────────
