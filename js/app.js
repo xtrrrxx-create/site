@@ -1135,8 +1135,13 @@ function getPages() {
                 z-index: 9999; display: none; align-items: center; justify-content: center; padding: 2rem; }
             .qc-lightbox.open { display: flex; }
             .qc-lightbox img { max-width: 95%; max-height: 95vh; border-radius: 12px; }
-            .qc-lightbox-close { position: absolute; top: 1rem; right: 1.25rem; color: #fff;
-                font-size: 2rem; background: none; border: none; cursor: pointer; }
+            .qc-lightbox-close { position: fixed; top: 1.25rem; right: 1.5rem; color: #fff;
+                width: 44px; height: 44px; font-size: 1.8rem; font-weight: 400; line-height: 1;
+                background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2);
+                border-radius: 999px; cursor: pointer; z-index: 10000;
+                display: flex; align-items: center; justify-content: center;
+                transition: background 0.15s, transform 0.15s; }
+            .qc-lightbox-close:hover { background: rgba(255,255,255,0.15); transform: scale(1.08); }
             .qc-spinner { width: 36px; height: 36px; border: 3px solid var(--border-color);
                 border-top-color: var(--text-primary); border-radius: 50%;
                 animation: qcspin 0.8s linear infinite; margin: 2rem auto; display: none; }
@@ -1158,9 +1163,9 @@ function getPages() {
                 <div class="qc-groups" id="qc-groups"></div>
             </div>
         </div>
-        <div class="qc-lightbox" id="qc-lightbox" onclick="if(event.target===this)this.classList.remove('open')">
-            <button class="qc-lightbox-close" onclick="document.getElementById('qc-lightbox').classList.remove('open')">×</button>
-            <img id="qc-lightbox-img" alt="" />
+        <div class="qc-lightbox" id="qc-lightbox" onclick="closeQcLightbox()">
+            <button class="qc-lightbox-close" onclick="event.stopPropagation();closeQcLightbox()" aria-label="Close">×</button>
+            <img id="qc-lightbox-img" alt="" onclick="event.stopPropagation()" />
         </div>
     `,
         tools: `
@@ -1681,7 +1686,18 @@ window.runQcCheck = async function () {
 window.openQcLightbox = function (url) {
     document.getElementById('qc-lightbox-img').src = url;
     document.getElementById('qc-lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
 };
+window.closeQcLightbox = function () {
+    document.getElementById('qc-lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+};
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const lb = document.getElementById('qc-lightbox');
+        if (lb && lb.classList.contains('open')) closeQcLightbox();
+    }
+});
 
 // ─── LINK CONVERTER ────────────────────────────────────────────────────────
 window.convertLink = function () {
