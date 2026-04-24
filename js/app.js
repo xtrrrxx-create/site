@@ -2013,53 +2013,64 @@ window.updateTrackerLinks = function (code) {
     }
 };
 
-// ─── LIVE ONLINE USERS (Supabase Realtime Presence) ───────────────────────
-(function initPresence() {
-    let attempts = 0;
+// ─── LIVE ONLINE USERS (Supabase REST heartbeat) ──────────────────────────
+// Strategy: each tab has a unique ID, upserts its row every 15s, count = rows
+// with last_seen within the last 30s. Reliable, no realtime config needed.
+(function initOnlineCounter() {
+    const HEARTBEAT_MS = 15000;
+    const STALE_SECONDS = 30;
+    const myId = (crypto && crypto.randomUUID ? crypto.randomUUID() :
+        (Math.random().toString(36).slice(2) + Date.now().toString(36)));
+    const TABLE = `${SUPABASE_URL}/rest/v1/online_users`;
+    const HEADERS = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+    };
     function setCount(n) {
         const el = document.getElementById('online-count');
         if (el) el.textContent = n;
     }
-    function start() {
-        if (!window.supabase || !window.supabase.createClient) {
-            if (++attempts < 40) return setTimeout(start, 200);
-            console.warn('[presence] Supabase SDK failed to load');
-            setCount('?');
-            return;
-        }
+    async function heartbeat() {
         try {
-            const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            const presenceKey = Math.random().toString(36).slice(2) + Date.now().toString(36);
-            const channel = sb.channel('online-users', {
-                config: { presence: { key: presenceKey } }
+            await fetch(TABLE, {
+                method: 'POST',
+                headers: { ...HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
+                body: JSON.stringify({ id: myId, last_seen: new Date().toISOString() })
             });
-            const render = () => {
-                const state = channel.presenceState();
-                const count = Math.max(Object.keys(state).length, 1);
-                console.debug('[presence] sync', count, state);
-                setCount(count);
-            };
-            channel
-                .on('presence', { event: 'sync' }, render)
-                .on('presence', { event: 'join' }, render)
-                .on('presence', { event: 'leave' }, render)
-                .subscribe(async (status, err) => {
-                    console.debug('[presence] status:', status, err || '');
-                    if (status === 'SUBSCRIBED') {
-                        await channel.track({ online_at: new Date().toISOString() });
-                        // Force a render after track in case sync event is delayed.
-                        setTimeout(render, 300);
-                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                        setCount('?');
-                    }
-                });
-            window.addEventListener('beforeunload', () => { try { channel.untrack(); } catch (_) {} });
-            // Expose for debugging
-            window._presenceChannel = channel;
+        } catch (e) { console.debug('[online] heartbeat failed:', e); }
+    }
+    async function refreshCount() {
+        try {
+            const since = new Date(Date.now() - STALE_SECONDS * 1000).toISOString();
+            const r = await fetch(`${TABLE}?select=id&last_seen=gt.${since}`, {
+                method: 'HEAD',
+                headers: { ...HEADERS, 'Prefer': 'count=exact' }
+            });
+            const range = r.headers.get('content-range') || '';
+            const total = parseInt(range.split('/')[1], 10);
+            setCount(Number.isFinite(total) && total > 0 ? total : 1);
         } catch (e) {
-            console.warn('[presence] init failed:', e);
+            console.debug('[online] count failed:', e);
             setCount('?');
         }
+    }
+    async function tick() { await heartbeat(); await refreshCount(); }
+    function removeSelf() {
+        // navigator.sendBeacon doesn't support DELETE, use fetch with keepalive.
+        try {
+            fetch(`${TABLE}?id=eq.${myId}`, {
+                method: 'DELETE',
+                headers: HEADERS,
+                keepalive: true
+            });
+        } catch (_) {}
+    }
+    function start() {
+        tick();
+        setInterval(tick, HEARTBEAT_MS);
+        window.addEventListener('beforeunload', removeSelf);
+        window.addEventListener('pagehide', removeSelf);
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', start);
