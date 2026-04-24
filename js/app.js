@@ -64,6 +64,9 @@ function updateNavbarLanguage() {
     if (settingsH) settingsH.textContent = t('settings');
     const settingsLbl = document.querySelector('#settings-modal .modal-body > label');
     if (settingsLbl) settingsLbl.textContent = t('lang_currency');
+    // Online pill
+    const onlineLbl = document.getElementById('online-label');
+    if (onlineLbl) onlineLbl.textContent = t('online_label');
 }
 
 function formatPrice(cnyPriceStr) {
@@ -227,6 +230,8 @@ const langMap = {
     qc_failed: { EN: "Failed to load QC: {e}", RON: "Încărcare QC eșuată: {e}", PLN: "Błąd ładowania QC: {e}", CNY: "加载 QC 失败：{e}" },
     qc_batch: { EN: "Batch", RON: "Batch", PLN: "Partia", CNY: "批次" },
     qc_photos: { EN: "photos", RON: "poze", PLN: "zdjęć", CNY: "张照片" },
+    qc_back: { EN: "Back", RON: "Înapoi", PLN: "Wróć", CNY: "返回" },
+    online_label: { EN: "online", RON: "online", PLN: "online", CNY: "在线" },
 
     // ── TOOLS ──
     link_converter: { EN: "Link Converter", RON: "Convertor Linkuri", PLN: "Konwerter Linków", CNY: "链接转换器" },
@@ -1201,11 +1206,23 @@ function getPages() {
                 background: rgba(128,128,128,0.08); border: 1px solid var(--border-color);
                 color: var(--text-primary); font-size: 0.9rem; display: none; }
             .qc-status.err { border-color: #c04040; color: #ff8a8a; }
-            .qc-groups { display: flex; flex-direction: column; gap: 2rem; margin-top: 2rem; }
-            .qc-group-head { display: flex; align-items: center; justify-content: space-between;
-                margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; }
-            .qc-group-title { font-size: 1.05rem; font-weight: 700; color: var(--text-primary); }
-            .qc-group-meta { font-size: 0.82rem; color: var(--text-secondary); }
+            .qc-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 1rem; margin-top: 2rem; }
+            .qc-batch-card { background: var(--bg-color); border: 1px solid var(--border-color);
+                border-radius: 16px; overflow: hidden; cursor: pointer;
+                transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+                display: flex; flex-direction: column; }
+            .qc-batch-card:hover { transform: translateY(-3px); border-color: var(--text-primary);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.25); }
+            .qc-batch-cover { position: relative; aspect-ratio: 1/1; overflow: hidden;
+                background: var(--nav-bg); }
+            .qc-batch-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+            .qc-batch-count { position: absolute; bottom: 0.6rem; right: 0.6rem;
+                background: rgba(0,0,0,0.75); color: #fff; font-size: 0.75rem; font-weight: 700;
+                padding: 0.3rem 0.6rem; border-radius: 999px; backdrop-filter: blur(4px); }
+            .qc-batch-info { padding: 0.85rem 1rem; display: flex; flex-direction: column; gap: 0.2rem; }
+            .qc-batch-info .qc-group-title { font-size: 0.95rem; font-weight: 700; color: var(--text-primary); }
+            .qc-batch-info .qc-group-meta { font-size: 0.78rem; color: var(--text-secondary); }
             .qc-images { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
                 gap: 0.75rem; }
             .qc-img-wrap { position: relative; aspect-ratio: 1/1; border-radius: 14px;
@@ -1213,6 +1230,21 @@ function getPages() {
                 border: 1px solid var(--border-color); transition: transform 0.15s, border-color 0.2s; }
             .qc-img-wrap:hover { transform: translateY(-2px); border-color: var(--text-primary); }
             .qc-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+            .qc-batch-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+                z-index: 9998; display: none; overflow-y: auto; padding: 5rem 5% 3rem; }
+            .qc-batch-modal.open { display: block; animation: fadeIn 0.25s ease-out; }
+            .qc-batch-modal-inner { max-width: 1600px; margin: 0 auto; }
+            .qc-batch-modal-head { display: flex; align-items: center; justify-content: space-between;
+                margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+            .qc-batch-modal-title { color: #fff; font-size: 1.4rem; font-weight: 800; }
+            .qc-batch-modal-meta { color: rgba(255,255,255,0.65); font-size: 0.88rem; }
+            .qc-batch-back { background: rgba(255,255,255,0.1); color: #fff;
+                border: 1px solid rgba(255,255,255,0.2); border-radius: 999px;
+                padding: 0.55rem 1.1rem; font-weight: 700; cursor: pointer;
+                display: inline-flex; align-items: center; gap: 0.4rem;
+                font-family: 'Inter', sans-serif; font-size: 0.88rem;
+                transition: background 0.15s; }
+            .qc-batch-back:hover { background: rgba(255,255,255,0.18); }
             .qc-lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.92);
                 z-index: 9999; display: none; align-items: center; justify-content: center; padding: 2rem; }
             .qc-lightbox.open { display: flex; }
@@ -1242,6 +1274,22 @@ function getPages() {
                 <div class="qc-status" id="qc-status"></div>
                 <div class="qc-spinner" id="qc-spinner"></div>
                 <div class="qc-groups" id="qc-groups"></div>
+            </div>
+        </div>
+        <div class="qc-batch-modal" id="qc-batch-modal">
+            <div class="qc-batch-modal-inner">
+                <div class="qc-batch-modal-head">
+                    <button class="qc-batch-back" onclick="closeQcBatch()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+                        ${t('qc_back')}
+                    </button>
+                    <div>
+                        <div class="qc-batch-modal-title" id="qc-batch-modal-title"></div>
+                        <div class="qc-batch-modal-meta" id="qc-batch-modal-meta"></div>
+                    </div>
+                    <div style="width:90px;"></div>
+                </div>
+                <div class="qc-images" id="qc-batch-modal-images"></div>
             </div>
         </div>
         <div class="qc-lightbox" id="qc-lightbox" onclick="closeQcLightbox()">
@@ -1751,30 +1799,33 @@ window.runQcCheck = async function () {
             return;
         }
 
-        groupsEl.innerHTML = groups.map((g, gi) => {
-            // Normalize: images can be [url,...] or [{url,...}]
+        // Build normalized batch list, store globally for modal
+        const batches = groups.map((g, gi) => {
             const rawImgs = g.images || g.photos || g.pictures || g.imgs || [];
             const imgs = (Array.isArray(rawImgs) ? rawImgs : []).map(i =>
                 typeof i === 'string' ? i : (i.url || i.src || i.href || i.image || '')
             ).filter(Boolean);
-            if (!imgs.length) return '';
             const label = [g.size && ('Size: ' + g.size), g.color && ('Color: ' + g.color)]
                 .filter(Boolean).join(' · ') || g.label || g.title || g.variant || `${t('qc_batch')} ${gi + 1}`;
             const date = (g.date || g.time || g.created_at || '').toString().slice(0, 10);
             const source = g.source || g.agent || '';
-            const meta = [date, source, `${imgs.length} ${t('qc_photos')}`].filter(Boolean).join(' · ');
-            const imgsHtml = imgs.map((url, idx) =>
-                `<div class="qc-img-wrap" onclick="openQcLightbox('${url.replace(/'/g, "\\'")}')">
-                    <img src="${url}" loading="lazy" alt="QC ${gi}-${idx}"/>
-                </div>`).join('');
-            return `<div class="qc-group">
-                <div class="qc-group-head">
-                    <div class="qc-group-title">${label}</div>
-                    <div class="qc-group-meta">${meta}</div>
+            const meta = [date, source].filter(Boolean).join(' · ');
+            return { label, meta, imgs };
+        }).filter(b => b.imgs.length);
+        window._qcBatches = batches;
+
+        groupsEl.innerHTML = batches.map((b, bi) => `
+            <div class="qc-batch-card" onclick="openQcBatch(${bi})">
+                <div class="qc-batch-cover">
+                    <img src="${b.imgs[0]}" loading="lazy" alt="${escapeHtml(b.label)}"/>
+                    <div class="qc-batch-count">${b.imgs.length} ${t('qc_photos')}</div>
                 </div>
-                <div class="qc-images">${imgsHtml}</div>
-            </div>`;
-        }).join('');
+                <div class="qc-batch-info">
+                    <div class="qc-group-title">${escapeHtml(b.label)}</div>
+                    <div class="qc-group-meta">${escapeHtml(b.meta) || '&nbsp;'}</div>
+                </div>
+            </div>
+        `).join('');
 
         statusEl.textContent = t('qc_found', { n: groups.length });
         statusEl.style.display = 'block';
@@ -1784,6 +1835,25 @@ window.runQcCheck = async function () {
         statusEl.style.display = 'block';
     } finally {
         btn.disabled = false; spinner.classList.remove('on');
+    }
+};
+window.openQcBatch = function (idx) {
+    const b = (window._qcBatches || [])[idx];
+    if (!b) return;
+    document.getElementById('qc-batch-modal-title').textContent = b.label;
+    document.getElementById('qc-batch-modal-meta').textContent = [b.meta, `${b.imgs.length} ${t('qc_photos')}`].filter(Boolean).join(' · ');
+    document.getElementById('qc-batch-modal-images').innerHTML = b.imgs.map((url, i) =>
+        `<div class="qc-img-wrap" onclick="openQcLightbox('${url.replace(/'/g, "\\'")}')">
+            <img src="${url}" loading="lazy" alt="QC ${idx}-${i}"/>
+        </div>`).join('');
+    document.getElementById('qc-batch-modal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    window.scrollTo(0, 0);
+};
+window.closeQcBatch = function () {
+    document.getElementById('qc-batch-modal').classList.remove('open');
+    if (!document.getElementById('qc-lightbox').classList.contains('open')) {
+        document.body.style.overflow = '';
     }
 };
 window.openQcLightbox = function (url) {
@@ -1798,7 +1868,9 @@ window.closeQcLightbox = function () {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         const lb = document.getElementById('qc-lightbox');
-        if (lb && lb.classList.contains('open')) closeQcLightbox();
+        if (lb && lb.classList.contains('open')) { closeQcLightbox(); return; }
+        const bm = document.getElementById('qc-batch-modal');
+        if (bm && bm.classList.contains('open')) closeQcBatch();
     }
 });
 
@@ -1897,3 +1969,45 @@ window.updateTrackerLinks = function (code) {
     }
 };
 
+// ─── LIVE ONLINE USERS (Supabase Realtime Presence) ───────────────────────
+(function initPresence() {
+    function start() {
+        if (!window.supabase || !window.supabase.createClient) {
+            // SDK not loaded yet — retry shortly.
+            setTimeout(start, 400);
+            return;
+        }
+        try {
+            const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                realtime: { params: { eventsPerSecond: 2 } }
+            });
+            const channel = sb.channel('online-users', {
+                config: { presence: { key: Math.random().toString(36).slice(2) + Date.now().toString(36) } }
+            });
+            const render = () => {
+                const state = channel.presenceState();
+                const count = Object.keys(state).length || 1;
+                const el = document.getElementById('online-count');
+                if (el) el.textContent = count;
+            };
+            channel
+                .on('presence', { event: 'sync' }, render)
+                .on('presence', { event: 'join' }, render)
+                .on('presence', { event: 'leave' }, render)
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        await channel.track({ online_at: new Date().toISOString() });
+                    }
+                });
+            // Untrack on page hide so counter drops off quickly.
+            window.addEventListener('beforeunload', () => { try { channel.untrack(); } catch (_) {} });
+        } catch (e) {
+            console.warn('Presence init failed:', e);
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+})();
