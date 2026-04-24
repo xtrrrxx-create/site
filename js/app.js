@@ -1448,10 +1448,10 @@ function initApp() {
 
         // CSP-safe: handle data-action buttons instead of inline onclick
         mainContent.querySelectorAll('[data-action="go-products"]').forEach(el => {
-            el.addEventListener('click', e => { e.preventDefault(); renderPage('products'); });
+            el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('products'); });
         });
         mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
-            el.addEventListener('click', e => { e.preventDefault(); renderPage('tools'); });
+            el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('tools'); });
         });
 
         navLinks.forEach(link => {
@@ -1491,21 +1491,43 @@ function initApp() {
         }
     }
 
+    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools'];
+    function pageFromPath() {
+        const seg = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
+        return VALID_PAGES.includes(seg) ? seg : 'home';
+    }
+    function navigateTo(pageId, replace) {
+        if (!VALID_PAGES.includes(pageId)) pageId = 'home';
+        const path = pageId === 'home' ? '/' : '/' + pageId;
+        if (window.location.pathname !== path) {
+            if (replace) history.replaceState({ page: pageId }, '', path);
+            else history.pushState({ page: pageId }, '', path);
+        }
+        renderPage(pageId);
+    }
+    window.navigateTo = navigateTo;
+
     navLinks.forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
-            renderPage(link.getAttribute('data-page'));
+            navigateTo(link.getAttribute('data-page'));
         });
     });
 
     document.querySelectorAll('.bottom-nav-item').forEach(item => {
         item.addEventListener('click', e => {
             e.preventDefault();
-            renderPage(item.getAttribute('data-page'));
+            navigateTo(item.getAttribute('data-page'));
         });
     });
 
-    renderPage('home');
+    window.addEventListener('popstate', () => {
+        renderPage(pageFromPath());
+    });
+
+    const initial = pageFromPath();
+    history.replaceState({ page: initial }, '', initial === 'home' ? '/' : '/' + initial);
+    renderPage(initial);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
