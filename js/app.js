@@ -2015,38 +2015,50 @@ window.updateTrackerLinks = function (code) {
 
 // ─── LIVE ONLINE USERS (Supabase Realtime Presence) ───────────────────────
 (function initPresence() {
+    let attempts = 0;
+    function setCount(n) {
+        const el = document.getElementById('online-count');
+        if (el) el.textContent = n;
+    }
     function start() {
         if (!window.supabase || !window.supabase.createClient) {
-            // SDK not loaded yet — retry shortly.
-            setTimeout(start, 400);
+            if (++attempts < 40) return setTimeout(start, 200);
+            console.warn('[presence] Supabase SDK failed to load');
+            setCount('?');
             return;
         }
         try {
-            const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                realtime: { params: { eventsPerSecond: 2 } }
-            });
+            const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            const presenceKey = Math.random().toString(36).slice(2) + Date.now().toString(36);
             const channel = sb.channel('online-users', {
-                config: { presence: { key: Math.random().toString(36).slice(2) + Date.now().toString(36) } }
+                config: { presence: { key: presenceKey } }
             });
             const render = () => {
                 const state = channel.presenceState();
-                const count = Object.keys(state).length || 1;
-                const el = document.getElementById('online-count');
-                if (el) el.textContent = count;
+                const count = Math.max(Object.keys(state).length, 1);
+                console.debug('[presence] sync', count, state);
+                setCount(count);
             };
             channel
                 .on('presence', { event: 'sync' }, render)
                 .on('presence', { event: 'join' }, render)
                 .on('presence', { event: 'leave' }, render)
-                .subscribe(async (status) => {
+                .subscribe(async (status, err) => {
+                    console.debug('[presence] status:', status, err || '');
                     if (status === 'SUBSCRIBED') {
                         await channel.track({ online_at: new Date().toISOString() });
+                        // Force a render after track in case sync event is delayed.
+                        setTimeout(render, 300);
+                    } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+                        setCount('?');
                     }
                 });
-            // Untrack on page hide so counter drops off quickly.
             window.addEventListener('beforeunload', () => { try { channel.untrack(); } catch (_) {} });
+            // Expose for debugging
+            window._presenceChannel = channel;
         } catch (e) {
-            console.warn('Presence init failed:', e);
+            console.warn('[presence] init failed:', e);
+            setCount('?');
         }
     }
     if (document.readyState === 'loading') {
