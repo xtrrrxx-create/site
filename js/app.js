@@ -1148,7 +1148,7 @@ function getPages() {
             <div class="qc-card">
                 <div class="qc-eyebrow">QC PHOTOS</div>
                 <h2 class="qc-title">QC Checker</h2>
-                <p class="qc-subtitle">Paste any Weidian / Taobao / 1688 / picks.ly link to view QC photos from sellers.</p>
+                <p class="qc-subtitle">Paste any Weidian / Taobao / 1688 / picks.ly or agent link (Kakobuy, ACBuy, Mulebuy, Superbuy, etc).</p>
                 <div class="qc-row">
                     <input class="qc-input" id="qc-input" type="text" placeholder="https://weidian.com/... or https://picks.ly/item/..." maxlength="500" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();runQcCheck();}" />
                     <button class="qc-btn" id="qc-submit" onclick="runQcCheck()">Check QC</button>
@@ -1552,12 +1552,47 @@ function qcPickslyToSource(url) {
     if (prefix === '1688' || prefix === 'AL') return `https://detail.1688.com/offer/${id}.html`;
     return null;
 }
+function qcBuildSource(shop, id) {
+    const s = (shop || '').toLowerCase();
+    if (s === 'weidian' || s === 'wd') return `https://weidian.com/item.html?itemID=${id}`;
+    if (s === 'taobao' || s === 'tb') return `https://item.taobao.com/item.htm?id=${id}`;
+    if (s === 'tmall') return `https://detail.tmall.com/item.htm?id=${id}`;
+    if (s === '1688' || s === 'ali' || s === 'al') return `https://detail.1688.com/offer/${id}.html`;
+    return null;
+}
 function qcNormalizeSource(raw) {
-    const u = (raw || '').trim();
+    let u = (raw || '').trim();
     if (!u) return null;
+
+    // picks.ly
     if (/picks\.ly\/item\//i.test(u)) return qcPickslyToSource(u);
-    // Already weidian/taobao/1688 URL — pass through
+
+    // Direct source — pass through
     if (/weidian\.com|taobao\.com|tmall\.com|1688\.com/i.test(u)) return u;
+
+    // Agent links: extract url= / link= query param (kakobuy, superbuy, cssbuy, etc.)
+    try {
+        const urlObj = new URL(u);
+        const q = urlObj.searchParams;
+        const nested = q.get('url') || q.get('link') || q.get('u') || q.get('target') || q.get('href');
+        if (nested) {
+            const dec = decodeURIComponent(nested);
+            if (/weidian\.com|taobao\.com|tmall\.com|1688\.com/i.test(dec)) return dec;
+        }
+        // ACBuy / Mulebuy / Hoobuy style: shop_type=X&id=Y  OR  source=X&id=Y  OR  platform=X&id=Y  OR  /<shop>/<id>
+        const shop = q.get('shop_type') || q.get('source') || q.get('platform') || q.get('shoptype') || q.get('from');
+        const id   = q.get('id') || q.get('goods_id') || q.get('itemID') || q.get('goodsId');
+        if (shop && id) {
+            const built = qcBuildSource(shop, id);
+            if (built) return built;
+        }
+        // Path style: /product/weidian/123456 or /item/tb-123456
+        const pathMatch = urlObj.pathname.match(/\/(weidian|taobao|tmall|1688|wd|tb|al)[\/\-_]+(\d{6,})/i);
+        if (pathMatch) {
+            const built = qcBuildSource(pathMatch[1], pathMatch[2]);
+            if (built) return built;
+        }
+    } catch (_) { /* bad URL */ }
     return null;
 }
 window.runQcCheck = async function () {
