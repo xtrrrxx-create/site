@@ -30,11 +30,12 @@ window.changeCurrencyUI = function (curr) {
         c.classList.toggle('active', c.getAttribute('data-cur') === curr);
     });
 
+    updateNavbarLanguage();
+    // Re-render current page so translated strings apply immediately.
     const activeLink = document.querySelector('.nav-links a.active');
-    if (activeLink) {
-        updateNavbarLanguage();
-        activeLink.click();
-    }
+    const pageId = activeLink ? activeLink.getAttribute('data-page') : 'home';
+    if (window.navigateTo) window.navigateTo(pageId, true);
+    else if (activeLink) activeLink.click();
 }
 
 function updateNavbarLanguage() {
@@ -45,8 +46,24 @@ function updateNavbarLanguage() {
         if (page === 'products') a.innerHTML = t('nav_products');
         if (page === 'tutorials') a.innerHTML = t('nav_tutorials');
         if (page === 'qccheck') a.innerHTML = t('nav_qc');
-        if (page === 'tools') a.innerHTML = t('nav_tools');
+        if (page === 'tools') a.innerHTML = t('nav_tools') + ' <span style="font-size: 0.7em; vertical-align: middle; margin-left: 2px;">▼</span>';
     });
+    // Bottom nav
+    document.querySelectorAll('.bottom-nav-item[data-page]').forEach(item => {
+        const span = item.querySelector('span');
+        if (!span) return;
+        const page = item.getAttribute('data-page');
+        if (page === 'home') span.textContent = t('nav_home');
+        if (page === 'products') span.textContent = t('nav_products');
+        if (page === 'tutorials') span.textContent = t('nav_tutorials');
+        if (page === 'qccheck') span.textContent = t('nav_qc');
+        if (page === 'tools') span.textContent = t('nav_tools');
+    });
+    // Settings modal
+    const settingsH = document.querySelector('#settings-modal h2');
+    if (settingsH) settingsH.textContent = t('settings');
+    const settingsLbl = document.querySelector('#settings-modal .modal-body > label');
+    if (settingsLbl) settingsLbl.textContent = t('lang_currency');
 }
 
 function formatPrice(cnyPriceStr) {
@@ -157,12 +174,79 @@ const langMap = {
         RON: "Urmărește pachetul folosind uneltele de <strong>Urmărire Pachete</strong> din meniul odată ce a fost expediat.",
         PLN: "Śledź swoją paczkę za pomocą narzędzi do <strong>Śledzenia Paczek</strong> po jej wysłaniu.",
         CNY: "发货后，请使用我们页面上的<strong>包裹追踪</strong>工具追踪您的包裹。"
-    }
+    },
+
+    // ── HOME ──
+    hero_eyebrow: { EN: "Smart product discovery", RON: "Descoperă produse inteligent", PLN: "Inteligentne odkrywanie produktów", CNY: "智能产品发现" },
+
+    // ── FILTERS ──
+    search_placeholder: { EN: "Search products...", RON: "Caută produse...", PLN: "Szukaj produktów...", CNY: "搜索产品..." },
+    filters: { EN: "Filters", RON: "Filtre", PLN: "Filtry", CNY: "筛选" },
+    refresh: { EN: "Refresh", RON: "Reîmprospătează", PLN: "Odśwież", CNY: "刷新" },
+    categories: { EN: "Categories", RON: "Categorii", PLN: "Kategorie", CNY: "类别" },
+    tags_quality: { EN: "Tags & Quality", RON: "Etichete și Calitate", PLN: "Tagi i Jakość", CNY: "标签和质量" },
+    clear_all: { EN: "Clear all", RON: "Șterge tot", PLN: "Wyczyść", CNY: "全部清除" },
+    show_results: { EN: "Show results", RON: "Arată rezultate", PLN: "Pokaż wyniki", CNY: "显示结果" },
+    showing_of: { EN: "Showing {a} of {b} products", RON: "Se afișează {a} din {b} produse", PLN: "Pokazano {a} z {b} produktów", CNY: "显示 {a} / {b} 个产品" },
+    no_results: { EN: "No products found. Try different filters.", RON: "Niciun produs găsit. Încearcă alte filtre.", PLN: "Brak produktów. Spróbuj innych filtrów.", CNY: "未找到产品。请尝试其他筛选条件。" },
+    load_more: { EN: "Load more ({n} left)", RON: "Mai mult ({n} rămase)", PLN: "Załaduj więcej ({n} pozostało)", CNY: "加载更多（剩余 {n}）" },
+    no_image: { EN: "No image", RON: "Fără imagine", PLN: "Brak obrazu", CNY: "无图片" },
+    products_error: { EN: "Error loading products: {e}.", RON: "Eroare la încărcarea produselor: {e}.", PLN: "Błąd ładowania produktów: {e}.", CNY: "加载产品出错：{e}。" },
+
+    // ── TUTORIALS ──
+    htb_title: { EN: "HOW TO BUY", RON: "CUM SĂ CUMPERI", PLN: "JAK KUPIĆ", CNY: "如何购买" },
+    htb_sub: { EN: "Follow this 5-step guide to buy products using Kakobuy and ship them internationally.", RON: "Urmează ghidul în 5 pași pentru a cumpăra produse prin Kakobuy și a le expedia internațional.", PLN: "Postępuj zgodnie z 5-etapowym przewodnikiem, aby kupować przez Kakobuy i wysyłać międzynarodowo.", CNY: "遵循这 5 步指南，使用 Kakobuy 购买商品并国际发货。" },
+    htb_1_h: { EN: "Create your Kakobuy account", RON: "Creează-ți contul Kakobuy", PLN: "Załóż konto Kakobuy", CNY: "创建您的 Kakobuy 账户" },
+    htb_1_p: { EN: "Start by creating an account so you can place orders, store warehouse items, and manage shipping.", RON: "Începe prin a crea un cont ca să poți plasa comenzi, să depozitezi articole și să gestionezi livrarea.", PLN: "Załóż konto, aby składać zamówienia, przechowywać rzeczy w magazynie i zarządzać wysyłką.", CNY: "首先创建一个账户，以便下订单、存放仓库物品并管理运输。" },
+    htb_signup: { EN: "Sign up now", RON: "Înregistrează-te acum", PLN: "Zarejestruj się", CNY: "立即注册" },
+    htb_2_h: { EN: "Browse products on Jarvis Finder", RON: "Navighează produsele pe Jarvis Finder", PLN: "Przeglądaj produkty w Jarvis Finder", CNY: "在 Jarvis Finder 上浏览产品" },
+    htb_2_p: { EN: "Use categories and search to find items quickly, then click Buy Now to open the item in Kakobuy.", RON: "Folosește categoriile și căutarea pentru a găsi repede articole, apoi apasă Cumpără pentru a-l deschide în Kakobuy.", PLN: "Użyj kategorii i wyszukiwarki, aby szybko znaleźć przedmioty, a następnie kliknij Kup Teraz.", CNY: "使用类别和搜索快速找到商品，然后点击立即购买在 Kakobuy 中打开。" },
+    htb_3_h: { EN: "Purchase your items", RON: "Cumpără articolele", PLN: "Kup przedmioty", CNY: "购买您的商品" },
+    htb_3_l1: { EN: "Check title, batch and price.", RON: "Verifică titlul, batch-ul și prețul.", PLN: "Sprawdź tytuł, batch i cenę.", CNY: "检查标题、批次和价格。" },
+    htb_3_l2: { EN: "Open product page via Buy Now.", RON: "Deschide pagina produsului prin Cumpără.", PLN: "Otwórz stronę produktu poprzez Kup Teraz.", CNY: "通过立即购买打开产品页面。" },
+    htb_3_l3: { EN: "Complete checkout in Kakobuy.", RON: "Finalizează comanda pe Kakobuy.", PLN: "Dokończ zamówienie w Kakobuy.", CNY: "在 Kakobuy 完成结账。" },
+    htb_4_h: { EN: "International shipping", RON: "Expediere internațională", PLN: "Wysyłka międzynarodowa", CNY: "国际运输" },
+    htb_4_l1: { EN: "Wait for warehouse arrival and QC photos.", RON: "Așteaptă sosirea la depozit și pozele QC.", PLN: "Czekaj na dostarczenie do magazynu i zdjęcia QC.", CNY: "等待仓库到货和 QC 照片。" },
+    htb_4_l2: { EN: "Select shipping line and parcel options.", RON: "Alege linia de expediere și opțiunile coletului.", PLN: "Wybierz linię wysyłki i opcje paczki.", CNY: "选择运输线路和包裹选项。" },
+    htb_4_l3: { EN: "Pay shipping fee and track package.", RON: "Plătește taxa de expediere și urmărește coletul.", PLN: "Zapłać za wysyłkę i śledź paczkę.", CNY: "支付运费并追踪包裹。" },
+    htb_5_h: { EN: "Apply coupon before payment", RON: "Aplică cuponul înainte de plată", PLN: "Użyj kuponu przed płatnością", CNY: "付款前使用优惠券" },
+    htb_5_p: { EN: "Use this coupon in Kakobuy checkout for extra discounts:", RON: "Folosește acest cupon la plata Kakobuy pentru discount suplimentar:", PLN: "Użyj tego kuponu przy płatności Kakobuy, aby uzyskać dodatkowe zniżki:", CNY: "在 Kakobuy 结账时使用此优惠券获得额外折扣：" },
+    htb_cta_h: { EN: "READY TO START YOUR HAUL?", RON: "GATA SĂ ÎNCEPI?", PLN: "GOTOWY ZACZĄĆ?", CNY: "准备好开始了吗？" },
+    htb_cta_p: { EN: "Create your Kakobuy account and start building your order.", RON: "Creează-ți contul Kakobuy și începe să construiești comanda.", PLN: "Załóż konto Kakobuy i zacznij budować zamówienie.", CNY: "创建您的 Kakobuy 账户并开始构建订单。" },
+    htb_cta_btn: { EN: "Create Kakobuy account", RON: "Creează cont Kakobuy", PLN: "Załóż konto Kakobuy", CNY: "创建 Kakobuy 账户" },
+
+    // ── QC CHECKER ──
+    qc_title: { EN: "QC Checker", RON: "Verificare QC", PLN: "Sprawdzarka QC", CNY: "QC 检查器" },
+    qc_subtitle: { EN: "Paste any Weidian / Taobao / 1688 / picks.ly or agent link (Kakobuy, ACBuy, Mulebuy, Superbuy, etc).", RON: "Lipește orice link Weidian / Taobao / 1688 / picks.ly sau agent (Kakobuy, ACBuy, Mulebuy, Superbuy, etc).", PLN: "Wklej link Weidian / Taobao / 1688 / picks.ly lub agenta (Kakobuy, ACBuy, Mulebuy, Superbuy itd.).", CNY: "粘贴任何 Weidian / Taobao / 1688 / picks.ly 或代理链接（Kakobuy、ACBuy、Mulebuy、Superbuy 等）。" },
+    qc_placeholder: { EN: "https://weidian.com/... or https://picks.ly/item/...", RON: "https://weidian.com/... sau https://picks.ly/item/...", PLN: "https://weidian.com/... lub https://picks.ly/item/...", CNY: "https://weidian.com/... 或 https://picks.ly/item/..." },
+    qc_btn: { EN: "Check QC", RON: "Verifică QC", PLN: "Sprawdź QC", CNY: "检查 QC" },
+    qc_invalid_picksly: { EN: "Invalid picks.ly link.", RON: "Link picks.ly invalid.", PLN: "Nieprawidłowy link picks.ly.", CNY: "无效的 picks.ly 链接。" },
+    qc_paste_full: { EN: "Paste a full URL (marketplace or agent).", RON: "Lipește un URL complet (marketplace sau agent).", PLN: "Wklej pełny URL (marketplace lub agent).", CNY: "粘贴完整的 URL（市场或代理）。" },
+    qc_none: { EN: "No QC photos available for this item yet.", RON: "Nu sunt încă poze QC pentru acest articol.", PLN: "Brak zdjęć QC dla tego przedmiotu.", CNY: "此商品暂无 QC 照片。" },
+    qc_found: { EN: "Found {n} QC batch(es).", RON: "S-au găsit {n} batch-uri QC.", PLN: "Znaleziono {n} partii QC.", CNY: "找到 {n} 个 QC 批次。" },
+    qc_failed: { EN: "Failed to load QC: {e}", RON: "Încărcare QC eșuată: {e}", PLN: "Błąd ładowania QC: {e}", CNY: "加载 QC 失败：{e}" },
+    qc_batch: { EN: "Batch", RON: "Batch", PLN: "Partia", CNY: "批次" },
+    qc_photos: { EN: "photos", RON: "poze", PLN: "zdjęć", CNY: "张照片" },
+
+    // ── TOOLS ──
+    link_converter: { EN: "Link Converter", RON: "Convertor Linkuri", PLN: "Konwerter Linków", CNY: "链接转换器" },
+    convert_link: { EN: "Convert Link", RON: "Convertește Linkul", PLN: "Konwertuj Link", CNY: "转换链接" },
+    package_tracking: { EN: "Package Tracking", RON: "Urmărire Pachete", PLN: "Śledzenie Paczek", CNY: "包裹追踪" },
+    open_btn: { EN: "Open", RON: "Deschide", PLN: "Otwórz", CNY: "打开" },
+    conv_invalid: { EN: "<strong>Error:</strong> Invalid URL. Use a full http/https product link.", RON: "<strong>Eroare:</strong> URL invalid. Folosește un link complet http/https.", PLN: "<strong>Błąd:</strong> Nieprawidłowy URL. Użyj pełnego linku http/https.", CNY: "<strong>错误：</strong>无效的 URL。请使用完整的 http/https 链接。" },
+
+    // ── SETTINGS ──
+    settings: { EN: "Settings", RON: "Setări", PLN: "Ustawienia", CNY: "设置" },
+    lang_currency: { EN: "Language / Currency", RON: "Limbă / Monedă", PLN: "Język / Waluta", CNY: "语言 / 货币" }
 };
 
-function t(key) {
+function t(key, vars) {
     const lang = currentCurrency;
-    return langMap[key]?.[lang] || langMap[key]?.['EN'] || key;
+    let str = langMap[key]?.[lang] || langMap[key]?.['EN'] || key;
+    if (vars) {
+        for (const k in vars) str = str.split('{' + k + '}').join(vars[k]);
+    }
+    return str;
 }
 
 window.toggleTheme = function () {
@@ -238,7 +322,7 @@ async function refreshProductsFromServer(silent = false) {
         const info = document.getElementById('kf-results-info');
         if (info) {
             const filtered = getFiltered();
-            info.textContent = `Showing ${filtered.length} of ${data.length} products`;
+            info.textContent = t('showing_of', { a: filtered.length, b: data.length });
         }
         if (!silent) {
             console.log('Products refreshed from server.');
@@ -430,7 +514,7 @@ function buildFilterUI() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <input type="text" id="kf-search-input" placeholder="Search products..." value="" maxlength="${INPUT_MAX_LEN}" autocomplete="off" spellcheck="false"/>
+                <input type="text" id="kf-search-input" placeholder="${t('search_placeholder')}" value="" maxlength="${INPUT_MAX_LEN}" autocomplete="off" spellcheck="false"/>
                 <button class="kf-search-clear" id="kf-search-clear" style="display:none">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -441,14 +525,14 @@ function buildFilterUI() {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/>
                 </svg>
-                Filters
+                ${t('filters')}
                 ${active > 0 ? `<span class="kf-filter-badge">${active}</span>` : ''}
             </button>
-            <button class="kf-refresh-btn" id="kf-refresh-products" title="Refresh products now">
+            <button class="kf-refresh-btn" id="kf-refresh-products" title="${t('refresh')}">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/>
                 </svg>
-                Refresh
+                ${t('refresh')}
             </button>
         </div>
 
@@ -463,28 +547,28 @@ function buildFilterUI() {
         <div class="kf-modal-overlay" id="kf-modal-overlay">
             <div class="kf-modal">
                 <div class="kf-modal-header">
-                    <h3>Filters</h3>
+                    <h3>${t('filters')}</h3>
                     <button class="kf-modal-close" id="kf-modal-close">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                             <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                         </svg>
                     </button>
                 </div>
-                <div class="kf-section-label">Categories</div>
+                <div class="kf-section-label">${t('categories')}</div>
                 <div class="kf-modal-cats">
                     ${CATEGORIES.map(cat => `
                         <button class="kf-modal-cat-btn ${filterState.category === cat ? 'active' : ''}" data-modal-cat="${cat}">${cat}</button>
                     `).join('')}
                 </div>
-                <div class="kf-section-label">Tags &amp; Quality</div>
+                <div class="kf-section-label">${t('tags_quality')}</div>
                 <div class="kf-batch-grid">
                     ${BATCHES.map(b => `
                         <button class="kf-batch-btn ${filterState.batch === b ? 'active' : ''}" data-batch="${b}">${b}</button>
                     `).join('')}
                 </div>
                 <div class="kf-modal-actions">
-                    <button class="kf-btn-clear" id="kf-clear-all">Clear all</button>
-                    <button class="kf-btn-show" id="kf-show-results">Show results</button>
+                    <button class="kf-btn-clear" id="kf-clear-all">${t('clear_all')}</button>
+                    <button class="kf-btn-show" id="kf-show-results">${t('show_results')}</button>
                 </div>
             </div>
         </div>
@@ -619,7 +703,7 @@ function renderFilteredProducts() {
     const filtered = getFiltered();
     const visible = filtered.slice(0, visibleProductsLimit);
     if (info) {
-        info.textContent = `Showing ${visible.length} of ${filtered.length} products`;
+        info.textContent = t('showing_of', { a: visible.length, b: filtered.length });
     }
 
     if (filtered.length === 0) {
@@ -628,7 +712,7 @@ function renderFilteredProducts() {
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <p>No products found. Try different filters.</p>
+                <p>${t('no_results')}</p>
             </div>
         `;
         return;
@@ -648,8 +732,8 @@ function renderFilteredProducts() {
             /picks\.ly\/twitter-image/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
-            ? `<img src="${safeExternalUrl(safeImg)}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>No image</div>');" />`
-            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">No image</div>`;
+            ? `<img src="${safeExternalUrl(safeImg)}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>${t('no_image')}</div>');" />`
+            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${t('no_image')}</div>`;
 
         const kakobuy = appendAffcodeIfMissing(p.kakobuy || '#');
         const picksly = safeExternalUrl(p.picksly || '#');
@@ -683,7 +767,7 @@ function renderFilteredProducts() {
             ? `
             <div style="grid-column:1/-1;display:flex;justify-content:center;padding-top:8px;">
                 <button id="kf-load-more" class="btn-secondary" style="padding:0.8rem 1.1rem;border-radius:10px;border:none;cursor:pointer;">
-                    Load more (${filtered.length - visible.length} left)
+                    ${t('load_more', { n: filtered.length - visible.length })}
                 </button>
             </div>
             `
@@ -849,7 +933,7 @@ function getPages() {
         <div class="jf-hero">
             <div class="jf-eyebrow">
                 <span class="jf-eyebrow-dot"></span>
-                Smart product discovery
+                ${t('hero_eyebrow')}
             </div>
             <h1 class="jf-title">
                 <span class="jf-title-line">jarvis</span>
@@ -1022,81 +1106,81 @@ function getPages() {
         </style>
         <div class="htb-wrap">
             <div class="htb-head">
-                <h2 class="htb-title">HOW TO BUY</h2>
-                <p class="htb-sub">Follow this 5-step guide to buy products using Kakobuy and ship them internationally.</p>
+                <h2 class="htb-title">${t('htb_title')}</h2>
+                <p class="htb-sub">${t('htb_sub')}</p>
             </div>
 
             <div class="htb-steps">
                 <section class="htb-step">
                     <div class="htb-step-top">
                         <span class="htb-num">01</span>
-                        <h3>Create your Kakobuy account</h3>
+                        <h3>${t('htb_1_h')}</h3>
                     </div>
-                    <p>Start by creating an account so you can place orders, store warehouse items, and manage shipping.</p>
-                    <div class="htb-img"><img src="images/how-to-buy/step-1.jpg?v=2" alt="Step 1 — create Kakobuy account" loading="eager" fetchpriority="high" decoding="async" /></div>
-                    <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">Sign up now</a>
+                    <p>${t('htb_1_p')}</p>
+                    <div class="htb-img"><img src="images/how-to-buy/step-1.jpg?v=2" alt="Step 1" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">${t('htb_signup')}</a>
                 </section>
 
                 <section class="htb-step">
                     <div class="htb-step-top">
                         <span class="htb-num">02</span>
-                        <h3>Browse products on Jarvis Finder</h3>
+                        <h3>${t('htb_2_h')}</h3>
                     </div>
-                    <p>Use categories and search to find items quickly, then click Buy Now to open the item in Kakobuy.</p>
-                    <div class="htb-img"><img src="images/how-to-buy/step-2.jpg?v=2" alt="Step 2 — browse products" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <p>${t('htb_2_p')}</p>
+                    <div class="htb-img"><img src="images/how-to-buy/step-2.jpg?v=2" alt="Step 2" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
                     <div class="htb-step-top">
                         <span class="htb-num">03</span>
-                        <h3>Purchase your items</h3>
+                        <h3>${t('htb_3_h')}</h3>
                     </div>
                     <ul class="htb-list">
-                        <li>Check title, batch and price.</li>
-                        <li>Open product page via Buy Now.</li>
-                        <li>Complete checkout in Kakobuy.</li>
+                        <li>${t('htb_3_l1')}</li>
+                        <li>${t('htb_3_l2')}</li>
+                        <li>${t('htb_3_l3')}</li>
                     </ul>
-                    <div class="htb-img"><img src="images/how-to-buy/step-3.jpg?v=2" alt="Step 3 — cart and submit" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-3.jpg?v=2" alt="Step 3" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
                     <div class="htb-step-top">
                         <span class="htb-num">04</span>
-                        <h3>International shipping</h3>
+                        <h3>${t('htb_4_h')}</h3>
                     </div>
                     <ul class="htb-list">
-                        <li>Wait for warehouse arrival and QC photos.</li>
-                        <li>Select shipping line and parcel options.</li>
-                        <li>Pay shipping fee and track package.</li>
+                        <li>${t('htb_4_l1')}</li>
+                        <li>${t('htb_4_l2')}</li>
+                        <li>${t('htb_4_l3')}</li>
                     </ul>
-                    <div class="htb-img"><img src="images/how-to-buy/step-4.jpg?v=2" alt="Step 4 — choose shipping line" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-4.jpg?v=2" alt="Step 4" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
                     <div class="htb-step-top">
                         <span class="htb-num">05</span>
-                        <h3>Apply coupon before payment</h3>
+                        <h3>${t('htb_5_h')}</h3>
                     </div>
-                    <p>Use this coupon in Kakobuy checkout for extra discounts:</p>
+                    <p>${t('htb_5_p')}</p>
                     <div class="htb-coupon">keviinn</div>
-                    <div class="htb-img"><img src="images/how-to-buy/step-5.jpg?v=2" alt="Step 5 — apply coupon and submit" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-5.jpg?v=2" alt="Step 5" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
             </div>
 
             <div class="htb-cta">
-                <h3>READY TO START YOUR HAUL?</h3>
-                <p>Create your Kakobuy account and start building your order.</p>
-                <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">Create Kakobuy account</a>
+                <h3>${t('htb_cta_h')}</h3>
+                <p>${t('htb_cta_p')}</p>
+                <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">${t('htb_cta_btn')}</a>
             </div>
         </div>
     `,
         qccheck: `
         <style>
-            .qc-wrap { max-width: 1400px; margin: 0 auto; padding: 5rem 1.5rem 3rem;
+            .qc-wrap { max-width: 1800px; margin: 0 auto; padding: 5rem 5% 3rem;
                 display: flex; flex-direction: column; gap: 1.5rem;
-                animation: fadeIn 0.4s ease-out; }
+                animation: fadeIn 0.4s ease-out; width: 100%; box-sizing: border-box; }
             .qc-card { background: var(--nav-bg); border: 1px solid var(--border-color);
-                border-radius: 24px; padding: 2.5rem 2.5rem 2rem; }
+                border-radius: 24px; padding: 2.5rem 2.5rem 2rem; width: 100%; box-sizing: border-box; }
             .qc-title { font-size: 2.6rem; font-weight: 900; letter-spacing: -1.5px;
                 color: var(--text-primary); margin-bottom: 0.4rem; line-height: 1; text-align: center; }
             .qc-subtitle { color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.75rem; text-align: center; }
@@ -1149,11 +1233,11 @@ function getPages() {
 
         <div class="qc-wrap">
             <div class="qc-card">
-                <h2 class="qc-title">QC Checker</h2>
-                <p class="qc-subtitle">Paste any Weidian / Taobao / 1688 / picks.ly or agent link (Kakobuy, ACBuy, Mulebuy, Superbuy, etc).</p>
+                <h2 class="qc-title">${t('qc_title')}</h2>
+                <p class="qc-subtitle">${t('qc_subtitle')}</p>
                 <div class="qc-row">
-                    <input class="qc-input" id="qc-input" type="text" placeholder="https://weidian.com/... or https://picks.ly/item/..." maxlength="500" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();runQcCheck();}" />
-                    <button class="qc-btn" id="qc-submit" onclick="runQcCheck()">Check QC</button>
+                    <input class="qc-input" id="qc-input" type="text" placeholder="${t('qc_placeholder')}" maxlength="500" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();runQcCheck();}" />
+                    <button class="qc-btn" id="qc-submit" onclick="runQcCheck()">${t('qc_btn')}</button>
                 </div>
                 <div class="qc-status" id="qc-status"></div>
                 <div class="qc-spinner" id="qc-spinner"></div>
@@ -1378,7 +1462,7 @@ function getPages() {
         <div class="tools-wrap">
             <div class="tool-card">
                 <div class="tool-eyebrow">${t('tool_eyebrow')}</div>
-                <h2 class="tool-title">Link Converter</h2>
+                <h2 class="tool-title">${t('link_converter')}</h2>
                 <p class="tool-subtitle">${t('link_converter_subtitle')}</p>
                 <div class="converter-row">
                     <input class="converter-input" id="link-input" type="text" placeholder="${t('link_placeholder')}" maxlength="${LINK_INPUT_MAX_LEN}" autocomplete="off" />
@@ -1401,25 +1485,25 @@ function getPages() {
                             </div>
                         </div>
                     </div>
-                    <button class="convert-btn" onclick="convertLink()">Convert Link</button>
+                    <button class="convert-btn" onclick="convertLink()">${t('convert_link')}</button>
                 </div>
                 <div class="converter-result-new" id="converter-result"></div>
             </div>
 
             <div class="tracking-card">
-                <h2 class="tool-title">Package Tracking</h2>
+                <h2 class="tool-title">${t('package_tracking')}</h2>
                 <p class="tool-subtitle" style="margin-bottom:1.25rem;">${t('tools_subtitle')}</p>
                 <input class="tracking-input" type="text" placeholder="${t('tracking_placeholder')}" id="tracking-input" maxlength="${INPUT_MAX_LEN}" oninput="updateTrackerLinks(this.value.trim())" />
                 <div class="tracker-grid">
                     <a class="tracker-card" href="https://t.17track.net/en" target="_blank" rel="noopener" id="track-17">
                         <div class="tracker-icon" style="background:#fff;display:flex;align-items:center;justify-content:center;"><img src="https://www.google.com/s2/favicons?domain=17track.net&sz=64" style="width:28px;height:28px;object-fit:contain;" /></div>
                         <span class="tracker-name">17TRACK</span>
-                        <span class="tracker-open-btn">Open</span>
+                        <span class="tracker-open-btn">${t('open_btn')}</span>
                     </a>
                     <a class="tracker-card" href="https://www.dhl.de/en/privatkunden/pakete-empfangen/verfolgen.html" target="_blank" rel="noopener" id="track-dhl">
                         <div class="tracker-icon" style="background:#FFCC00;display:flex;align-items:center;justify-content:center;padding:4px;"><img src="https://www.google.com/s2/favicons?domain=dhl.com&sz=64" style="width:28px;height:28px;object-fit:contain;" /></div>
                         <span class="tracker-name">DHL Express</span>
-                        <span class="tracker-open-btn">Open</span>
+                        <span class="tracker-open-btn">${t('open_btn')}</span>
                     </a>
                 </div>
             </div>
@@ -1474,7 +1558,7 @@ function initApp() {
                     renderFilteredProducts();
 
                     const info = document.getElementById('kf-results-info');
-                    if (info) info.textContent = `Showing ${data.length} of ${data.length} products`;
+                    if (info) info.textContent = t('showing_of', { a: data.length, b: data.length });
 
                     // Lightweight periodic sync.
                     productsRefreshTimer = setInterval(() => {
@@ -1483,7 +1567,7 @@ function initApp() {
                 })
                 .catch(err => {
                     const container = document.getElementById('products-container');
-                    if (container) container.innerHTML = `<p style="grid-column:1/-1;color:#ff6b6b;text-align:center;">Error loading products: ${err.message}. Use a local server (e.g. python -m http.server) to fetch JSON correctly.</p>`;
+                    if (container) container.innerHTML = `<p style="grid-column:1/-1;color:#ff6b6b;text-align:center;">${t('products_error', { e: err.message })}</p>`;
                 });
         }
     }
@@ -1636,14 +1720,14 @@ window.runQcCheck = async function () {
     if (/picks\.ly\/item\//i.test(raw)) {
         src = qcPickslyToSource(raw);
         if (!src) {
-            statusEl.textContent = 'Invalid picks.ly link.';
+            statusEl.textContent = t('qc_invalid_picksly');
             statusEl.classList.add('err');
             statusEl.style.display = 'block';
             return;
         }
     }
     if (!/^https?:\/\//i.test(src)) {
-        statusEl.textContent = 'Paste a full URL (marketplace or agent).';
+        statusEl.textContent = t('qc_paste_full');
         statusEl.classList.add('err');
         statusEl.style.display = 'block';
         return;
@@ -1661,7 +1745,7 @@ window.runQcCheck = async function () {
         const rawGroups = data.groups || data.albums || data.qc || data.results || data.data || [];
         const groups = Array.isArray(rawGroups) ? rawGroups : [];
         if (!groups.length) {
-            statusEl.textContent = 'No QC photos available for this item yet.';
+            statusEl.textContent = t('qc_none');
             statusEl.classList.add('err');
             statusEl.style.display = 'block';
             return;
@@ -1675,10 +1759,10 @@ window.runQcCheck = async function () {
             ).filter(Boolean);
             if (!imgs.length) return '';
             const label = [g.size && ('Size: ' + g.size), g.color && ('Color: ' + g.color)]
-                .filter(Boolean).join(' · ') || g.label || g.title || g.variant || `Batch ${gi + 1}`;
+                .filter(Boolean).join(' · ') || g.label || g.title || g.variant || `${t('qc_batch')} ${gi + 1}`;
             const date = (g.date || g.time || g.created_at || '').toString().slice(0, 10);
             const source = g.source || g.agent || '';
-            const meta = [date, source, `${imgs.length} photos`].filter(Boolean).join(' · ');
+            const meta = [date, source, `${imgs.length} ${t('qc_photos')}`].filter(Boolean).join(' · ');
             const imgsHtml = imgs.map((url, idx) =>
                 `<div class="qc-img-wrap" onclick="openQcLightbox('${url.replace(/'/g, "\\'")}')">
                     <img src="${url}" loading="lazy" alt="QC ${gi}-${idx}"/>
@@ -1692,10 +1776,10 @@ window.runQcCheck = async function () {
             </div>`;
         }).join('');
 
-        statusEl.textContent = `Found ${groups.length} QC batch${groups.length > 1 ? 'es' : ''}.`;
+        statusEl.textContent = t('qc_found', { n: groups.length });
         statusEl.style.display = 'block';
     } catch (err) {
-        statusEl.textContent = `Failed to load QC: ${err.message}`;
+        statusEl.textContent = t('qc_failed', { e: err.message });
         statusEl.classList.add('err');
         statusEl.style.display = 'block';
     } finally {
@@ -1743,7 +1827,7 @@ window.convertLink = function () {
         resultDiv.style.border = '1px solid rgba(239,68,68,0.3)';
         resultDiv.style.background = 'rgba(239,68,68,0.1)';
         resultDiv.style.color = '#ef4444';
-        resultDiv.innerHTML = `<strong>Error:</strong> Invalid URL. Use a full http/https product link.`;
+        resultDiv.innerHTML = t('conv_invalid');
         resultDiv.style.display = 'block';
         return;
     }
