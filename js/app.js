@@ -1092,16 +1092,14 @@ function getPages() {
     `,
         qccheck: `
         <style>
-            .qc-wrap { max-width: 1100px; margin: 0 auto; padding: 5rem 1.5rem 3rem;
+            .qc-wrap { max-width: 1400px; margin: 0 auto; padding: 5rem 1.5rem 3rem;
                 display: flex; flex-direction: column; gap: 1.5rem;
                 animation: fadeIn 0.4s ease-out; }
             .qc-card { background: var(--nav-bg); border: 1px solid var(--border-color);
                 border-radius: 24px; padding: 2.5rem 2.5rem 2rem; }
-            .qc-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em;
-                text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
             .qc-title { font-size: 2.6rem; font-weight: 900; letter-spacing: -1.5px;
-                color: var(--text-primary); margin-bottom: 0.4rem; line-height: 1; }
-            .qc-subtitle { color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.75rem; }
+                color: var(--text-primary); margin-bottom: 0.4rem; line-height: 1; text-align: center; }
+            .qc-subtitle { color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.75rem; text-align: center; }
             .qc-row { display: flex; gap: 0.75rem; align-items: stretch; }
             .qc-input { flex: 1; background: var(--bg-color); border: 1px solid var(--border-color);
                 border-radius: 14px; padding: 0 1.1rem; height: 52px; color: var(--text-primary);
@@ -1151,7 +1149,6 @@ function getPages() {
 
         <div class="qc-wrap">
             <div class="qc-card">
-                <div class="qc-eyebrow">QC PHOTOS</div>
                 <h2 class="qc-title">QC Checker</h2>
                 <p class="qc-subtitle">Paste any Weidian / Taobao / 1688 / picks.ly or agent link (Kakobuy, ACBuy, Mulebuy, Superbuy, etc).</p>
                 <div class="qc-row">
