@@ -1607,9 +1607,19 @@ window.runQcCheck = async function () {
     statusEl.classList.remove('err');
     groupsEl.innerHTML = '';
 
-    const src = qcNormalizeSource(raw);
-    if (!src) {
-        statusEl.textContent = 'Invalid link. Paste a Weidian, Taobao, 1688, or picks.ly item URL.';
+    // picks.ly → source conversion (partner API doesn't accept picks.ly links directly)
+    let src = raw;
+    if (/picks\.ly\/item\//i.test(raw)) {
+        src = qcPickslyToSource(raw);
+        if (!src) {
+            statusEl.textContent = 'Invalid picks.ly link.';
+            statusEl.classList.add('err');
+            statusEl.style.display = 'block';
+            return;
+        }
+    }
+    if (!/^https?:\/\//i.test(src)) {
+        statusEl.textContent = 'Paste a full URL (marketplace or agent).';
         statusEl.classList.add('err');
         statusEl.style.display = 'block';
         return;
@@ -1621,9 +1631,11 @@ window.runQcCheck = async function () {
         const r = await fetch(api);
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
-        if (!data.success) throw new Error(data.message || 'No QC data');
+        if (!data.success) throw new Error(data.error || data.message || 'No QC data');
 
-        const groups = data.groups || [];
+        // Accept multiple response shapes: groups / albums / qc / results
+        const rawGroups = data.groups || data.albums || data.qc || data.results || data.data || [];
+        const groups = Array.isArray(rawGroups) ? rawGroups : [];
         if (!groups.length) {
             statusEl.textContent = 'No QC photos available for this item yet.';
             statusEl.classList.add('err');
@@ -1632,18 +1644,25 @@ window.runQcCheck = async function () {
         }
 
         groupsEl.innerHTML = groups.map((g, gi) => {
-            const imgs = (g.images || []).filter(i => i && i.url);
+            // Normalize: images can be [url,...] or [{url,...}]
+            const rawImgs = g.images || g.photos || g.pictures || g.imgs || [];
+            const imgs = (Array.isArray(rawImgs) ? rawImgs : []).map(i =>
+                typeof i === 'string' ? i : (i.url || i.src || i.href || i.image || '')
+            ).filter(Boolean);
             if (!imgs.length) return '';
-            const label = g.label || g.title || `Batch ${gi + 1}`;
-            const date = g.date || g.time || '';
-            const imgsHtml = imgs.map((im, idx) =>
-                `<div class="qc-img-wrap" onclick="openQcLightbox('${im.url.replace(/'/g, "\\'")}')">
-                    <img src="${im.url}" loading="lazy" alt="QC ${gi}-${idx}"/>
+            const label = [g.size && ('Size: ' + g.size), g.color && ('Color: ' + g.color)]
+                .filter(Boolean).join(' · ') || g.label || g.title || g.variant || `Batch ${gi + 1}`;
+            const date = (g.date || g.time || g.created_at || '').toString().slice(0, 10);
+            const source = g.source || g.agent || '';
+            const meta = [date, source, `${imgs.length} photos`].filter(Boolean).join(' · ');
+            const imgsHtml = imgs.map((url, idx) =>
+                `<div class="qc-img-wrap" onclick="openQcLightbox('${url.replace(/'/g, "\\'")}')">
+                    <img src="${url}" loading="lazy" alt="QC ${gi}-${idx}"/>
                 </div>`).join('');
             return `<div class="qc-group">
                 <div class="qc-group-head">
                     <div class="qc-group-title">${label}</div>
-                    <div class="qc-group-meta">${date} · ${imgs.length} photos</div>
+                    <div class="qc-group-meta">${meta}</div>
                 </div>
                 <div class="qc-images">${imgsHtml}</div>
             </div>`;
