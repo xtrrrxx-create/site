@@ -1033,7 +1033,7 @@ function getPages() {
                         <h3>Create your Kakobuy account</h3>
                     </div>
                     <p>Start by creating an account so you can place orders, store warehouse items, and manage shipping.</p>
-                    <div class="htb-img"><img src="images/how-to-buy/step-1.jpg?v=2" alt="Step 1 — create Kakobuy account" loading="lazy" decoding="async" /></div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-1.jpg?v=2" alt="Step 1 — create Kakobuy account" loading="eager" fetchpriority="high" decoding="async" /></div>
                     <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">Sign up now</a>
                 </section>
 
@@ -1043,7 +1043,7 @@ function getPages() {
                         <h3>Browse products on Jarvis Finder</h3>
                     </div>
                     <p>Use categories and search to find items quickly, then click Buy Now to open the item in Kakobuy.</p>
-                    <div class="htb-img"><img src="images/how-to-buy/step-2.jpg?v=2" alt="Step 2 — browse products" loading="lazy" decoding="async" /></div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-2.jpg?v=2" alt="Step 2 — browse products" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1056,7 +1056,7 @@ function getPages() {
                         <li>Open product page via Buy Now.</li>
                         <li>Complete checkout in Kakobuy.</li>
                     </ul>
-                    <div class="htb-img"><img src="images/how-to-buy/step-3.jpg?v=2" alt="Step 3 — cart and submit" loading="lazy" decoding="async" /></div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-3.jpg?v=2" alt="Step 3 — cart and submit" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1069,7 +1069,7 @@ function getPages() {
                         <li>Select shipping line and parcel options.</li>
                         <li>Pay shipping fee and track package.</li>
                     </ul>
-                    <div class="htb-img"><img src="images/how-to-buy/step-4.jpg?v=2" alt="Step 4 — choose shipping line" loading="lazy" decoding="async" /></div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-4.jpg?v=2" alt="Step 4 — choose shipping line" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1079,7 +1079,7 @@ function getPages() {
                     </div>
                     <p>Use this coupon in Kakobuy checkout for extra discounts:</p>
                     <div class="htb-coupon">keviinn</div>
-                    <div class="htb-img"><img src="images/how-to-buy/step-5.jpg?v=2" alt="Step 5 — apply coupon and submit" loading="lazy" decoding="async" /></div>
+                    <div class="htb-img"><img src="images/how-to-buy/step-5.jpg?v=2" alt="Step 5 — apply coupon and submit" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
             </div>
 
