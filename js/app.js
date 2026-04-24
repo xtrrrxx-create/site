@@ -1617,7 +1617,7 @@ window.runQcCheck = async function () {
 
     btn.disabled = true; spinner.classList.add('on');
     try {
-        const api = `https://picks.ly/api/qc?url=${encodeURIComponent(src)}`;
+        const api = `/api/qc?url=${encodeURIComponent(src)}`;
         const r = await fetch(api);
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const data = await r.json();
