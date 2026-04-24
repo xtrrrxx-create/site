@@ -231,6 +231,7 @@ const langMap = {
     qc_batch: { EN: "Batch", RON: "Batch", PLN: "Partia", CNY: "批次" },
     qc_photos: { EN: "photos", RON: "poze", PLN: "zdjęć", CNY: "张照片" },
     qc_back: { EN: "Back", RON: "Înapoi", PLN: "Wróć", CNY: "返回" },
+    qc_view_picksly: { EN: "View on picks.ly", RON: "Vezi pe picks.ly", PLN: "Zobacz na picks.ly", CNY: "在 picks.ly 查看" },
     online_label: { EN: "online", RON: "online", PLN: "online", CNY: "在线" },
 
     // ── TOOLS ──
@@ -1206,6 +1207,14 @@ function getPages() {
                 background: rgba(128,128,128,0.08); border: 1px solid var(--border-color);
                 color: var(--text-primary); font-size: 0.9rem; display: none; }
             .qc-status.err { border-color: #c04040; color: #ff8a8a; }
+            .qc-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
+            .qc-picksly-btn { display: inline-flex; align-items: center; gap: 0.45rem;
+                background: var(--bg-color); color: var(--text-primary);
+                border: 1px solid var(--border-color); border-radius: 999px;
+                padding: 0.55rem 1rem; font-weight: 700; font-size: 0.85rem;
+                text-decoration: none; cursor: pointer;
+                transition: border-color 0.15s, background 0.15s; }
+            .qc-picksly-btn:hover { border-color: var(--text-primary); background: var(--nav-bg); }
             .qc-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
                 gap: 1rem; margin-top: 2rem; }
             .qc-batch-card { background: var(--bg-color); border: 1px solid var(--border-color);
@@ -1272,6 +1281,7 @@ function getPages() {
                     <button class="qc-btn" id="qc-submit" onclick="runQcCheck()">${t('qc_btn')}</button>
                 </div>
                 <div class="qc-status" id="qc-status"></div>
+                <div class="qc-actions" id="qc-actions" style="display:none;"></div>
                 <div class="qc-spinner" id="qc-spinner"></div>
                 <div class="qc-groups" id="qc-groups"></div>
             </div>
@@ -1708,6 +1718,28 @@ function qcPickslyToSource(url) {
     if (prefix === '1688' || prefix === 'AL') return `https://detail.1688.com/offer/${id}.html`;
     return null;
 }
+function qcSourceToPicksly(src) {
+    if (!src) return null;
+    if (/picks\.ly\/item\//i.test(src)) return src;
+    try {
+        const u = new URL(src);
+        const host = u.hostname.toLowerCase();
+        const q = u.searchParams;
+        if (host.includes('weidian.com')) {
+            const id = q.get('itemID') || q.get('itemId') || q.get('id');
+            if (id) return `https://picks.ly/item/WD${id}`;
+        }
+        if (host.includes('taobao.com') || host.includes('tmall.com')) {
+            const id = q.get('id');
+            if (id) return `https://picks.ly/item/TB${id}`;
+        }
+        if (host.includes('1688.com')) {
+            const m = u.pathname.match(/\/offer\/(\d+)/);
+            if (m) return `https://picks.ly/item/1688${m[1]}`;
+        }
+    } catch (_) { /* bad URL */ }
+    return null;
+}
 function qcBuildSource(shop, id) {
     const s = (shop || '').toLowerCase();
     if (s === 'weidian' || s === 'wd') return `https://weidian.com/item.html?itemID=${id}`;
@@ -1762,6 +1794,8 @@ window.runQcCheck = async function () {
     statusEl.style.display = 'none';
     statusEl.classList.remove('err');
     groupsEl.innerHTML = '';
+    const actionsEl = document.getElementById('qc-actions');
+    if (actionsEl) { actionsEl.innerHTML = ''; actionsEl.style.display = 'none'; }
 
     // picks.ly → source conversion (partner API doesn't accept picks.ly links directly)
     let src = raw;
@@ -1829,6 +1863,16 @@ window.runQcCheck = async function () {
 
         statusEl.textContent = t('qc_found', { n: groups.length });
         statusEl.style.display = 'block';
+
+        // "View on picks.ly" button — original link if it was picks.ly, otherwise derive from source.
+        const pickslyUrl = /picks\.ly\/item\//i.test(raw) ? raw : qcSourceToPicksly(src);
+        if (pickslyUrl && actionsEl) {
+            actionsEl.style.display = 'flex';
+            actionsEl.innerHTML = `<a class="qc-picksly-btn" href="${pickslyUrl}" target="_blank" rel="noopener">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                ${t('qc_view_picksly')}
+            </a>`;
+        }
     } catch (err) {
         statusEl.textContent = t('qc_failed', { e: err.message });
         statusEl.classList.add('err');
