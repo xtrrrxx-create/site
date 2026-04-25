@@ -1277,7 +1277,7 @@ function getPages() {
                 <h2 class="qc-title">${t('qc_title')}</h2>
                 <p class="qc-subtitle">${t('qc_subtitle')}</p>
                 <div class="qc-row">
-                    <input class="qc-input" id="qc-input" type="text" placeholder="${t('qc_placeholder')}" maxlength="100" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();runQcCheck();}" />
+                    <input class="qc-input" id="qc-input" type="text" placeholder="${t('qc_placeholder')}" maxlength="200" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();runQcCheck();}" />
                     <button class="qc-btn" id="qc-submit" onclick="runQcCheck()">${t('qc_btn')}</button>
                 </div>
                 <div class="qc-status" id="qc-status"></div>
@@ -1797,7 +1797,7 @@ window.runQcCheck = async function () {
     const spinner = document.getElementById('qc-spinner');
     const groupsEl = document.getElementById('qc-groups');
     const btn = document.getElementById('qc-submit');
-    const raw = (input.value || '').trim().slice(0, 100);
+    const raw = (input.value || '').trim().slice(0, 200);
 
     statusEl.style.display = 'none';
     statusEl.classList.remove('err');
