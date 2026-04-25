@@ -1901,12 +1901,19 @@ window.openQcBatch = function (idx) {
     document.getElementById('qc-batch-modal').classList.add('open');
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
+    // Hide navbar
+    document.querySelector('.nav-container').style.opacity = '0';
+    document.querySelector('.nav-container').style.pointerEvents = 'none';
+    document.querySelector('.nav-container').style.transition = 'opacity 0.2s ease';
 };
 window.closeQcBatch = function () {
     document.getElementById('qc-batch-modal').classList.remove('open');
     if (!document.getElementById('qc-lightbox').classList.contains('open')) {
         document.body.style.overflow = '';
     }
+    // Show navbar again
+    document.querySelector('.nav-container').style.opacity = '1';
+    document.querySelector('.nav-container').style.pointerEvents = '';
 };
 window.openQcLightbox = function (url) {
     document.getElementById('qc-lightbox-img').src = url;
