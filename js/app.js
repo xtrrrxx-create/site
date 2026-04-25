@@ -1567,7 +1567,7 @@ function getPages() {
                         <span class="tracker-open-btn">${t('open_btn')}</span>
                     </a>
                     <a class="tracker-card" href="https://www.dhl.de/en/privatkunden/pakete-empfangen/verfolgen.html" target="_blank" rel="noopener" id="track-dhl">
-                        <div class="tracker-icon" style="background:#FFCC00;border-radius:14px;display:flex;align-items:center;justify-content:center;"><span style="font-size:1.3rem;font-weight:900;color:#D40511;letter-spacing:-1px;font-family:'Arial Black',Arial,sans-serif;">DHL</span></div>
+                        <div class="tracker-icon" style="background:#FFCC00;border-radius:14px;display:flex;align-items:center;justify-content:center;padding:10px;"><img src="images/dhl-logo.svg" style="width:54px;height:auto;" alt="DHL" /></div>
                         <span class="tracker-name">DHL</span>
                         <span class="tracker-open-btn">${t('open_btn')}</span>
                     </a>
