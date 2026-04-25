@@ -2013,64 +2013,38 @@ window.updateTrackerLinks = function (code) {
     }
 };
 
-// ─── LIVE ONLINE USERS (Supabase REST heartbeat) ──────────────────────────
-// Strategy: each tab has a unique ID, upserts its row every 15s, count = rows
-// with last_seen within the last 30s. Reliable, no realtime config needed.
+// ─── ONLINE COUNTER (cosmetic) ────────────────────────────────────────────
+// Shows a number between MIN and MAX, deterministically derived from the
+// current 10-minute time bucket so every visitor sees the same value and it
+// changes every 10 minutes. Small jitter every ~30s keeps it feeling alive.
 (function initOnlineCounter() {
-    const HEARTBEAT_MS = 15000;
-    const STALE_SECONDS = 30;
-    const myId = (crypto && crypto.randomUUID ? crypto.randomUUID() :
-        (Math.random().toString(36).slice(2) + Date.now().toString(36)));
-    const TABLE = `${SUPABASE_URL}/rest/v1/online_users`;
-    const HEADERS = {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-    };
+    const MIN = 20, MAX = 40;
+    const BUCKET_MS = 10 * 60 * 1000; // 10 min
+    const JITTER_MS = 30 * 1000;
     function setCount(n) {
         const el = document.getElementById('online-count');
         if (el) el.textContent = n;
     }
-    async function heartbeat() {
-        try {
-            await fetch(TABLE, {
-                method: 'POST',
-                headers: { ...HEADERS, 'Prefer': 'resolution=merge-duplicates,return=minimal' },
-                body: JSON.stringify({ id: myId, last_seen: new Date().toISOString() })
-            });
-        } catch (e) { console.debug('[online] heartbeat failed:', e); }
+    // Simple deterministic hash → [0,1)
+    function seededRand(seed) {
+        let x = Math.sin(seed * 9301 + 49297) * 233280;
+        return x - Math.floor(x);
     }
-    async function refreshCount() {
-        try {
-            const since = new Date(Date.now() - STALE_SECONDS * 1000).toISOString();
-            const r = await fetch(`${TABLE}?select=id&last_seen=gt.${since}`, {
-                method: 'HEAD',
-                headers: { ...HEADERS, 'Prefer': 'count=exact' }
-            });
-            const range = r.headers.get('content-range') || '';
-            const total = parseInt(range.split('/')[1], 10);
-            setCount(Number.isFinite(total) && total > 0 ? total : 1);
-        } catch (e) {
-            console.debug('[online] count failed:', e);
-            setCount('?');
-        }
+    function pickCount() {
+        const bucket = Math.floor(Date.now() / BUCKET_MS);
+        const base = MIN + Math.floor(seededRand(bucket) * (MAX - MIN + 1));
+        // Tiny jitter (-1, 0, +1) for a "live" feel, also bucketed.
+        const jitterBucket = Math.floor(Date.now() / JITTER_MS);
+        const jitter = Math.floor(seededRand(bucket * 1000 + jitterBucket) * 3) - 1;
+        let n = base + jitter;
+        if (n < MIN) n = MIN;
+        if (n > MAX) n = MAX;
+        return n;
     }
-    async function tick() { await heartbeat(); await refreshCount(); }
-    function removeSelf() {
-        // navigator.sendBeacon doesn't support DELETE, use fetch with keepalive.
-        try {
-            fetch(`${TABLE}?id=eq.${myId}`, {
-                method: 'DELETE',
-                headers: HEADERS,
-                keepalive: true
-            });
-        } catch (_) {}
-    }
+    function tick() { setCount(pickCount()); }
     function start() {
         tick();
-        setInterval(tick, HEARTBEAT_MS);
-        window.addEventListener('beforeunload', removeSelf);
-        window.addEventListener('pagehide', removeSelf);
+        setInterval(tick, JITTER_MS);
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', start);
