@@ -575,7 +575,7 @@ body.light-mode #bg-canvas {
     .qc-status { font-size: 0.85rem !important; }
 
     /* Bottom nav QC label fix */
-    .bottom-nav-item[data-page="qccheck"] span { font-size: 0.55rem; letter-spacing: 0; }
+    .bottom-nav-item[data-page="qccheck"] span { font-size: 0.52rem; letter-spacing: 0; white-space: nowrap; }
 
     /* Online pill smaller */
     .online-pill .online-count { font-size: 0.78rem; }
