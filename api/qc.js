@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
     try {
         const pickslyRes = await fetch(
-            `https://partner.picks.ly/api/qc/search?url=${encodeURIComponent(url)}`,
+            `https://partner.picks.ly/api/qc/search?url=${encodeURIComponent(url)}&limit=50&page=1`,
             {
                 headers: {
                     'X-API-Key': apiKey,
