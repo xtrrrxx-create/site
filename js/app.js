@@ -1317,12 +1317,20 @@ function getPages() {
                 flex-direction: column;
                 gap: 1.5rem;
                 animation: fadeIn 0.4s ease-out;
+                width: 100%;
+                box-sizing: border-box;
             }
             .tool-card {
                 background: var(--nav-bg);
                 border: 1px solid var(--border-color);
                 border-radius: 24px;
                 padding: 2.5rem 2.5rem 2rem;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            .tracking-card {
+                width: 100%;
+                box-sizing: border-box;
             }
             .tool-eyebrow {
                 font-size: 0.72rem;
