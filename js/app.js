@@ -1310,9 +1310,9 @@ function getPages() {
         tools: `
         <style>
             .tools-wrap {
-                max-width: 1100px;
+                max-width: 1800px;
                 margin: 0 auto;
-                padding: 5rem 1.5rem 3rem;
+                padding: 5rem 5% 3rem;
                 display: flex;
                 flex-direction: column;
                 gap: 1.5rem;
