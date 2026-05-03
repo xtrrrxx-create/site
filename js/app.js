@@ -1980,7 +1980,7 @@ function showWelcomeModal() {
         { id:'CNY', label:'¥ CNY' },
     ];
     const AGENTS = [
-        'Kakobuy','PandaBuy','Sugargoo','Wegobuy','CSSBuy','Basetao','Mulebuy','Hoobuy','ACBuy'
+        'Kakobuy','Sugargoo','CSSBuy','Mulebuy','ACBuy','Joyabuy','Oopbuy','Litbuy','GTBuy'
     ];
 
     let selLang  = currentCurrency === 'RON' ? 'RON' : currentCurrency === 'PLN' ? 'PLN' : currentCurrency === 'CNY' ? 'CNY' : 'EN';
