@@ -1968,132 +1968,139 @@ function initApp() {
 function showWelcomeModal() {
     if (localStorage.getItem('jf_onboarded')) return;
 
-    const LANGS = [
-        { id: 'EN',  label: '🇬🇧 English' },
-        { id: 'RON', label: '🇷🇴 Română' },
-        { id: 'PLN', label: '🇵🇱 Polski' },
-        { id: 'CNY', label: '🇨🇳 中文' },
-    ];
-    const AGENTS = [
-        { id: 'kakobuy',  label: 'Kakobuy' },
-        { id: 'pandabuy', label: 'PandaBuy' },
-        { id: 'sugargoo', label: 'Sugargoo' },
-        { id: 'wegobuy',  label: 'Wegobuy' },
-        { id: 'cssbuy',   label: 'CSSBuy' },
-        { id: 'basetao',  label: 'Basetao' },
-        { id: 'mulebuy',  label: 'Mulebuy' },
-        { id: 'hoobuy',   label: 'Hoobuy' },
-        { id: 'acbuy',    label: 'ACBuy' },
+    const LANGS   = [
+        { id:'EN', flag:'GB', label:'English' },
+        { id:'RON', flag:'RO', label:'Română' },
+        { id:'PLN', flag:'PL', label:'Polski' },
+        { id:'CNY', flag:'CN', label:'中文' },
     ];
     const CURRENCIES = [
-        { id: 'USD', label: '$ USD' },
-        { id: 'EUR', label: '€ EUR' },
-        { id: 'RON', label: 'RON' },
-        { id: 'PLN', label: 'zł PLN' },
-        { id: 'CNY', label: '¥ CNY' },
+        { id:'USD', label:'$ USD' }, { id:'EUR', label:'€ EUR' },
+        { id:'RON', label:'RON' },   { id:'PLN', label:'zł PLN' },
+        { id:'CNY', label:'¥ CNY' },
+    ];
+    const AGENTS = [
+        'Kakobuy','PandaBuy','Sugargoo','Wegobuy','CSSBuy','Basetao','Mulebuy','Hoobuy','ACBuy'
     ];
 
     let selLang  = currentCurrency === 'RON' ? 'RON' : currentCurrency === 'PLN' ? 'PLN' : currentCurrency === 'CNY' ? 'CNY' : 'EN';
     let selCur   = currentCurrency;
     let selAgent = localStorage.getItem('jf_agent') || 'kakobuy';
 
-    const pill = (active) => `
-        padding:0.55rem 1rem;border-radius:999px;font-size:0.85rem;font-weight:600;cursor:pointer;
-        border:1px solid ${active ? '#f5a623' : '#3a3a3a'};
-        background:${active ? '#f5a623' : 'transparent'};
-        color:${active ? '#fff' : '#a1a1aa'};transition:all 0.15s;white-space:nowrap;
-    `;
-    const agentBtn = (active) => `
-        padding:0.6rem 0.4rem;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;
-        border:1px solid ${active ? '#f5a623' : '#3a3a3a'};
-        background:${active ? 'rgba(245,166,35,0.12)' : 'transparent'};
-        color:${active ? '#f5a623' : '#a1a1aa'};transition:all 0.15s;
-    `;
+    const S = {
+        pill: (on) => `padding:.5rem 1.1rem;border-radius:999px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;border:1.5px solid ${on?'#f5a623':'#404040'};background:${on?'#f5a623':'transparent'};color:${on?'#fff':'#888'};`,
+        agent: (on) => `padding:.65rem .4rem;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;border:1.5px solid ${on?'#f5a623':'#404040'};background:${on?'rgba(245,166,35,.13)':'transparent'};color:${on?'#f5a623':'#888'};`,
+    };
 
     const overlay = document.createElement('div');
     overlay.id = 'jf-welcome-overlay';
-    overlay.style.cssText = `
-        position:fixed;inset:0;z-index:9999;
-        background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
-        display:flex;align-items:center;justify-content:center;padding:1rem;
-        animation:fadeIn 0.3s ease;overflow-y:auto;
-    `;
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .3s ease;overflow-y:auto;';
 
     overlay.innerHTML = `
-        <div style="
-            background:#2a2a2a;border-radius:24px;padding:2.4rem 2.6rem 2rem;
-            width:100%;max-width:600px;
-            box-shadow:0 32px 100px rgba(0,0,0,0.7);
-            animation:jfFadeUp 0.35s cubic-bezier(0.16,1,0.3,1);
-        ">
-            <div style="margin-bottom:0.4rem;">
-                <span style="font-size:2rem;font-weight:800;color:#fff;letter-spacing:-1px;">jarvis <span style="color:transparent;-webkit-text-stroke:1.5px #fff;">finder</span></span>
-            </div>
-            <p style="color:#71717a;font-size:0.95rem;margin-bottom:2rem;line-height:1.5;">
-                Welcome! Set your preferences once and we'll remember them for next time.
-            </p>
+    <div style="background:#242424;border-radius:24px;width:100%;max-width:580px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
 
-            <p style="color:#a1a1aa;font-size:0.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:0.7rem;">Language</p>
-            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.6rem;" id="jf-lang-grid">
-                ${LANGS.map(l => `<button onclick="jfWelSelLang('${l.id}')" id="jf-wl-${l.id}" style="${pill(l.id === selLang)}">${l.label}</button>`).join('')}
+        <!-- Header -->
+        <div style="padding:2rem 2.2rem 1.5rem;border-bottom:1px solid #333;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div>
+                    <div style="font-size:1.8rem;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1;margin-bottom:.4rem;">
+                        jarvis <span style="color:transparent;-webkit-text-stroke:1.5px #fff;">finder</span>
+                    </div>
+                    <p style="color:#666;font-size:.9rem;margin:0;">Customize your experience before you start.</p>
+                </div>
+                <button onclick="jfWelDone()" style="background:none;border:none;color:#555;cursor:pointer;padding:.3rem;font-size:1.2rem;line-height:1;">✕</button>
             </div>
+        </div>
 
-            <p style="color:#a1a1aa;font-size:0.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:0.7rem;">Currency</p>
-            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.6rem;" id="jf-cur-grid">
-                ${CURRENCIES.map(c => `<button onclick="jfWelSelCur('${c.id}')" id="jf-wc-${c.id}" style="${pill(c.id === selCur)}">${c.label}</button>`).join('')}
-            </div>
+        <!-- Prefs -->
+        <div style="padding:1.6rem 2.2rem;display:flex;flex-direction:column;gap:1.4rem;border-bottom:1px solid #333;">
 
-            <p style="color:#a1a1aa;font-size:0.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:0.7rem;">Preferred Agent</p>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:2rem;" id="jf-agent-grid">
-                ${AGENTS.map(a => `<button onclick="jfWelSelAgent('${a.id}')" id="jf-wa-${a.id}" style="${agentBtn(a.id === selAgent)}">${a.label}</button>`).join('')}
+            <div>
+                <p style="color:#666;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;">Language</p>
+                <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="jf-lang-grid">
+                    ${LANGS.map(l=>`<button onclick="jfWelSelLang('${l.id}')" id="jf-wl-${l.id}" style="${S.pill(l.id===selLang)}"><span style="font-size:.7rem;background:#555;color:#ccc;border-radius:3px;padding:0 .3rem;margin-right:.3rem;font-weight:800;">${l.flag}</span>${l.label}</button>`).join('')}
+                </div>
             </div>
 
-            <button onclick="jfWelDone()" style="
-                width:100%;padding:1rem;border-radius:999px;border:none;
-                background:#f5a623;color:#fff;font-size:1rem;font-weight:700;
-                cursor:pointer;transition:opacity 0.15s;letter-spacing:.01em;
-            " onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <div>
+                <p style="color:#666;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;">Currency</p>
+                <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="jf-cur-grid">
+                    ${CURRENCIES.map(c=>`<button onclick="jfWelSelCur('${c.id}')" id="jf-wc-${c.id}" style="${S.pill(c.id===selCur)}">${c.label}</button>`).join('')}
+                </div>
+            </div>
+
+            <div>
+                <p style="color:#666;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;">Preferred Agent</p>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;" id="jf-agent-grid">
+                    ${AGENTS.map(a=>`<button onclick="jfWelSelAgent('${a.toLowerCase()}')" id="jf-wa-${a.toLowerCase()}" style="${S.agent(a.toLowerCase()===selAgent)}">${a}</button>`).join('')}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sign Up -->
+        <div style="padding:1.4rem 2.2rem;border-bottom:1px solid #333;background:#1e1e1e;">
+            <p style="color:#fff;font-size:.9rem;font-weight:700;margin-bottom:.3rem;">Create a free account</p>
+            <p style="color:#666;font-size:.8rem;margin-bottom:.9rem;">Save your history, get notified on new drops.</p>
+            <div style="display:flex;gap:.5rem;">
+                <input id="jf-signup-email" type="email" placeholder="your@email.com" style="flex:1;padding:.7rem 1rem;border-radius:999px;border:1.5px solid #404040;background:#2a2a2a;color:#fff;font-size:.88rem;outline:none;font-family:Inter,sans-serif;" onfocus="this.style.borderColor='#f5a623'" onblur="this.style.borderColor='#404040'"/>
+                <button onclick="jfWelSignUp()" style="padding:.7rem 1.3rem;border-radius:999px;border:none;background:#f5a623;color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;white-space:nowrap;">Sign Up</button>
+            </div>
+            <p id="jf-signup-msg" style="font-size:.78rem;margin-top:.5rem;color:#666;min-height:1em;"></p>
+        </div>
+
+        <!-- CTA -->
+        <div style="padding:1.4rem 2.2rem;">
+            <button onclick="jfWelDone()" style="width:100%;padding:.9rem;border-radius:999px;border:none;background:#f5a623;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
                 Get Started →
             </button>
-            <p style="text-align:center;margin-top:1rem;">
-                <span onclick="jfWelDone()" style="color:#52525b;font-size:0.82rem;cursor:pointer;">Maybe later</span>
+            <p style="text-align:center;margin-top:.8rem;">
+                <span onclick="jfWelDone()" style="color:#444;font-size:.8rem;cursor:pointer;">Maybe later</span>
             </p>
         </div>
-    `;
+    </div>`;
 
     document.body.appendChild(overlay);
 
     window.jfWelSelLang = function(l) {
         selLang = l;
         document.querySelectorAll('[id^="jf-wl-"]').forEach(btn => {
-            const active = btn.id === 'jf-wl-' + l;
-            btn.style.background = active ? '#f5a623' : 'transparent';
-            btn.style.borderColor = active ? '#f5a623' : '#3a3a3a';
-            btn.style.color = active ? '#fff' : '#a1a1aa';
+            const on = btn.id === 'jf-wl-' + l;
+            btn.style.background = on ? '#f5a623' : 'transparent';
+            btn.style.borderColor = on ? '#f5a623' : '#404040';
+            btn.style.color = on ? '#fff' : '#888';
         });
-        // auto-select matching currency
-        const map = { EN: 'USD', RON: 'RON', PLN: 'PLN', CNY: 'CNY' };
+        const map = { EN:'USD', RON:'RON', PLN:'PLN', CNY:'CNY' };
         if (map[l]) window.jfWelSelCur(map[l]);
     };
 
     window.jfWelSelCur = function(c) {
         selCur = c;
         document.querySelectorAll('[id^="jf-wc-"]').forEach(btn => {
-            const active = btn.id === 'jf-wc-' + c;
-            btn.style.background = active ? '#f5a623' : 'transparent';
-            btn.style.borderColor = active ? '#f5a623' : '#3a3a3a';
-            btn.style.color = active ? '#fff' : '#a1a1aa';
+            const on = btn.id === 'jf-wc-' + c;
+            btn.style.background = on ? '#f5a623' : 'transparent';
+            btn.style.borderColor = on ? '#f5a623' : '#404040';
+            btn.style.color = on ? '#fff' : '#888';
         });
     };
 
     window.jfWelSelAgent = function(a) {
         selAgent = a;
         document.querySelectorAll('[id^="jf-wa-"]').forEach(btn => {
-            const active = btn.id === 'jf-wa-' + a;
-            btn.style.background = active ? 'rgba(245,166,35,0.12)' : 'transparent';
-            btn.style.borderColor = active ? '#f5a623' : '#3a3a3a';
-            btn.style.color = active ? '#f5a623' : '#a1a1aa';
+            const on = btn.id === 'jf-wa-' + a;
+            btn.style.background = on ? 'rgba(245,166,35,.13)' : 'transparent';
+            btn.style.borderColor = on ? '#f5a623' : '#404040';
+            btn.style.color = on ? '#f5a623' : '#888';
         });
+    };
+
+    window.jfWelSignUp = function() {
+        const email = document.getElementById('jf-signup-email').value.trim();
+        const msg = document.getElementById('jf-signup-msg');
+        if (!email || !email.includes('@')) { msg.style.color='#f5a623'; msg.textContent='Please enter a valid email.'; return; }
+        localStorage.setItem('jf_email', email);
+        msg.style.color='#4ade80';
+        msg.textContent='You\'re on the list!';
+        document.getElementById('jf-signup-email').disabled = true;
     };
 
     window.jfWelDone = function() {
@@ -2101,7 +2108,6 @@ function showWelcomeModal() {
         localStorage.setItem('jf_agent', selAgent);
         localStorage.setItem('jf_lang', selLang);
         if (selCur !== currentCurrency) window.changeCurrencyUI(selCur);
-        overlay.style.animation = 'none';
         overlay.style.opacity = '0';
         overlay.style.transition = 'opacity 0.25s';
         setTimeout(() => overlay.remove(), 260);
