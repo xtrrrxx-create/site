@@ -1927,6 +1927,13 @@ function initApp() {
                 if (loader) loader.remove();
                 bindFilterEvents();
                 renderFilteredProducts();
+                requestAnimationFrame(() => {
+                    document.querySelectorAll('.product-card:not(.sr-visible)').forEach(card => {
+                        if (card.getBoundingClientRect().top < window.innerHeight + 100) {
+                            card.classList.add('sr-visible');
+                        }
+                    });
+                });
                 const info = document.getElementById('kf-results-info');
                 if (info) info.textContent = t('showing_of', { a: data.length, b: data.length });
                 productsRefreshTimer = setInterval(() => refreshProductsFromServer(true), PRODUCTS_AUTO_REFRESH_MS);
