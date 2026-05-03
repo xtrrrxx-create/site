@@ -1111,14 +1111,10 @@ function getPages() {
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
-                    <svg style="position:absolute;right:calc(9% - 30px);top:calc(35% + 30px);width:120px;height:110px;overflow:visible;animation:jfFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) both 0.9s;pointer-events:none;" viewBox="0 0 120 110" fill="none">
-                        <style>
-                            @keyframes arrowDraw{from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
-                            @keyframes arrowBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-                            .ha{stroke-dasharray:300;stroke-dashoffset:300;animation:arrowDraw 0.8s cubic-bezier(0.16,1,0.3,1) forwards 1.1s,arrowBob 2.2s ease-in-out infinite 2s}
-                        </style>
-                        <path class="ha" d="M 10 105 C 5 70, 50 55, 80 15" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
-                        <path class="ha" d="M 80 15 L 68 20 M 80 15 L 82 28" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <svg style="position:absolute;right:calc(9% - 20px);top:calc(35% + 28px);width:110px;height:100px;overflow:visible;pointer-events:none;animation:jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 1s,arrowBob 2.2s ease-in-out infinite 1.8s;" viewBox="0 0 110 100" fill="none">
+                        <style>@keyframes arrowBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}</style>
+                        <path d="M 8 95 C 10 55, 55 35, 88 8" stroke="#ff8c00" stroke-width="3" stroke-linecap="round"/>
+                        <polyline points="68,6 88,8 90,28" stroke="#ff8c00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                     </svg>
                 </div>
                 <p class="jf-sub">${t('hero_desc')}</p>
