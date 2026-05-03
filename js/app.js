@@ -1007,14 +1007,14 @@ function getPages() {
                 background: var(--nav-bg);
                 border: 1px solid var(--border-color);
                 border-radius: 16px;
-                width: calc((100vw - 80px) / 6.5);
-                min-width: 190px;
+                width: calc((100vw - 80px) / 5.2);
+                min-width: 220px;
                 flex-shrink: 0;
                 overflow: hidden;
                 transition: border-color 0.2s;
                 display: flex;
                 flex-direction: column;
-                height: calc(100vh - 520px);
+                height: calc(100vh - 480px);
                 min-height: 280px;
             }
             .rv-card:hover { border-color: var(--text-secondary); }
@@ -1073,10 +1073,7 @@ function getPages() {
                     <span class="jf-eyebrow-dot"></span>
                     ${t('hero_eyebrow')}
                 </div>
-                <h1 class="jf-title">
-                    <span class="jf-title-line">jarvis</span>
-                    <span class="jf-title-line">finder</span>
-                </h1>
+                <h1 class="jf-title" style="white-space:nowrap;">jarvis finder</h1>
                 <p class="jf-sub">${t('hero_desc')}</p>
                 ${buildRecentlyViewedMarquee()}
             </div>
