@@ -891,11 +891,10 @@ function injectHomeStyles() {
         .jf-title {
             font-family: 'Goodly', 'Georgia', serif;
             font-weight: normal;
-            font-size: clamp(3.5rem, 10vw, 8rem);
-            line-height: 0.9;
-            letter-spacing: 0.08em;
-            transform: scaleX(1.15);
-            display: block;
+            font-size: clamp(2.5rem, 6vw, 5.5rem);
+            line-height: 1;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
             color: var(--text-primary);
             margin-bottom: 0.4rem;
         }
