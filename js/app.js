@@ -759,9 +759,12 @@ function renderFilteredProducts() {
             <div class="product-card" onclick="trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
-                    ${batchFlair ? `<div class="product-batch-row">${batchFlair}</div>` : ''}
+                    <div class="product-batch-row">
+                        <span class="product-store-badge">店</span>
+                        <span class="product-store-name">${escapeHtml(p.category || batchRaw || 'Store')}</span>
+                    </div>
                     <h3 class="product-title">${safeTitle}</h3>
-                    <div class="product-price" style="color:#ff8c00;">${formatPrice(p.price)}</div>
+                    <div class="product-price">${formatPrice(p.price)}</div>
                     <div class="product-actions">
                         <a href="${kakobuy}" target="_blank" class="card-btn-buy" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">${t('btn_buy')}</a>
                         <a href="${picksly}" target="_blank" class="card-btn-qc" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">View QC</a>
