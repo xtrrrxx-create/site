@@ -44,75 +44,42 @@
     <canvas id="bg-canvas"></canvas>
     <div id="cursor-glow" class="cursor-glow"></div>
 
-    <!-- RIGHT SIDEBAR (desktop) -->
-    <aside class="right-sidebar" id="right-sidebar">
-        <div class="rsb-logo" onclick="window.navigateTo && window.navigateTo('home')">
-            <span class="rsb-logo-icon">JF</span>
-            <span class="rsb-logo-text">jarvis finder</span>
-        </div>
+    <!-- TOP NAVBAR (original pill) -->
+    <div class="nav-container">
+        <nav class="navbar">
+            <div class="logo" onclick="document.querySelector('[data-page=home]').click();">jarvis finder</div>
 
-        <nav class="rsb-nav">
-            <ul class="nav-links" style="list-style:none;display:contents;">
-                <li>
-                    <a href="/" data-page="home" class="rsb-link active">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                        <span class="rsb-label">Home</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/products" data-page="products" class="rsb-link">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="6"/><rect x="9" y="3" width="6" height="6"/><rect x="16" y="3" width="6" height="6"/><rect x="2" y="10" width="6" height="6"/><rect x="9" y="10" width="6" height="6"/><rect x="16" y="10" width="6" height="6"/><rect x="2" y="17" width="6" height="6"/><rect x="9" y="17" width="6" height="6"/><rect x="16" y="17" width="6" height="6"/></svg>
-                        <span class="rsb-label">Products</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/tutorials" data-page="tutorials" class="rsb-link">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                        <span class="rsb-label">Tutorials</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/qccheck" data-page="qccheck" class="rsb-link">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <span class="rsb-label">QC Check</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="/tools" data-page="tools" class="rsb-link">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-                        <span class="rsb-label">Tools</span>
-                    </a>
-                </li>
-            </ul>
-        </nav>
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="/" data-page="home" class="active">Home</a></li>
+                    <li><a href="/products" data-page="products">Products</a></li>
+                    <li><a href="/tutorials" data-page="tutorials">Tutorials</a></li>
+                    <li><a href="/qccheck" data-page="qccheck">QC Check</a></li>
+                    <li><a href="/tools" data-page="tools">Tools <span style="font-size: 0.7em; vertical-align: middle; margin-left: 2px;">▼</span></a></li>
+                </ul>
+            </div>
 
-        <div class="rsb-divider"></div>
-
-        <div class="rsb-bottom">
-            <button class="rsb-action-btn" id="rsb-cmd-btn" title="Command Palette (Ctrl+K)">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
-                <span class="rsb-label">⌘K</span>
-            </button>
-
-            <div class="rsb-online-wrap">
+            <div class="nav-actions">
                 <div class="online-pill" id="online-pill" title="People viewing this site right now">
                     <span class="online-dot"></span>
                     <span class="online-count" id="online-count">–</span>
-                    <span class="online-label rsb-label" id="online-label">online</span>
+                    <span class="online-label" id="online-label">online</span>
                 </div>
+                <button class="btn-icon" aria-label="Toggle Theme" id="theme-btn" onclick="toggleTheme()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+                <button class="btn-icon" aria-label="Settings" id="settings-btn" style="margin-left: 0.5rem;"
+                    onclick="document.getElementById('settings-modal').style.display='flex'">
+                    <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                </button>
             </div>
-
-            <button class="rsb-action-btn" id="theme-btn" aria-label="Toggle Theme" onclick="toggleTheme()">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-                <span class="rsb-label">Theme</span>
-            </button>
-
-            <button class="rsb-action-btn" id="settings-btn" aria-label="Settings" onclick="document.getElementById('settings-modal').style.display='flex'">
-                <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-                <span class="rsb-label">Settings</span>
-            </button>
-        </div>
-    </aside>
+        </nav>
+    </div>
 
     <!-- COMMAND PALETTE -->
     <div id="cmd-palette" class="cmd-overlay" style="display:none;" role="dialog" aria-modal="true">
@@ -123,23 +90,6 @@
                 <kbd class="cmd-esc">ESC</kbd>
             </div>
             <div class="cmd-results" id="cmd-results"></div>
-        </div>
-    </div>
-
-    <!-- MOBILE TOP BAR (hidden on desktop) -->
-    <div class="mobile-topbar">
-        <div class="logo" onclick="window.navigateTo && window.navigateTo('home')">jarvis finder</div>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-            <div class="online-pill" id="online-pill-mobile" title="People viewing this site right now">
-                <span class="online-dot"></span>
-                <span class="online-count" id="online-count-mobile">–</span>
-            </div>
-            <button class="btn-icon" aria-label="Toggle Theme" onclick="toggleTheme()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            </button>
-            <button class="btn-icon" aria-label="Settings" onclick="document.getElementById('settings-modal').style.display='flex'">
-                <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            </button>
         </div>
     </div>
 

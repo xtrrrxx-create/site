@@ -1581,7 +1581,7 @@ function getPages() {
 // ─── APP INIT ──────────────────────────────────────────────────────────────
 function initApp() {
     const mainContent = document.getElementById('app-content');
-    const navLinks = document.querySelectorAll('.nav-links a, .rsb-link');
+    const navLinks = document.querySelectorAll('.nav-links a');
 
     function renderPage(pageId) {
         if (productsRefreshTimer) {
