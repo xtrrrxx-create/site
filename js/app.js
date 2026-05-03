@@ -1072,7 +1072,7 @@ function getPages() {
                     <span class="jf-eyebrow-dot"></span>
                     ${t('hero_eyebrow')}
                 </div>
-                <h1 class="jf-title" style="white-space:nowrap;">jarvis finder</h1>
+                <h1 class="jf-title" style="white-space:nowrap;"><span style="color:var(--text-primary);">jarvis </span><span style="color:transparent;-webkit-text-stroke:1.5px var(--text-primary);">finder</span></h1>
                 <p class="jf-sub">${t('hero_desc')}</p>
                 ${buildRecentlyViewedMarquee()}
             </div>
