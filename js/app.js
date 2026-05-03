@@ -1011,7 +1011,7 @@ function getPages() {
                 transition: border-color 0.2s;
                 display: flex;
                 flex-direction: column;
-                height: calc(100vh - 560px);
+                height: calc(100vh - 620px);
                 min-height: 280px;
             }
             .rv-card:hover { border-color: var(--text-secondary); }
