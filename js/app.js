@@ -813,7 +813,7 @@ function injectHomeStyles() {
             justify-content: flex-start;
             min-height: calc(100vh - 5rem);
             text-align: center;
-            padding-top: 8vh;
+            padding-top: 5vh;
             padding-left: 1.5rem;
             padding-right: 1.5rem;
             padding-bottom: 2rem;
@@ -895,7 +895,7 @@ function injectHomeStyles() {
             line-height: 0.9;
             letter-spacing: -0.02em;
             color: var(--text-primary);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.4rem;
         }
         .jf-title-line {
             display: block;
@@ -915,7 +915,7 @@ function injectHomeStyles() {
             font-size: 0.95rem;
             font-weight: 400;
             line-height: 1.6;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             max-width: 380px;
             animation: jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.4s;
         }
@@ -987,8 +987,8 @@ function getPages() {
             .rv-track-wrap {
                 overflow: hidden;
                 width: 100%;
-                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
-                mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+                mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
             }
             .rv-track {
                 display: flex;
@@ -1013,7 +1013,7 @@ function getPages() {
             .rv-card:hover { border-color: var(--text-secondary); }
             .rv-img {
                 width: 100%;
-                height: 280px;
+                height: 150px;
                 overflow: hidden;
                 background: var(--bg-color);
             }
