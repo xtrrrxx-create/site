@@ -1031,7 +1031,11 @@ function getPages() {
                 display: flex;
                 gap: 1rem;
                 width: max-content;
-                will-change: transform;
+                animation: rv-scroll 30s linear infinite;
+            }
+            @keyframes rv-scroll {
+                0%   { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
             }
             .rv-card {
                 background: #2a2a2a;
@@ -2020,32 +2024,13 @@ function initApp() {
     history.replaceState({ page: initial }, '', initial === 'home' ? '/' : '/' + initial);
     renderPage(initial);
 
-    (function initRvMarquee() {
+    function initRvMarquee() {
         const track = document.getElementById('rv-track');
         if (!track) return;
-        const SPEED = 0.5; // px per ms at 60fps equivalent
-        let pos = 0;
-        let paused = false;
-        let lastTs = null;
-
-        function getHalfWidth() { return track.scrollWidth / 2; }
-
-        function tick(ts) {
-            requestAnimationFrame(tick);
-            if (paused || document.hidden) { lastTs = null; return; }
-            if (lastTs === null) { lastTs = ts; return; }
-            const delta = Math.min(ts - lastTs, 100); // cap delta to avoid jump after tab switch
-            lastTs = ts;
-            pos += SPEED * delta / 16.67;
-            const half = getHalfWidth();
-            if (half > 0 && pos >= half) pos -= half;
-            track.style.transform = `translateX(${-pos}px)`;
-        }
-
-        track.addEventListener('mouseenter', () => { paused = true; });
-        track.addEventListener('mouseleave', () => { paused = false; lastTs = null; });
-        requestAnimationFrame(tick);
-    })();
+        track.addEventListener('mouseenter', () => track.style.animationPlayState = 'paused');
+        track.addEventListener('mouseleave', () => track.style.animationPlayState = 'running');
+    }
+    initRvMarquee();
 
     // Prefetch products in background so Products page loads instantly
     if (initial !== 'products' && allProductsCache.length === 0) {
