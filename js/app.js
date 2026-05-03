@@ -1110,7 +1110,24 @@ function getPages() {
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
+                    <svg class="jf-arrow" style="position:absolute;right:calc(9% + 105px);top:calc(35% + 4px);width:140px;height:90px;pointer-events:none;overflow:visible;opacity:0;animation:jfArrowIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards 1.2s, jfArrowBob 2.4s ease-in-out infinite 1.8s;" viewBox="0 0 140 90" fill="none" aria-hidden="true">
+                        <defs>
+                            <marker id="jfArrowTip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                                <path d="M0,0 L10,5 L0,10 z" fill="#ff8c00"/>
+                            </marker>
+                        </defs>
+                        <path d="M 12 80 Q 28 38 130 14" stroke="#ff8c00" stroke-width="3" stroke-linecap="round" fill="none" marker-end="url(#jfArrowTip)" stroke-dasharray="200" stroke-dashoffset="200" style="animation:jfArrowDraw 0.9s cubic-bezier(0.65,0,0.35,1) forwards 1.2s;"/>
+                    </svg>
                 </div>
+                <style>
+                    @keyframes jfArrowIn { to { opacity: 1; } }
+                    @keyframes jfArrowDraw { to { stroke-dashoffset: 0; } }
+                    @keyframes jfArrowBob {
+                        0%, 100% { transform: translate(0, 0); }
+                        50% { transform: translate(4px, -4px); }
+                    }
+                    @media (max-width: 900px) { .jf-arrow { display: none; } }
+                </style>
                 <p class="jf-sub">${t('hero_desc')}</p>
                 ${buildRecentlyViewedMarquee()}
             </div>
