@@ -1013,7 +1013,7 @@ function getPages() {
             .rv-card:hover { border-color: var(--text-secondary); }
             .rv-img {
                 width: 100%;
-                height: 170px;
+                height: 280px;
                 overflow: hidden;
                 background: var(--bg-color);
             }
