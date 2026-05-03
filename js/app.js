@@ -2037,15 +2037,37 @@ function showWelcomeModal() {
             </div>
         </div>
 
-        <!-- Sign Up -->
-        <div style="padding:1.4rem 2.2rem;border-bottom:1px solid #333;background:#1e1e1e;">
-            <p style="color:#fff;font-size:.9rem;font-weight:700;margin-bottom:.3rem;">Create a free account</p>
-            <p style="color:#666;font-size:.8rem;margin-bottom:.9rem;">Save your history, get notified on new drops.</p>
-            <div style="display:flex;gap:.5rem;">
-                <input id="jf-signup-email" type="email" placeholder="your@email.com" style="flex:1;padding:.7rem 1rem;border-radius:999px;border:1.5px solid #404040;background:#2a2a2a;color:#fff;font-size:.88rem;outline:none;font-family:Inter,sans-serif;" onfocus="this.style.borderColor='#f5a623'" onblur="this.style.borderColor='#404040'"/>
-                <button onclick="jfWelSignUp()" style="padding:.7rem 1.3rem;border-radius:999px;border:none;background:#f5a623;color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;white-space:nowrap;">Sign Up</button>
+        <!-- KakoBuy Sign Up -->
+        <div style="padding:1.4rem 2.2rem;border-bottom:1px solid #333;background:#1a1a1a;">
+            <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
+                <div style="background:#fff;border-radius:10px;padding:.3rem .5rem;font-size:.75rem;font-weight:900;line-height:1.1;color:#000;">Kako<br>Buy</div>
+                <div>
+                    <p style="color:#fff;font-size:1rem;font-weight:800;margin:0;line-height:1.2;">Get <span style="color:#f5a623;">$450</span> just for signing up.</p>
+                    <p style="color:#666;font-size:.78rem;margin:0;">Use our link. Costs nothing. Keeps this site free.</p>
+                </div>
             </div>
-            <p id="jf-signup-msg" style="font-size:.78rem;margin-top:.5rem;color:#666;min-height:1em;"></p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.9rem;">
+                <div style="background:#2d1f3d;border-radius:10px;padding:.6rem;text-align:center;">
+                    <p style="color:#c084fc;font-weight:800;font-size:.95rem;margin:0;">$450</p>
+                    <p style="color:#888;font-size:.72rem;margin:0;">credit</p>
+                </div>
+                <div style="background:#2a2a2a;border-radius:10px;padding:.6rem;text-align:center;">
+                    <p style="color:#fff;font-weight:800;font-size:.95rem;margin:0;">$15</p>
+                    <p style="color:#888;font-size:.72rem;margin:0;">off first order</p>
+                </div>
+                <div style="background:#2a2a2a;border-radius:10px;padding:.6rem;text-align:center;">
+                    <p style="color:#fff;font-weight:800;font-size:.95rem;margin:0;">free</p>
+                    <p style="color:#888;font-size:.72rem;margin:0;">to join</p>
+                </div>
+            </div>
+            <div style="background:#2a2a2a;border-radius:10px;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;border:1px solid #333;">
+                <div>
+                    <p style="color:#666;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0;">Code</p>
+                    <p style="color:#fff;font-weight:700;font-size:.95rem;margin:0;">keviinn</p>
+                </div>
+                <button onclick="navigator.clipboard.writeText('keviinn');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)" style="background:#3a3a3a;color:#fff;border:none;border-radius:6px;padding:.35rem .75rem;font-size:.78rem;font-weight:700;cursor:pointer;">Copy</button>
+            </div>
+            <a href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener" style="display:block;width:100%;padding:.85rem;border-radius:999px;background:linear-gradient(135deg,#f5a623,#e8520a);color:#fff;font-weight:800;font-size:.9rem;text-align:center;text-decoration:none;letter-spacing:.04em;">SIGN UP HERE</a>
         </div>
 
         <!-- CTA -->
@@ -2091,16 +2113,6 @@ function showWelcomeModal() {
             btn.style.borderColor = on ? '#f5a623' : '#404040';
             btn.style.color = on ? '#f5a623' : '#888';
         });
-    };
-
-    window.jfWelSignUp = function() {
-        const email = document.getElementById('jf-signup-email').value.trim();
-        const msg = document.getElementById('jf-signup-msg');
-        if (!email || !email.includes('@')) { msg.style.color='#f5a623'; msg.textContent='Please enter a valid email.'; return; }
-        localStorage.setItem('jf_email', email);
-        msg.style.color='#4ade80';
-        msg.textContent='You\'re on the list!';
-        document.getElementById('jf-signup-email').disabled = true;
     };
 
     window.jfWelDone = function() {
