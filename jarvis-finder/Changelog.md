@@ -1,5 +1,11 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-03 (6)
+### Cards — Picks.ly clone exact
+- Badge 店: `border-radius: 5px` (pătrat cu colțuri rotunjite, identic Picks.ly)
+- Titlu: 2 linii (`-webkit-line-clamp: 2`) în loc de 1 linie truncată
+- View QC buton: `border: 1px solid #3a3a3c` adăugat (ca Picks.ly)
+
 ## 2026-05-03 (5)
 ### Frontend — Cards 1:1 Picks.ly
 - Badge 店: schimbat din rectangular roșu → **cerc portocaliu** (#e8520a, border-radius 50%, 20x20px)
