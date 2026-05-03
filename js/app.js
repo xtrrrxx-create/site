@@ -1111,6 +1111,25 @@ function getPages() {
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
+                    <svg style="position:absolute;right:calc(9% + 60px);top:calc(35% + 18px);width:90px;height:80px;overflow:visible;animation:jfFadeUp 0.8s cubic-bezier(0.16,1,0.3,1) both 0.9s;pointer-events:none;" viewBox="0 0 90 80" fill="none">
+                        <style>
+                            @keyframes arrowDraw {
+                                from { stroke-dashoffset: 200; }
+                                to   { stroke-dashoffset: 0; }
+                            }
+                            @keyframes arrowBob {
+                                0%,100% { transform: translateY(0); }
+                                50%     { transform: translateY(-5px); }
+                            }
+                            .hero-arrow-path {
+                                stroke-dasharray: 200;
+                                stroke-dashoffset: 200;
+                                animation: arrowDraw 0.7s cubic-bezier(0.16,1,0.3,1) forwards 1.1s, arrowBob 2s ease-in-out infinite 1.8s;
+                            }
+                        </style>
+                        <path class="hero-arrow-path" d="M 70 75 C 60 55, 30 40, 15 10" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round"/>
+                        <path class="hero-arrow-path" d="M 15 10 L 8 22 M 15 10 L 27 16" stroke="#ff8c00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
                 </div>
                 <p class="jf-sub">${t('hero_desc')}</p>
                 ${buildRecentlyViewedMarquee()}
