@@ -792,7 +792,8 @@ function renderFilteredProducts() {
 
 // ─── HOME PAGE STYLES ──────────────────────────────────────────────────────
 function injectHomeStyles() {
-    if (document.getElementById('jf-home-styles')) return;
+    const existing = document.getElementById('jf-home-styles');
+    if (existing) existing.remove();
     const s = document.createElement('style');
     s.id = 'jf-home-styles';
     s.textContent = `
@@ -805,16 +806,18 @@ function injectHomeStyles() {
             font-display: swap;
         }
 
+        .jf-home-wrap {
+            position: relative;
+            min-height: calc(100vh - 5rem);
+        }
         .jf-hero {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 5rem);
+            justify-content: flex-start;
             text-align: center;
-            padding: 2rem 1.5rem 2rem;
+            padding: 18vh 1.5rem 2rem;
             position: relative;
-            overflow: hidden;
         }
 
         /* Subtle radial glow behind the text */
@@ -845,7 +848,6 @@ function injectHomeStyles() {
             text-transform: uppercase;
             color: var(--text-secondary);
             margin-bottom: 1.75rem;
-            margin-top: 2rem;
             animation: jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 0.05s;
         }
         .jf-eyebrow-dot {
@@ -857,7 +859,7 @@ function injectHomeStyles() {
         /* Floating explore button top-right */
         .jf-btn-float {
             position: absolute;
-            top: 18%;
+            top: 18vh;
             right: 8%;
             display: inline-flex;
             align-items: center;
@@ -1057,17 +1059,7 @@ function getPages() {
                 color: var(--text-primary);
             }
         </style>
-        <div class="jf-hero">
-            <div class="jf-eyebrow">
-                <span class="jf-eyebrow-dot"></span>
-                ${t('hero_eyebrow')}
-            </div>
-            <h1 class="jf-title">
-                <span class="jf-title-line">jarvis</span>
-                <span class="jf-title-line">finder</span>
-            </h1>
-            <p class="jf-sub">${t('hero_desc')}</p>
-            ${buildRecentlyViewedMarquee()}
+        <div class="jf-home-wrap">
             <button class="jf-btn-float" data-action="go-products">
                 ${t('btn_explore')}
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1075,6 +1067,18 @@ function getPages() {
                     <polyline points="12 5 19 12 12 19"/>
                 </svg>
             </button>
+            <div class="jf-hero">
+                <div class="jf-eyebrow">
+                    <span class="jf-eyebrow-dot"></span>
+                    ${t('hero_eyebrow')}
+                </div>
+                <h1 class="jf-title">
+                    <span class="jf-title-line">jarvis</span>
+                    <span class="jf-title-line">finder</span>
+                </h1>
+                <p class="jf-sub">${t('hero_desc')}</p>
+                ${buildRecentlyViewedMarquee()}
+            </div>
         </div>
     `,
         products: `
