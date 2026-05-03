@@ -9,26 +9,26 @@
 }
 
 body.light-mode {
-    --bg-color: #f6f4f0;
-    --nav-bg: #ffffff;
-    --border-color: #e4e2dd;
+    --bg-color: #f2ede4;
+    --nav-bg: #faf7f2;
+    --border-color: #ddd6cb;
     --text-primary: #1c1917;
-    --text-secondary: #78716c;
+    --text-secondary: #8a7e74;
     --accent-color: #1c1917;
-    --glow-color: rgba(0, 0, 0, 0.15);
+    --glow-color: rgba(0, 0, 0, 0.1);
 }
 
 body.light-mode .product-card {
-    background: #ffffff;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05);
+    background: #faf7f2;
+    box-shadow: 0 4px 16px rgba(180,160,130,0.15), 0 1px 4px rgba(180,160,130,0.1);
 }
 
 body.light-mode .product-card:hover {
-    box-shadow: 0 8px 28px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07);
+    box-shadow: 0 8px 28px rgba(180,160,130,0.25), 0 2px 8px rgba(180,160,130,0.12);
 }
 
 body.light-mode .product-image {
-    background: #f0ede8;
+    background: #ede8e0;
 }
 
 body.light-mode .product-title,
@@ -37,26 +37,26 @@ body.light-mode .product-price {
 }
 
 body.light-mode .product-store-name {
-    color: #78716c;
+    color: #8a7e74;
 }
 
 body.light-mode .card-btn-qc {
-    background: #f0ede8;
+    background: #ede8e0;
     color: #1c1917;
-    border-color: #ddd9d3;
+    border-color: #d4cdc4;
 }
 
 body.light-mode .card-btn-qc:hover {
-    background: #e5e1da;
+    background: #e2dbd1;
 }
 
 body.light-mode .kf-search-box {
-    background: #ffffff;
-    border-color: #e4e2dd;
+    background: #faf7f2;
+    border-color: #ddd6cb;
 }
 
 body.light-mode .navbar {
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    box-shadow: 0 4px 20px rgba(180,160,130,0.15);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
