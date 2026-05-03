@@ -806,18 +806,17 @@ function injectHomeStyles() {
             font-display: swap;
         }
 
-        .jf-home-wrap {
-            position: relative;
-            min-height: calc(100vh - 5rem);
-        }
         .jf-hero {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             min-height: calc(100vh - 5rem);
             text-align: center;
-            padding: 2rem 1.5rem 2rem;
+            padding-top: 13vh;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+            padding-bottom: 2rem;
             position: relative;
         }
 
@@ -1066,7 +1065,7 @@ function getPages() {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
             <div class="jf-hero">
-                <div class="jf-eyebrow" style="position:absolute;top:18vh;">
+                <div class="jf-eyebrow">
                     <span class="jf-eyebrow-dot"></span>
                     ${t('hero_eyebrow')}
                 </div>
