@@ -413,7 +413,7 @@ main {
     justify-content: center;
     transition: background 0.2s, color 0.2s;
 }
-.card-btn-buy:hover { background: #f2ede4; color: #1c1917; opacity: 1; }
+.card-btn-buy:hover { background: #faf7f2; color: #1c1917; opacity: 1; }
 
 .card-btn-qc {
     background: #2c2c2e;
