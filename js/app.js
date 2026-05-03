@@ -1968,6 +1968,12 @@ function initApp() {
 function showWelcomeModal() {
     if (localStorage.getItem('jf_onboarded')) return;
 
+    const LANGS = [
+        { id: 'EN',  label: '🇬🇧 English' },
+        { id: 'RON', label: '🇷🇴 Română' },
+        { id: 'PLN', label: '🇵🇱 Polski' },
+        { id: 'CNY', label: '🇨🇳 中文' },
+    ];
     const AGENTS = [
         { id: 'kakobuy',  label: 'Kakobuy' },
         { id: 'pandabuy', label: 'PandaBuy' },
@@ -1975,72 +1981,100 @@ function showWelcomeModal() {
         { id: 'wegobuy',  label: 'Wegobuy' },
         { id: 'cssbuy',   label: 'CSSBuy' },
         { id: 'basetao',  label: 'Basetao' },
+        { id: 'mulebuy',  label: 'Mulebuy' },
+        { id: 'hoobuy',   label: 'Hoobuy' },
+        { id: 'acbuy',    label: 'ACBuy' },
     ];
-    const CURRENCIES = ['USD', 'EUR', 'RON', 'PLN', 'CNY'];
-    let selCur = currentCurrency;
+    const CURRENCIES = [
+        { id: 'USD', label: '$ USD' },
+        { id: 'EUR', label: '€ EUR' },
+        { id: 'RON', label: 'RON' },
+        { id: 'PLN', label: 'zł PLN' },
+        { id: 'CNY', label: '¥ CNY' },
+    ];
+
+    let selLang  = currentCurrency === 'RON' ? 'RON' : currentCurrency === 'PLN' ? 'PLN' : currentCurrency === 'CNY' ? 'CNY' : 'EN';
+    let selCur   = currentCurrency;
     let selAgent = localStorage.getItem('jf_agent') || 'kakobuy';
+
+    const pill = (active) => `
+        padding:0.55rem 1rem;border-radius:999px;font-size:0.85rem;font-weight:600;cursor:pointer;
+        border:1px solid ${active ? '#f5a623' : '#3a3a3a'};
+        background:${active ? '#f5a623' : 'transparent'};
+        color:${active ? '#fff' : '#a1a1aa'};transition:all 0.15s;white-space:nowrap;
+    `;
+    const agentBtn = (active) => `
+        padding:0.6rem 0.4rem;border-radius:10px;font-size:0.85rem;font-weight:600;cursor:pointer;
+        border:1px solid ${active ? '#f5a623' : '#3a3a3a'};
+        background:${active ? 'rgba(245,166,35,0.12)' : 'transparent'};
+        color:${active ? '#f5a623' : '#a1a1aa'};transition:all 0.15s;
+    `;
 
     const overlay = document.createElement('div');
     overlay.id = 'jf-welcome-overlay';
     overlay.style.cssText = `
         position:fixed;inset:0;z-index:9999;
-        background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);
-        display:flex;align-items:center;justify-content:center;
-        animation:fadeIn 0.3s ease;
+        background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);
+        display:flex;align-items:center;justify-content:center;padding:1rem;
+        animation:fadeIn 0.3s ease;overflow-y:auto;
     `;
 
     overlay.innerHTML = `
         <div style="
-            background:#2a2a2a;border-radius:20px;padding:2rem 2.2rem 1.8rem;
-            width:100%;max-width:440px;margin:1rem;
-            box-shadow:0 24px 80px rgba(0,0,0,0.6);
+            background:#2a2a2a;border-radius:24px;padding:2.4rem 2.6rem 2rem;
+            width:100%;max-width:600px;
+            box-shadow:0 32px 100px rgba(0,0,0,0.7);
             animation:jfFadeUp 0.35s cubic-bezier(0.16,1,0.3,1);
         ">
-            <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.3rem;">
-                <span style="font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-0.5px;">jarvis <span style="color:transparent;-webkit-text-stroke:1.5px #fff;">finder</span></span>
+            <div style="margin-bottom:0.4rem;">
+                <span style="font-size:2rem;font-weight:800;color:#fff;letter-spacing:-1px;">jarvis <span style="color:transparent;-webkit-text-stroke:1.5px #fff;">finder</span></span>
             </div>
-            <p style="color:#a1a1aa;font-size:0.9rem;margin-bottom:1.6rem;">Set your preferences to get started.</p>
+            <p style="color:#71717a;font-size:0.95rem;margin-bottom:2rem;line-height:1.5;">
+                Welcome! Set your preferences once and we'll remember them for next time.
+            </p>
 
-            <p style="color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:0.6rem;">Currency</p>
-            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.4rem;" id="jf-cur-grid">
-                ${CURRENCIES.map(c => `
-                    <button onclick="jfWelSelCur('${c}')" id="jf-wc-${c}" style="
-                        padding:0.5rem 1rem;border-radius:999px;font-size:0.85rem;font-weight:600;
-                        cursor:pointer;border:1px solid ${c === selCur ? '#f5a623' : '#3a3a3a'};
-                        background:${c === selCur ? '#f5a623' : 'transparent'};
-                        color:${c === selCur ? '#fff' : '#a1a1aa'};
-                        transition:all 0.15s;
-                    ">${c}</button>
-                `).join('')}
+            <p style="color:#a1a1aa;font-size:0.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:0.7rem;">Language</p>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.6rem;" id="jf-lang-grid">
+                ${LANGS.map(l => `<button onclick="jfWelSelLang('${l.id}')" id="jf-wl-${l.id}" style="${pill(l.id === selLang)}">${l.label}</button>`).join('')}
             </div>
 
-            <p style="color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:0.6rem;">Preferred Agent</p>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:1.8rem;" id="jf-agent-grid">
-                ${AGENTS.map(a => `
-                    <button onclick="jfWelSelAgent('${a.id}')" id="jf-wa-${a.id}" style="
-                        padding:0.55rem 0.5rem;border-radius:10px;font-size:0.85rem;font-weight:600;
-                        cursor:pointer;border:1px solid ${a.id === selAgent ? '#f5a623' : '#3a3a3a'};
-                        background:${a.id === selAgent ? 'rgba(245,166,35,0.12)' : 'transparent'};
-                        color:${a.id === selAgent ? '#f5a623' : '#a1a1aa'};
-                        transition:all 0.15s;
-                    ">${a.label}</button>
-                `).join('')}
+            <p style="color:#a1a1aa;font-size:0.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:0.7rem;">Currency</p>
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.6rem;" id="jf-cur-grid">
+                ${CURRENCIES.map(c => `<button onclick="jfWelSelCur('${c.id}')" id="jf-wc-${c.id}" style="${pill(c.id === selCur)}">${c.label}</button>`).join('')}
+            </div>
+
+            <p style="color:#a1a1aa;font-size:0.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:0.7rem;">Preferred Agent</p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-bottom:2rem;" id="jf-agent-grid">
+                ${AGENTS.map(a => `<button onclick="jfWelSelAgent('${a.id}')" id="jf-wa-${a.id}" style="${agentBtn(a.id === selAgent)}">${a.label}</button>`).join('')}
             </div>
 
             <button onclick="jfWelDone()" style="
-                width:100%;padding:0.9rem;border-radius:999px;border:none;
+                width:100%;padding:1rem;border-radius:999px;border:none;
                 background:#f5a623;color:#fff;font-size:1rem;font-weight:700;
-                cursor:pointer;transition:opacity 0.15s;
-            " onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                cursor:pointer;transition:opacity 0.15s;letter-spacing:.01em;
+            " onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
                 Get Started →
             </button>
             <p style="text-align:center;margin-top:1rem;">
-                <span onclick="jfWelDone()" style="color:#555;font-size:0.82rem;cursor:pointer;">Maybe later</span>
+                <span onclick="jfWelDone()" style="color:#52525b;font-size:0.82rem;cursor:pointer;">Maybe later</span>
             </p>
         </div>
     `;
 
     document.body.appendChild(overlay);
+
+    window.jfWelSelLang = function(l) {
+        selLang = l;
+        document.querySelectorAll('[id^="jf-wl-"]').forEach(btn => {
+            const active = btn.id === 'jf-wl-' + l;
+            btn.style.background = active ? '#f5a623' : 'transparent';
+            btn.style.borderColor = active ? '#f5a623' : '#3a3a3a';
+            btn.style.color = active ? '#fff' : '#a1a1aa';
+        });
+        // auto-select matching currency
+        const map = { EN: 'USD', RON: 'RON', PLN: 'PLN', CNY: 'CNY' };
+        if (map[l]) window.jfWelSelCur(map[l]);
+    };
 
     window.jfWelSelCur = function(c) {
         selCur = c;
@@ -2065,6 +2099,7 @@ function showWelcomeModal() {
     window.jfWelDone = function() {
         localStorage.setItem('jf_onboarded', '1');
         localStorage.setItem('jf_agent', selAgent);
+        localStorage.setItem('jf_lang', selLang);
         if (selCur !== currentCurrency) window.changeCurrencyUI(selCur);
         overlay.style.animation = 'none';
         overlay.style.opacity = '0';
