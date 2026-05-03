@@ -2003,8 +2003,8 @@ function showWelcomeModal() {
         <div style="padding:1.4rem 2.2rem 1.2rem;border-bottom:1px solid #333;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
-                    <div style="font-size:1.8rem;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1;margin-bottom:.4rem;">
-                        jarvis <span style="color:transparent;-webkit-text-stroke:1.5px #fff;">finder</span>
+                    <div style="font-size:1.8rem;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:.4rem;">
+                        <span style="color:#fff;">jarvis</span> <span style="color:#f5a623;">finder</span>
                     </div>
                     <p style="color:#666;font-size:.9rem;margin:0;">Customize your experience before you start.</p>
                 </div>
