@@ -1004,8 +1004,8 @@ function getPages() {
             .rv-card {
                 background: var(--nav-bg);
                 border: 1px solid var(--border-color);
-                border-radius: 14px;
-                width: 150px;
+                border-radius: 16px;
+                width: 200px;
                 flex-shrink: 0;
                 overflow: hidden;
                 transition: border-color 0.2s;
@@ -1013,39 +1013,39 @@ function getPages() {
             .rv-card:hover { border-color: var(--text-secondary); }
             .rv-img {
                 width: 100%;
-                height: 110px;
+                height: 170px;
                 overflow: hidden;
-                background: #1e1e1e;
+                background: var(--bg-color);
             }
             .rv-info {
-                padding: 0.55rem 0.6rem 0.6rem;
+                padding: 0.75rem;
             }
             .rv-title {
-                font-size: 0.72rem;
+                font-size: 0.78rem;
                 font-weight: 600;
                 color: var(--text-primary);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                margin-bottom: 0.2rem;
+                margin-bottom: 0.25rem;
             }
             .rv-price {
-                font-size: 0.8rem;
+                font-size: 0.85rem;
                 font-weight: 800;
                 color: #ff8c00;
-                margin-bottom: 0.45rem;
+                margin-bottom: 0.6rem;
             }
             .rv-actions {
                 display: flex;
-                gap: 0.3rem;
+                gap: 0.4rem;
             }
             .rv-btn {
                 flex: 1;
                 text-align: center;
                 text-decoration: none;
-                border-radius: 999px;
-                padding: 0.3rem 0.2rem;
-                font-size: 0.66rem;
+                border-radius: 8px;
+                padding: 0.45rem 0.2rem;
+                font-size: 0.74rem;
                 font-weight: 700;
                 transition: opacity 0.15s;
             }
