@@ -1,5 +1,19 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-03 (4)
+### Frontend / Site
+- Tematică portocalie inspirată din Picks.ly: accent #ff8c00 pe butoane și elemente cheie
+- Navbar mai slim și mai lat: `width: 1200px; padding: 0.35rem 0.6rem`
+- Hero: eyebrow "Smart Product Discovery" repoziționat, buton "Explore Products" mutat top-right absolut
+- Titlu "jarvis finder" pe O SINGURĂ LINIE: `clamp(3rem, 8.5vw, 9rem)`, `white-space: nowrap`, două culori (alb solid + outlined)
+- Carduri Recently Viewed umplu ecranul fără scroll: `height: calc(100vh - Xpx)`, 5-6 pe rând
+- Carduri produse redesign în stil Picks.ly (fără schimbare dimensiuni):
+  - Background `#1c1c1e`, fără border
+  - Badge roșu "店" + nume categorie gri
+  - Titlu alb truncat, preț alb bold
+  - Buton Buy Now: `#f5a623` pill orange
+  - Buton View QC: `#2c2c2e` pill gri
+
 ## 2026-05-03 (3)
 ### Home — Recently Viewed Marquee
 - Secțiune "Recently Viewed" pe home page cu animație marquee dreapta→stânga
