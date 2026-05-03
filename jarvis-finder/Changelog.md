@@ -1,5 +1,10 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-03 (5)
+### Frontend — Cards 1:1 Picks.ly
+- Badge 店: schimbat din rectangular roșu → **cerc portocaliu** (#e8520a, border-radius 50%, 20x20px)
+- Store name: schimbat din gri (#888) → **alb** (#fff)
+
 ## 2026-05-03 (4)
 ### Frontend / Site
 - Tematică portocalie inspirată din Picks.ly: accent #ff8c00 pe butoane și elemente cheie
