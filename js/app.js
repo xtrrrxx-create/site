@@ -812,7 +812,7 @@ function injectHomeStyles() {
             justify-content: center;
             min-height: calc(100vh - 5rem);
             text-align: center;
-            padding: 2rem 1.5rem 5rem;
+            padding: 2rem 1.5rem 2rem;
             position: relative;
             overflow: hidden;
         }
@@ -836,7 +836,7 @@ function injectHomeStyles() {
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            border: 1px solid var(--border-color);
+            border: 1px solid rgba(255,140,0,0.35);
             border-radius: 9999px;
             padding: 0.35rem 0.9rem;
             font-size: 0.72rem;
@@ -845,14 +845,45 @@ function injectHomeStyles() {
             text-transform: uppercase;
             color: var(--text-secondary);
             margin-bottom: 1.75rem;
+            margin-top: 2rem;
             animation: jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 0.05s;
         }
         .jf-eyebrow-dot {
             width: 5px; height: 5px;
-            background: var(--text-secondary);
+            background: #ff8c00;
             border-radius: 50%;
-            opacity: 0.7;
         }
+
+        /* Floating explore button top-right */
+        .jf-btn-float {
+            position: absolute;
+            top: 18%;
+            right: 8%;
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            background: #ff8c00;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            padding: 0.9rem 2rem;
+            border-radius: 9999px;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, gap 0.2s ease;
+            box-shadow: 0 4px 24px rgba(255,140,0,0.3);
+            animation: jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.52s;
+            text-decoration: none;
+            z-index: 2;
+        }
+        .jf-btn-float:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(255,140,0,0.5);
+            gap: 14px;
+        }
+        .jf-btn-float svg { flex-shrink: 0; transition: transform 0.2s; }
+        .jf-btn-float:hover svg { transform: translateX(2px); }
 
         /* Giant Goodly heading */
         .jf-title {
@@ -1018,8 +1049,8 @@ function getPages() {
             }
             .rv-btn:hover { opacity: 0.8; }
             .rv-btn-buy {
-                background: var(--text-primary);
-                color: var(--bg-color);
+                background: #ff8c00;
+                color: #fff;
             }
             .rv-btn-qc {
                 background: var(--border-color);
@@ -1037,9 +1068,7 @@ function getPages() {
             </h1>
             <p class="jf-sub">${t('hero_desc')}</p>
             ${buildRecentlyViewedMarquee()}
-        </div>
-        <div style="display:flex;justify-content:center;padding-bottom:3.5rem;">
-            <button class="jf-btn" data-action="go-products">
+            <button class="jf-btn-float" data-action="go-products">
                 ${t('btn_explore')}
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12"/>
