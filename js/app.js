@@ -365,19 +365,19 @@ function injectFilterStyles() {
             display: flex;
             align-items: center;
             gap: 0.6rem;
-            background: var(--nav-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 0.7rem 1rem;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 9999px;
+            padding: 0.75rem 1.25rem;
             transition: border-color 0.2s;
         }
-        .kf-search-box:focus-within { border-color: var(--text-primary); }
+        .kf-search-box:focus-within { border-color: #555; }
         .kf-search-box svg { flex-shrink: 0; color: var(--text-secondary); }
         .kf-search-box input {
             flex: 1; background: transparent; border: none; outline: none;
             color: var(--text-primary); font-family: 'Inter', sans-serif; font-size: 0.95rem;
         }
-        .kf-search-box input::placeholder { color: var(--text-secondary); opacity: 0.6; }
+        .kf-search-box input::placeholder { color: var(--text-secondary); opacity: 0.7; }
         .kf-search-clear {
             background: none; border: none; color: var(--text-secondary);
             cursor: pointer; padding: 2px; display: flex; align-items: center;
@@ -535,6 +535,9 @@ function buildFilterUI() {
                         <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
                 </button>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-secondary);flex-shrink:0;">
+                    <rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                </svg>
             </div>
             <button class="kf-filter-btn ${active > 0 ? 'active' : ''}" id="kf-open-filters">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
