@@ -891,7 +891,7 @@ function injectHomeStyles() {
         .jf-title {
             font-family: 'Goodly', 'Georgia', serif;
             font-weight: normal;
-            font-size: clamp(5.5rem, 15vw, 11.5rem);
+            font-size: clamp(3.5rem, 10vw, 8rem);
             line-height: 0.9;
             letter-spacing: -0.02em;
             color: var(--text-primary);
@@ -1011,7 +1011,7 @@ function getPages() {
                 transition: border-color 0.2s;
                 display: flex;
                 flex-direction: column;
-                height: calc(100vh - 670px);
+                height: calc(100vh - 580px);
                 min-height: 280px;
             }
             .rv-card:hover { border-color: var(--text-secondary); }
