@@ -83,6 +83,15 @@ function formatPrice(cnyPriceStr) {
     }
 }
 
+function stripEmojis(str) {
+    return String(str ?? "")
+        .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
+        .replace(/[\u{2600}-\u{27BF}]/gu, '')
+        .replace(/[\u{FE00}-\u{FEFF}]/gu, '')
+        .replace(/️/g, '')
+        .trim();
+}
+
 function escapeHtml(value) {
     return String(value ?? "")
         .replace(/&/g, "&amp;")
@@ -725,7 +734,7 @@ function renderFilteredProducts() {
     }
 
     container.innerHTML = visible.map(p => {
-        const safeTitle = escapeHtml(p.title || "Untitled");
+        const safeTitle = escapeHtml(stripEmojis(p.title || "Untitled"));
         const batchRaw = (p.batch || '').trim();
         const batch = batchRaw.toLowerCase();
         const rawImg = (p.img || '').trim();
