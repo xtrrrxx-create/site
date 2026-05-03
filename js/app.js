@@ -113,6 +113,42 @@ function safeExternalUrl(rawUrl) {
     }
 }
 
+function extractWeidianItemId(kakobuyUrl) {
+    try {
+        const parsed = new URL(kakobuyUrl);
+        const nested = parsed.searchParams.get('url') || parsed.searchParams.get('link');
+        if (!nested) return null;
+        const sourceUrl = new URL(decodeURIComponent(nested));
+        return sourceUrl.searchParams.get('itemID') || sourceUrl.searchParams.get('itemId') || null;
+    } catch { return null; }
+}
+
+function buildAgentLink(kakobuyRaw) {
+    const agent = (localStorage.getItem('jf_agent') || 'kakobuy').toLowerCase();
+    const clean = safeExternalUrl(kakobuyRaw || '#');
+    if (clean === '#') return '#';
+
+    if (agent === 'kakobuy') return appendAffcodeIfMissing(clean);
+
+    const itemId = extractWeidianItemId(clean);
+    if (!itemId) return appendAffcodeIfMissing(clean);
+
+    const weidianUrl = `https://weidian.com/item.html?itemID=${itemId}`;
+    const enc = encodeURIComponent(weidianUrl);
+
+    switch (agent) {
+        case 'sugargoo': return `https://www.sugargoo.com/#/home/productDetail?productLink=${enc}`;
+        case 'cssbuy':   return `https://www.cssbuy.com/item-micro-${itemId}.html`;
+        case 'mulebuy':  return `https://www.mulebuy.com/product/?url=${enc}`;
+        case 'acbuy':    return `https://www.acbuy.com/en/page/buy/?url=${enc}`;
+        case 'joyagoo':  return `https://joyagoo.com/product?id=${itemId}&platform=WEIDIAN`;
+        case 'oopbuy':   return `https://oopbuy.com/product/2/${itemId}`;
+        case 'litbuy':   return `https://litbuy.com/product/2/${itemId}`;
+        case 'gtbuy':    return `https://www.gtbuy.com/product/weidian/${itemId}`;
+        default:         return appendAffcodeIfMissing(clean);
+    }
+}
+
 function appendAffcodeIfMissing(rawUrl) {
     const clean = safeExternalUrl(rawUrl);
     if (clean === "#") return "#";
@@ -753,7 +789,7 @@ function renderFilteredProducts() {
             ? `<img src="${safeExternalUrl(safeImg)}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>${t('no_image')}</div>');" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${t('no_image')}</div>`;
 
-        const kakobuy = appendAffcodeIfMissing(p.kakobuy || '#');
+        const kakobuy = buildAgentLink(p.kakobuy || '#');
         const picksly = safeExternalUrl(p.picksly || '#');
         let batchFlair = '';
         if (batch === 'best batch') {
