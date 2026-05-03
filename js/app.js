@@ -1033,7 +1033,6 @@ function getPages() {
                 width: max-content;
                 animation: rv-scroll 30s linear infinite;
             }
-            .rv-track:hover { animation-play-state: paused; }
             @keyframes rv-scroll {
                 0%   { transform: translateX(0); }
                 100% { transform: translateX(-50%); }
@@ -1114,7 +1113,7 @@ function getPages() {
                     <svg style="position:absolute;right:calc(9% - 20px);top:calc(35% + 28px);width:110px;height:100px;overflow:visible;pointer-events:none;animation:jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 1s,arrowBob 2.2s ease-in-out infinite 1.8s;" viewBox="0 0 110 100" fill="none">
                         <style>@keyframes arrowBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}</style>
                         <path d="M 8 95 C 10 55, 55 35, 88 8" stroke="#ff8c00" stroke-width="3" stroke-linecap="round"/>
-                        <polyline points="68,6 88,8 90,28" stroke="#ff8c00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                        <polyline points="72,22 88,8 74,4" stroke="#ff8c00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
                     </svg>
                 </div>
                 <p class="jf-sub">${t('hero_desc')}</p>
