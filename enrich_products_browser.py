@@ -19,7 +19,7 @@ def picksly_from_source(source_url: str) -> str:
 
     m = re.search(r"/offer/(\d+)\.html", source_url, re.I)
     if m:
-        return f"https://picks.ly/item/1688{m.group(1)}"
+        return f"https://picks.ly/item/AL{m.group(1)}"
 
     m = re.search(r"/product-detail/[^/]*?(\d+)\.html", source_url, re.I)
     if m:

@@ -153,7 +153,7 @@ def make_picksly(url: str) -> str:
     # 1688: /offer/XXXXXXX.html
     m = re.search(r'/offer/(\d+)\.html', url, re.I)
     if m:
-        return f"https://picks.ly/item/1688{m.group(1)}"
+        return f"https://picks.ly/item/AL{m.group(1)}"
     # Alibaba (unele linkuri sunt /product-detail/XXXX.html)
     m = re.search(r'/product-detail/[^/]*?(\d+)\.html', url, re.I)
     if m:

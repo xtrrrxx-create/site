@@ -66,7 +66,7 @@ def make_links(source_url):
         else:
             m = re.search(r'/offer/(\d+)\.html', source_url, re.I)
             if m:
-                picksly = f"https://picks.ly/item/1688{m.group(1)}"
+                picksly = f"https://picks.ly/item/AL{m.group(1)}"
     
     return kakobuy, picksly
 

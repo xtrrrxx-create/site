@@ -59,3 +59,11 @@ Via **admin-app** (Electron local, nu e pe GitHub public) sau direct în Supabas
 
 ## Utilizator
 Kevin — owner site, preferă răspunsuri scurte și directe. Face push automat la final.
+
+## Obsidian Vault
+Vault la: `C:\Users\kevin\Desktop\site\jarvis-finder\`  
+**Citește întotdeauna la start** notele relevante din vault:
+- `Site Overview.md` — arhitectura completă a site-ului
+- `Changelog.md` — istoricul schimbărilor
+- `Scripts & Tools.md` — toate scripturile backend
+- `2026-05-03 Jarvis Finder schimbări.md` — ultima sesiune de lucru

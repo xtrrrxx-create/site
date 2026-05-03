@@ -1,19 +1,20 @@
 import asyncio
+from dotenv import load_dotenv
+load_dotenv()
 import hashlib
 import json
 import os
 import re
 import secrets
-import subprocess
 import time
 from collections import defaultdict, deque
-from pathlib import Path
+from pathlib import Path as FilePath
 from typing import Annotated, Any
 from urllib.parse import urlparse
 
 from fastapi import Depends, FastAPI, HTTPException, Path, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from pydantic import BaseModel, Field, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -21,15 +22,12 @@ from slowapi.util import get_remote_address
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send
 
-DB_PATH = Path(__file__).parent / "products.json"
-REPO_ROOT = DB_PATH.parent
+import httpx
 
-# After each save, run git add/commit/push on products.json (set ADMIN_AUTO_GIT_PUSH=0 to disable).
-_GIT_PUSH_DEBOUNCE_S = 4.0
-_git_push_task: asyncio.Task[None] | None = None
-_git_push_lock = asyncio.Lock()
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY", "")
 
-CATEGORIES = ["", "Shoes", "Slides", "Shorts", "Pants", "T-shirts", "Long-sleeve", "Hoodies", "Jackets", "Accessories"]
+CATEGORIES = ["", "Shoes", "Slides", "Shorts", "Pants", "T-shirts", "Long-sleeve", "Hoodies", "Jackets", "Merch", "Accessories"]
 BATCHES = ["", "Best Batch", "Budget Batch", "Random Batch"]
 
 MAX_BODY_BYTES = int(os.environ.get("ADMIN_MAX_BODY_BYTES", "262144"))
@@ -216,87 +214,72 @@ def _ws_allow_new_connection(ip: str) -> bool:
     return True
 
 
-def load_products() -> list[dict[str, Any]]:
-    if not DB_PATH.exists():
-        return []
-    with DB_PATH.open("r", encoding="utf-8") as f:
-        return json.load(f)
+def _sb_headers() -> dict[str, str]:
+    return {
+        "apikey": SUPABASE_SERVICE_KEY,
+        "Authorization": f"Bearer {SUPABASE_SERVICE_KEY}",
+        "Content-Type": "application/json",
+        "Prefer": "return=representation",
+    }
 
 
-def save_products(products: list[dict[str, Any]]) -> None:
-    with DB_PATH.open("w", encoding="utf-8") as f:
-        json.dump(products, f, indent=4, ensure_ascii=False)
+async def sb_get_all() -> list[dict[str, Any]]:
+    # Supabase caps at 1000 rows per request — paginate with offset.
+    out: list[dict[str, Any]] = []
+    page = 1000
+    async with httpx.AsyncClient() as client:
+        off = 0
+        while True:
+            r = await client.get(
+                f"{SUPABASE_URL}/rest/v1/products",
+                params={"select": "*", "order": "id.asc", "limit": str(page), "offset": str(off)},
+                headers=_sb_headers(),
+                timeout=30,
+            )
+            r.raise_for_status()
+            batch = r.json()
+            if not batch:
+                break
+            out.extend(batch)
+            if len(batch) < page:
+                break
+            off += page
+    return out
 
 
-def _git_commit_push_sync() -> None:
-    if os.environ.get("ADMIN_AUTO_GIT_PUSH", "1").strip().lower() in ("0", "false", "no", "off"):
-        return
-    repo = REPO_ROOT
-    try:
-        subprocess.run(
-            ["git", "add", "--", "products.json"],
-            cwd=repo,
-            capture_output=True,
-            timeout=30,
-            check=False,
+async def sb_insert(product: dict[str, Any]) -> dict[str, Any]:
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{SUPABASE_URL}/rest/v1/products",
+            json=product,
+            headers=_sb_headers(),
+            timeout=15,
         )
-        diff = subprocess.run(
-            ["git", "diff", "--cached", "--quiet"],
-            cwd=repo,
-            timeout=30,
+        r.raise_for_status()
+        return r.json()[0]
+
+
+async def sb_update(row_id: int, product: dict[str, Any]) -> None:
+    async with httpx.AsyncClient() as client:
+        r = await client.patch(
+            f"{SUPABASE_URL}/rest/v1/products",
+            params={"id": f"eq.{row_id}"},
+            json=product,
+            headers=_sb_headers(),
+            timeout=15,
         )
-        if diff.returncode == 0:
-            return
-        commit = subprocess.run(
-            [
-                "git",
-                "commit",
-                "-m",
-                "catalog: update products.json (admin auto)",
-            ],
-            cwd=repo,
-            capture_output=True,
-            timeout=60,
-            text=True,
+        r.raise_for_status()
+
+
+async def sb_delete(row_id: int) -> None:
+    async with httpx.AsyncClient() as client:
+        r = await client.delete(
+            f"{SUPABASE_URL}/rest/v1/products",
+            params={"id": f"eq.{row_id}"},
+            headers=_sb_headers(),
+            timeout=15,
         )
-        if commit.returncode != 0:
-            return
-        br = subprocess.run(
-            ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            cwd=repo,
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
-        branch = (br.stdout or "").strip() or "main"
-        subprocess.run(
-            ["git", "push", "origin", branch],
-            cwd=repo,
-            capture_output=True,
-            timeout=120,
-            text=True,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        pass
-
-
-async def schedule_git_push() -> None:
-    global _git_push_task
-
-    if os.environ.get("ADMIN_AUTO_GIT_PUSH", "1").strip().lower() in ("0", "false", "no", "off"):
-        return
-
-    async def _debounced() -> None:
-        try:
-            await asyncio.sleep(_GIT_PUSH_DEBOUNCE_S)
-        except asyncio.CancelledError:
-            return
-        async with _git_push_lock:
-            await asyncio.to_thread(_git_commit_push_sync)
-
-    if _git_push_task is not None and not _git_push_task.done():
-        _git_push_task.cancel()
-    _git_push_task = asyncio.create_task(_debounced())
+        r.raise_for_status()
 
 
 def clean_text(value: str) -> str:
@@ -418,26 +401,25 @@ db_lock = asyncio.Lock()
 
 @app.get("/", response_class=HTMLResponse)
 @limiter.limit("60/minute")
-async def admin_page(request: Request) -> str:
+async def admin_page(request: Request, response: Response) -> str:
     return HTML
 
 
 @app.get("/api/meta")
 @limiter.limit("120/minute")
-async def meta(request: Request, _: None = Depends(require_read_token)) -> dict[str, Any]:
+async def meta(request: Request, response: Response, _: None = Depends(require_read_token)) -> dict[str, Any]:
     return {"categories": CATEGORIES, "batches": BATCHES}
 
 
 @app.get("/api/products")
 @limiter.limit("120/minute")
-async def get_products(request: Request, _: None = Depends(require_read_token)) -> list[dict[str, Any]]:
-    async with db_lock:
-        return load_products()
+async def get_products(request: Request, response: Response, _: None = Depends(require_read_token)) -> list[dict[str, Any]]:
+    return await sb_get_all()
 
 
 @app.post("/api/admin/authenticate")
 @limiter.limit("5/15minutes")
-async def admin_authenticate(request: Request, body: AdminPasswordIn) -> dict[str, Any]:
+async def admin_authenticate(request: Request, response: Response, body: AdminPasswordIn) -> dict[str, Any]:
     expected = os.environ.get("ADMIN_PASSWORD", "").strip()
     if not expected:
         raise HTTPException(status_code=400, detail="Password authentication not configured")
@@ -459,15 +441,13 @@ async def admin_authenticate(request: Request, body: AdminPasswordIn) -> dict[st
 @limiter.limit("60/minute")
 async def add_product(
     request: Request,
+    response: Response,
     payload: ProductIn,
     _: None = Depends(require_write_token),
 ) -> dict[str, Any]:
-    async with db_lock:
-        products = load_products()
-        products.append(payload.model_dump())
-        save_products(products)
+    await sb_insert(payload.model_dump())
+    products = await sb_get_all()
     await manager.broadcast({"type": "products_updated", "count": len(products)})
-    await schedule_git_push()
     return {"ok": True, "count": len(products)}
 
 
@@ -475,18 +455,18 @@ async def add_product(
 @limiter.limit("60/minute")
 async def update_product(
     request: Request,
+    response: Response,
     index: Annotated[int, Path(ge=0, le=5_000_000)],
     payload: ProductIn,
     _: None = Depends(require_write_token),
 ) -> dict[str, Any]:
-    async with db_lock:
-        products = load_products()
-        if index < 0 or index >= len(products):
-            raise HTTPException(status_code=404, detail="Product index not found")
-        products[index] = payload.model_dump()
-        save_products(products)
+    products = await sb_get_all()
+    if index < 0 or index >= len(products):
+        raise HTTPException(status_code=404, detail="Product index not found")
+    row_id = products[index]["id"]
+    await sb_update(row_id, payload.model_dump())
+    products = await sb_get_all()
     await manager.broadcast({"type": "products_updated", "count": len(products)})
-    await schedule_git_push()
     return {"ok": True, "count": len(products)}
 
 
@@ -494,17 +474,17 @@ async def update_product(
 @limiter.limit("60/minute")
 async def delete_product(
     request: Request,
+    response: Response,
     index: Annotated[int, Path(ge=0, le=5_000_000)],
     _: None = Depends(require_write_token),
 ) -> dict[str, Any]:
-    async with db_lock:
-        products = load_products()
-        if index < 0 or index >= len(products):
-            raise HTTPException(status_code=404, detail="Product index not found")
-        products.pop(index)
-        save_products(products)
+    products = await sb_get_all()
+    if index < 0 or index >= len(products):
+        raise HTTPException(status_code=404, detail="Product index not found")
+    row_id = products[index]["id"]
+    await sb_delete(row_id)
+    products = await sb_get_all()
     await manager.broadcast({"type": "products_updated", "count": len(products)})
-    await schedule_git_push()
     return {"ok": True, "count": len(products)}
 
 
@@ -512,23 +492,12 @@ async def delete_product(
 @limiter.limit("60/minute")
 async def reorder_product(
     request: Request,
+    response: Response,
     payload: ReorderIn,
     _: None = Depends(require_write_token),
 ) -> dict[str, Any]:
-    async with db_lock:
-        products = load_products()
-        n = len(products)
-        if payload.from_index < 0 or payload.from_index >= n:
-            raise HTTPException(status_code=404, detail="Source index not found")
-        if payload.to_index < 0 or payload.to_index >= n:
-            raise HTTPException(status_code=404, detail="Target index not found")
-        if payload.from_index == payload.to_index:
-            return {"ok": True, "count": n}
-        item = products.pop(payload.from_index)
-        products.insert(payload.to_index, item)
-        save_products(products)
-    await manager.broadcast({"type": "products_updated", "count": len(products)})
-    await schedule_git_push()
+    # Reorder not supported with Supabase id-based ordering
+    products = await sb_get_all()
     return {"ok": True, "count": len(products)}
 
 
@@ -573,105 +542,242 @@ HTML = """
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Realtime Admin</title>
+  <title>Jarvis Admin</title>
   <style>
-    body { font-family: Inter, Arial, sans-serif; background:#101014; color:#f1f1f1; margin:0; }
-    .wrap { max-width:1200px; margin:24px auto; padding:0 16px; padding-bottom:80px; }
-    .editor-sticky {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: #101014;
-      padding: 12px 0 14px;
-      margin: 0 -16px;
-      padding-left: 16px;
-      padding-right: 16px;
-      border-bottom: 1px solid #2c2c35;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    :root {
+      --bg:#0b0b10; --panel:#14141b; --panel2:#1a1a24; --border:#2a2a38;
+      --text:#eceef3; --muted:#8b8ba0; --accent:#4f8cff; --accent2:#6a9bff;
+      --green:#3ecf8e; --red:#ef5350; --yellow:#ffb74d;
     }
-    .row { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
-    input, select { background:#19191f; border:1px solid #333; color:#fff; padding:8px; border-radius:8px; }
-    button { background:#2d6cdf; color:#fff; border:none; border-radius:8px; padding:9px 12px; cursor:pointer; }
-    button.secondary { background:#444; }
-    button.danger { background:#d64747; }
-    table { width:100%; border-collapse:collapse; font-size:14px; }
-    th, td { border-bottom:1px solid #2c2c35; padding:8px; text-align:left; }
-    tr:hover { background:#171722; }
-    .status { margin:0 0 10px; color:#96f7a5; }
-    .small { font-size:12px; color:#aaa; margin:0; }
+    * { box-sizing:border-box; }
+    html, body { height:100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+      background: radial-gradient(1200px 600px at 0% 0%, #16162080, #0b0b10 60%), var(--bg);
+      color: var(--text); margin:0; font-size:14px;
+    }
+    .wrap { max-width:1400px; margin:0 auto; padding:20px 24px 140px; }
+    h1 { font-size:22px; margin:0 0 16px; font-weight:700; letter-spacing:-0.02em; }
+    .pill { display:inline-block; padding:2px 8px; border-radius:999px; font-size:11px; font-weight:600; background:var(--panel2); color:var(--muted); border:1px solid var(--border); }
+    .pill.ok { color:var(--green); border-color:#2d6b4d; }
+    .pill.warn { color:var(--yellow); border-color:#7a5a1f; }
+    .pill.err { color:var(--red); border-color:#7a3030; }
+
+    /* AUTH BAR */
+    .auth {
+      display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+      padding:10px 14px; background:var(--panel); border:1px solid var(--border);
+      border-radius:12px; margin-bottom:16px;
+    }
+    .auth .hint { flex-basis:100%; font-size:12px; color:var(--muted); margin-top:2px; }
+
+    /* EDITOR CARD */
+    .editor {
+      position: sticky; top: 12px; z-index: 50;
+      background: var(--panel); border:1px solid var(--border); border-radius:14px;
+      padding:14px 16px; margin-bottom:16px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+    }
+    .editor-head {
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      margin-bottom:10px;
+    }
+    .editor-title { font-weight:600; font-size:15px; }
+    .status { font-size:13px; color:var(--green); }
+    .status.err { color:var(--red); }
+
+    .grid {
+      display:grid;
+      grid-template-columns: 120px 1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width:900px) { .grid { grid-template-columns: 1fr; } }
+
+    .preview {
+      width:120px; height:120px; border-radius:10px; border:1px dashed var(--border);
+      display:flex; align-items:center; justify-content:center; overflow:hidden;
+      background: #0f0f16; font-size:11px; color:var(--muted); text-align:center;
+      grid-row: span 2;
+    }
+    .preview img { width:100%; height:100%; object-fit:cover; }
+
+    .fields {
+      display:grid; gap:8px;
+      grid-template-columns: 1fr 120px;
+    }
+    .fields.full { grid-column: span 2; grid-template-columns: 1fr 1fr 1fr 150px 150px; }
+    @media (max-width:900px) { .fields, .fields.full { grid-template-columns: 1fr; } }
+
+    label { display:block; font-size:11px; color:var(--muted); margin-bottom:3px; letter-spacing:.04em; text-transform:uppercase; }
+    input, select {
+      width:100%; background:#0f0f16; border:1px solid var(--border); color:var(--text);
+      padding:9px 11px; border-radius:8px; font-size:13px; font-family:inherit;
+    }
+    input:focus, select:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(79,140,255,0.15); }
+
+    .actions { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+    button {
+      background: var(--accent); color:#fff; border:none; border-radius:8px;
+      padding:9px 14px; cursor:pointer; font-size:13px; font-weight:600;
+      transition: background 0.15s, transform 0.05s;
+    }
+    button:hover { background: var(--accent2); }
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity:0.45; cursor:not-allowed; }
+    button.secondary { background:#2a2a38; }
+    button.secondary:hover { background:#363648; }
+    button.danger { background:#b53a3a; }
+    button.danger:hover { background:#cf4545; }
+    button.ghost { background:transparent; border:1px solid var(--border); color:var(--muted); }
+    button.ghost:hover { color:var(--text); border-color:var(--accent); }
+    button.tiny { padding:5px 9px; font-size:11px; }
+
+    /* FILTER BAR */
+    .filterbar {
+      display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+      margin:18px 0 12px;
+    }
+    .filterbar input[type=search] { flex:1; min-width:220px; }
+    .filterbar select { width:auto; min-width:140px; }
+    .meta { font-size:12px; color:var(--muted); white-space:nowrap; margin-left:auto; }
+
+    /* TABLE */
+    .tablewrap { background:var(--panel); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; }
+    th { font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:600;
+         text-align:left; padding:10px 12px; background:#0f0f16; border-bottom:1px solid var(--border); }
+    td { padding:8px 12px; border-bottom:1px solid #1e1e28; vertical-align:middle; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover { background:#181824; }
+    tr.selected { background:#1a2540; }
+    .thumb { width:48px; height:48px; border-radius:6px; background:#0f0f16; object-fit:cover; display:block; }
+    .thumb.empty { display:flex; align-items:center; justify-content:center; color:var(--muted); font-size:10px; }
+    .title-cell { max-width:360px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .price { font-weight:600; color:var(--yellow); }
+    .id-cell { color:var(--muted); font-size:12px; font-family: ui-monospace, monospace; }
+    .row-actions { display:flex; gap:4px; }
+    .link-chips { display:flex; gap:4px; }
+    .chip {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:22px; height:22px; border-radius:5px; background:#0f0f16;
+      color:var(--muted); font-size:10px; font-weight:700; text-decoration:none;
+      border:1px solid var(--border);
+    }
+    .chip:hover { color:var(--accent); border-color:var(--accent); }
+    .chip.dim { opacity:0.25; }
+
+    /* FAB */
     #jumpForm {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      z-index: 60;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
-      font-weight: 600;
+      position: fixed; right:20px; bottom:20px; z-index:60;
+      box-shadow:0 8px 24px rgba(0,0,0,0.5); border-radius:999px; padding:12px 18px;
+      font-weight:600;
     }
-    .table-search-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 16px 0 10px;
-    }
-    .table-search-row input[type="search"] {
-      flex: 1;
-      min-width: 200px;
-      padding: 10px 12px;
-      font-size: 15px;
-    }
-    .table-search-row .search-meta {
-      font-size: 13px;
-      color: #9a9aaa;
-      white-space: nowrap;
-    }
+    .empty-state { padding:40px; text-align:center; color:var(--muted); }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h2>Jarvis Finder Realtime Admin</h2>
-    <div class="row" id="authBar" style="align-items:center;margin-bottom:16px;padding:10px 12px;background:#19191f;border-radius:10px;border:1px solid #2c2c35">
-      <input type="password" id="adminPassword" placeholder="Admin password" autocomplete="current-password" style="min-width:160px"/>
+    <h1>🛠 Jarvis Admin <span id="totalBadge" class="pill">0 products</span></h1>
+
+    <div class="auth" id="authBar">
+      <input type="password" id="adminPassword" placeholder="Admin password" autocomplete="current-password" style="min-width:170px;flex:1"/>
       <button type="button" id="loginBtn">Sign in</button>
-      <input id="adminTokenInput" placeholder="Or paste API token" autocomplete="off" style="min-width:220px;flex:1"/>
+      <input id="adminTokenInput" placeholder="Or paste API token" autocomplete="off" style="min-width:220px;flex:2"/>
       <button type="button" id="saveTokenBtn" class="secondary">Save token</button>
-      <button type="button" id="clearTokenBtn" class="secondary">Clear</button>
-      <span class="small" id="authHint" style="flex-basis:100%"></span>
+      <button type="button" id="clearTokenBtn" class="ghost">Clear</button>
+      <span class="hint" id="authHint"></span>
     </div>
-    <div class="editor-sticky" id="editorBar">
-      <div class="status" id="status">Connecting...</div>
-      <div class="row">
-        <input id="title" placeholder="Title" style="min-width:220px;flex:2"/>
-        <input id="price" placeholder="Price (CNY)" style="width:120px"/>
-        <input id="img" placeholder="Image URL" style="min-width:220px;flex:2"/>
-        <input id="kakobuy" placeholder="Kakobuy URL" style="min-width:220px;flex:2"/>
-        <input id="picksly" placeholder="Picksly URL" style="min-width:220px;flex:2"/>
-        <select id="category"></select>
-        <select id="batch"></select>
-        <button id="addBtn">Add</button>
-        <button id="updateBtn" class="secondary" disabled>Update selected</button>
-        <button id="cancelBtn" class="secondary" disabled>Cancel edit</button>
+
+    <div class="editor" id="editorBar">
+      <div class="editor-head">
+        <div class="editor-title" id="editorTitle">Add new product</div>
+        <div class="status" id="status">Connecting...</div>
       </div>
-      <p class="small">Tip: form stays at top while you scroll. Saves trigger git commit + push to origin (~4s after your last change) so Vercel can deploy. Set env ADMIN_AUTO_GIT_PUSH=0 to disable.</p>
+      <div class="grid">
+        <div class="preview" id="preview"><span>No image</span></div>
+
+        <div>
+          <label>Title</label>
+          <input id="title" placeholder="e.g. Balenciaga Track"/>
+        </div>
+        <div>
+          <label>Price (CNY)</label>
+          <input id="price" placeholder="350"/>
+        </div>
+
+        <div style="grid-column: 2 / span 2">
+          <label>Image URL</label>
+          <input id="img" placeholder="https://..."/>
+        </div>
+
+        <div class="fields full" style="grid-column: 1 / span 3">
+          <div><label>Kakobuy</label><input id="kakobuy" placeholder="https://kakobuy.com/..."/></div>
+          <div><label>Picksly</label><input id="picksly" placeholder="https://picks.ly/item/..."/></div>
+          <div style="display:flex;align-items:end;gap:6px">
+            <button type="button" class="secondary tiny" id="openPicksly" title="Open picks.ly link">↗ Picksly</button>
+            <button type="button" class="secondary tiny" id="openKakobuy" title="Open kakobuy link">↗ Kako</button>
+          </div>
+          <div><label>Category</label><select id="category"></select></div>
+          <div><label>Batch</label><select id="batch"></select></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="addBtn">＋ Add product</button>
+        <button id="updateBtn" class="secondary" disabled>💾 Update</button>
+        <button id="cancelBtn" class="ghost" disabled>Cancel</button>
+        <span style="flex:1"></span>
+        <span class="pill" id="editIdPill" style="display:none"></span>
+      </div>
     </div>
-    <div class="table-search-row">
-      <input type="search" id="tableSearch" placeholder="Search products (title, category, price…)" autocomplete="off"/>
-      <span class="search-meta" id="tableSearchCount"></span>
+
+    <div class="filterbar">
+      <input type="search" id="tableSearch" placeholder="🔍 Search title, price, category..." autocomplete="off"/>
+      <select id="catFilter"><option value="">All categories</option></select>
+      <select id="imgFilter">
+        <option value="">All products</option>
+        <option value="no">No image only</option>
+        <option value="yes">With image only</option>
+      </select>
+      <span class="meta" id="tableSearchCount"></span>
     </div>
-    <table id="tbl">
-      <thead><tr><th>#</th><th>Title</th><th>Price</th><th>Category</th><th>Batch</th><th>Actions</th></tr></thead>
-      <tbody></tbody>
-    </table>
+
+    <div class="tablewrap">
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th style="width:60px">ID</th>
+            <th style="width:64px">Img</th>
+            <th>Title</th>
+            <th style="width:80px">Price</th>
+            <th style="width:110px">Category</th>
+            <th style="width:110px">Batch</th>
+            <th style="width:80px">Links</th>
+            <th style="width:160px">Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="emptyMsg" class="empty-state" style="display:none">No products match your filters.</div>
+    </div>
   </div>
-  <button type="button" id="jumpForm" class="secondary" title="Jump to form at top">↑ Form</button>
+  <button type="button" id="jumpForm" class="secondary" title="Back to editor">↑ Editor</button>
   <script>
     let products = [];
     let selectedIndex = -1;
     let tableSearchQuery = "";
+    let catFilterValue = "";
+    let imgFilterValue = "";
     let loadProductsDebounce = null;
     let wsPingInterval = null;
     let activeWs = null;
     const statusEl = document.getElementById("status");
+
+    function escHtml(s) {
+      return String(s || "").replace(/[&<>"']/g, c =>
+        ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+    function escAttr(s) { return escHtml(s); }
 
     function getStoredToken() {
       try { return localStorage.getItem("adminApiToken") || ""; } catch (_) { return ""; }
@@ -695,10 +801,18 @@ HTML = """
       category: document.getElementById("category"),
       batch: document.getElementById("batch"),
     };
+    const previewEl = document.getElementById("preview");
+
+    function updatePreview() {
+      const u = (fields.img.value || "").trim();
+      if (!u) { previewEl.innerHTML = '<span>No image</span>'; return; }
+      previewEl.innerHTML = `<img src="${escAttr(u)}" onerror="this.parentElement.innerHTML='<span>Invalid<br>image</span>'"/>`;
+    }
+    fields.img.addEventListener("input", updatePreview);
 
     function setStatus(text, ok=true) {
       statusEl.textContent = text;
-      statusEl.style.color = ok ? "#96f7a5" : "#ff7b7b";
+      statusEl.className = "status" + (ok ? "" : " err");
     }
 
     function clearForm() {
@@ -706,6 +820,11 @@ HTML = """
       selectedIndex = -1;
       document.getElementById("updateBtn").disabled = true;
       document.getElementById("cancelBtn").disabled = true;
+      document.getElementById("editorTitle").textContent = "Add new product";
+      document.getElementById("editIdPill").style.display = "none";
+      updatePreview();
+      const sel = document.querySelector("#tbl tbody tr.selected");
+      if (sel) sel.classList.remove("selected");
     }
 
     function formPayload() {
@@ -728,8 +847,11 @@ HTML = """
       }
       if (!r.ok) throw new Error("meta");
       const m = await r.json();
-      fields.category.innerHTML = m.categories.map(v => `<option value="${v}">${v || "(empty)"}</option>`).join("");
-      fields.batch.innerHTML = m.batches.map(v => `<option value="${v}">${v || "(empty)"}</option>`).join("");
+      fields.category.innerHTML = m.categories.map(v => `<option value="${escAttr(v)}">${escHtml(v || "(empty)")}</option>`).join("");
+      fields.batch.innerHTML = m.batches.map(v => `<option value="${escAttr(v)}">${escHtml(v || "(empty)")}</option>`).join("");
+      const cf = document.getElementById("catFilter");
+      cf.innerHTML = '<option value="">All categories</option>' +
+        m.categories.filter(v => v).map(v => `<option value="${escAttr(v)}">${escHtml(v)}</option>`).join("");
     }
 
     function getFilteredTableRows() {
@@ -737,17 +859,15 @@ HTML = """
       const out = [];
       for (let i = 0; i < products.length; i++) {
         const p = products[i];
-        if (!q) {
-          out.push({ p, i });
-          continue;
+        if (catFilterValue && (p.category || "") !== catFilterValue) continue;
+        if (imgFilterValue === "no" && (p.img || "").trim()) continue;
+        if (imgFilterValue === "yes" && !(p.img || "").trim()) continue;
+        if (q) {
+          const hay = [p.title || "", p.category || "", p.batch || "", String(p.price || "")]
+            .join(" ").toLowerCase();
+          if (!hay.includes(q)) continue;
         }
-        const hay = [
-          p.title || "",
-          p.category || "",
-          p.batch || "",
-          String(p.price || ""),
-        ].join(" ").toLowerCase();
-        if (hay.includes(q)) out.push({ p, i });
+        out.push({ p, i });
       }
       return out;
     }
@@ -755,27 +875,48 @@ HTML = """
     function render() {
       const tbody = document.querySelector("#tbl tbody");
       const rows = getFilteredTableRows();
-      tbody.innerHTML = rows.map(({ p, i }) => `
-        <tr>
-          <td>${i}</td>
-          <td>${(p.title || "").replace(/</g, "&lt;")}</td>
-          <td>${p.price || ""}</td>
-          <td>${p.category || ""}</td>
-          <td>${p.batch || ""}</td>
-          <td>
-            <button class="secondary" onclick="moveRow(${i}, -1)">↑</button>
-            <button class="secondary" onclick="moveRow(${i}, 1)">↓</button>
-            <button class="secondary" onclick="selectRow(${i})">Edit</button>
-            <button class="danger" onclick="deleteRow(${i})">Delete</button>
-          </td>
-        </tr>
-      `).join("");
+      const emptyMsg = document.getElementById("emptyMsg");
+
+      if (rows.length === 0) {
+        tbody.innerHTML = "";
+        emptyMsg.style.display = "block";
+      } else {
+        emptyMsg.style.display = "none";
+        tbody.innerHTML = rows.map(({ p, i }) => {
+          const img = (p.img || "").trim();
+          const thumb = img
+            ? `<img class="thumb" src="${escAttr(img)}" loading="lazy" onerror="this.className='thumb empty';this.replaceWith(Object.assign(document.createElement('div'),{className:'thumb empty',textContent:'✗'}))"/>`
+            : `<div class="thumb empty">—</div>`;
+          const pk = p.picksly ? `<a class="chip" href="${escAttr(p.picksly)}" target="_blank" rel="noopener" title="Picksly">P</a>` : `<span class="chip dim">P</span>`;
+          const kb = p.kakobuy ? `<a class="chip" href="${escAttr(p.kakobuy)}" target="_blank" rel="noopener" title="Kakobuy">K</a>` : `<span class="chip dim">K</span>`;
+          const batchCls = p.batch === "Best Batch" ? "ok" : (p.batch === "Budget Batch" ? "warn" : "");
+          return `
+            <tr data-index="${i}" ${i===selectedIndex?'class="selected"':''}>
+              <td class="id-cell">#${p.id ?? i}</td>
+              <td>${thumb}</td>
+              <td class="title-cell" title="${escAttr(p.title || "")}">${escHtml(p.title || "")}</td>
+              <td class="price">${escHtml(p.price || "")}</td>
+              <td>${p.category ? `<span class="pill">${escHtml(p.category)}</span>` : ''}</td>
+              <td>${p.batch ? `<span class="pill ${batchCls}">${escHtml(p.batch)}</span>` : ''}</td>
+              <td><div class="link-chips">${pk}${kb}</div></td>
+              <td><div class="row-actions">
+                <button class="secondary tiny" onclick="selectRow(${i})">Edit</button>
+                <button class="danger tiny" onclick="deleteRow(${i})">Del</button>
+              </div></td>
+            </tr>
+          `;
+        }).join("");
+      }
       const cm = document.getElementById("tableSearchCount");
       if (cm) {
-        cm.textContent = tableSearchQuery.trim()
-          ? `Showing ${rows.length} of ${products.length} (filtered)`
-          : `Showing ${products.length} products`;
+        cm.textContent = (q => {
+          const hasFilter = tableSearchQuery.trim() || catFilterValue || imgFilterValue;
+          return hasFilter
+            ? `${rows.length} of ${products.length}`
+            : `${products.length} products`;
+        })();
       }
+      document.getElementById("totalBadge").textContent = `${products.length} products`;
     }
 
     async function loadProducts(silent) {
@@ -810,6 +951,12 @@ HTML = """
       Object.keys(fields).forEach(k => fields[k].value = p[k] || "");
       document.getElementById("updateBtn").disabled = false;
       document.getElementById("cancelBtn").disabled = false;
+      document.getElementById("editorTitle").textContent = "Edit product";
+      const pill = document.getElementById("editIdPill");
+      pill.textContent = `editing #${p.id ?? i}`;
+      pill.style.display = "inline-block";
+      updatePreview();
+      render();
       focusEditorBar();
     }
 
@@ -873,8 +1020,19 @@ HTML = """
     document.getElementById("jumpForm").onclick = () => focusEditorBar();
 
     document.getElementById("tableSearch").addEventListener("input", (e) => {
-      tableSearchQuery = e.target.value || "";
-      render();
+      tableSearchQuery = e.target.value || ""; render();
+    });
+    document.getElementById("catFilter").addEventListener("change", (e) => {
+      catFilterValue = e.target.value || ""; render();
+    });
+    document.getElementById("imgFilter").addEventListener("change", (e) => {
+      imgFilterValue = e.target.value || ""; render();
+    });
+    document.getElementById("openPicksly").addEventListener("click", () => {
+      const u = (fields.picksly.value || "").trim(); if (u) window.open(u, "_blank");
+    });
+    document.getElementById("openKakobuy").addEventListener("click", () => {
+      const u = (fields.kakobuy.value || "").trim(); if (u) window.open(u, "_blank");
     });
 
     function connectWs() {
