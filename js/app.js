@@ -1906,6 +1906,7 @@ function initApp() {
         navLinks.forEach(link => {
             link.classList.toggle('active', link.getAttribute('data-page') === pageId);
         });
+        updateNavIndicator(pageId);
 
         document.querySelectorAll('.bottom-nav-item').forEach(item => {
             item.classList.toggle('active', item.getAttribute('data-page') === pageId);
@@ -1950,6 +1951,34 @@ function initApp() {
         const seg = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
         return VALID_PAGES.includes(seg) ? seg : 'home';
     }
+    function updateNavIndicator(pageId) {
+        const navList = document.querySelector('.nav-links');
+        if (!navList) return;
+        const activeLink = navList.querySelector(`a[data-page="${pageId}"]`);
+        if (!activeLink) return;
+
+        let indicator = navList.querySelector('.nav-indicator');
+        const isFirst = !indicator;
+        if (isFirst) {
+            indicator = document.createElement('div');
+            indicator.className = 'nav-indicator';
+            indicator.style.transition = 'none';
+            navList.insertBefore(indicator, navList.firstChild);
+        }
+
+        const listRect = navList.getBoundingClientRect();
+        const linkRect = activeLink.getBoundingClientRect();
+        indicator.style.width  = linkRect.width + 'px';
+        indicator.style.height = linkRect.height + 'px';
+        indicator.style.transform = `translateX(${linkRect.left - listRect.left}px) translateY(${linkRect.top - listRect.top}px)`;
+
+        if (isFirst) {
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                indicator.style.transition = '';
+            }));
+        }
+    }
+
     function navigateTo(pageId, replace) {
         if (!VALID_PAGES.includes(pageId)) pageId = 'home';
         const path = pageId === 'home' ? '/' : '/' + pageId;
@@ -1957,7 +1986,11 @@ function initApp() {
             if (replace) history.replaceState({ page: pageId }, '', path);
             else history.pushState({ page: pageId }, '', path);
         }
-        renderPage(pageId);
+        mainContent.classList.add('page-exit');
+        setTimeout(() => {
+            renderPage(pageId);
+            mainContent.classList.remove('page-exit');
+        }, 120);
     }
     window.navigateTo = navigateTo;
 
