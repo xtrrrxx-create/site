@@ -940,7 +940,7 @@ function getPages() {
         <style>
             .rv-section {
                 width: 100%;
-                padding: 0 0 2.5rem;
+                padding: 0 0 1.5rem;
                 overflow: hidden;
             }
             .rv-label {
@@ -1036,6 +1036,9 @@ function getPages() {
                 <span class="jf-title-line">finder</span>
             </h1>
             <p class="jf-sub">${t('hero_desc')}</p>
+            ${buildRecentlyViewedMarquee()}
+        </div>
+        <div style="display:flex;justify-content:center;padding-bottom:3.5rem;">
             <button class="jf-btn" data-action="go-products">
                 ${t('btn_explore')}
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1044,7 +1047,6 @@ function getPages() {
                 </svg>
             </button>
         </div>
-        ${buildRecentlyViewedMarquee()}
     `,
         products: `
         <div class="section-container" style="animation: fadeIn 0.4s ease-out;">
