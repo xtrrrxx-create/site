@@ -754,16 +754,17 @@ function renderFilteredProducts() {
             batchFlair = `<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#2c2d34;color:#d9d9df;border:1px solid #4b4d59;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
         }
 
+        const rvItem = JSON.stringify({ title: safeTitle, price: p.price, img: safeImg, kakobuy: p.kakobuy || '', picksly: p.picksly || '' }).replace(/'/g, '&#39;');
         return `
-            <div class="product-card">
+            <div class="product-card" onclick="trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
                     <div style="margin-bottom:0.4rem;min-height:18px;">${batchFlair}</div>
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
                     <div class="product-actions">
-                        <a href="${kakobuy}" target="_blank" class="btn-primary" style="flex:2;text-align:center;text-decoration:none;border-radius:8px;padding:0.75rem;">${t('btn_buy')}</a>
-                        <a href="${picksly}" target="_blank" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;border-radius:8px;padding:0.75rem;display:flex;align-items:center;justify-content:center;background:var(--border-color);border:none;font-weight:600;">QC</a>
+                        <a href="${kakobuy}" target="_blank" class="btn-primary" style="flex:2;text-align:center;text-decoration:none;border-radius:8px;padding:0.75rem;" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">${t('btn_buy')}</a>
+                        <a href="${picksly}" target="_blank" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;border-radius:8px;padding:0.75rem;display:flex;align-items:center;justify-content:center;background:var(--border-color);border:none;font-weight:600;" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">QC</a>
                     </div>
                 </div>
             </div>
@@ -936,6 +937,95 @@ function injectHomeStyles() {
 function getPages() {
     return {
         home: `
+        <style>
+            .rv-section {
+                width: 100%;
+                padding: 0 0 2.5rem;
+                overflow: hidden;
+            }
+            .rv-label {
+                font-size: 0.72rem;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: var(--text-secondary);
+                padding: 0 5% 0.9rem;
+            }
+            .rv-track-wrap {
+                overflow: hidden;
+                width: 100%;
+                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+                mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+            }
+            .rv-track {
+                display: flex;
+                gap: 1rem;
+                width: max-content;
+                animation: rv-scroll 30s linear infinite;
+            }
+            .rv-track:hover { animation-play-state: paused; }
+            @keyframes rv-scroll {
+                0%   { transform: translateX(0); }
+                100% { transform: translateX(-50%); }
+            }
+            .rv-card {
+                background: var(--nav-bg);
+                border: 1px solid var(--border-color);
+                border-radius: 16px;
+                width: 180px;
+                flex-shrink: 0;
+                overflow: hidden;
+                transition: border-color 0.2s;
+            }
+            .rv-card:hover { border-color: var(--text-secondary); }
+            .rv-img {
+                width: 100%;
+                height: 160px;
+                overflow: hidden;
+                background: var(--bg-color);
+            }
+            .rv-info {
+                padding: 0.75rem;
+            }
+            .rv-title {
+                font-size: 0.78rem;
+                font-weight: 600;
+                color: var(--text-primary);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                margin-bottom: 0.25rem;
+            }
+            .rv-price {
+                font-size: 0.82rem;
+                font-weight: 800;
+                color: var(--text-primary);
+                margin-bottom: 0.6rem;
+            }
+            .rv-actions {
+                display: flex;
+                gap: 0.4rem;
+            }
+            .rv-btn {
+                flex: 1;
+                text-align: center;
+                text-decoration: none;
+                border-radius: 8px;
+                padding: 0.4rem 0.2rem;
+                font-size: 0.72rem;
+                font-weight: 700;
+                transition: opacity 0.15s;
+            }
+            .rv-btn:hover { opacity: 0.8; }
+            .rv-btn-buy {
+                background: var(--text-primary);
+                color: var(--bg-color);
+            }
+            .rv-btn-qc {
+                background: var(--border-color);
+                color: var(--text-primary);
+            }
+        </style>
         <div class="jf-hero">
             <div class="jf-eyebrow">
                 <span class="jf-eyebrow-dot"></span>
@@ -954,6 +1044,7 @@ function getPages() {
                 </svg>
             </button>
         </div>
+        ${buildRecentlyViewedMarquee()}
     `,
         products: `
         <div class="section-container" style="animation: fadeIn 0.4s ease-out;">
@@ -2084,6 +2175,61 @@ document.addEventListener('keydown', (e) => {
 });
 
 // ─── LINK CONVERTER ────────────────────────────────────────────────────────
+// ─── RECENTLY VIEWED ───────────────────────────────────────────────────────
+const RV_KEY = 'jf_recently_viewed';
+const RV_MAX = 12;
+
+window.trackRecentlyViewed = function(jsonStr) {
+    try {
+        const item = JSON.parse(jsonStr.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
+        let rv = [];
+        try { rv = JSON.parse(localStorage.getItem(RV_KEY)) || []; } catch(e) {}
+        rv = rv.filter(x => x.title !== item.title);
+        rv.unshift(item);
+        if (rv.length > RV_MAX) rv = rv.slice(0, RV_MAX);
+        localStorage.setItem(RV_KEY, JSON.stringify(rv));
+    } catch(e) {}
+};
+
+function getRecentlyViewed() {
+    try { return JSON.parse(localStorage.getItem(RV_KEY)) || []; } catch(e) { return []; }
+}
+
+function buildRecentlyViewedMarquee() {
+    const rv = getRecentlyViewed();
+    if (rv.length === 0) return '';
+    const kakobuyAffcode = 'affcode=keviinn';
+    const cards = rv.map(item => {
+        const kakobuy = item.kakobuy
+            ? (item.kakobuy.includes('affcode') ? item.kakobuy : item.kakobuy + (item.kakobuy.includes('?') ? '&' : '?') + kakobuyAffcode)
+            : '#';
+        const picksly = item.picksly || '#';
+        const img = item.img
+            ? `<img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none'" />`
+            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
+        return `
+        <div class="rv-card">
+            <div class="rv-img">${img}</div>
+            <div class="rv-info">
+                <div class="rv-title">${escapeHtml(item.title)}</div>
+                <div class="rv-price">${formatPrice(item.price)}</div>
+                <div class="rv-actions">
+                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener" class="rv-btn rv-btn-buy">Buy Now</a>
+                    <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener" class="rv-btn rv-btn-qc">QC</a>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    return `
+    <div class="rv-section">
+        <div class="rv-label">Recently Viewed</div>
+        <div class="rv-track-wrap">
+            <div class="rv-track" id="rv-track">${cards}${cards}</div>
+        </div>
+    </div>`;
+}
+
 // ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────
 const WEIGHT_CATS = [
     { id: 'footwear',     label: 'Footwear',     weight: 900 },

@@ -1,5 +1,15 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-03 (3)
+### Home — Recently Viewed Marquee
+- Secțiune "Recently Viewed" pe home page cu animație marquee dreapta→stânga
+- Tracking automat când userul dă click pe Buy Now sau QC pe orice produs
+- Carduri cu imagine, titlu, preț, butoane Buy Now + QC funcționale
+- Stocat în localStorage (`jf_recently_viewed`), max 12 produse
+- Marquee se oprește la hover
+- Fade-out pe margini via CSS mask-image
+- Dispare automat dacă nu există produse vizitate
+
 ## 2026-05-03 (2)
 ### Tools — Weight Estimator
 - Adăugat tool nou "Weight Estimator" în pagina /tools
