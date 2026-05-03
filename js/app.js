@@ -813,7 +813,7 @@ function injectHomeStyles() {
             justify-content: flex-start;
             min-height: calc(100vh - 5rem);
             text-align: center;
-            padding-top: 13vh;
+            padding-top: 4vh;
             padding-left: 1.5rem;
             padding-right: 1.5rem;
             padding-bottom: 2rem;
@@ -1060,7 +1060,7 @@ function getPages() {
             }
         </style>
         <div style="position:relative;min-height:calc(100vh - 5rem);">
-            <button data-action="go-products" style="position:absolute;top:18vh;right:8%;display:inline-flex;align-items:center;gap:9px;background:#ff8c00;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;padding:0.9rem 2rem;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(255,140,0,0.35);z-index:10;transition:transform 0.2s,box-shadow 0.2s;">
+            <button data-action="go-products" style="position:absolute;top:33vh;right:9%;display:inline-flex;align-items:center;gap:9px;background:#ff8c00;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;padding:0.9rem 2rem;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(255,140,0,0.35);z-index:10;transition:transform 0.2s,box-shadow 0.2s;">
                 ${t('btn_explore')}
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
             </button>
