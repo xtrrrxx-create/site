@@ -759,7 +759,7 @@ function renderFilteredProducts() {
         if (batch === 'best batch') {
             batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#f5a623;letter-spacing:.03em;">BEST BATCH</span>';
         } else if (batch === 'budget batch') {
-            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">BUDGET</span>';
+            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
         } else if (batch === 'random batch') {
             batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">RANDOM</span>';
         } else if (batchRaw) {
