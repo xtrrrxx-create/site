@@ -1031,7 +1031,7 @@ function getPages() {
                 display: flex;
                 gap: 1rem;
                 width: max-content;
-                animation: rv-scroll 30s linear infinite;
+                animation: rv-scroll 15s linear infinite;
             }
             @keyframes rv-scroll {
                 0%   { transform: translateX(0); }
