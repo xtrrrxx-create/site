@@ -1018,7 +1018,7 @@ function getPages() {
             .rv-card {
                 background: #2a2a2a;
                 border: 1px solid #3a3a3a;
-                box-shadow: 0px 10px 15px -3px rgba(0,0,0,0.1), 0px 4px 6px -4px rgba(0,0,0,0.1);
+                box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
                 border-radius: 16px;
                 width: calc((100vw - 80px) / 5.2);
                 min-width: 220px;
