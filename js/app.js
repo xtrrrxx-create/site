@@ -2256,7 +2256,7 @@ function buildRecentlyViewedMarquee() {
         <div class="rv-card">
             <div class="rv-img">${img}</div>
             <div class="rv-info">
-                <div class="rv-title">${escapeHtml(item.title)}</div>
+                <div class="rv-title">${escapeHtml(stripEmojis(item.title))}</div>
                 <div class="rv-price">${formatPrice(item.price)}</div>
                 <div class="rv-actions">
                     <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener" class="rv-btn" style="background:#ff8c00;color:#fff;flex:1;text-align:center;text-decoration:none;border-radius:8px;padding:0.4rem 0.2rem;font-size:0.72rem;font-weight:700;">Buy Now</a>
