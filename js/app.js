@@ -813,7 +813,7 @@ function injectHomeStyles() {
             justify-content: flex-start;
             min-height: calc(100vh - 5rem);
             text-align: center;
-            padding-top: 4vh;
+            padding-top: 8vh;
             padding-left: 1.5rem;
             padding-right: 1.5rem;
             padding-bottom: 2rem;
