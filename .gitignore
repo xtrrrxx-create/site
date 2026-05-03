@@ -53,3 +53,21 @@ dedup_all.py
 dedupe.py
 recat_by_title.py
 fix_qc_images.py
+
+# Scripts with hardcoded service keys — never commit
+fix_images.js
+fix_images_fast.js
+fix_images_turbo.js
+update_supabase_imgs.js
+update_prices.js
+
+# Supabase data exports — sensitive
+products_supabase.json
+products_supabase_fixed.json
+discord_products_backup.json
+
+# Claude local settings (may contain API keys)
+.claude/settings.local.json
+
+# Skill lock files
+skills-lock.json

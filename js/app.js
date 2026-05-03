@@ -2191,7 +2191,7 @@ document.addEventListener('click', (e) => {
 window.selectAgent = function (value, label, imgSrc) {
     selectedAgent = value;
     const btn = document.getElementById('agent-selected-label');
-    if (btn) btn.innerHTML = `<img src="${imgSrc}" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ${label}`;
+    if (btn) btn.innerHTML = `<img src="${escapeHtml(safeExternalUrl(imgSrc))}" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ${escapeHtml(label)}`;
     document.querySelectorAll('.agent-option').forEach(o => {
         o.classList.toggle('selected', o.dataset.value === value);
     });
@@ -2342,7 +2342,7 @@ window.runQcCheck = async function () {
         groupsEl.innerHTML = batches.map((b, bi) => `
             <div class="qc-batch-card" onclick="openQcBatch(${bi})">
                 <div class="qc-batch-cover">
-                    <img src="${b.imgs[0]}" loading="lazy" alt="${escapeHtml(b.label)}"/>
+                    <img src="${escapeHtml(safeExternalUrl(b.imgs[0]))}" loading="lazy" alt="${escapeHtml(b.label)}"/>
                     <div class="qc-batch-count">${b.imgs.length} ${t('qc_photos')}</div>
                 </div>
                 <div class="qc-batch-info">
@@ -2359,7 +2359,7 @@ window.runQcCheck = async function () {
         const pickslyUrl = /picks\.ly\/item\//i.test(raw) ? raw : qcSourceToPicksly(src);
         if (pickslyUrl && actionsEl) {
             actionsEl.style.display = 'flex';
-            actionsEl.innerHTML = `<a class="qc-picksly-btn" href="${pickslyUrl}" target="_blank" rel="noopener">
+            actionsEl.innerHTML = `<a class="qc-picksly-btn" href="${escapeHtml(safeExternalUrl(pickslyUrl))}" target="_blank" rel="noopener">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 ${t('qc_view_picksly')}
             </a>`;
@@ -2377,10 +2377,20 @@ window.openQcBatch = function (idx) {
     if (!b) return;
     document.getElementById('qc-batch-modal-title').textContent = b.label;
     document.getElementById('qc-batch-modal-meta').textContent = [b.meta, `${b.imgs.length} ${t('qc_photos')}`].filter(Boolean).join(' · ');
-    document.getElementById('qc-batch-modal-images').innerHTML = b.imgs.map((url, i) =>
-        `<div class="qc-img-wrap" onclick="openQcLightbox('${url.replace(/'/g, "\\'")}')">
-            <img src="${url}" loading="lazy" alt="QC ${idx}-${i}"/>
-        </div>`).join('');
+    const imagesContainer = document.getElementById('qc-batch-modal-images');
+    while (imagesContainer.firstChild) imagesContainer.removeChild(imagesContainer.firstChild);
+    b.imgs.forEach((url, i) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'qc-img-wrap';
+        const safeUrl = safeExternalUrl(url);
+        wrap.addEventListener('click', () => { if (safeUrl !== '#') openQcLightbox(safeUrl); });
+        const img = document.createElement('img');
+        img.src = safeUrl;
+        img.loading = 'lazy';
+        img.alt = `QC ${idx}-${i}`;
+        wrap.appendChild(img);
+        imagesContainer.appendChild(wrap);
+    });
     document.getElementById('qc-batch-modal').classList.add('open');
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);

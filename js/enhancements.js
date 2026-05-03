@@ -61,16 +61,20 @@
 
         if (prodMatches.length) {
             html += `<div class="cmd-section-label">Products</div>`;
-            html += prodMatches.map(p => `
-                <div class="cmd-item" data-type="product" data-kakobuy="${p.kakobuy || ''}">
-                    ${p.img ? `<img class="cmd-item-img" src="${p.img}" loading="lazy" onerror="this.style.display='none'">` : '<span class="cmd-item-icon">📦</span>'}
+            html += prodMatches.map(p => {
+                const safeKako = escapeHtml(p.kakobuy || '');
+                const safeImg  = escapeHtml(p.img || '');
+                const safeTitle = escapeHtml((p.title || '').slice(0, 50));
+                return `
+                <div class="cmd-item" data-type="product" data-kakobuy="${safeKako}">
+                    ${safeImg ? `<img class="cmd-item-img" src="${safeImg}" loading="lazy" onerror="this.style.display='none'">` : '<span class="cmd-item-icon">📦</span>'}
                     <div class="cmd-item-info">
-                        <span class="cmd-item-title">${(p.title || '').slice(0, 50)}</span>
+                        <span class="cmd-item-title">${safeTitle}</span>
                         <span class="cmd-item-desc">${p.price ? (window.formatPrice ? window.formatPrice(p.price) : '$' + p.price) : ''}</span>
                     </div>
                     <span class="cmd-item-kbd">↗</span>
-                </div>
-            `).join('');
+                </div>`;
+            }).join('');
         }
 
         if (!html) {
@@ -239,22 +243,51 @@ window.applyTilt = applyTilt;
         dropdownEl.style.width = rect.width + 'px';
         dropdownEl.style.display = 'block';
 
-        dropdownEl.innerHTML = results.map(p => `
-            <div class="sd-item" data-kakobuy="${p.kakobuy || ''}">
-                ${p.img ? `<img class="sd-img" src="${p.img}" loading="lazy" onerror="this.style.display='none'">` : ''}
-                <div class="sd-info">
-                    <div class="sd-title">${(p.title || '').slice(0, 45)}</div>
-                    <div class="sd-price">${p.price ? (window.formatPrice ? window.formatPrice(p.price) : '$' + p.price) : ''}</div>
-                </div>
-                <svg class="sd-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-            </div>
-        `).join('');
+        while (dropdownEl.firstChild) dropdownEl.removeChild(dropdownEl.firstChild);
 
-        dropdownEl.querySelectorAll('.sd-item').forEach(el => {
-            el.addEventListener('click', () => {
-                if (el.dataset.kakobuy) window.open(el.dataset.kakobuy, '_blank');
+        results.forEach(p => {
+            const item = document.createElement('div');
+            item.className = 'sd-item';
+            item.dataset.kakobuy = safeExternalUrl(p.kakobuy || '');
+
+            if (p.img) {
+                const img = document.createElement('img');
+                img.className = 'sd-img';
+                img.src = safeExternalUrl(p.img || '');
+                img.loading = 'lazy';
+                img.onerror = function() { this.style.display = 'none'; };
+                item.appendChild(img);
+            }
+
+            const info = document.createElement('div');
+            info.className = 'sd-info';
+
+            const title = document.createElement('div');
+            title.className = 'sd-title';
+            title.textContent = (p.title || '').slice(0, 45);
+
+            const price = document.createElement('div');
+            price.className = 'sd-price';
+            price.textContent = p.price ? (window.formatPrice ? window.formatPrice(p.price) : '$' + p.price) : '';
+
+            info.appendChild(title);
+            info.appendChild(price);
+            item.appendChild(info);
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('class', 'sd-arrow');
+            svg.setAttribute('width', '14'); svg.setAttribute('height', '14');
+            svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
+            svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2.5');
+            svg.innerHTML = '<line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>';
+            item.appendChild(svg);
+
+            item.addEventListener('click', () => {
+                if (item.dataset.kakobuy && item.dataset.kakobuy !== '#') window.open(item.dataset.kakobuy, '_blank');
                 hideDropdown();
             });
+
+            dropdownEl.appendChild(item);
         });
     }
 
