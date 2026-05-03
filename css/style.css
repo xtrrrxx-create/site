@@ -137,7 +137,7 @@ body {
     border-radius: 9999px;
     pointer-events: none;
     z-index: 0;
-    transition: transform 200ms var(--ease-out), width 200ms var(--ease-out), height 200ms var(--ease-out);
+    transition: transform 130ms var(--ease-out), width 130ms var(--ease-out);
 }
 
 .nav-links li {
