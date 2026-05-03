@@ -1997,7 +1997,7 @@ function showWelcomeModal() {
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .3s ease;overflow-y:auto;';
 
     overlay.innerHTML = `
-    <div style="background:#242424;border-radius:24px;width:100%;max-width:580px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
+    <div style="background:#242424;border-radius:24px;width:100%;max-width:780px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
 
         <!-- Header -->
         <div style="padding:2rem 2.2rem 1.5rem;border-bottom:1px solid #333;">
@@ -2039,12 +2039,9 @@ function showWelcomeModal() {
 
         <!-- KakoBuy Sign Up -->
         <div style="padding:1.4rem 2.2rem;border-bottom:1px solid #333;background:#1a1a1a;">
-            <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.6rem;">
-                <div style="background:#fff;border-radius:10px;padding:.3rem .5rem;font-size:.75rem;font-weight:900;line-height:1.1;color:#000;">Kako<br>Buy</div>
-                <div>
-                    <p style="color:#fff;font-size:1rem;font-weight:800;margin:0;line-height:1.2;">Get <span style="color:#f5a623;">$450</span> just for signing up.</p>
-                    <p style="color:#666;font-size:.78rem;margin:0;">Use our link. Costs nothing. Keeps this site free.</p>
-                </div>
+            <div style="margin-bottom:.6rem;">
+                <p style="color:#fff;font-size:1rem;font-weight:800;margin:0 0 .2rem;line-height:1.2;">Get <span style="color:#f5a623;">$450</span> just for signing up on KakoBuy.</p>
+                <p style="color:#666;font-size:.78rem;margin:0;">Use our link. Costs nothing. Keeps this site free.</p>
             </div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.9rem;">
                 <div style="background:#2d1f3d;border-radius:10px;padding:.6rem;text-align:center;">
@@ -2067,7 +2064,7 @@ function showWelcomeModal() {
                 </div>
                 <button onclick="navigator.clipboard.writeText('keviinn');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)" style="background:#3a3a3a;color:#fff;border:none;border-radius:6px;padding:.35rem .75rem;font-size:.78rem;font-weight:700;cursor:pointer;">Copy</button>
             </div>
-            <a href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener" style="display:block;width:100%;padding:.85rem;border-radius:999px;background:linear-gradient(135deg,#f5a623,#e8520a);color:#fff;font-weight:800;font-size:.9rem;text-align:center;text-decoration:none;letter-spacing:.04em;">SIGN UP HERE</a>
+            <a href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener" style="display:block;width:100%;padding:.85rem;border-radius:999px;background:#f5a623;color:#fff;font-weight:800;font-size:.9rem;text-align:center;text-decoration:none;letter-spacing:.04em;">SIGN UP HERE</a>
         </div>
 
         <!-- CTA -->
