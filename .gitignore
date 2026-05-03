@@ -6,6 +6,11 @@ node_modules/
 out/
 dist/
 build/
+admin-app/dist/
+admin-app/dist2/
+
+# Claude worktrees
+.claude/worktrees/
 
 # env files
 .env
@@ -38,3 +43,13 @@ Thumbs.db
 bottoms-spreadsheet.xlsx
 products_template.xlsx
 tops-spreadsheet.xlsx
+.vercel
+fix_categories_v2.py
+refresh_all_prices.py
+fix_prices_from_discord.py
+fix_batches_by_price.py
+find_dupes.py
+dedup_all.py
+dedupe.py
+recat_by_title.py
+fix_qc_images.py

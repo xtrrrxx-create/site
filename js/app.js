@@ -1581,7 +1581,7 @@ function getPages() {
 // ─── APP INIT ──────────────────────────────────────────────────────────────
 function initApp() {
     const mainContent = document.getElementById('app-content');
-    const navLinks = document.querySelectorAll('.nav-links a');
+    const navLinks = document.querySelectorAll('.nav-links a, .rsb-link');
 
     function renderPage(pageId) {
         if (productsRefreshTimer) {
@@ -1612,6 +1612,7 @@ function initApp() {
         if (pageId === 'products') {
             filterState = { search: '', category: 'All', batch: 'All Tags' };
 
+            if (window.showSkeletonCards) window.showSkeletonCards(10);
             fetchFromSupabase()
                 .then(data => {
                     lastProductsSignature = JSON.stringify(data);
@@ -2042,6 +2043,8 @@ window.updateTrackerLinks = function (code) {
     function setCount(n) {
         const el = document.getElementById('online-count');
         if (el) el.textContent = n;
+        const elM = document.getElementById('online-count-mobile');
+        if (elM) elM.textContent = n;
     }
     // Simple deterministic hash → [0,1)
     function seededRand(seed) {
