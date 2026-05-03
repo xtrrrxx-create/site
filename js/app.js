@@ -1107,7 +1107,7 @@ function getPages() {
                 </div>
                 <div style="position:relative;width:100%;display:flex;justify-content:center;">
                     <h1 class="jf-title" style="white-space:nowrap;margin-bottom:0;"><span style="color:var(--text-primary);">jarvis </span><span style="color:transparent;-webkit-text-stroke:1.5px var(--text-primary);">finder</span></h1>
-                    <button data-action="go-products" style="position:absolute;right:9%;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:9px;background:#ff8c00;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;padding:0.9rem 2rem;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(255,140,0,0.35);animation:jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.52s;">
+                    <button data-action="go-products" style="position:absolute;right:9%;top:35%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:9px;background:#ff8c00;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;padding:0.9rem 2rem;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(255,140,0,0.35);animation:jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.52s;">
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
