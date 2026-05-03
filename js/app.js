@@ -761,10 +761,10 @@ function renderFilteredProducts() {
                 <div class="product-info">
                     ${batchFlair ? `<div class="product-batch-row">${batchFlair}</div>` : ''}
                     <h3 class="product-title">${safeTitle}</h3>
-                    <div class="product-price">${formatPrice(p.price)}</div>
+                    <div class="product-price" style="color:#ff8c00;">${formatPrice(p.price)}</div>
                     <div class="product-actions">
-                        <a href="${kakobuy}" target="_blank" class="btn-primary" style="text-decoration:none;" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">${t('btn_buy')}</a>
-                        <a href="${picksly}" target="_blank" class="btn-secondary" style="text-decoration:none;display:flex;align-items:center;justify-content:center;" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">View QC</a>
+                        <a href="${kakobuy}" target="_blank" class="card-btn-buy" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">${t('btn_buy')}</a>
+                        <a href="${picksly}" target="_blank" class="card-btn-qc" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">View QC</a>
                     </div>
                 </div>
             </div>

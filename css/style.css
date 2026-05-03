@@ -306,8 +306,26 @@ main {
 }
 
 .btn-primary {
-    background: #ff8c00;
-    color: #fff;
+    background-color: var(--text-primary);
+    color: var(--bg-color);
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-secondary {
+    background-color: transparent;
+    border-radius: 8px;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+}
+
+.card-btn-buy {
+    background: #ff8c00 !important;
+    color: #fff !important;
     border: none;
     padding: 0.75rem 1rem;
     border-radius: 8px;
@@ -316,24 +334,32 @@ main {
     cursor: pointer;
     flex: 2;
     text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: opacity 0.15s;
 }
-.btn-primary:hover { opacity: 0.85; }
+.card-btn-buy:hover { opacity: 0.85; }
 
-.btn-secondary {
+.card-btn-qc {
     background: transparent;
     border-radius: 8px;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1rem;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
     flex: 1;
     text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     transition: border-color 0.15s;
 }
-.btn-secondary:hover { border-color: var(--text-secondary); }
+.card-btn-qc:hover { border-color: var(--text-secondary); }
 
 /* Converter */
 .input-group input, .input-group select {
