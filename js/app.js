@@ -331,26 +331,10 @@ const LINK_INPUT_MAX_LEN = 100;
 const PRODUCTS_RENDER_STEP = 30;
 const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
 
-// Supabase config
-const SUPABASE_URL = 'https://jcfcyqnuhufmtoxlqknt.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpjZmN5cW51aHVmbXRveGxxa250Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwNjg4NzksImV4cCI6MjA5MTY0NDg3OX0.T40EwnvdZYI4n_Jm2Tnt1lBeGt46AHLWsTy_wP1Z-d0';
-
 async function fetchFromSupabase() {
-    const pageSize = 1000;
-    let all = [];
-    let offset = 0;
-    while (true) {
-        const res = await fetch(
-            `${SUPABASE_URL}/rest/v1/products?select=title,price,img,kakobuy,picksly,category,batch&order=id.asc&limit=${pageSize}&offset=${offset}`,
-            { headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } }
-        );
-        if (!res.ok) throw new Error('Supabase fetch failed');
-        const page = await res.json();
-        all = all.concat(page);
-        if (page.length < pageSize) break;
-        offset += pageSize;
-    }
-    return all;
+    const res = await fetch('/api/products');
+    if (!res.ok) throw new Error('Failed to load products');
+    return res.json();
 }
 
 let filterState = { search: '', category: 'All', batch: 'All Tags' };
