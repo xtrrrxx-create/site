@@ -757,13 +757,13 @@ function renderFilteredProducts() {
         const picksly = safeExternalUrl(p.picksly || '#');
         let batchFlair = '';
         if (batch === 'best batch') {
-            batchFlair = '<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#1f5130;color:#b8f7cc;border:1px solid #2a7a47;">BEST BATCH</span>';
+            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#f5a623;letter-spacing:.03em;">BEST BATCH</span>';
         } else if (batch === 'budget batch') {
-            batchFlair = '<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#51411f;color:#ffe3ab;border:1px solid #8a6b2a;">BUDGET</span>';
+            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">BUDGET</span>';
         } else if (batch === 'random batch') {
-            batchFlair = '<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#2a2f42;color:#c7d2ff;border:1px solid #4d5a96;">RANDOM</span>';
+            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">RANDOM</span>';
         } else if (batchRaw) {
-            batchFlair = `<span style="display:inline-flex;align-items:center;padding:0.22rem 0.5rem;border-radius:999px;font-size:0.68rem;font-weight:800;letter-spacing:.02em;background:#2c2d34;color:#d9d9df;border:1px solid #4b4d59;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
+            batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
         }
 
         const rvItem = JSON.stringify({ title: safeTitle, price: p.price, img: safeImg, kakobuy: p.kakobuy || '', picksly: p.picksly || '' }).replace(/'/g, '&#39;');
