@@ -1,4 +1,4 @@
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
     const SUPABASE_URL = process.env.SUPABASE_URL;
     const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY;
 
@@ -27,6 +27,5 @@ module.exports = async function handler(req, res) {
     }
 
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
-    res.setHeader('Access-Control-Allow-Origin', 'https://www.jarvis-finder.com');
     res.json(all);
-};
+}
