@@ -759,12 +759,12 @@ function renderFilteredProducts() {
             <div class="product-card" onclick="trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
-                    <div style="margin-bottom:0.4rem;min-height:18px;">${batchFlair}</div>
+                    ${batchFlair ? `<div class="product-batch-row">${batchFlair}</div>` : ''}
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
                     <div class="product-actions">
-                        <a href="${kakobuy}" target="_blank" class="btn-primary" style="flex:2;text-align:center;text-decoration:none;border-radius:8px;padding:0.75rem;" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">${t('btn_buy')}</a>
-                        <a href="${picksly}" target="_blank" class="btn-secondary" style="flex:1;text-align:center;text-decoration:none;border-radius:8px;padding:0.75rem;display:flex;align-items:center;justify-content:center;background:var(--border-color);border:none;font-weight:600;" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">QC</a>
+                        <a href="${kakobuy}" target="_blank" class="btn-primary" style="text-decoration:none;" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">${t('btn_buy')}</a>
+                        <a href="${picksly}" target="_blank" class="btn-secondary" style="text-decoration:none;display:flex;align-items:center;justify-content:center;" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">View QC</a>
                     </div>
                 </div>
             </div>
@@ -895,7 +895,7 @@ function injectHomeStyles() {
             line-height: 0.9;
             letter-spacing: -0.02em;
             color: var(--text-primary);
-            margin-bottom: 1.6rem;
+            margin-bottom: 0.75rem;
         }
         .jf-title-line {
             display: block;
@@ -912,10 +912,10 @@ function injectHomeStyles() {
         /* Subtext */
         .jf-sub {
             color: var(--text-secondary);
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 400;
-            line-height: 1.7;
-            margin-bottom: 2.25rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
             max-width: 380px;
             animation: jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.4s;
         }
@@ -973,16 +973,16 @@ function getPages() {
         <style>
             .rv-section {
                 width: 100%;
-                padding: 0 0 1.5rem;
+                padding: 0 0 0.5rem;
                 overflow: hidden;
             }
             .rv-label {
-                font-size: 0.72rem;
+                font-size: 0.66rem;
                 font-weight: 700;
                 letter-spacing: 0.12em;
                 text-transform: uppercase;
                 color: var(--text-secondary);
-                padding: 0 5% 0.9rem;
+                padding: 0 5% 0.5rem;
             }
             .rv-track-wrap {
                 overflow: hidden;
@@ -1004,8 +1004,8 @@ function getPages() {
             .rv-card {
                 background: var(--nav-bg);
                 border: 1px solid var(--border-color);
-                border-radius: 16px;
-                width: 180px;
+                border-radius: 14px;
+                width: 150px;
                 flex-shrink: 0;
                 overflow: hidden;
                 transition: border-color 0.2s;
@@ -1013,47 +1013,43 @@ function getPages() {
             .rv-card:hover { border-color: var(--text-secondary); }
             .rv-img {
                 width: 100%;
-                height: 160px;
+                height: 110px;
                 overflow: hidden;
-                background: var(--bg-color);
+                background: #1e1e1e;
             }
             .rv-info {
-                padding: 0.75rem;
+                padding: 0.55rem 0.6rem 0.6rem;
             }
             .rv-title {
-                font-size: 0.78rem;
+                font-size: 0.72rem;
                 font-weight: 600;
                 color: var(--text-primary);
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                margin-bottom: 0.25rem;
+                margin-bottom: 0.2rem;
             }
             .rv-price {
-                font-size: 0.82rem;
+                font-size: 0.8rem;
                 font-weight: 800;
-                color: var(--text-primary);
-                margin-bottom: 0.6rem;
+                color: #ff8c00;
+                margin-bottom: 0.45rem;
             }
             .rv-actions {
                 display: flex;
-                gap: 0.4rem;
+                gap: 0.3rem;
             }
             .rv-btn {
                 flex: 1;
                 text-align: center;
                 text-decoration: none;
-                border-radius: 8px;
-                padding: 0.4rem 0.2rem;
-                font-size: 0.72rem;
+                border-radius: 999px;
+                padding: 0.3rem 0.2rem;
+                font-size: 0.66rem;
                 font-weight: 700;
                 transition: opacity 0.15s;
             }
             .rv-btn:hover { opacity: 0.8; }
-            .rv-btn-buy {
-                background: #ff8c00;
-                color: #fff;
-            }
             .rv-btn-qc {
                 background: var(--border-color);
                 color: var(--text-primary);
