@@ -1031,11 +1031,7 @@ function getPages() {
                 display: flex;
                 gap: 1rem;
                 width: max-content;
-                animation: rv-scroll 30s linear infinite;
-            }
-            @keyframes rv-scroll {
-                0%   { transform: translateX(0); }
-                100% { transform: translateX(-50%); }
+                will-change: transform;
             }
             .rv-card {
                 background: #2a2a2a;
@@ -1110,11 +1106,6 @@ function getPages() {
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
-                    <svg style="position:absolute;right:calc(9% - 20px);top:calc(35% + 28px);width:110px;height:100px;overflow:visible;pointer-events:none;animation:jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 1s,arrowBob 2.2s ease-in-out infinite 1.8s;" viewBox="0 0 110 100" fill="none">
-                        <style>@keyframes arrowBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}</style>
-                        <path d="M 8 95 C 10 55, 55 35, 88 8" stroke="#ff8c00" stroke-width="3" stroke-linecap="round"/>
-                        <polyline points="72,22 88,8 74,4" stroke="#ff8c00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                    </svg>
                 </div>
                 <p class="jf-sub">${t('hero_desc')}</p>
                 ${buildRecentlyViewedMarquee()}
@@ -2029,20 +2020,32 @@ function initApp() {
     history.replaceState({ page: initial }, '', initial === 'home' ? '/' : '/' + initial);
     renderPage(initial);
 
-    // Recently viewed marquee: pause on hover, resume on tab return
-    function initRvMarquee() {
+    (function initRvMarquee() {
         const track = document.getElementById('rv-track');
         if (!track) return;
-        track.addEventListener('mouseenter', () => track.style.animationPlayState = 'paused');
-        track.addEventListener('mouseleave', () => track.style.animationPlayState = 'running');
-    }
-    initRvMarquee();
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) {
-            const track = document.getElementById('rv-track');
-            if (track && !track.matches(':hover')) track.style.animationPlayState = 'running';
+        const SPEED = 0.5; // px per ms at 60fps equivalent
+        let pos = 0;
+        let paused = false;
+        let lastTs = null;
+
+        function getHalfWidth() { return track.scrollWidth / 2; }
+
+        function tick(ts) {
+            requestAnimationFrame(tick);
+            if (paused || document.hidden) { lastTs = null; return; }
+            if (lastTs === null) { lastTs = ts; return; }
+            const delta = Math.min(ts - lastTs, 100); // cap delta to avoid jump after tab switch
+            lastTs = ts;
+            pos += SPEED * delta / 16.67;
+            const half = getHalfWidth();
+            if (half > 0 && pos >= half) pos -= half;
+            track.style.transform = `translateX(${-pos}px)`;
         }
-    });
+
+        track.addEventListener('mouseenter', () => { paused = true; });
+        track.addEventListener('mouseleave', () => { paused = false; lastTs = null; });
+        requestAnimationFrame(tick);
+    })();
 
     // Prefetch products in background so Products page loads instantly
     if (initial !== 'products' && allProductsCache.length === 0) {
