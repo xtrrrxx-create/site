@@ -891,9 +891,9 @@ function injectHomeStyles() {
         .jf-title {
             font-family: 'Goodly', 'Georgia', serif;
             font-weight: normal;
-            font-size: clamp(2.5rem, 6vw, 5.5rem);
+            font-size: clamp(3rem, 8.5vw, 9rem);
             line-height: 1;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.02em;
             white-space: nowrap;
             color: var(--text-primary);
             margin-bottom: 0.4rem;
