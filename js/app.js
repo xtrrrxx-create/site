@@ -1009,16 +1009,21 @@ function getPages() {
                 flex-shrink: 0;
                 overflow: hidden;
                 transition: border-color 0.2s;
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 560px);
+                min-height: 280px;
             }
             .rv-card:hover { border-color: var(--text-secondary); }
             .rv-img {
                 width: 100%;
-                height: 150px;
+                flex: 1;
                 overflow: hidden;
                 background: var(--bg-color);
             }
             .rv-info {
                 padding: 0.75rem;
+                flex-shrink: 0;
             }
             .rv-title {
                 font-size: 0.78rem;
