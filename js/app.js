@@ -2029,6 +2029,21 @@ function initApp() {
     history.replaceState({ page: initial }, '', initial === 'home' ? '/' : '/' + initial);
     renderPage(initial);
 
+    // Recently viewed marquee: pause on hover, resume on tab return
+    function initRvMarquee() {
+        const track = document.getElementById('rv-track');
+        if (!track) return;
+        track.addEventListener('mouseenter', () => track.style.animationPlayState = 'paused');
+        track.addEventListener('mouseleave', () => track.style.animationPlayState = 'running');
+    }
+    initRvMarquee();
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            const track = document.getElementById('rv-track');
+            if (track && !track.matches(':hover')) track.style.animationPlayState = 'running';
+        }
+    });
+
     // Prefetch products in background so Products page loads instantly
     if (initial !== 'products' && allProductsCache.length === 0) {
         window._prefetchPromise = fetchFromSupabase().then(data => {
