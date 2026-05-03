@@ -893,7 +893,9 @@ function injectHomeStyles() {
             font-weight: normal;
             font-size: clamp(3.5rem, 10vw, 8rem);
             line-height: 0.9;
-            letter-spacing: -0.02em;
+            letter-spacing: 0.08em;
+            transform: scaleX(1.15);
+            display: block;
             color: var(--text-primary);
             margin-bottom: 0.4rem;
         }
@@ -1005,13 +1007,14 @@ function getPages() {
                 background: var(--nav-bg);
                 border: 1px solid var(--border-color);
                 border-radius: 16px;
-                width: 200px;
+                width: calc((100vw - 80px) / 6.5);
+                min-width: 190px;
                 flex-shrink: 0;
                 overflow: hidden;
                 transition: border-color 0.2s;
                 display: flex;
                 flex-direction: column;
-                height: calc(100vh - 580px);
+                height: calc(100vh - 520px);
                 min-height: 280px;
             }
             .rv-card:hover { border-color: var(--text-secondary); }
