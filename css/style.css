@@ -411,9 +411,9 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.15s;
+    transition: background 0.2s, color 0.2s;
 }
-.card-btn-buy:hover { opacity: 0.88; }
+.card-btn-buy:hover { background: #f2ede4; color: #1c1917; opacity: 1; }
 
 .card-btn-qc {
     background: #2c2c2e;
