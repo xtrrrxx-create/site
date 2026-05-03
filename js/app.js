@@ -1919,30 +1919,30 @@ function initApp() {
         if (pageId === 'products') {
             filterState = { search: '', category: 'All', batch: 'All Tags' };
 
-            if (window.showSkeletonCards) window.showSkeletonCards(10);
-            fetchFromSupabase()
-                .then(data => {
-                    lastProductsSignature = JSON.stringify(data);
-                    allProductsCache = data;
+            const onData = (data) => {
+                lastProductsSignature = JSON.stringify(data);
+                allProductsCache = data;
+                window.allProductsCache = data;
+                const loader = document.getElementById('loading-text');
+                if (loader) loader.remove();
+                bindFilterEvents();
+                renderFilteredProducts();
+                const info = document.getElementById('kf-results-info');
+                if (info) info.textContent = t('showing_of', { a: data.length, b: data.length });
+                productsRefreshTimer = setInterval(() => refreshProductsFromServer(true), PRODUCTS_AUTO_REFRESH_MS);
+            };
 
-                    const loader = document.getElementById('loading-text');
-                    if (loader) loader.remove();
-
-                    bindFilterEvents();
-                    renderFilteredProducts();
-
-                    const info = document.getElementById('kf-results-info');
-                    if (info) info.textContent = t('showing_of', { a: data.length, b: data.length });
-
-                    // Lightweight periodic sync.
-                    productsRefreshTimer = setInterval(() => {
-                        refreshProductsFromServer(true);
-                    }, PRODUCTS_AUTO_REFRESH_MS);
-                })
-                .catch(err => {
-                    const container = document.getElementById('products-container');
-                    if (container) container.innerHTML = `<p style="grid-column:1/-1;color:#ff6b6b;text-align:center;">${t('products_error', { e: err.message })}</p>`;
-                });
+            if (allProductsCache.length > 0) {
+                onData(allProductsCache);
+            } else {
+                if (window.showSkeletonCards) window.showSkeletonCards(10);
+                (window._prefetchPromise || fetchFromSupabase())
+                    .then(onData)
+                    .catch(err => {
+                        const container = document.getElementById('products-container');
+                        if (container) container.innerHTML = `<p style="grid-column:1/-1;color:#ff6b6b;text-align:center;">${t('products_error', { e: err.message })}</p>`;
+                    });
+            }
         }
     }
 
@@ -2015,6 +2015,16 @@ function initApp() {
     const initial = pageFromPath();
     history.replaceState({ page: initial }, '', initial === 'home' ? '/' : '/' + initial);
     renderPage(initial);
+
+    // Prefetch products in background so Products page loads instantly
+    if (initial !== 'products' && allProductsCache.length === 0) {
+        window._prefetchPromise = fetchFromSupabase().then(data => {
+            lastProductsSignature = JSON.stringify(data);
+            allProductsCache = data;
+            window.allProductsCache = data;
+            window._prefetchPromise = null;
+        }).catch(() => { window._prefetchPromise = null; });
+    }
 }
 
 // ─── WELCOME MODAL ─────────────────────────────────────────────────────────
