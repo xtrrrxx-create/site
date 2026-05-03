@@ -189,11 +189,12 @@ window.applyTilt = applyTilt;
 // ─── 3. SCROLL REVEAL ──────────────────────────────────────────────────────
 (function initScrollReveal() {
     const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => {
-            if (e.isIntersecting) {
-                e.target.classList.add('sr-visible');
-                io.unobserve(e.target);
-            }
+        const visible = entries.filter(e => e.isIntersecting);
+        visible.forEach((e, i) => {
+            e.target.style.transitionDelay = `${i * 40}ms`;
+            e.target.classList.add('sr-visible');
+            setTimeout(() => { e.target.style.transitionDelay = ''; }, 380 + i * 40);
+            io.unobserve(e.target);
         });
     }, { threshold: 0.08 });
 

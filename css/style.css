@@ -6,6 +6,9 @@
     --text-secondary: #A1A1AA;
     --accent-color: #ffffff;
     --glow-color: rgba(255, 255, 255, 0.1);
+
+    --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 body.light-mode {
@@ -137,7 +140,7 @@ body {
     font-size: 0.95rem;
     padding: 0.7rem 1.5rem;
     border-radius: 9999px;
-    transition: all 0.2s ease;
+    transition: color 180ms var(--ease-out), background-color 180ms var(--ease-out);
     white-space: nowrap;
 }
 
@@ -204,7 +207,7 @@ body {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out);
 }
 
 .btn-icon:hover {
@@ -259,11 +262,19 @@ main {
     border-radius: 9999px;
     border: none;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
 }
 
-.btn-explore:hover {
-    transform: scale(1.03);
+@media (hover: hover) and (pointer: fine) {
+    .btn-explore:hover {
+        transform: scale(1.04);
+        box-shadow: 0 6px 28px rgba(255,140,0,0.5);
+    }
+}
+
+.btn-explore:active {
+    transform: scale(0.97);
+    transition: transform 100ms var(--ease-out);
 }
 
 /* Sections for products and tools */
@@ -298,15 +309,22 @@ main {
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 220ms var(--ease-out), box-shadow 220ms var(--ease-out);
     display: flex;
     flex-direction: column;
     height: 100%;
 }
 
-.product-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+@media (hover: hover) and (pointer: fine) {
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 48px rgba(0,0,0,0.55);
+    }
+}
+
+.product-card:active {
+    transform: scale(0.98);
+    transition: transform 100ms var(--ease-out);
 }
 
 .product-image {
@@ -413,9 +431,10 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, color 0.2s;
+    transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 100ms var(--ease-out);
 }
 .card-btn-buy:hover { background: #faf7f2; color: #1c1917; opacity: 1; }
+.card-btn-buy:active { transform: scale(0.97); }
 
 .card-btn-qc {
     background: #2c2c2e;
@@ -432,9 +451,10 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s;
+    transition: background-color 160ms var(--ease-out), transform 100ms var(--ease-out);
 }
 .card-btn-qc:hover { background: #3a3a3c; }
+.card-btn-qc:active { transform: scale(0.97); }
 
 /* Converter */
 .input-group input, .input-group select {
@@ -522,7 +542,7 @@ main {
     border-radius: 12px;
     padding: 0.6rem 1rem;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out);
     flex: 1 1 calc(33% - 0.75rem);
     min-width: 130px;
 }
@@ -567,8 +587,8 @@ main {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 #bg-canvas {
@@ -1084,12 +1104,32 @@ main {
 ═══════════════════════════════════════════════════════════ */
 .product-card {
     opacity: 0;
-    transform: translateY(18px);
-    transition: opacity 0.45s ease, transform 0.45s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transform: translateY(16px);
+    transition: opacity 380ms var(--ease-out), transform 380ms var(--ease-out), border-color 200ms var(--ease-out), box-shadow 220ms var(--ease-out);
 }
 .product-card.sr-visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+.btn-icon:active {
+    transform: scale(0.93);
+    transition: transform 100ms var(--ease-out);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   REDUCED MOTION
+═══════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    .product-card {
+        opacity: 1;
+        transform: none;
+    }
 }
 
 /* ═══════════════════════════════════════════════════════════
