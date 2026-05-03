@@ -1997,10 +1997,10 @@ function showWelcomeModal() {
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .3s ease;overflow-y:auto;';
 
     overlay.innerHTML = `
-    <div style="background:#242424;border-radius:24px;width:100%;max-width:780px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
+    <div style="background:#242424;border-radius:24px;width:100%;max-width:960px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
 
         <!-- Header -->
-        <div style="padding:2rem 2.2rem 1.5rem;border-bottom:1px solid #333;">
+        <div style="padding:1.4rem 2.2rem 1.2rem;border-bottom:1px solid #333;">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
                     <div style="font-size:1.8rem;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1;margin-bottom:.4rem;">
@@ -2013,12 +2013,12 @@ function showWelcomeModal() {
         </div>
 
         <!-- Prefs -->
-        <div style="padding:1.6rem 2.2rem;display:flex;flex-direction:column;gap:1.4rem;border-bottom:1px solid #333;">
+        <div style="padding:1.2rem 2.2rem;display:flex;flex-direction:column;gap:1rem;border-bottom:1px solid #333;">
 
             <div>
                 <p style="color:#666;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;">Language</p>
                 <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="jf-lang-grid">
-                    ${LANGS.map(l=>`<button onclick="jfWelSelLang('${l.id}')" id="jf-wl-${l.id}" style="${S.pill(l.id===selLang)}"><span style="font-size:.7rem;background:#555;color:#ccc;border-radius:3px;padding:0 .3rem;margin-right:.3rem;font-weight:800;">${l.flag}</span>${l.label}</button>`).join('')}
+                    ${LANGS.map(l=>`<button onclick="jfWelSelLang('${l.id}')" id="jf-wl-${l.id}" style="${S.pill(l.id===selLang)}">${l.label}</button>`).join('')}
                 </div>
             </div>
 
@@ -2038,14 +2038,14 @@ function showWelcomeModal() {
         </div>
 
         <!-- KakoBuy Sign Up -->
-        <div style="padding:1.4rem 2.2rem;border-bottom:1px solid #333;background:#1a1a1a;">
+        <div style="padding:1.2rem 2.2rem;border-bottom:1px solid #333;background:#1a1a1a;">
             <div style="margin-bottom:.6rem;">
                 <p style="color:#fff;font-size:1rem;font-weight:800;margin:0 0 .2rem;line-height:1.2;">Get <span style="color:#f5a623;">$450</span> just for signing up on KakoBuy.</p>
                 <p style="color:#666;font-size:.78rem;margin:0;">Use our link. Costs nothing. Keeps this site free.</p>
             </div>
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.9rem;">
-                <div style="background:#2d1f3d;border-radius:10px;padding:.6rem;text-align:center;">
-                    <p style="color:#c084fc;font-weight:800;font-size:.95rem;margin:0;">$450</p>
+                <div style="background:#2a2a2a;border-radius:10px;padding:.6rem;text-align:center;">
+                    <p style="color:#f5a623;font-weight:800;font-size:.95rem;margin:0;">$450</p>
                     <p style="color:#888;font-size:.72rem;margin:0;">credit</p>
                 </div>
                 <div style="background:#2a2a2a;border-radius:10px;padding:.6rem;text-align:center;">
@@ -2068,8 +2068,8 @@ function showWelcomeModal() {
         </div>
 
         <!-- CTA -->
-        <div style="padding:1.4rem 2.2rem;">
-            <button onclick="jfWelDone()" style="width:100%;padding:.9rem;border-radius:999px;border:none;background:#f5a623;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+        <div style="padding:1.2rem 2.2rem;">
+            <button onclick="jfWelDone()" style="width:100%;padding:.85rem;border-radius:999px;border:none;background:#f5a623;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
                 Get Started →
             </button>
             <p style="text-align:center;margin-top:.8rem;">
