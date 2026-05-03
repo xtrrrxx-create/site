@@ -363,7 +363,7 @@ main {
     font-weight: 700;
     font-size: 0.88rem;
     cursor: pointer;
-    flex: 2;
+    flex: 1;
     text-align: center;
     text-decoration: none;
     display: flex;

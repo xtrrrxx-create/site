@@ -761,7 +761,8 @@ function renderFilteredProducts() {
                 <div class="product-info">
                     <div class="product-batch-row">
                         <span class="product-store-badge">店</span>
-                        <span class="product-store-name">${escapeHtml(p.category || batchRaw || 'Store')}</span>
+                        <span class="product-store-name">${escapeHtml(p.category || '')}</span>
+                        ${batchFlair}
                     </div>
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
