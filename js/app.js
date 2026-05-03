@@ -1016,8 +1016,8 @@ function getPages() {
                 100% { transform: translateX(-50%); }
             }
             .rv-card {
-                background: var(--nav-bg);
-                border: 1px solid var(--border-color);
+                background: #2a2a2a;
+                border: 1px solid #3a3a3a;
                 border-radius: 16px;
                 width: calc((100vw - 80px) / 5.2);
                 min-width: 220px;
