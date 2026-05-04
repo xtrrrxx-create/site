@@ -2869,7 +2869,10 @@ window.updateTrackerLinks = function (code) {
     });
 
     // Input-event delegation (oninput="updateTrackerLinks(this.value)" etc.)
+    // e.target may not be an Element (e.g. Document for synthetic events) —
+    // guard with `instanceof Element` before calling closest.
     document.addEventListener('input', function(e) {
+        if (!(e.target instanceof Element)) return;
         const el = e.target.closest('[data-action-input]');
         if (!el) return;
         const a = el.dataset.actionInput;
@@ -2880,6 +2883,7 @@ window.updateTrackerLinks = function (code) {
 
     // Keydown delegation (onkeydown="if(Enter) runQcCheck()" pattern)
     document.addEventListener('keydown', function(e) {
+        if (!(e.target instanceof Element)) return;
         const el = e.target.closest('[data-action-key]');
         if (!el) return;
         const action = el.dataset.actionKey;
