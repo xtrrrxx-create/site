@@ -780,8 +780,8 @@ function renderFilteredProducts() {
             /picks\.ly\/twitter-image/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
-            ? `<img src="${safeExternalUrl(safeImg)}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" onerror="this.onerror=null;this.style.display='none';this.parentElement.insertAdjacentHTML('beforeend','<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;&quot;>${t('no_image')}</div>');" />`
-            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${t('no_image')}</div>`;
+            ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" />`
+            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
 
         const kakobuy = buildAgentLink(p.kakobuy || '#');
         const picksly = safeExternalUrl(p.picksly || '#');
@@ -1475,8 +1475,8 @@ function getPages() {
                 <h2 class="qc-title">${t('qc_title')}</h2>
                 <p class="qc-subtitle">${t('qc_subtitle')}</p>
                 <div class="qc-row">
-                    <input class="qc-input" id="qc-input" type="text" placeholder="${t('qc_placeholder')}" maxlength="200" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();runQcCheck();}" />
-                    <button class="qc-btn" id="qc-submit" onclick="runQcCheck()">${t('qc_btn')}</button>
+                    <input class="qc-input" id="qc-input" type="text" placeholder="${t('qc_placeholder')}" maxlength="200" autocomplete="off" data-action-key="runQcCheck" />
+                    <button class="qc-btn" id="qc-submit" data-action="runQcCheck">${t('qc_btn')}</button>
                 </div>
                 <div class="qc-status" id="qc-status"></div>
                 <div class="qc-actions" id="qc-actions" style="display:none;"></div>
@@ -1487,7 +1487,7 @@ function getPages() {
         <div class="qc-batch-modal" id="qc-batch-modal">
             <div class="qc-batch-modal-inner">
                 <div class="qc-batch-modal-head">
-                    <button class="qc-batch-back" onclick="closeQcBatch()">
+                    <button class="qc-batch-back" data-action="closeQcBatch">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                         ${t('qc_back')}
                     </button>
@@ -1500,9 +1500,9 @@ function getPages() {
                 <div class="qc-images" id="qc-batch-modal-images"></div>
             </div>
         </div>
-        <div class="qc-lightbox" id="qc-lightbox" onclick="closeQcLightbox()">
-            <button class="qc-lightbox-close" onclick="event.stopPropagation();closeQcLightbox()" aria-label="Close">×</button>
-            <img id="qc-lightbox-img" alt="" onclick="event.stopPropagation()" />
+        <div class="qc-lightbox" id="qc-lightbox" data-action="closeQcLightbox">
+            <button class="qc-lightbox-close" data-action="closeQcLightbox" data-stop="click" aria-label="Close">×</button>
+            <img id="qc-lightbox-img" alt="" data-stop="click" />
         </div>
     `,
         tools: `
@@ -1844,25 +1844,25 @@ function getPages() {
                 <div class="converter-row">
                     <input class="converter-input" id="link-input" type="text" placeholder="${t('link_placeholder')}" maxlength="${LINK_INPUT_MAX_LEN}" autocomplete="off" />
                     <div class="agent-dropdown-wrap">
-                        <button class="agent-dropdown-btn" id="agent-dropdown-btn" onclick="toggleAgentDropdown()">
+                        <button class="agent-dropdown-btn" id="agent-dropdown-btn" data-action="toggleAgentDropdown">
                             <span style="display:flex;align-items:center;gap:0.45rem;" id="agent-selected-label">
                                 <img src="https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
                             </span>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                         <div class="agent-dropdown-menu" id="agent-dropdown-menu">
-                            <div class="agent-option selected" data-value="kakobuy" onclick="selectAgent('kakobuy','KakoBuy','https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64')">
+                            <div class="agent-option selected" data-value="kakobuy" data-action="selectAgent" data-arg="kakobuy" data-arg2="KakoBuy" data-arg3="https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64">
                                 <img src="https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
                             </div>
-                            <div class="agent-option" data-value="acbuy" onclick="selectAgent('acbuy','ACBuy','https://www.google.com/s2/favicons?domain=acbuy.com&sz=64')">
+                            <div class="agent-option" data-value="acbuy" data-action="selectAgent" data-arg="acbuy" data-arg2="ACBuy" data-arg3="https://www.google.com/s2/favicons?domain=acbuy.com&sz=64">
                                 <img src="https://www.google.com/s2/favicons?domain=acbuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ACBuy
                             </div>
-                            <div class="agent-option" data-value="mulebuy" onclick="selectAgent('mulebuy','Mulebuy','https://www.google.com/s2/favicons?domain=mulebuy.com&sz=64')">
+                            <div class="agent-option" data-value="mulebuy" data-action="selectAgent" data-arg="mulebuy" data-arg2="Mulebuy" data-arg3="https://www.google.com/s2/favicons?domain=mulebuy.com&sz=64">
                                 <img src="https://www.google.com/s2/favicons?domain=mulebuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> Mulebuy
                             </div>
                         </div>
                     </div>
-                    <button class="convert-btn" onclick="convertLink()">${t('convert_link')}</button>
+                    <button class="convert-btn" data-action="convertLink">${t('convert_link')}</button>
                 </div>
                 <div class="converter-result-new" id="converter-result"></div>
             </div>
@@ -1891,7 +1891,7 @@ function getPages() {
                             <div class="weight-unit-label">pkg (g)</div>
                         </div>
                     </div>
-                    <button class="weight-reset-btn" onclick="weightReset()">Reset</button>
+                    <button class="weight-reset-btn" data-action="weightReset">Reset</button>
                 </div>
                 <p class="weight-disclaimer">Weights are approximate averages. Actual weights may vary by ±10-15% depending on brand and materials.</p>
             </div>
@@ -1899,7 +1899,7 @@ function getPages() {
             <div class="tracking-card">
                 <h2 class="tool-title">${t('package_tracking')}</h2>
                 <p class="tool-subtitle" style="margin-bottom:1.25rem;">${t('tools_subtitle')}</p>
-                <input class="tracking-input" type="text" placeholder="${t('tracking_placeholder')}" id="tracking-input" maxlength="${INPUT_MAX_LEN}" oninput="updateTrackerLinks(this.value.trim())" />
+                <input class="tracking-input" type="text" placeholder="${t('tracking_placeholder')}" id="tracking-input" maxlength="${INPUT_MAX_LEN}" data-action-input="updateTrackerLinks" />
                 <div class="tracker-grid">
                     <a class="tracker-card" href="https://t.17track.net/en" target="_blank" rel="noopener" id="track-17">
                         <div class="tracker-icon" style="background:#fff;display:flex;align-items:center;justify-content:center;"><img src="https://www.google.com/s2/favicons?domain=17track.net&sz=64" style="width:28px;height:28px;object-fit:contain;" /></div>
@@ -2113,6 +2113,7 @@ function showWelcomeModal() {
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .3s ease;overflow-y:auto;';
 
     overlay.innerHTML = `
+    <style>.jf-wel-cta:hover { opacity: 0.85; }</style>
     <div style="background:#242424;border-radius:24px;width:100%;max-width:960px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
 
         <!-- Header -->
@@ -2124,7 +2125,7 @@ function showWelcomeModal() {
                     </div>
                     <p style="color:#666;font-size:.9rem;margin:0;">Customize your experience before you start.</p>
                 </div>
-                <button onclick="jfWelDone()" style="background:none;border:none;color:#555;cursor:pointer;padding:.3rem;font-size:1.2rem;line-height:1;">✕</button>
+                <button data-action="jfWelDone" style="background:none;border:none;color:#555;cursor:pointer;padding:.3rem;font-size:1.2rem;line-height:1;">✕</button>
             </div>
         </div>
 
@@ -2134,21 +2135,21 @@ function showWelcomeModal() {
             <div>
                 <p style="color:#666;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;">Language</p>
                 <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="jf-lang-grid">
-                    ${LANGS.map(l=>`<button onclick="jfWelSelLang('${l.id}')" id="jf-wl-${l.id}" style="${S.pill(l.id===selLang)}">${l.label}</button>`).join('')}
+                    ${LANGS.map(l=>`<button data-action="jfWelSelLang" data-arg="${escapeHtml(l.id)}" id="jf-wl-${escapeHtml(l.id)}" style="${S.pill(l.id===selLang)}">${escapeHtml(l.label)}</button>`).join('')}
                 </div>
             </div>
 
             <div>
                 <p style="color:#666;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;">Currency</p>
                 <div style="display:flex;gap:.4rem;flex-wrap:wrap;" id="jf-cur-grid">
-                    ${CURRENCIES.map(c=>`<button onclick="jfWelSelCur('${c.id}')" id="jf-wc-${c.id}" style="${S.pill(c.id===selCur)}">${c.label}</button>`).join('')}
+                    ${CURRENCIES.map(c=>`<button data-action="jfWelSelCur" data-arg="${escapeHtml(c.id)}" id="jf-wc-${escapeHtml(c.id)}" style="${S.pill(c.id===selCur)}">${escapeHtml(c.label)}</button>`).join('')}
                 </div>
             </div>
 
             <div>
                 <p style="color:#666;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;">Preferred Agent</p>
                 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;" id="jf-agent-grid">
-                    ${AGENTS.map(a=>`<button onclick="jfWelSelAgent('${a.toLowerCase()}')" id="jf-wa-${a.toLowerCase()}" style="${S.agent(a.toLowerCase()===selAgent)}">${a}</button>`).join('')}
+                    ${AGENTS.map(a=>`<button data-action="jfWelSelAgent" data-arg="${escapeHtml(a.toLowerCase())}" id="jf-wa-${escapeHtml(a.toLowerCase())}" style="${S.agent(a.toLowerCase()===selAgent)}">${escapeHtml(a)}</button>`).join('')}
                 </div>
             </div>
         </div>
@@ -2178,18 +2179,18 @@ function showWelcomeModal() {
                     <p style="color:#666;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0;">Code</p>
                     <p style="color:#fff;font-weight:700;font-size:.95rem;margin:0;">keviinn</p>
                 </div>
-                <button onclick="navigator.clipboard.writeText('keviinn');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)" style="background:#3a3a3a;color:#fff;border:none;border-radius:6px;padding:.35rem .75rem;font-size:.78rem;font-weight:700;cursor:pointer;">Copy</button>
+                <button data-action="copyAffcode" data-arg="keviinn" style="background:#3a3a3a;color:#fff;border:none;border-radius:6px;padding:.35rem .75rem;font-size:.78rem;font-weight:700;cursor:pointer;">Copy</button>
             </div>
             <a href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener" style="display:block;width:100%;padding:.85rem;border-radius:999px;background:#f5a623;color:#fff;font-weight:800;font-size:.9rem;text-align:center;text-decoration:none;letter-spacing:.04em;">SIGN UP HERE</a>
         </div>
 
         <!-- CTA -->
         <div style="padding:1.2rem 2.2rem;">
-            <button onclick="jfWelDone()" style="width:100%;padding:.85rem;border-radius:999px;border:none;background:#f5a623;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <button data-action="jfWelDone" class="jf-wel-cta" style="width:100%;padding:.85rem;border-radius:999px;border:none;background:#f5a623;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;">
                 Get Started →
             </button>
             <p style="text-align:center;margin-top:.8rem;">
-                <span onclick="jfWelDone()" style="color:#444;font-size:.8rem;cursor:pointer;">Maybe later</span>
+                <span data-action="jfWelDone" style="color:#444;font-size:.8rem;cursor:pointer;">Maybe later</span>
             </p>
         </div>
     </div>`;
@@ -2420,7 +2421,7 @@ window.runQcCheck = async function () {
         window._qcBatches = batches;
 
         groupsEl.innerHTML = batches.map((b, bi) => `
-            <div class="qc-batch-card" onclick="openQcBatch(${bi})">
+            <div class="qc-batch-card" data-action="openQcBatch" data-arg="${bi}">
                 <div class="qc-batch-cover">
                     <img src="${escapeHtml(safeExternalUrl(b.imgs[0]))}" loading="lazy" alt="${escapeHtml(b.label)}"/>
                     <div class="qc-batch-count">${b.imgs.length} ${t('qc_photos')}</div>
@@ -2565,7 +2566,7 @@ function buildRecentlyViewedMarquee() {
         const picksly = sanitizeStoredUrl(item.picksly) || '#';
         const imgUrl = sanitizeStoredUrl(item.img);
         const img = imgUrl
-            ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none'" />`
+            ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" data-fallback="hide" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
         return `
         <div class="rv-card">
@@ -2616,9 +2617,9 @@ function weightRender() {
             <span>${cat.label}</span>
             <span class="weight-cat-count">~${cat.weight}g each</span>
             <div class="weight-cat-qty">
-                <button class="weight-qty-btn" onclick="weightChange('${cat.id}',-1)">-</button>
+                <button class="weight-qty-btn" data-action="weightChange" data-arg="${escapeHtml(cat.id)}" data-arg2="-1">-</button>
                 <span class="weight-qty-val">${qty}</span>
-                <button class="weight-qty-btn" onclick="weightChange('${cat.id}',1)">+</button>
+                <button class="weight-qty-btn" data-action="weightChange" data-arg="${escapeHtml(cat.id)}" data-arg2="1">+</button>
             </div>
         </div>`;
     }).join('');
@@ -2785,6 +2786,153 @@ window.updateTrackerLinks = function (code) {
     function start() {
         tick();
         setInterval(tick, JITTER_MS);
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start);
+    } else {
+        start();
+    }
+})();
+
+
+// ─── DELEGATED ACTION DISPATCHER ───────────────────────────────────────────
+// Replaces every inline `onclick=` / `oninput=` / `onkeydown=` so we can drop
+// `'unsafe-inline'` from CSP script-src. Elements get `data-action="name"`
+// (and optionally data-arg / data-arg2 / data-arg3); a single document-level
+// listener routes the event to the right handler. Defends in depth against
+// any future XSS — even if injection succeeds, the browser refuses to run
+// inline scripts.
+
+(function initActionDispatcher() {
+    function call(fn, ...args) {
+        if (typeof fn === 'function') return fn(...args);
+    }
+
+    function runAction(el) {
+        const a = el.dataset.action;
+        const a1 = el.dataset.arg;
+        const a2 = el.dataset.arg2;
+        const a3 = el.dataset.arg3;
+        switch (a) {
+            case 'home-nav': {
+                const home = document.querySelector('[data-page=home]');
+                if (home) home.click();
+                break;
+            }
+            case 'toggleTheme':         call(window.toggleTheme); break;
+            case 'openSettings':        { const m = document.getElementById('settings-modal'); if (m) m.style.display = 'flex'; break; }
+            case 'closeSettings':       { const m = document.getElementById('settings-modal'); if (m) m.style.display = 'none'; break; }
+            case 'changeCurrency':      call(window.changeCurrencyUI, a1); break;
+            case 'runQcCheck':          call(window.runQcCheck); break;
+            case 'closeQcBatch':        call(window.closeQcBatch); break;
+            case 'closeQcLightbox':     call(window.closeQcLightbox); break;
+            case 'toggleAgentDropdown': call(window.toggleAgentDropdown); break;
+            case 'selectAgent':         call(window.selectAgent, a1, a2, a3); break;
+            case 'convertLink':         call(window.convertLink); break;
+            case 'weightReset':         call(window.weightReset); break;
+            case 'weightChange':        call(window.weightChange, a1, parseInt(a2 || '0', 10)); break;
+            case 'jfWelDone':           call(window.jfWelDone); break;
+            case 'jfWelSelLang':        call(window.jfWelSelLang, a1); break;
+            case 'jfWelSelCur':         call(window.jfWelSelCur, a1); break;
+            case 'jfWelSelAgent':       call(window.jfWelSelAgent, a1); break;
+            case 'copyAffcode': {
+                const code = a1 || 'keviinn';
+                if (navigator.clipboard) navigator.clipboard.writeText(code).catch(() => {});
+                el.textContent = 'Copied!';
+                setTimeout(() => { el.textContent = 'Copy'; }, 2000);
+                break;
+            }
+            case 'openQcBatch':         call(window.openQcBatch, parseInt(a1 || '0', 10)); break;
+        }
+    }
+
+    // Walk from click target upward. If we hit `data-stop="click"` first, do
+    // not propagate to ancestor actions (mirrors the old inline
+    // event.stopPropagation() pattern). If `data-stop` and `data-action` are
+    // both on the same node, the action still runs.
+    document.addEventListener('click', function(e) {
+        let node = e.target;
+        while (node && node !== document.body && node !== document) {
+            const ds = node.dataset;
+            if (ds) {
+                if (ds.stop === 'click') {
+                    if (ds.action) runAction(node);
+                    return;
+                }
+                if (ds.action) {
+                    runAction(node);
+                    return;
+                }
+            }
+            node = node.parentElement;
+        }
+    });
+
+    // Input-event delegation (oninput="updateTrackerLinks(this.value)" etc.)
+    document.addEventListener('input', function(e) {
+        const el = e.target.closest('[data-action-input]');
+        if (!el) return;
+        const a = el.dataset.actionInput;
+        if (a === 'updateTrackerLinks') {
+            call(window.updateTrackerLinks, (el.value || '').trim());
+        }
+    }, true);
+
+    // Keydown delegation (onkeydown="if(Enter) runQcCheck()" pattern)
+    document.addEventListener('keydown', function(e) {
+        const el = e.target.closest('[data-action-key]');
+        if (!el) return;
+        const action = el.dataset.actionKey;
+        if (e.key === 'Enter' && action === 'runQcCheck') {
+            e.preventDefault();
+            call(window.runQcCheck);
+        }
+    }, true);
+})();
+
+
+// ─── IMG FALLBACK BINDER ───────────────────────────────────────────────────
+// Replaces inline `onerror="this.style.display='none'"` patterns. New <img>
+// elements with `data-fallback` get an error listener attached automatically
+// via MutationObserver. Two modes:
+//   - data-fallback="hide"          → just hide on error
+//   - data-fallback="no-image-text" → hide and append a localized "no image"
+//                                     placeholder (replaces the giant inline
+//                                     onerror that used insertAdjacentHTML).
+
+(function initImgFallback() {
+    function bind(img) {
+        if (img._fallbackBound) return;
+        img._fallbackBound = true;
+        const mode = img.dataset.fallback;
+        img.addEventListener('error', function() {
+            this.onerror = null;
+            this.style.display = 'none';
+            if (mode === 'no-image-text' && this.parentElement) {
+                if (!this.parentElement.querySelector('.img-fallback-text')) {
+                    const div = document.createElement('div');
+                    div.className = 'img-fallback-text';
+                    div.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;';
+                    div.textContent = (typeof t === 'function') ? t('no_image') : 'No image';
+                    this.parentElement.appendChild(div);
+                }
+            }
+        }, { once: true });
+    }
+    function bindAll(root) {
+        root.querySelectorAll('img[data-fallback]').forEach(bind);
+    }
+    function start() {
+        bindAll(document);
+        new MutationObserver(records => {
+            for (const r of records) {
+                for (const node of r.addedNodes) {
+                    if (node.nodeType !== 1) continue;
+                    if (node.tagName === 'IMG' && node.dataset.fallback) bind(node);
+                    else if (node.querySelectorAll) bindAll(node);
+                }
+            }
+        }).observe(document.body, { childList: true, subtree: true });
     }
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', start);

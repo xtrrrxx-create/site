@@ -71,7 +71,7 @@
                 const safeTitle = escapeHtml((p.title || '').slice(0, 50));
                 return `
                 <div class="cmd-item" data-type="product" data-kakobuy="${safeKako}">
-                    ${safeImg ? `<img class="cmd-item-img" src="${safeImg}" loading="lazy" onerror="this.style.display='none'">` : '<span class="cmd-item-icon">📦</span>'}
+                    ${safeImg ? `<img class="cmd-item-img" src="${safeImg}" loading="lazy" data-fallback="hide">` : '<span class="cmd-item-icon">📦</span>'}
                     <div class="cmd-item-info">
                         <span class="cmd-item-title">${safeTitle}</span>
                         <span class="cmd-item-desc">${p.price ? (window.formatPrice ? window.formatPrice(p.price) : '$' + p.price) : ''}</span>
