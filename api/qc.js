@@ -36,6 +36,57 @@ function hostAllowed(hostname) {
     return ALLOWED_HOST_SUFFIXES.some(s => h === s || h.endsWith('.' + s));
 }
 
+// In-memory rate limiter. Vercel reuses warm function instances so the Map
+// persists across invocations on the same instance. NOT shared across regions
+// or cold starts — that means a determined attacker can scale past it by
+// hitting many regions, but it's enough to stop a single misbehaving script
+// from burning through Picksly quota in a tight loop. For a stronger global
+// limit we'd need Vercel KV / Upstash Redis (paid).
+const RL_WINDOW_MS = 5 * 60 * 1000;       // 5 minutes
+const RL_MAX_PER_WINDOW = 60;             // 60 requests / IP / 5 min
+const RL_BURST_WINDOW_MS = 10 * 1000;     // 10 second burst window
+const RL_BURST_MAX = 10;                  // max 10 requests in any 10s
+const rlMap = new Map();                  // ip -> { count, resetAt, burst, burstResetAt }
+
+function clientIp(req) {
+    // x-forwarded-for: original client IP first, comma-separated
+    const xff = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    return xff || req.headers['x-real-ip'] || req.socket?.remoteAddress || 'unknown';
+}
+
+function checkRateLimit(ip) {
+    const now = Date.now();
+    let entry = rlMap.get(ip);
+    if (!entry) {
+        entry = { count: 0, resetAt: now + RL_WINDOW_MS, burst: 0, burstResetAt: now + RL_BURST_WINDOW_MS };
+        rlMap.set(ip, entry);
+    }
+    if (entry.resetAt < now) {
+        entry.count = 0;
+        entry.resetAt = now + RL_WINDOW_MS;
+    }
+    if (entry.burstResetAt < now) {
+        entry.burst = 0;
+        entry.burstResetAt = now + RL_BURST_WINDOW_MS;
+    }
+    // Opportunistic cleanup so the map doesn't grow forever — sweep on every
+    // 50th call. Keeps memory bounded on warm instances over long uptimes.
+    if (rlMap.size > 1000 && Math.random() < 0.02) {
+        for (const [k, v] of rlMap) {
+            if (v.resetAt < now && v.burstResetAt < now) rlMap.delete(k);
+        }
+    }
+    if (entry.burst >= RL_BURST_MAX) {
+        return { ok: false, retryAfter: Math.ceil((entry.burstResetAt - now) / 1000) };
+    }
+    if (entry.count >= RL_MAX_PER_WINDOW) {
+        return { ok: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+    }
+    entry.count++;
+    entry.burst++;
+    return { ok: true, remaining: RL_MAX_PER_WINDOW - entry.count };
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'GET') {
         res.setHeader('Allow', 'GET');
@@ -59,6 +110,16 @@ export default async function handler(req, res) {
     if (!(sameSite || originOk || refererOk)) {
         return res.status(403).json({ success: false, error: 'Forbidden' });
     }
+
+    // Rate limit by client IP. Pre-validation so a flood of bad URLs still
+    // counts toward the cap — otherwise an attacker could probe for free.
+    const ip = clientIp(req);
+    const rl = checkRateLimit(ip);
+    if (!rl.ok) {
+        res.setHeader('Retry-After', String(rl.retryAfter));
+        return res.status(429).json({ success: false, error: 'Too many requests', retryAfter: rl.retryAfter });
+    }
+    res.setHeader('X-RateLimit-Remaining', String(rl.remaining));
 
     const { url } = req.query;
     if (!url || typeof url !== 'string') {
