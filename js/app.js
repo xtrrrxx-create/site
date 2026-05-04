@@ -113,6 +113,14 @@ function safeExternalUrl(rawUrl) {
     }
 }
 
+// Variant for URLs we are about to persist or render in localStorage. Returns
+// "" for invalid/javascript: URLs so we can drop the field instead of writing
+// the literal string "#" into stored data.
+function sanitizeStoredUrl(rawUrl) {
+    const cleaned = safeExternalUrl(rawUrl);
+    return cleaned === "#" ? "" : cleaned;
+}
+
 function extractWeidianItemId(kakobuyUrl) {
     try {
         const parsed = new URL(kakobuyUrl);
@@ -786,9 +794,19 @@ function renderFilteredProducts() {
             batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
         }
 
-        const rvItem = JSON.stringify({ title: safeTitle, price: p.price, img: safeImg, kakobuy: p.kakobuy || '', picksly: p.picksly || '' }).replace(/'/g, '&#39;');
+        // Recently-viewed payload travels via a data attribute (HTML-escaped),
+        // not via inline onclick. Avoids breaking out of attribute quoting if
+        // a product field contains "/'/<. Decoded by the delegated listener.
+        const rvItem = escapeHtml(JSON.stringify({
+            title: stripEmojis(p.title || ''),
+            price: p.price,
+            img: safeImg,
+            // Sanitize URLs at write time so they cannot smuggle javascript: etc.
+            kakobuy: safeExternalUrl(p.kakobuy || ''),
+            picksly: safeExternalUrl(p.picksly || '')
+        }));
         return `
-            <div class="product-card" onclick="trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">
+            <div class="product-card" data-rv="${rvItem}">
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
@@ -799,8 +817,8 @@ function renderFilteredProducts() {
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
                     <div class="product-actions">
-                        <a href="${kakobuy}" target="_blank" class="card-btn-buy" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">${t('btn_buy')}</a>
-                        <a href="${picksly}" target="_blank" class="card-btn-qc" onclick="event.stopPropagation();trackRecentlyViewed('${rvItem.replace(/"/g, '&quot;')}')">View QC</a>
+                        <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="card-btn-buy">${t('btn_buy')}</a>
+                        <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
                     </div>
                 </div>
             </div>
@@ -1110,13 +1128,13 @@ function getPages() {
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
-                    <svg class="jf-arrow" style="position:absolute;right:calc(9% + 105px);top:calc(35% + 4px);width:140px;height:90px;pointer-events:none;overflow:visible;opacity:0;animation:jfArrowIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards 1.2s, jfArrowBob 2.4s ease-in-out infinite 1.8s;" viewBox="0 0 140 90" fill="none" aria-hidden="true">
+                    <svg class="jf-arrow" style="position:absolute;right:calc(9% + 165px);top:calc(35% + 35px);width:170px;height:100px;pointer-events:none;overflow:visible;opacity:0;animation:jfArrowIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards 1.2s, jfArrowBob 2.4s ease-in-out infinite 1.8s;" viewBox="0 0 170 100" fill="none" aria-hidden="true">
                         <defs>
                             <marker id="jfArrowTip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
                                 <path d="M0,0 L10,5 L0,10 z" fill="#ff8c00"/>
                             </marker>
                         </defs>
-                        <path d="M 12 80 Q 28 38 130 14" stroke="#ff8c00" stroke-width="3" stroke-linecap="round" fill="none" marker-end="url(#jfArrowTip)" stroke-dasharray="200" stroke-dashoffset="200" style="animation:jfArrowDraw 0.9s cubic-bezier(0.65,0,0.35,1) forwards 1.2s;"/>
+                        <path d="M 14 92 Q 30 50 158 8" stroke="#ff8c00" stroke-width="3" stroke-linecap="round" fill="none" marker-end="url(#jfArrowTip)" stroke-dasharray="240" stroke-dashoffset="240" style="animation:jfArrowDraw 0.9s cubic-bezier(0.65,0,0.35,1) forwards 1.2s;"/>
                     </svg>
                 </div>
                 <style>
@@ -2494,9 +2512,35 @@ document.addEventListener('keydown', (e) => {
 const RV_KEY = 'jf_recently_viewed';
 const RV_MAX = 12;
 
+// Delegated listener: picks up clicks on .product-card and reads the
+// HTML-escaped JSON from data-rv. Inline onclick removed to harden against
+// stored XSS via product fields.
+document.addEventListener('click', function(e) {
+    const card = e.target.closest && e.target.closest('.product-card[data-rv]');
+    if (!card) return;
+    const raw = card.getAttribute('data-rv');
+    if (raw) window.trackRecentlyViewed(raw);
+});
+
 window.trackRecentlyViewed = function(jsonStr) {
     try {
-        const item = JSON.parse(jsonStr.replace(/&quot;/g, '"').replace(/&#39;/g, "'"));
+        // The browser already HTML-decoded the attribute when we read it via
+        // getAttribute, so jsonStr is plain JSON. Defensive decode kept for
+        // backward compatibility with any older inline-onclick callers.
+        const decoded = String(jsonStr || '')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&amp;/g, '&');
+        const item = JSON.parse(decoded);
+        // Re-validate URLs on the way into localStorage so a tampered DOM
+        // can't inject javascript: URLs that are later rendered in the marquee.
+        if (item && typeof item === 'object') {
+            if (item.kakobuy) item.kakobuy = sanitizeStoredUrl(item.kakobuy);
+            if (item.picksly) item.picksly = sanitizeStoredUrl(item.picksly);
+            if (item.img) item.img = sanitizeStoredUrl(item.img);
+        }
         let rv = [];
         try { rv = JSON.parse(localStorage.getItem(RV_KEY)) || []; } catch(e) {}
         rv = rv.filter(x => x.title !== item.title);
@@ -2515,12 +2559,17 @@ function buildRecentlyViewedMarquee() {
     if (rv.length === 0) return '';
     const kakobuyAffcode = 'affcode=keviinn';
     const cards = rv.map(item => {
-        const kakobuy = item.kakobuy
-            ? (item.kakobuy.includes('affcode') ? item.kakobuy : item.kakobuy + (item.kakobuy.includes('?') ? '&' : '?') + kakobuyAffcode)
+        // Re-validate every URL coming from localStorage — an attacker who can
+        // write to localStorage (XSS elsewhere, malicious browser extension)
+        // must not be able to plant javascript: URLs that fire when we render.
+        const kakobuyClean = sanitizeStoredUrl(item.kakobuy);
+        const kakobuy = kakobuyClean
+            ? (kakobuyClean.includes('affcode') ? kakobuyClean : kakobuyClean + (kakobuyClean.includes('?') ? '&' : '?') + kakobuyAffcode)
             : '#';
-        const picksly = item.picksly || '#';
-        const img = item.img
-            ? `<img src="${escapeHtml(item.img)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none'" />`
+        const picksly = sanitizeStoredUrl(item.picksly) || '#';
+        const imgUrl = sanitizeStoredUrl(item.img);
+        const img = imgUrl
+            ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" onerror="this.style.display='none'" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
         return `
         <div class="rv-card">
@@ -2642,7 +2691,8 @@ window.convertLink = function () {
 
     const validHosts = ['weidian.com', 'taobao.com', 'tmall.com', '1688.com'];
     const host = parsedInput.hostname.toLowerCase();
-    const hostAllowed = validHosts.some(h => host.includes(h));
+    // Suffix match — `weidian.com.evil.tld` must NOT pass.
+    const hostAllowed = validHosts.some(h => host === h || host.endsWith('.' + h));
     if (!hostAllowed) {
         resultDiv.style.border = '1px solid rgba(239,68,68,0.3)';
         resultDiv.style.background = 'rgba(239,68,68,0.1)';
@@ -2682,9 +2732,9 @@ window.convertLink = function () {
     resultDiv.style.border = '1px solid var(--border-color)';
     resultDiv.style.background = 'rgba(128,128,128,0.08)';
     resultDiv.style.color = 'var(--text-primary)';
-    resultDiv.innerHTML = `Link converted for <strong>${agentText}</strong>. <a href="${finalUrl}" target="_blank" style="color:var(--text-primary);font-weight:600;text-decoration:underline;">Click here to open →</a>`;
+    resultDiv.innerHTML = `Link converted for <strong>${escapeHtml(agentText)}</strong>. <a href="${escapeHtml(finalUrl)}" target="_blank" rel="noopener noreferrer" style="color:var(--text-primary);font-weight:600;text-decoration:underline;">Click here to open →</a>`;
     resultDiv.style.display = 'block';
-    setTimeout(() => window.open(finalUrl, '_blank'), 800);
+    setTimeout(() => window.open(finalUrl, '_blank', 'noopener,noreferrer'), 800);
 };
 
 // ─── PACKAGE TRACKING ──────────────────────────────────────────────────────

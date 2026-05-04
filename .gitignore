@@ -60,6 +60,21 @@ fix_images_fast.js
 fix_images_turbo.js
 update_supabase_imgs.js
 update_prices.js
+import-products.js
+multi_scraper.py
+fill_qc_all.py
+fill_missing_images.py
+delete_after_id.py
+dedup_prefer_image.py
+clear_bad_imgs.py
+fill_picksly_from_ikako.py
+enrich_products.py
+enrich_products_browser.py
+auto_import.py
+full_import_fast.py
+discord_scraper.py
+admin-app/
+admin_realtime.py
 
 # Supabase data exports — sensitive
 products_supabase.json
@@ -71,3 +86,4 @@ discord_products_backup.json
 
 # Skill lock files
 skills-lock.json
+.env*.local
