@@ -2524,16 +2524,10 @@ document.addEventListener('click', function(e) {
 
 window.trackRecentlyViewed = function(jsonStr) {
     try {
-        // The browser already HTML-decoded the attribute when we read it via
-        // getAttribute, so jsonStr is plain JSON. Defensive decode kept for
-        // backward compatibility with any older inline-onclick callers.
-        const decoded = String(jsonStr || '')
-            .replace(/&quot;/g, '"')
-            .replace(/&#39;/g, "'")
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>')
-            .replace(/&amp;/g, '&');
-        const item = JSON.parse(decoded);
+        // jsonStr comes from card.getAttribute('data-rv') which returns the
+        // browser-decoded value. Do NOT manually decode entities again — that
+        // would corrupt legitimate titles containing literal "&quot;" text.
+        const item = JSON.parse(String(jsonStr || ''));
         // Re-validate URLs on the way into localStorage so a tampered DOM
         // can't inject javascript: URLs that are later rendered in the marquee.
         if (item && typeof item === 'object') {
