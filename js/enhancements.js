@@ -292,7 +292,11 @@ window.applyTilt = applyTilt;
             item.appendChild(svg);
 
             item.addEventListener('click', () => {
-                if (item.dataset.kakobuy && item.dataset.kakobuy !== '#') window.open(item.dataset.kakobuy, '_blank');
+                // Re-validate at click-time and add noopener — same defense-
+                // in-depth pattern as the command palette.
+                const raw = item.dataset.kakobuy || '';
+                const url = (typeof safeExternalUrl === 'function') ? safeExternalUrl(raw) : raw;
+                if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
                 hideDropdown();
             });
 

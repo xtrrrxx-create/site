@@ -2439,7 +2439,7 @@ window.runQcCheck = async function () {
         const pickslyUrl = /picks\.ly\/item\//i.test(raw) ? raw : qcSourceToPicksly(src);
         if (pickslyUrl && actionsEl) {
             actionsEl.style.display = 'flex';
-            actionsEl.innerHTML = `<a class="qc-picksly-btn" href="${escapeHtml(safeExternalUrl(pickslyUrl))}" target="_blank" rel="noopener">
+            actionsEl.innerHTML = `<a class="qc-picksly-btn" href="${escapeHtml(safeExternalUrl(pickslyUrl))}" target="_blank" rel="noopener noreferrer">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                 ${t('qc_view_picksly')}
             </a>`;
@@ -2574,8 +2574,8 @@ function buildRecentlyViewedMarquee() {
                 <div class="rv-title">${escapeHtml(stripEmojis(item.title))}</div>
                 <div class="rv-price">${formatPrice(item.price)}</div>
                 <div class="rv-actions">
-                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener" class="rv-btn" style="background:#ff8c00;color:#fff;flex:1;text-align:center;text-decoration:none;border-radius:8px;padding:0.4rem 0.2rem;font-size:0.72rem;font-weight:700;">Buy Now</a>
-                    <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener" class="rv-btn rv-btn-qc">QC</a>
+                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="rv-btn" style="background:#ff8c00;color:#fff;flex:1;text-align:center;text-decoration:none;border-radius:8px;padding:0.4rem 0.2rem;font-size:0.72rem;font-weight:700;">Buy Now</a>
+                    <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="rv-btn rv-btn-qc">QC</a>
                 </div>
             </div>
         </div>`;
