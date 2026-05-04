@@ -84,6 +84,11 @@ discord_products_backup.json
 # Claude local settings (may contain API keys)
 .claude/settings.local.json
 
+# Obsidian local config — contains REST API key + TLS cert/private key.
+# NEVER commit. Rotate the key if this folder ever ends up tracked.
+jarvis-finder/.obsidian/
+.obsidian/
+
 # Skill lock files
 skills-lock.json
 .env*.local

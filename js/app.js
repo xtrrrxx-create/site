@@ -163,7 +163,9 @@ function appendAffcodeIfMissing(rawUrl) {
     try {
         const parsed = new URL(clean);
         const host = parsed.hostname.toLowerCase();
-        const isKakoLink = host.includes("ikako.vip") || host.includes("kakobuy.com");
+        // Suffix match — `kakobuy.com.evil.tld` must NOT receive our affcode.
+        const matches = (h) => host === h || host.endsWith('.' + h);
+        const isKakoLink = matches("ikako.vip") || matches("kakobuy.com");
         if (isKakoLink && !parsed.searchParams.has("affcode")) {
             parsed.searchParams.set("affcode", "keviinn");
         }
@@ -1983,7 +1985,7 @@ function initApp() {
                     .then(onData)
                     .catch(err => {
                         const container = document.getElementById('products-container');
-                        if (container) container.innerHTML = `<p style="grid-column:1/-1;color:#ff6b6b;text-align:center;">${t('products_error', { e: err.message })}</p>`;
+                        if (container) container.innerHTML = `<p style="grid-column:1/-1;color:#ff6b6b;text-align:center;">${escapeHtml(t('products_error', { e: err && err.message ? err.message : 'unknown' }))}</p>`;
                     });
             }
         }

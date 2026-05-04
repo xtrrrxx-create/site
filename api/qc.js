@@ -89,6 +89,13 @@ export default async function handler(req, res) {
     }
 
     try {
+        // Strip embedded credentials and fragment before forwarding upstream.
+        // - Credentials would otherwise show up in Picksly logs and pollute
+        //   the cache key (`s-maxage=600`) with attacker-chosen variants.
+        // - Fragments are not used by Picksly and are pure cache-buster fuel.
+        parsed.username = '';
+        parsed.password = '';
+        parsed.hash = '';
         const cleanUrl = parsed.toString();
         const pickslyRes = await fetch(
             `https://partner.picks.ly/api/qc/search?url=${encodeURIComponent(cleanUrl)}&limit=50&page=1`,

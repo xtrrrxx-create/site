@@ -62,8 +62,12 @@
         if (prodMatches.length) {
             html += `<div class="cmd-section-label">Products</div>`;
             html += prodMatches.map(p => {
-                const safeKako = escapeHtml(p.kakobuy || '');
-                const safeImg  = escapeHtml(p.img || '');
+                // Sanitize URLs at write-time so a malicious DB row containing
+                // javascript:/data:/file: URLs cannot reach window.open later.
+                const cleanKako = (typeof safeExternalUrl === 'function' ? safeExternalUrl(p.kakobuy || '') : '#');
+                const cleanImg  = (typeof safeExternalUrl === 'function' ? safeExternalUrl(p.img || '')     : '#');
+                const safeKako = escapeHtml(cleanKako === '#' ? '' : cleanKako);
+                const safeImg  = (cleanImg === '#') ? '' : escapeHtml(cleanImg);
                 const safeTitle = escapeHtml((p.title || '').slice(0, 50));
                 return `
                 <div class="cmd-item" data-type="product" data-kakobuy="${safeKako}">
@@ -78,7 +82,8 @@
         }
 
         if (!html) {
-            html = `<div class="cmd-empty">No results for "<strong>${q}</strong>"</div>`;
+            // Escape user search input — anything typed into Ctrl+K lands here.
+            html = `<div class="cmd-empty">No results for "<strong>${escapeHtml(q)}</strong>"</div>`;
         }
 
         container.innerHTML = html;
@@ -93,7 +98,10 @@
         container.querySelectorAll('.cmd-item[data-type="product"]').forEach(el => {
             el.addEventListener('click', () => {
                 close();
-                if (el.dataset.kakobuy) window.open(el.dataset.kakobuy, '_blank');
+                // Re-validate at click-time as a second line of defense.
+                const raw = el.dataset.kakobuy || '';
+                const url = (typeof safeExternalUrl === 'function') ? safeExternalUrl(raw) : raw;
+                if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
             });
         });
 
