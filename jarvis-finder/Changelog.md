@@ -1,5 +1,19 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-05 (3) — Hardening rundă 3 + clarificări scope
+### Verificat (nu e nimic de făcut)
+- **`/tools`** e 100% client-side (link converter în `app.js` `window.convertLink`). Are deja: max-len 100, `URL.parse` cu try/catch, protocol allowlist `http(s):`, host allowlist suffix-match (`weidian/taobao/tmall/1688`), `escapeHtml` pe output. Nu există endpoint server pentru tools.
+- **`/qccheck` server side** (`api/qc.js`) — host allowlist + protocol + length 2048 + strip credentials/fragment + rate-limit + origin/referer triple-check. Era deja făcut.
+- **Zero `eval`/`Function`/`exec`/`child_process`/`fs`** în `api/` și `js/` (verificat cu grep).
+- **Auth system**: NU EXISTĂ. Site-ul e catalog public, fără login/cookies/JWT/sessions/users. Nimic de hardenuit. Dacă se adaugă vreodată login admin, trebuie cookie `HttpOnly + Secure + SameSite=Strict` + JWT `HS256` semnat cu secret din env + hash bcrypt/argon2 pentru "remember me" tokens.
+- **Dependency CVEs**: zero `package.json` în repo. Funcțiile Vercel folosesc doar `fetch` + `URL` built-in Node. Supply-chain attack surface = 0.
+- **Bot protection cu Turnstile/reCAPTCHA pe `/products`**: nu e fezabil — ar bloca catalogul public. Folosim în schimb edge cache (`s-maxage=60`) + per-IP rate-limit + UA filter (vezi mai jos).
+
+### Aplicat
+- **`api/products.js`**: adăugat per-IP rate-limit 30 req/min (înainte n-avea deloc); UA filter care blochează `curl|wget|python-requests|scrapy|nikto|sqlmap|masscan|semrush|ahrefs|mj12bot|bytespider` etc.; correlation ID (`cid`) în toate log-urile + în răspunsurile 5xx (clientul îl poate cita într-un raport fără să expunem internals).
+- **`api/qc.js`**: același UA filter + correlation IDs în log-uri și 5xx.
+- Userii reali nu observă nimic — edge cache absoarbe traficul, doar abuzul lovește limit-ul.
+
 ## 2026-05-05 (2) — LEAK CRITIC găsit și închis
 ### Problemă
 Vercel deploy-uia **toate** fișierele din repo ca static assets. Verificat live:

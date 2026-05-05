@@ -48,6 +48,13 @@ const RL_BURST_WINDOW_MS = 10 * 1000;     // 10 second burst window
 const RL_BURST_MAX = 10;                  // max 10 requests in any 10s
 const rlMap = new Map();                  // ip -> { count, resetAt, burst, burstResetAt }
 
+// UA filter — same as /api/products. Not security, just friction for dumb bots.
+const BLOCKED_UA = /(curl|wget|python-requests|libwww-perl|httpclient|scrapy|httrack|nikto|sqlmap|masscan|nmap|zgrab|semrush|ahrefs|mj12bot|dotbot|petalbot|bytespider)/i;
+
+function corrId() {
+    return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+}
+
 function clientIp(req) {
     // x-forwarded-for: original client IP first, comma-separated
     const xff = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
@@ -88,9 +95,16 @@ function checkRateLimit(ip) {
 }
 
 export default async function handler(req, res) {
+    const cid = corrId();
+
     if (req.method !== 'GET') {
         res.setHeader('Allow', 'GET');
         return res.status(405).json({ success: false, error: 'Method not allowed' });
+    }
+
+    const ua = String(req.headers['user-agent'] || '');
+    if (!ua || BLOCKED_UA.test(ua)) {
+        return res.status(403).json({ success: false, error: 'Forbidden' });
     }
 
     // Origin check — reject browser fetches from other sites.
@@ -145,8 +159,8 @@ export default async function handler(req, res) {
 
     const apiKey = process.env.PICKSLY_API_KEY;
     if (!apiKey) {
-        console.error('[api/qc] PICKSLY_API_KEY not set');
-        return res.status(500).json({ success: false, error: 'Server misconfigured' });
+        console.error(`[api/qc ${cid}] PICKSLY_API_KEY not set`);
+        return res.status(500).json({ success: false, error: 'Server misconfigured', cid });
     }
 
     try {
@@ -178,7 +192,7 @@ export default async function handler(req, res) {
         return res.status(pickslyRes.status).json(data);
 
     } catch (err) {
-        console.error('[api/qc] upstream failed', err && err.message);
-        return res.status(502).json({ success: false, error: 'Upstream error' });
+        console.error(`[api/qc ${cid}] upstream failed`, err && err.message);
+        return res.status(502).json({ success: false, error: 'Upstream error', cid });
     }
 }

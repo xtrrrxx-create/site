@@ -1,32 +1,84 @@
 // Vercel Serverless Function — Supabase products proxy.
-// Hides anon key from frontend. Read-only, GET only, generic errors.
+// Hides anon key from frontend. Read-only, GET only, generic errors,
+// per-IP rate limit + UA filter to discourage scrapers.
 
 const ALLOWED_ORIGINS = new Set([
     'https://jarvis-finder.com',
     'https://www.jarvis-finder.com',
 ]);
 
+// Per-IP rate limit. The catalog is cached at the Vercel edge
+// (s-maxage=60), so legitimate users almost never hit this function.
+// Anything that bypasses the cache (cache-buster query, no-cache header)
+// counts toward this budget. In-memory; per warm instance only.
+const RL_WINDOW_MS = 60 * 1000;
+const RL_MAX = 30; // 30 origin hits / IP / minute is plenty for a real user
+const rlMap = new Map();
+
+// Block obvious scrapers/automation by UA. We do NOT rely on this for
+// security (UA is trivially spoofed) — it's a low-friction filter that
+// stops dumb wget/curl loops without blocking real browsers.
+const BLOCKED_UA = /(curl|wget|python-requests|libwww-perl|httpclient|scrapy|httrack|nikto|sqlmap|masscan|nmap|zgrab|semrush|ahrefs|mj12bot|dotbot|petalbot|bytespider)/i;
+
+function clientIp(req) {
+    const xff = (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    return xff || req.headers['x-real-ip'] || req.socket?.remoteAddress || 'unknown';
+}
+
+function checkRateLimit(ip) {
+    const now = Date.now();
+    let entry = rlMap.get(ip);
+    if (!entry || entry.resetAt < now) {
+        entry = { count: 0, resetAt: now + RL_WINDOW_MS };
+        rlMap.set(ip, entry);
+    }
+    if (rlMap.size > 1000 && Math.random() < 0.02) {
+        for (const [k, v] of rlMap) if (v.resetAt < now) rlMap.delete(k);
+    }
+    if (entry.count >= RL_MAX) {
+        return { ok: false, retryAfter: Math.ceil((entry.resetAt - now) / 1000) };
+    }
+    entry.count++;
+    return { ok: true };
+}
+
+// Short, opaque correlation ID. Logged server-side, sent to client only on
+// 5xx so a user can quote it in a bug report without us echoing internals.
+function corrId() {
+    return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+}
+
 export default async function handler(req, res) {
-    // Method allowlist — only GET allowed.
+    const cid = corrId();
+
     if (req.method !== 'GET') {
         res.setHeader('Allow', 'GET');
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Soft origin check: if a browser sends an Origin header, it must be ours.
-    // Direct curl/server-to-server has no Origin and is allowed (this is a public
-    // catalog), but cross-site browser fetches from other domains are rejected.
     const origin = req.headers.origin;
     if (origin && !ALLOWED_ORIGINS.has(origin)) {
         return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const ua = String(req.headers['user-agent'] || '');
+    if (!ua || BLOCKED_UA.test(ua)) {
+        return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    const ip = clientIp(req);
+    const rl = checkRateLimit(ip);
+    if (!rl.ok) {
+        res.setHeader('Retry-After', String(rl.retryAfter));
+        return res.status(429).json({ error: 'Too many requests' });
     }
 
     const SUPABASE_URL = process.env.SUPABASE_URL;
     const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
     if (!SUPABASE_URL || !SUPABASE_KEY) {
-        console.error('[api/products] missing supabase env');
-        return res.status(500).json({ error: 'Server misconfigured' });
+        console.error(`[api/products ${cid}] missing supabase env`);
+        return res.status(500).json({ error: 'Server misconfigured', cid });
     }
 
     // Defense-in-depth: ensure SUPABASE_URL is a valid https Supabase host before
@@ -36,12 +88,12 @@ export default async function handler(req, res) {
     try {
         supabaseBase = new URL(SUPABASE_URL);
     } catch {
-        console.error('[api/products] SUPABASE_URL is not a valid URL');
-        return res.status(500).json({ error: 'Server misconfigured' });
+        console.error(`[api/products ${cid}] SUPABASE_URL is not a valid URL`);
+        return res.status(500).json({ error: 'Server misconfigured', cid });
     }
     if (supabaseBase.protocol !== 'https:' || !/\.supabase\.(co|in)$/i.test(supabaseBase.hostname)) {
-        console.error('[api/products] SUPABASE_URL host not allowed');
-        return res.status(500).json({ error: 'Server misconfigured' });
+        console.error(`[api/products ${cid}] SUPABASE_URL host not allowed`);
+        return res.status(500).json({ error: 'Server misconfigured', cid });
     }
 
     const pageSize = 1000;
@@ -58,8 +110,8 @@ export default async function handler(req, res) {
             if (!r.ok) {
                 // Log details server-side, return generic to client.
                 const body = await r.text().catch(() => '');
-                console.error('[api/products] upstream error', r.status, body.slice(0, 500));
-                return res.status(502).json({ error: 'Upstream error' });
+                console.error(`[api/products ${cid}] upstream`, r.status, body.slice(0, 500));
+                return res.status(502).json({ error: 'Upstream error', cid });
             }
             const page = await r.json();
             all = all.concat(page);
@@ -69,8 +121,8 @@ export default async function handler(req, res) {
             if (offset > 50000) break;
         }
     } catch (err) {
-        console.error('[api/products] fetch failed', err && err.message);
-        return res.status(502).json({ error: 'Upstream error' });
+        console.error(`[api/products ${cid}] fetch failed`, err && err.message);
+        return res.status(502).json({ error: 'Upstream error', cid });
     }
 
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
