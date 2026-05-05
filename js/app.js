@@ -1051,6 +1051,10 @@ function getPages() {
                 width: max-content;
                 animation: rv-scroll 15s linear infinite;
             }
+            /* Pure-CSS hover-pause: applies to the wrap so hovering a card
+               (which lives inside the track) reliably pauses scrolling.
+               Survives marquee re-renders without re-attaching JS listeners. */
+            .rv-track-wrap:hover .rv-track { animation-play-state: paused; }
             @keyframes rv-scroll {
                 0%   { transform: translateX(0); }
                 100% { transform: translateX(-50%); }
@@ -2075,12 +2079,9 @@ function initApp() {
     history.replaceState({ page: initial }, '', initial === 'home' ? '/' : '/' + initial);
     renderPage(initial);
 
-    function initRvMarquee() {
-        const track = document.getElementById('rv-track');
-        if (!track) return;
-        track.addEventListener('mouseenter', () => track.style.animationPlayState = 'paused');
-        track.addEventListener('mouseleave', () => track.style.animationPlayState = 'running');
-    }
+    // Hover-pause is now handled by .rv-track-wrap:hover in CSS — no
+    // JS listeners needed, so re-renders of the marquee can't break it.
+    function initRvMarquee() { /* no-op, kept for callers */ }
     initRvMarquee();
 
     // Prefetch products in background so Products page loads instantly,
