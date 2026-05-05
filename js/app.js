@@ -1955,7 +1955,18 @@ function initApp() {
         // Re-attach hover-pause listeners every time home is rendered.
         // The home DOM (including #rv-track) is rebuilt on each navigation,
         // so a single startup call would only work for the first visit.
-        if (pageId === 'home') initRvMarquee();
+        if (pageId === 'home') {
+            initRvMarquee();
+            // 12s after home is shown, refetch popularity bypassing the
+            // edge cache. Catches the case where the first call happened
+            // before any clicks existed (so the marquee was all-fallback).
+            setTimeout(() => {
+                if (pageFromPath() !== 'home') return;
+                loadPopularProducts({ force: true }).then(() => {
+                    if (pageFromPath() === 'home') refreshHomeMarquee();
+                });
+            }, 12000);
+        }
 
         if (pageId === 'products') {
             filterState = { search: '', category: 'All', batch: 'All Tags' };
@@ -2552,32 +2563,46 @@ let popularTitlesOrder = []; // ordered list of titles, most-clicked first
 let popularLoaded = false;
 
 function getRecentlyViewed() {
-    // Universal feed: top-15 most-clicked products globally. Falls back to
-    // the newest catalog tail until /api/popular returns and /api/click
-    // has accumulated some signal (so a brand-new install still shows
-    // something instead of an empty strip).
+    // Universal feed: most-clicked products first, padded with newest items
+    // so the marquee always has at least RV_MAX cards (otherwise a single
+    // popular item would just loop alone and look broken).
     const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
     if (!cache.length) return [];
 
+    const out = [];
+    const seen = new Set();
     if (popularTitlesOrder.length) {
         const byTitle = new Map(cache.map(p => [String(p.title || '').toLowerCase(), p]));
-        const out = [];
         for (const t of popularTitlesOrder) {
             const p = byTitle.get(t);
-            if (p) out.push(p);
+            if (p && !seen.has(p.title)) {
+                out.push(p);
+                seen.add(p.title);
+                if (out.length >= RV_MAX) return out;
+            }
+        }
+    }
+    // Pad with newest catalog items (catalog tail, ordered newest-first).
+    const newest = cache.slice(-RV_MAX * 2).reverse();
+    for (const p of newest) {
+        if (!seen.has(p.title)) {
+            out.push(p);
+            seen.add(p.title);
             if (out.length >= RV_MAX) break;
         }
-        if (out.length) return out;
     }
-    // Fallback: newest items (catalog tail) so the strip is never empty.
-    return cache.slice(-RV_MAX).reverse();
+    return out;
 }
 
-async function loadPopularProducts() {
-    if (popularLoaded) return;
+async function loadPopularProducts(opts) {
+    const force = opts && opts.force;
+    if (popularLoaded && !force) return;
     popularLoaded = true;
     try {
-        const res = await fetch('/api/popular');
+        // Cache-buster on forced reload so we bypass the edge cache when
+        // the user just clicked something and we want fresh popularity.
+        const url = force ? `/api/popular?t=${Date.now()}` : '/api/popular';
+        const res = await fetch(url);
         if (!res.ok) return;
         const data = await res.json();
         if (Array.isArray(data)) {

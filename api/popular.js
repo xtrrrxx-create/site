@@ -51,7 +51,10 @@ export default async function handler(req, res) {
             return res.json([]);
         }
         const data = await r.json();
-        res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+        // Short cache: popularity is meant to feel close to live. 20s is
+        // enough to absorb burst traffic without making click feedback
+        // feel laggy on the home marquee.
+        res.setHeader('Cache-Control', 's-maxage=20, stale-while-revalidate=60');
         res.setHeader('X-Content-Type-Options', 'nosniff');
         res.setHeader('Vary', 'Origin');
         return res.json(Array.isArray(data) ? data : []);
