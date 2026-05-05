@@ -369,11 +369,9 @@ async function refreshProductsFromServer(silent = false) {
             const filtered = getFiltered();
             info.textContent = t('showing_of', { a: filtered.length, b: data.length });
         }
-        if (!silent) {
-            console.log('Products refreshed from server.');
-        }
-    } catch (err) {
-        console.warn('Auto-refresh failed:', err);
+        // Silent in production — no data echoed to console.
+    } catch (_err) {
+        // Swallow: auto-refresh is best-effort, do not leak error details to client console.
     }
 }
 

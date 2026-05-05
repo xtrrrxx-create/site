@@ -174,6 +174,7 @@ export default async function handler(req, res) {
         const data = await pickslyRes.json().catch(() => ({ success: false, error: 'Upstream error' }));
         res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=1800');
         res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Vary', 'Origin');
         return res.status(pickslyRes.status).json(data);
 
     } catch (err) {

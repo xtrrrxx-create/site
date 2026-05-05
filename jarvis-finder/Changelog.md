@@ -1,5 +1,31 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-05 — Security audit pass
+### Audit findings (verificate)
+- ✅ **Zero secrete hardcoded** — toate cheile (Supabase, Picksly) vin din `process.env` în serverless functions
+- ✅ **Proxy layer complet** — frontend lovește doar `/api/products` și `/api/qc`, nu vede niciodată Supabase URL/anon key sau Picksly key
+- ✅ **`.gitignore`** acoperă `.env*`, scripturi cu service_role, exporturi Supabase, `.obsidian/`
+- ✅ **`git ls-files | grep -E "eyJ...|service_role|sk_live"`** → 0 hituri în istoric tracked
+- ✅ **CSP strict** în `vercel.json`: `default-src 'self'`, `script-src 'self'` (no inline), `frame-ancestors 'none'`, HSTS preload, COOP/CORP, Permissions-Policy
+- ✅ **SSRF safe** în `/api/qc` — host allowlist suffix-match (taobao/weidian/etc), protocol check `http(s):`, max URL 2048, strip credentials/fragment
+- ✅ **Rate limit** `/api/qc` — 60 req/IP/5min + burst 10 req/10s, in-memory cu cleanup opportunistic
+- ✅ **Origin/Referer/Sec-Fetch-Site** triple check pe `/api/qc`, allowlist Origin pe `/api/products`
+- ✅ **No SQL** — Supabase REST cu `select=` cu coloane fixe, fără query injection vector
+- ✅ **XSS** — toate inserțiile dinamice trec prin `escapeHtml()` + `safeExternalUrl()`; `innerHTML` folosit doar cu static templates / translation keys
+- ✅ **Method allowlist** — `GET` only pe ambele rute, 405 cu header `Allow`
+- ✅ **Generic errors** la client (`Upstream error`, `Server misconfigured`); detaliile rămân în `console.error` server-side
+
+### Hardening aplicat în această sesiune
+- **`api/products.js`**: validare defense-in-depth a `SUPABASE_URL` — trebuie `https:` și hostname `*.supabase.co|.in`, altfel 500. Previne SSRF dacă env-ul ajunge greșit configurat. Adăugat `Vary: Origin`.
+- **`api/qc.js`**: adăugat `Vary: Origin`.
+- **`js/app.js`**: scos `console.log("Products refreshed from server.")` și `console.warn` din auto-refresh — zero log-uri în consola browserului în producție.
+- **`.env.example`**: documentat `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `PICKSLY_API_KEY` (set în dashboard Vercel, nu commit-uit).
+
+### Recomandări (opționale, nu blocante)
+- Pentru rate-limit global cross-region pe `/api/qc` ar trebui Vercel KV / Upstash Redis (acum e per-instanță)
+- Rotire periodică Picksly API key în Vercel dashboard
+- `npm audit` n/a (no package.json la root — nu sunt dependențe runtime pe site)
+
 ## 2026-05-03 (6)
 ### Cards — Picks.ly clone exact
 - Badge 店: `border-radius: 5px` (pătrat cu colțuri rotunjite, identic Picks.ly)

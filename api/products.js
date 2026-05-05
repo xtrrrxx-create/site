@@ -29,14 +29,30 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Server misconfigured' });
     }
 
+    // Defense-in-depth: ensure SUPABASE_URL is a valid https Supabase host before
+    // we ever fetch from it. Prevents an accidentally-misconfigured env from
+    // turning this proxy into an SSRF tool against arbitrary internal hosts.
+    let supabaseBase;
+    try {
+        supabaseBase = new URL(SUPABASE_URL);
+    } catch {
+        console.error('[api/products] SUPABASE_URL is not a valid URL');
+        return res.status(500).json({ error: 'Server misconfigured' });
+    }
+    if (supabaseBase.protocol !== 'https:' || !/\.supabase\.(co|in)$/i.test(supabaseBase.hostname)) {
+        console.error('[api/products] SUPABASE_URL host not allowed');
+        return res.status(500).json({ error: 'Server misconfigured' });
+    }
+
     const pageSize = 1000;
     let all = [];
     let offset = 0;
 
     try {
         while (true) {
+            const base = `${supabaseBase.protocol}//${supabaseBase.host}`;
             const r = await fetch(
-                `${SUPABASE_URL}/rest/v1/products?select=title,price,img,kakobuy,picksly,category,batch&order=id.asc&limit=${pageSize}&offset=${offset}`,
+                `${base}/rest/v1/products?select=title,price,img,kakobuy,picksly,category,batch&order=id.asc&limit=${pageSize}&offset=${offset}`,
                 { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
             );
             if (!r.ok) {
@@ -59,5 +75,6 @@ export default async function handler(req, res) {
 
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Vary', 'Origin');
     return res.json(all);
 }
