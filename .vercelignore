@@ -1,0 +1,42 @@
+# Strict whitelist — Vercel deploys files NOT listed here. We ignore
+# everything by default and re-include only what the public site needs.
+# This prevents accidental exposure of admin scripts, scrapers, internal
+# JSON state, docs, fonts archive, exe, etc. via jarvis-finder.com/<file>.
+
+# 1) ignore everything
+*
+
+# 2) un-ignore the directories the site actually serves
+!index.html
+!vercel.json
+!og-image.png
+!favicon.ico
+!robots.txt
+
+!css/
+!css/**
+
+!js/
+!js/**
+
+!images/
+!images/**
+
+!fonts/
+!fonts/**
+
+!api/
+!api/**
+
+# Never re-include hidden / build / VCS dirs even if matched above
+.git
+.github
+.claude
+.cursor
+.vercel
+.obsidian
+node_modules
+admin-app
+jarvis-finder
+__pycache__
+tmp

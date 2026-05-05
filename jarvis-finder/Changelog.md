@@ -1,5 +1,21 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-05 (2) — LEAK CRITIC găsit și închis
+### Problemă
+Vercel deploy-uia **toate** fișierele din repo ca static assets. Verificat live:
+- `curl -L https://jarvis-finder.com/CLAUDE.md` → **200 OK** (markdown servit public!)
+- La fel: `/admin.py`, `/admin.exe` (10MB), `/admin_realtime.py`, `/products.json` (295KB cu tot catalogul intern), `/chrome_queue.json`, `/to_fetch.json`, `/to_fetch_resolved.json`, toate `probe_*.py`, `enrich_*.py`, `auto_import.py`, `full_import_fast.py` etc. — toate descărcabile direct.
+
+Asta expunea: arhitectura internă, scripturi de scraping (cu logica lor de bypass), starea internă a queue-urilor, instrucțiunile pentru Claude (CLAUDE.md cu credențiale Obsidian menționate).
+
+### Fix
+- **`.vercelignore`** nou cu **whitelist strict**: `*` ignoră tot, apoi re-include doar `index.html`, `vercel.json`, `og-image.png`, `robots.txt`, `favicon.ico`, și directoarele `css/ js/ images/ fonts/ api/`. Restul (toate `.py`, `.exe`, `.json` de la root, `.md`, `.zip`, `admin-app/`, `jarvis-finder/`, `tmp/`, `.claude/`, `.obsidian/`) NU mai ajung pe Vercel.
+- **`robots.txt`** explicit — `Disallow: /api/`, `Disallow: /*.json$`, `Disallow: /*.py$`, plus allow pe rutele SPA.
+- **`vercel.json`** — header block nou pentru `/api/(.*)`: `X-Robots-Tag: noindex, nofollow, noarchive` + `Referrer-Policy: no-referrer` (zero referer trimis upstream → Picksly/Supabase nu văd ce pagină a inițiat call-ul).
+
+### Verificare după deploy
+După Vercel rebuild: `curl -IL https://jarvis-finder.com/CLAUDE.md` trebuie să dea 404 (nu 200). Verifică și `/admin.py`, `/products.json`.
+
 ## 2026-05-05 — Security audit pass
 ### Audit findings (verificate)
 - ✅ **Zero secrete hardcoded** — toate cheile (Supabase, Picksly) vin din `process.env` în serverless functions
