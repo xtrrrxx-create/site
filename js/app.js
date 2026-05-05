@@ -1047,9 +1047,16 @@ function getPages() {
             }
             .rv-track {
                 display: flex;
-                gap: 1rem;
+                gap: 0;
                 width: max-content;
-                animation: rv-scroll 15s linear infinite;
+                animation: rv-scroll 30s linear infinite;
+                will-change: transform;
+            }
+            .rv-half {
+                display: flex;
+                gap: 1rem;
+                flex-shrink: 0;
+                padding-right: 1rem;
             }
             /* Pure-CSS hover-pause: applies to the wrap so hovering a card
                (which lives inside the track) reliably pauses scrolling.
@@ -2632,17 +2639,21 @@ window.jfTrackClick = function(title) {
 // Replace the marquee in the live DOM. Used after the catalog finishes
 // loading on a fresh visit so the marquee fills in instead of staying empty.
 function refreshHomeMarquee() {
-    const wrap = document.querySelector('.rv-section');
+    const section = document.querySelector('.rv-section');
     const fresh = buildRecentlyViewedMarquee();
     if (!fresh) return;
-    if (wrap) {
+    if (section) {
+        // Preserve animation progress: only swap the track innerHTML
+        const track = section.querySelector('.rv-track');
         const tmp = document.createElement('div');
         tmp.innerHTML = fresh;
-        wrap.replaceWith(tmp.firstElementChild);
+        const newTrack = tmp.querySelector('.rv-track');
+        if (track && newTrack) {
+            track.innerHTML = newTrack.innerHTML;
+        } else {
+            section.replaceWith(tmp.firstElementChild);
+        }
     } else {
-        // No section in DOM yet (cache was empty at first render) — inject
-        // it before the recently-viewed sentinel if we can find a home
-        // container, otherwise skip silently.
         const home = document.querySelector('.jf-hero') || document.getElementById('main-content');
         if (home) {
             const tmp = document.createElement('div');
@@ -2650,7 +2661,6 @@ function refreshHomeMarquee() {
             home.appendChild(tmp.firstElementChild);
         }
     }
-    // No JS init needed — hover-pause is pure CSS (.rv-track-wrap:hover).
 }
 
 function buildRecentlyViewedMarquee() {
@@ -2688,7 +2698,7 @@ function buildRecentlyViewedMarquee() {
     <div class="rv-section">
         <div class="rv-label">Most Popular</div>
         <div class="rv-track-wrap">
-            <div class="rv-track" id="rv-track">${cards}${cards}</div>
+            <div class="rv-track" id="rv-track"><div class="rv-half">${cards}</div><div class="rv-half">${cards}</div></div>
         </div>
     </div>`;
 }
