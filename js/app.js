@@ -2650,7 +2650,7 @@ function refreshHomeMarquee() {
             home.appendChild(tmp.firstElementChild);
         }
     }
-    initRvMarquee();
+    // No JS init needed — hover-pause is pure CSS (.rv-track-wrap:hover).
 }
 
 function buildRecentlyViewedMarquee() {
