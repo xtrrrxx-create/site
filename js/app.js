@@ -1128,7 +1128,7 @@ function getPages() {
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
-                    <svg class="jf-arrow" style="position:absolute;right:calc(9% + 165px);top:calc(35% + 35px);width:170px;height:100px;pointer-events:none;overflow:visible;opacity:0;animation:jfArrowIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards 1.2s, jfArrowBob 2.4s ease-in-out infinite 1.8s;" viewBox="0 0 170 100" fill="none" aria-hidden="true">
+                    <svg class="jf-arrow" style="position:absolute;right:calc(9% + 200px);top:calc(35% + 70px);width:170px;height:100px;pointer-events:none;overflow:visible;opacity:0;animation:jfArrowIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards 1.2s, jfArrowBob 2.4s ease-in-out infinite 1.8s;" viewBox="0 0 170 100" fill="none" aria-hidden="true">
                         <defs>
                             <marker id="jfArrowTip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
                                 <path d="M0,0 L10,5 L0,10 z" fill="#ff8c00"/>
@@ -1952,6 +1952,11 @@ function initApp() {
             if (window.initWeightEstimator) window.initWeightEstimator();
         }
 
+        // Re-attach hover-pause listeners every time home is rendered.
+        // The home DOM (including #rv-track) is rebuilt on each navigation,
+        // so a single startup call would only work for the first visit.
+        if (pageId === 'home') initRvMarquee();
+
         if (pageId === 'products') {
             filterState = { search: '', category: 'All', batch: 'All Tags' };
 
@@ -2093,17 +2098,11 @@ function showWelcomeModal() {
         { id:'RON', label:'RON' },   { id:'PLN', label:'zł PLN' },
         { id:'CNY', label:'¥ CNY' },
     ];
-    const AGENTS = [
-        'Kakobuy','Sugargoo','CSSBuy','Mulebuy','ACBuy','Joyabuy','Oopbuy','Litbuy','GTBuy'
-    ];
-
     let selLang  = currentCurrency === 'RON' ? 'RON' : currentCurrency === 'PLN' ? 'PLN' : currentCurrency === 'CNY' ? 'CNY' : 'EN';
     let selCur   = currentCurrency;
-    let selAgent = localStorage.getItem('jf_agent') || 'kakobuy';
 
     const S = {
         pill: (on) => `padding:.5rem 1.1rem;border-radius:999px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;border:1.5px solid ${on?'#f5a623':'#404040'};background:${on?'#f5a623':'transparent'};color:${on?'#fff':'#888'};`,
-        agent: (on) => `padding:.65rem .4rem;border-radius:10px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;border:1.5px solid ${on?'#f5a623':'#404040'};background:${on?'rgba(245,166,35,.13)':'transparent'};color:${on?'#f5a623':'#888'};`,
     };
 
     const overlay = document.createElement('div');
@@ -2111,7 +2110,11 @@ function showWelcomeModal() {
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn .3s ease;overflow-y:auto;';
 
     overlay.innerHTML = `
-    <style>.jf-wel-cta:hover { opacity: 0.85; }</style>
+    <style>
+        .jf-wel-cta:hover { opacity: 0.85; }
+        .jf-wel-signup { display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:999px;background:transparent;color:#f5a623;font-weight:600;font-size:.85rem;text-decoration:none;border:1.5px solid #f5a623;transition:all .15s;white-space:nowrap; }
+        .jf-wel-signup:hover { background:#f5a623;color:#fff; }
+    </style>
     <div style="background:#242424;border-radius:24px;width:100%;max-width:960px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
 
         <!-- Header -->
@@ -2144,42 +2147,25 @@ function showWelcomeModal() {
                 </div>
             </div>
 
-            <div>
-                <p style="color:#666;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem;">Preferred Agent</p>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;" id="jf-agent-grid">
-                    ${AGENTS.map(a=>`<button data-action="jfWelSelAgent" data-arg="${escapeHtml(a.toLowerCase())}" id="jf-wa-${escapeHtml(a.toLowerCase())}" style="${S.agent(a.toLowerCase()===selAgent)}">${escapeHtml(a)}</button>`).join('')}
-                </div>
-            </div>
         </div>
 
-        <!-- KakoBuy Sign Up -->
-        <div style="padding:1.2rem 2.2rem;border-bottom:1px solid #333;background:#1a1a1a;">
-            <div style="margin-bottom:.6rem;">
-                <p style="color:#fff;font-size:1rem;font-weight:800;margin:0 0 .2rem;line-height:1.2;">Get <span style="color:#f5a623;">$450</span> just for signing up on KakoBuy.</p>
-                <p style="color:#666;font-size:.78rem;margin:0;">Use our link. Costs nothing. Keeps this site free.</p>
+        <!-- KakoBuy Sign Up — minimalist -->
+        <div style="padding:1.4rem 2.2rem;border-bottom:1px solid #2a2a2a;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;">
+                <div style="flex:1;min-width:240px;">
+                    <p style="color:#fff;font-size:.95rem;font-weight:600;margin:0 0 .25rem;line-height:1.3;">
+                        $450 sign-up bonus on <span style="color:#f5a623;">KakoBuy</span>
+                    </p>
+                    <p style="color:#666;font-size:.78rem;margin:0;line-height:1.4;">
+                        Optional. Costs you nothing &middot; keeps this site free.
+                        <span style="color:#888;">Code <span style="color:#fff;font-family:'JetBrains Mono',ui-monospace,monospace;">keviinn</span></span>
+                    </p>
+                </div>
+                <a href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener noreferrer" class="jf-wel-signup">
+                    Sign up
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+                </a>
             </div>
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.9rem;">
-                <div style="background:#2a2a2a;border-radius:10px;padding:.6rem;text-align:center;">
-                    <p style="color:#f5a623;font-weight:800;font-size:.95rem;margin:0;">$450</p>
-                    <p style="color:#888;font-size:.72rem;margin:0;">credit</p>
-                </div>
-                <div style="background:#2a2a2a;border-radius:10px;padding:.6rem;text-align:center;">
-                    <p style="color:#fff;font-weight:800;font-size:.95rem;margin:0;">$15</p>
-                    <p style="color:#888;font-size:.72rem;margin:0;">off first order</p>
-                </div>
-                <div style="background:#2a2a2a;border-radius:10px;padding:.6rem;text-align:center;">
-                    <p style="color:#fff;font-weight:800;font-size:.95rem;margin:0;">free</p>
-                    <p style="color:#888;font-size:.72rem;margin:0;">to join</p>
-                </div>
-            </div>
-            <div style="background:#2a2a2a;border-radius:10px;padding:.6rem 1rem;display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;border:1px solid #333;">
-                <div>
-                    <p style="color:#666;font-size:.65rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0;">Code</p>
-                    <p style="color:#fff;font-weight:700;font-size:.95rem;margin:0;">keviinn</p>
-                </div>
-                <button data-action="copyAffcode" data-arg="keviinn" style="background:#3a3a3a;color:#fff;border:none;border-radius:6px;padding:.35rem .75rem;font-size:.78rem;font-weight:700;cursor:pointer;">Copy</button>
-            </div>
-            <a href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener" style="display:block;width:100%;padding:.85rem;border-radius:999px;background:#f5a623;color:#fff;font-weight:800;font-size:.9rem;text-align:center;text-decoration:none;letter-spacing:.04em;">SIGN UP HERE</a>
         </div>
 
         <!-- CTA -->
@@ -2217,19 +2203,8 @@ function showWelcomeModal() {
         });
     };
 
-    window.jfWelSelAgent = function(a) {
-        selAgent = a;
-        document.querySelectorAll('[id^="jf-wa-"]').forEach(btn => {
-            const on = btn.id === 'jf-wa-' + a;
-            btn.style.background = on ? 'rgba(245,166,35,.13)' : 'transparent';
-            btn.style.borderColor = on ? '#f5a623' : '#404040';
-            btn.style.color = on ? '#f5a623' : '#888';
-        });
-    };
-
     window.jfWelDone = function() {
         localStorage.setItem('jf_onboarded', '1');
-        localStorage.setItem('jf_agent', selAgent);
         localStorage.setItem('jf_lang', selLang);
         if (selCur !== currentCurrency) window.changeCurrencyUI(selCur);
         overlay.style.opacity = '0';

@@ -1,5 +1,16 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-05 (4) — UX fixes
+### Bug
+- **Recently Viewed marquee nu se mai oprea la hover după ce ieșeai și te întorceai pe home.** Cauza: `initRvMarquee()` era apelat o singură dată în `initApp()`, dar `renderPage('home')` recreează DOM-ul (`#rv-track` e nou), deci listener-ii vechi rămâneau atașați de elementul mort.
+  - Fix: apel `initRvMarquee()` la fiecare render `pageId === 'home'` în `renderPage`.
+
+### UI tweaks
+- **Săgeata hero** (curba portocalie spre "Explore Products"): mutată mai în stânga-jos. `right:calc(9% + 165px)` → `+200px`, `top:calc(35% + 35px)` → `+70px`.
+- **Welcome modal**: scoasă complet secțiunea "Preferred Agent" (9 butoane) — userii oricum nu o foloseau pentru ce credeam. Refăcut blocul "KakoBuy sign-up" în stil minimalist (1 linie de text + 1 buton outline `Sign up →`), fără cardurile "$450 / $15 / free" care arătau prea AI-generate. Restul (language + currency) neschimbat.
+  - Cleanup: scoase `AGENTS` const, `selAgent`, `window.jfWelSelAgent`, `S.agent`, `localStorage.jf_agent` write din modal. Handler-ul rămâne în dispatcher pentru backwards-compat (no-op).
+  - CSP-safe: hover-ul pe butonul Sign up e via clasa `.jf-wel-signup:hover` în `<style>`, nu `onmouseover` inline.
+
 ## 2026-05-05 (3) — Hardening rundă 3 + clarificări scope
 ### Verificat (nu e nimic de făcut)
 - **`/tools`** e 100% client-side (link converter în `app.js` `window.convertLink`). Are deja: max-len 100, `URL.parse` cu try/catch, protocol allowlist `http(s):`, host allowlist suffix-match (`weidian/taobao/tmall/1688`), `escapeHtml` pe output. Nu există endpoint server pentru tools.
