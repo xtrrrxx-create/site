@@ -1,5 +1,30 @@
 # Jarvis Finder — Changelog
 
+## 2026-05-05 (5) — Most Popular marquee (universal click tracking)
+### Schimbare
+Recently Viewed (per-browser localStorage) → **Most Popular** (top 15 produse cele mai click-uite, identice la toți userii).
+
+### Backend nou
+- **`api/click.js`** — POST `/api/click` cu `{title}`. Validează origin/referer/UA, rate-limit 30/min/IP, max 300 chars titlu, apelează RPC `increment_click(p_title)` în Supabase. Răspuns `204 No Content`.
+- **`api/popular.js`** — GET `/api/popular`. Returnează top 15 `{title, clicks}` ordonate desc. Edge cache `s-maxage=60`. Dacă tabela încă nu există, returnează `[]` în loc de 5xx (graceful degrade).
+
+### Frontend
+- `js/app.js`:
+  - `loadPopularProducts()` la startup — fetch `/api/popular`, salvează ordinea titlurilor.
+  - `getRecentlyViewed()` rescris: face join `popularTitlesOrder × allProductsCache`, fallback la newest dacă tabela e încă goală (zero click-uri agregate).
+  - `window.jfTrackClick(title)` — fire-and-forget cu `navigator.sendBeacon()` (sau `fetch keepalive` fallback). Supraviețuiește navigării (Buy Now deschide tab nou, beacon-ul tot pleacă).
+  - Event delegation pe `a.card-btn-buy, a.card-btn-qc, a.rv-btn` — la orice click pe Buy/QC, extrage titlul din cel mai apropiat `.product-title|.rv-title` și trimite click-ul.
+  - Marquee label: "Recently Viewed" → "Most Popular".
+
+### ⚠️ Pas manual obligatoriu (1 dată) în Supabase
+Rulează SQL-ul din `jarvis-finder/supabase-popularity.sql` în **Supabase Dashboard → SQL Editor → New Query → Run**. Creează:
+- Tabela `product_clicks (title pk, clicks, updated_at)`
+- RLS: anon poate READ, NU poate INSERT/UPDATE direct
+- Funcția `increment_click(p_title)` cu `SECURITY DEFINER` — singura cale prin care anon poate să scrie (controlat: doar +1 la counter, nimic altceva)
+- Index pe `clicks desc` pentru read fast
+
+Până rulezi SQL-ul: site-ul afișează fallback "newest" în marquee, click-urile trimit POST dar primesc 502 (silent — userul nu vede nimic).
+
 ## 2026-05-05 (4) — UX fixes
 ### Bug
 - **Recently Viewed marquee nu se mai oprea la hover după ce ieșeai și te întorceai pe home.** Cauza: `initRvMarquee()` era apelat o singură dată în `initApp()`, dar `renderPage('home')` recreează DOM-ul (`#rv-track` e nou), deci listener-ii vechi rămâneau atașați de elementul mort.

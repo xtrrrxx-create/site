@@ -2072,14 +2072,26 @@ function initApp() {
     }
     initRvMarquee();
 
-    // Prefetch products in background so Products page loads instantly
+    // Prefetch products in background so Products page loads instantly,
+    // and pull global popularity rankings in parallel.
     if (initial !== 'products' && allProductsCache.length === 0) {
-        window._prefetchPromise = fetchFromSupabase().then(data => {
-            lastProductsSignature = JSON.stringify(data);
-            allProductsCache = data;
-            window.allProductsCache = data;
+        window._prefetchPromise = Promise.all([
+            fetchFromSupabase().then(data => {
+                lastProductsSignature = JSON.stringify(data);
+                allProductsCache = data;
+                window.allProductsCache = data;
+                return data;
+            }),
+            loadPopularProducts(),
+        ]).then(() => {
             window._prefetchPromise = null;
+            if (pageFromPath() === 'home') refreshHomeMarquee();
         }).catch(() => { window._prefetchPromise = null; });
+    } else {
+        // Catalog already loaded -> just refresh popularity in the background.
+        loadPopularProducts().then(() => {
+            if (pageFromPath() === 'home') refreshHomeMarquee();
+        });
     }
 }
 
@@ -2493,9 +2505,23 @@ const RV_MAX = 12;
 // stored XSS via product fields.
 document.addEventListener('click', function(e) {
     const card = e.target.closest && e.target.closest('.product-card[data-rv]');
-    if (!card) return;
-    const raw = card.getAttribute('data-rv');
-    if (raw) window.trackRecentlyViewed(raw);
+    if (card) {
+        const raw = card.getAttribute('data-rv');
+        if (raw) window.trackRecentlyViewed(raw);
+    }
+
+    // Universal popularity tracking: any click on a Buy / QC link inside a
+    // product card OR a marquee card increments the global counter for that
+    // title. Used by /api/popular -> "Most Popular" marquee.
+    const link = e.target.closest && e.target.closest('a.card-btn-buy, a.card-btn-qc, a.rv-btn');
+    if (link) {
+        const cardEl = link.closest('.product-card, .rv-card');
+        if (cardEl) {
+            const titleEl = cardEl.querySelector('.product-title, .rv-title');
+            const title = titleEl ? titleEl.textContent.trim() : '';
+            if (title && window.jfTrackClick) window.jfTrackClick(title);
+        }
+    }
 });
 
 window.trackRecentlyViewed = function(jsonStr) {
@@ -2520,8 +2546,85 @@ window.trackRecentlyViewed = function(jsonStr) {
     } catch(e) {}
 };
 
+// Global popularity cache. Filled by /api/popular on startup.
+// Map: lowercased title -> click count. Same data shown to every visitor.
+let popularTitlesOrder = []; // ordered list of titles, most-clicked first
+let popularLoaded = false;
+
 function getRecentlyViewed() {
-    try { return JSON.parse(localStorage.getItem(RV_KEY)) || []; } catch(e) { return []; }
+    // Universal feed: top-15 most-clicked products globally. Falls back to
+    // the newest catalog tail until /api/popular returns and /api/click
+    // has accumulated some signal (so a brand-new install still shows
+    // something instead of an empty strip).
+    const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+    if (!cache.length) return [];
+
+    if (popularTitlesOrder.length) {
+        const byTitle = new Map(cache.map(p => [String(p.title || '').toLowerCase(), p]));
+        const out = [];
+        for (const t of popularTitlesOrder) {
+            const p = byTitle.get(t);
+            if (p) out.push(p);
+            if (out.length >= RV_MAX) break;
+        }
+        if (out.length) return out;
+    }
+    // Fallback: newest items (catalog tail) so the strip is never empty.
+    return cache.slice(-RV_MAX).reverse();
+}
+
+async function loadPopularProducts() {
+    if (popularLoaded) return;
+    popularLoaded = true;
+    try {
+        const res = await fetch('/api/popular');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (Array.isArray(data)) {
+            popularTitlesOrder = data
+                .map(row => String(row && row.title || '').toLowerCase())
+                .filter(Boolean);
+        }
+    } catch (_) { /* silent — fallback already in place */ }
+}
+
+// Fire-and-forget click tracker. Uses sendBeacon when available so the
+// request survives navigation (clicking Buy Now opens a new tab but the
+// browser still flushes the beacon).
+window.jfTrackClick = function(title) {
+    if (!title) return;
+    try {
+        const body = JSON.stringify({ title: String(title).slice(0, 300) });
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon('/api/click', new Blob([body], { type: 'application/json' }));
+        } else {
+            fetch('/api/click', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+        }
+    } catch (_) {}
+};
+
+// Replace the marquee in the live DOM. Used after the catalog finishes
+// loading on a fresh visit so the marquee fills in instead of staying empty.
+function refreshHomeMarquee() {
+    const wrap = document.querySelector('.rv-section');
+    const fresh = buildRecentlyViewedMarquee();
+    if (!fresh) return;
+    if (wrap) {
+        const tmp = document.createElement('div');
+        tmp.innerHTML = fresh;
+        wrap.replaceWith(tmp.firstElementChild);
+    } else {
+        // No section in DOM yet (cache was empty at first render) — inject
+        // it before the recently-viewed sentinel if we can find a home
+        // container, otherwise skip silently.
+        const home = document.querySelector('.jf-hero') || document.getElementById('main-content');
+        if (home) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = fresh;
+            home.appendChild(tmp.firstElementChild);
+        }
+    }
+    initRvMarquee();
 }
 
 function buildRecentlyViewedMarquee() {
@@ -2557,7 +2660,7 @@ function buildRecentlyViewedMarquee() {
 
     return `
     <div class="rv-section">
-        <div class="rv-label">Recently Viewed</div>
+        <div class="rv-label">Most Popular</div>
         <div class="rv-track-wrap">
             <div class="rv-track" id="rv-track">${cards}${cards}</div>
         </div>
