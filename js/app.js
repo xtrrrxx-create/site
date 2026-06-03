@@ -1068,63 +1068,64 @@ function getPages() {
             }
             .rv-card {
                 background: #2a2a2a;
-                border: 1px solid #3a3a3a;
+                border: none;
                 box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
                 border-radius: 16px;
                 width: calc((100vw - 80px) / 5.2);
                 min-width: 220px;
                 flex-shrink: 0;
                 overflow: hidden;
-                transition: border-color 0.2s;
+                transition: transform 220ms ease, box-shadow 220ms ease;
                 display: flex;
                 flex-direction: column;
                 height: calc(100vh - 480px);
                 min-height: 280px;
             }
-            .rv-card:hover { border-color: var(--text-secondary); }
+            .rv-card:hover { transform: translateY(-5px); box-shadow: 0 20px 48px rgba(0,0,0,0.55); }
             .rv-img {
                 width: 100%;
                 flex: 1;
                 overflow: hidden;
-                background: var(--bg-color);
+                background: #111;
             }
             .rv-info {
-                padding: 0.75rem;
+                padding: 0.85rem 1rem 1rem;
                 flex-shrink: 0;
             }
             .rv-title {
-                font-size: 0.78rem;
+                font-size: 0.95rem;
                 font-weight: 600;
-                color: var(--text-primary);
+                color: #fff;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                margin-bottom: 0.25rem;
+                margin-bottom: 0.4rem;
             }
             .rv-price {
-                font-size: 0.85rem;
-                font-weight: 800;
-                color: #ff8c00;
-                margin-bottom: 0.6rem;
+                font-size: 1.1rem;
+                font-weight: 700;
+                color: #fff;
+                margin-bottom: 0.75rem;
             }
             .rv-actions {
                 display: flex;
-                gap: 0.4rem;
+                gap: 0.5rem;
             }
             .rv-btn {
                 flex: 1;
                 text-align: center;
                 text-decoration: none;
-                border-radius: 8px;
-                padding: 0.45rem 0.2rem;
-                font-size: 0.74rem;
+                border-radius: 999px;
+                padding: 0.65rem 1rem;
+                font-size: 0.82rem;
                 font-weight: 700;
-                transition: opacity 0.15s;
+                transition: background-color 160ms ease, opacity 160ms ease;
             }
-            .rv-btn:hover { opacity: 0.8; }
+            .rv-btn:hover { opacity: 0.85; }
             .rv-btn-qc {
-                background: var(--border-color);
-                color: var(--text-primary);
+                background: #2c2c2e;
+                color: #fff;
+                border-radius: 999px;
             }
         </style>
         <div style="position:relative;min-height:calc(100vh - 5rem);">
@@ -1139,24 +1140,7 @@ function getPages() {
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
-                    <svg class="jf-arrow" style="position:absolute;right:calc(9% + 200px);top:calc(35% + 70px);width:170px;height:100px;pointer-events:none;overflow:visible;opacity:0;animation:jfArrowIn 0.6s cubic-bezier(0.16,1,0.3,1) forwards 1.2s, jfArrowBob 2.4s ease-in-out infinite 1.8s;" viewBox="0 0 170 100" fill="none" aria-hidden="true">
-                        <defs>
-                            <marker id="jfArrowTip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto">
-                                <path d="M0,0 L10,5 L0,10 z" fill="#ff8c00"/>
-                            </marker>
-                        </defs>
-                        <path d="M 14 92 Q 30 50 158 8" stroke="#ff8c00" stroke-width="3" stroke-linecap="round" fill="none" marker-end="url(#jfArrowTip)" stroke-dasharray="240" stroke-dashoffset="240" style="animation:jfArrowDraw 0.9s cubic-bezier(0.65,0,0.35,1) forwards 1.2s;"/>
-                    </svg>
                 </div>
-                <style>
-                    @keyframes jfArrowIn { to { opacity: 1; } }
-                    @keyframes jfArrowDraw { to { stroke-dashoffset: 0; } }
-                    @keyframes jfArrowBob {
-                        0%, 100% { transform: translate(0, 0); }
-                        50% { transform: translate(4px, -4px); }
-                    }
-                    @media (max-width: 900px) { .jf-arrow { display: none; } }
-                </style>
                 <p class="jf-sub">${t('hero_desc')}</p>
                 ${buildRecentlyViewedMarquee()}
             </div>
@@ -2687,7 +2671,7 @@ function buildRecentlyViewedMarquee() {
                 <div class="rv-title">${escapeHtml(stripEmojis(item.title))}</div>
                 <div class="rv-price">${formatPrice(item.price)}</div>
                 <div class="rv-actions">
-                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="rv-btn" style="background:#ff8c00;color:#fff;flex:1;text-align:center;text-decoration:none;border-radius:8px;padding:0.4rem 0.2rem;font-size:0.72rem;font-weight:700;">Buy Now</a>
+                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="rv-btn" style="background:#f5a623;color:#fff;">Buy Now</a>
                     <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="rv-btn rv-btn-qc">QC</a>
                 </div>
             </div>
