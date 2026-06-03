@@ -1,8 +1,8 @@
 :root {
-    --bg-color: #121212;
-    --nav-bg: #1a1a1a;
-    --border-color: #2a2a2a;
-    --text-primary: #ffffff;
+    --bg-color: #1e1e1e;
+    --nav-bg: #2a2a2a;
+    --border-color: #363636;
+    --text-primary: #f0f0f0;
     --text-secondary: #a0a0a0;
     --accent-color: #ff9f0a;
     --glow-color: rgba(255, 255, 255, 0.1);
@@ -319,11 +319,11 @@ main {
 }
 
 .product-card {
-    background: #1e1e1e;
-    border: 1px solid #2a2a2a;
+    background: linear-gradient(to bottom, #333, #262626);
+    border: 1px solid #363636;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: none;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.3);
     transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out);
     display: flex;
     flex-direction: column;
@@ -333,7 +333,7 @@ main {
 @media (hover: hover) and (pointer: fine) {
     .product-card:hover {
         transform: translateY(-3px);
-        border-color: #3a3a3a;
+        border-color: #525252;
     }
 }
 
@@ -344,7 +344,7 @@ main {
 
 .product-image {
     height: 280px;
-    background: #161616;
+    background: #2a2a2a;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -456,7 +456,7 @@ main {
     background: transparent;
     border-radius: 9999px;
     color: var(--text-secondary);
-    border: 1px solid #3a3a3a;
+    border: 1px solid #424242;
     padding: 6px 16px;
     font-size: 13px;
     font-weight: 600;
@@ -470,7 +470,7 @@ main {
     white-space: nowrap;
     transition: border-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 100ms var(--ease-out);
 }
-.card-btn-qc:hover { border-color: #555; color: #fff; }
+.card-btn-qc:hover { border-color: #525252; color: #f0f0f0; }
 .card-btn-qc:active { transform: scale(0.97); }
 
 /* Converter */

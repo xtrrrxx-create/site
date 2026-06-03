@@ -1069,9 +1069,9 @@ function getPages() {
                 100% { transform: translateX(-50%); }
             }
             .rv-card {
-                background: #1e1e1e;
-                border: 1px solid #2a2a2a;
-                box-shadow: none;
+                background: linear-gradient(to bottom, #333, #262626);
+                border: 1px solid #363636;
+                box-shadow: 0 18px 40px rgba(0,0,0,0.3);
                 border-radius: 16px;
                 width: 280px;
                 flex-shrink: 0;
@@ -1080,10 +1080,10 @@ function getPages() {
                 display: flex;
                 flex-direction: column;
             }
-            .rv-card:hover { transform: translateY(-3px); border-color: #3a3a3a; }
+            .rv-card:hover { transform: translateY(-3px); border-color: #525252; }
             .rv-card .product-image {
                 height: 280px;
-                background: #161616;
+                background: #2a2a2a;
             }
         </style>
         <div style="position:relative;min-height:calc(100vh - 5rem);">
