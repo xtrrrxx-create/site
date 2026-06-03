@@ -1049,7 +1049,7 @@ function getPages() {
                 display: flex;
                 gap: 0;
                 width: max-content;
-                animation: rv-scroll 30s linear infinite;
+                animation: rv-scroll 60s linear infinite;
                 will-change: transform;
             }
             .rv-half {
