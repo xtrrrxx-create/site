@@ -12,45 +12,45 @@
 }
 
 body.light-mode {
-    --bg-color: #f2ede4;
-    --nav-bg: #faf7f2;
-    --border-color: #ddd6cb;
-    --text-primary: #1c1917;
-    --text-secondary: #8a7e74;
-    --accent-color: #1c1917;
+    --bg-color: #f5f5f5;
+    --nav-bg: #ffffff;
+    --border-color: #e5e5e5;
+    --text-primary: #171717;
+    --text-secondary: #525252;
+    --accent-color: #ff9f0a;
     --glow-color: rgba(0, 0, 0, 0.1);
 }
 
 body.light-mode .product-card {
-    background: #faf7f2;
-    box-shadow: 0 4px 16px rgba(180,160,130,0.15), 0 1px 4px rgba(180,160,130,0.1);
+    background: #ffffff;
+    box-shadow: rgba(0,0,0,0.12) 0px 2px 4px 0px, rgba(0,0,0,0.18) 0px 8px 16px 0px;
 }
 
 body.light-mode .product-card:hover {
-    box-shadow: 0 8px 28px rgba(180,160,130,0.25), 0 2px 8px rgba(180,160,130,0.12);
+    box-shadow: rgba(0,0,0,0.18) 0px 6px 12px 0px, rgba(0,0,0,0.22) 0px 16px 32px 0px;
 }
 
 body.light-mode .product-image {
-    background: #ede8e0;
+    background: #f0f0f0;
 }
 
 body.light-mode .product-title,
 body.light-mode .product-price {
-    color: #1c1917;
+    color: #171717;
 }
 
 body.light-mode .product-store-name {
-    color: #8a7e74;
+    color: #525252;
 }
 
 body.light-mode .card-btn-qc {
-    background: #ede8e0;
-    color: #1c1917;
-    border-color: #d4cdc4;
+    background: #f0f0f0;
+    color: #171717;
+    border-color: #e5e5e5;
 }
 
 body.light-mode .card-btn-qc:hover {
-    background: #e2dbd1;
+    background: #e5e5e5;
 }
 
 body.light-mode .kf-search-box {
@@ -62,7 +62,7 @@ body.light-mode .navbar {
     box-shadow: 0 4px 20px rgba(180,160,130,0.15);
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif; }
 
 html, body {
     overflow-x: hidden;
@@ -430,7 +430,7 @@ main {
 }
 
 .card-btn-buy {
-    background: #f5a623;
+    background: #ff9f0a;
     color: #fff;
     border: none;
     padding: 0.65rem 1rem;

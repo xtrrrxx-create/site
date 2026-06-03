@@ -785,7 +785,7 @@ function renderFilteredProducts() {
         const picksly = safeExternalUrl(p.picksly || '#');
         let batchFlair = '';
         if (batch === 'best batch') {
-            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#f5a623;letter-spacing:.03em;">BEST BATCH</span>';
+            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#ff9f0a;letter-spacing:.03em;">BEST BATCH</span>';
         } else if (batch === 'budget batch') {
             batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
         } else if (batch === 'random batch') {
@@ -906,7 +906,7 @@ function injectHomeStyles() {
         }
         .jf-eyebrow-dot {
             width: 5px; height: 5px;
-            background: #ff8c00;
+            background: #ff9f0a;
             border-radius: 50%;
         }
 
@@ -918,7 +918,7 @@ function injectHomeStyles() {
             display: inline-flex;
             align-items: center;
             gap: 9px;
-            background: #ff8c00;
+            background: #ff9f0a;
             color: #fff;
             font-family: 'Inter', sans-serif;
             font-weight: 700;
@@ -1136,7 +1136,7 @@ function getPages() {
                 </div>
                 <div style="position:relative;width:100%;display:flex;justify-content:center;">
                     <h1 class="jf-title" style="white-space:nowrap;margin-bottom:0;"><span style="color:var(--text-primary);">jarvis </span><span style="color:transparent;-webkit-text-stroke:1.5px var(--text-primary);">finder</span></h1>
-                    <button data-action="go-products" style="position:absolute;right:9%;top:35%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:9px;background:#ff8c00;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:0.9rem;padding:0.9rem 2rem;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(255,140,0,0.35);animation:jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.52s;">
+                    <button data-action="go-products" style="position:absolute;right:9%;top:35%;transform:translateY(-50%);display:inline-flex;align-items:center;gap:9px;background:#ff9f0a;color:#fff;font-family:'Inter Tight','Inter',sans-serif;font-weight:700;font-size:0.9rem;padding:0.9rem 2rem;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(255,140,0,0.35);animation:jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.52s;">
                         ${t('btn_explore')}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </button>
@@ -2117,7 +2117,7 @@ function showWelcomeModal() {
     let selCur   = currentCurrency;
 
     const S = {
-        pill: (on) => `padding:.5rem 1.1rem;border-radius:999px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;border:1.5px solid ${on?'#f5a623':'#404040'};background:${on?'#f5a623':'transparent'};color:${on?'#fff':'#888'};`,
+        pill: (on) => `padding:.5rem 1.1rem;border-radius:999px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;border:1.5px solid ${on?'#ff9f0a':'#404040'};background:${on?'#ff9f0a':'transparent'};color:${on?'#fff':'#888'};`,
     };
 
     const overlay = document.createElement('div');
@@ -2127,8 +2127,8 @@ function showWelcomeModal() {
     overlay.innerHTML = `
     <style>
         .jf-wel-cta:hover { opacity: 0.85; }
-        .jf-wel-signup { display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:999px;background:transparent;color:#f5a623;font-weight:600;font-size:.85rem;text-decoration:none;border:1.5px solid #f5a623;transition:all .15s;white-space:nowrap; }
-        .jf-wel-signup:hover { background:#f5a623;color:#fff; }
+        .jf-wel-signup { display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:999px;background:transparent;color:#ff9f0a;font-weight:600;font-size:.85rem;text-decoration:none;border:1.5px solid #ff9f0a;transition:all .15s;white-space:nowrap; }
+        .jf-wel-signup:hover { background:#ff9f0a;color:#fff; }
     </style>
     <div style="background:#242424;border-radius:24px;width:100%;max-width:960px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
 
@@ -2137,7 +2137,7 @@ function showWelcomeModal() {
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
                     <div style="font-size:1.8rem;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:.4rem;">
-                        <span style="color:#fff;">jarvis</span> <span style="color:#f5a623;">finder</span>
+                        <span style="color:#fff;">jarvis</span> <span style="color:#ff9f0a;">finder</span>
                     </div>
                     <p style="color:#666;font-size:.9rem;margin:0;">Customize your experience before you start.</p>
                 </div>
@@ -2169,7 +2169,7 @@ function showWelcomeModal() {
             <div style="display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;">
                 <div style="flex:1;min-width:240px;">
                     <p style="color:#fff;font-size:.95rem;font-weight:600;margin:0 0 .25rem;line-height:1.3;">
-                        $450 sign-up bonus on <span style="color:#f5a623;">KakoBuy</span>
+                        $450 sign-up bonus on <span style="color:#ff9f0a;">KakoBuy</span>
                     </p>
                     <p style="color:#666;font-size:.78rem;margin:0;line-height:1.4;">
                         Optional. Costs you nothing &middot; keeps this site free.
@@ -2185,7 +2185,7 @@ function showWelcomeModal() {
 
         <!-- CTA -->
         <div style="padding:1.2rem 2.2rem;">
-            <button data-action="jfWelDone" class="jf-wel-cta" style="width:100%;padding:.85rem;border-radius:999px;border:none;background:#f5a623;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;">
+            <button data-action="jfWelDone" class="jf-wel-cta" style="width:100%;padding:.85rem;border-radius:999px;border:none;background:#ff9f0a;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;">
                 Get Started →
             </button>
             <p style="text-align:center;margin-top:.8rem;">
@@ -2200,8 +2200,8 @@ function showWelcomeModal() {
         selLang = l;
         document.querySelectorAll('[id^="jf-wl-"]').forEach(btn => {
             const on = btn.id === 'jf-wl-' + l;
-            btn.style.background = on ? '#f5a623' : 'transparent';
-            btn.style.borderColor = on ? '#f5a623' : '#404040';
+            btn.style.background = on ? '#ff9f0a' : 'transparent';
+            btn.style.borderColor = on ? '#ff9f0a' : '#404040';
             btn.style.color = on ? '#fff' : '#888';
         });
         const map = { EN:'USD', RON:'RON', PLN:'PLN', CNY:'CNY' };
@@ -2212,8 +2212,8 @@ function showWelcomeModal() {
         selCur = c;
         document.querySelectorAll('[id^="jf-wc-"]').forEach(btn => {
             const on = btn.id === 'jf-wc-' + c;
-            btn.style.background = on ? '#f5a623' : 'transparent';
-            btn.style.borderColor = on ? '#f5a623' : '#404040';
+            btn.style.background = on ? '#ff9f0a' : 'transparent';
+            btn.style.borderColor = on ? '#ff9f0a' : '#404040';
             btn.style.color = on ? '#fff' : '#888';
         });
     };
@@ -2671,7 +2671,7 @@ function buildRecentlyViewedMarquee() {
                 <div class="rv-title">${escapeHtml(stripEmojis(item.title))}</div>
                 <div class="rv-price">${formatPrice(item.price)}</div>
                 <div class="rv-actions">
-                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="rv-btn" style="background:#f5a623;color:#fff;">Buy Now</a>
+                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="rv-btn" style="background:#ff9f0a;color:#fff;">Buy Now</a>
                     <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="rv-btn rv-btn-qc">QC</a>
                 </div>
             </div>
