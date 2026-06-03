@@ -2688,10 +2688,10 @@ function buildHomeSections() {
     const arrowRight = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
     return HOME_CATS.map(cat => {
-        const items = cache.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase()).slice(0, 15);
+        const items = cache.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase()).slice(0, 8);
         if (items.length < 3) return '';
         const id = 'hc-' + cat.toLowerCase().replace(/[^a-z]/g, '');
-        const cards = items.map(item => {
+        const cards = items.map((item, idx) => {
             const safeTitle = escapeHtml(stripEmojis(item.title || 'Untitled'));
             const rawImg = (item.img || '').trim();
             const isHttp = rawImg.startsWith('http');
@@ -2703,7 +2703,7 @@ function buildHomeSections() {
                 /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />`
+                ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
