@@ -2666,13 +2666,13 @@ function buildRecentlyViewedMarquee() {
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
         return `
         <div class="rv-card">
-            <div class="rv-img">${img}</div>
-            <div class="rv-info">
-                <div class="rv-title">${escapeHtml(stripEmojis(item.title))}</div>
-                <div class="rv-price">${formatPrice(item.price)}</div>
-                <div class="rv-actions">
-                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="rv-btn" style="background:#ff9f0a;color:#fff;">Buy Now</a>
-                    <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="rv-btn rv-btn-qc">QC</a>
+            <div class="product-image" style="overflow:hidden;">${img}</div>
+            <div class="product-info">
+                <h3 class="product-title rv-title">${escapeHtml(stripEmojis(item.title))}</h3>
+                <div class="product-price">${formatPrice(item.price)}</div>
+                <div class="product-actions">
+                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="card-btn-buy">Buy Now</a>
+                    <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">QC</a>
                 </div>
             </div>
         </div>`;
