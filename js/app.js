@@ -1131,7 +1131,7 @@ function getPages() {
                 </div>
             </div>
             <div class="jf-hero" style="min-height:auto;padding-top:2rem;padding-bottom:2.5rem;">
-                <h1 style="font-family:'Inter Tight',system-ui,sans-serif;font-size:clamp(2rem,5vw,42px);font-weight:600;letter-spacing:-0.025em;line-height:1.3;color:var(--text-primary);margin-bottom:0.75rem;animation:jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 0.05s;">Your Go-to <span style="color:#ff9f0a;font-style:italic;">Spreadsheet</span></h1>
+                <h1 style="font-family:'Inter Tight',system-ui,sans-serif;font-size:clamp(2rem,5vw,42px);font-weight:600;letter-spacing:-0.025em;line-height:1.3;color:var(--text-primary);margin-bottom:0.75rem;animation:jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 0.05s;">Your Go-to <span style="color:#ff9f0a;font-weight:800;">Spreadsheet</span></h1>
                 <p class="jf-sub" style="margin-bottom:0;">${t('hero_desc')}</p>
             </div>
             <div id="home-sections">${buildHomeSections()}</div>
