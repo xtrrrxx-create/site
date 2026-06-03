@@ -1069,22 +1069,26 @@ function getPages() {
             .hc-viewmore:hover { color: var(--text-primary); }
             .hc-carousel-wrap {
                 position: relative;
+                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
+                mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
             }
             .hc-carousel {
                 display: flex;
                 gap: 1rem;
-                overflow-x: hidden;
+                overflow-x: auto;
                 scroll-behavior: smooth;
+                scroll-snap-type: x mandatory;
                 scrollbar-width: none;
                 -ms-overflow-style: none;
+                padding: 0 1rem 4px;
             }
             .hc-carousel::-webkit-scrollbar { display: none; }
             .hc-card {
                 flex-shrink: 0;
-                width: calc((100% - 4rem) / 5);
-                min-width: 200px;
+                width: 240px;
                 display: flex;
                 flex-direction: column;
+                scroll-snap-align: start;
             }
             .hc-arrow {
                 position: absolute;
