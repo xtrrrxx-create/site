@@ -1073,16 +1073,16 @@ function getPages() {
             .hc-carousel {
                 display: flex;
                 gap: 1rem;
-                overflow-x: auto;
+                overflow-x: hidden;
                 scroll-behavior: smooth;
                 scrollbar-width: none;
                 -ms-overflow-style: none;
-                padding-bottom: 4px;
             }
             .hc-carousel::-webkit-scrollbar { display: none; }
             .hc-card {
                 flex-shrink: 0;
-                width: 240px;
+                width: calc((100% - 4rem) / 5);
+                min-width: 200px;
                 display: flex;
                 flex-direction: column;
             }
@@ -1923,7 +1923,7 @@ function initApp() {
                 const id = btn.getAttribute('data-carousel');
                 const dir = parseInt(btn.getAttribute('data-dir'), 10);
                 const carousel = document.getElementById(id);
-                if (carousel) carousel.scrollBy({ left: dir * 300, behavior: 'smooth' });
+                if (carousel) { const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240; carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' }); }
             });
         });
         mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
@@ -2629,7 +2629,7 @@ function refreshHomeMarquee() {
             const id = btn.getAttribute('data-carousel');
             const dir = parseInt(btn.getAttribute('data-dir'), 10);
             const carousel = document.getElementById(id);
-            if (carousel) carousel.scrollBy({ left: dir * 300, behavior: 'smooth' });
+            if (carousel) { const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240; carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' }); }
         });
     });
     // Re-attach category link handlers
