@@ -1033,14 +1033,15 @@ function getPages() {
                 padding: 2rem 0 0.5rem;
                 overflow: hidden;
             }
-            /* ── Category carousel sections ── */
+            /* ── Category carousel sections (picks.ly clone) ── */
             .hc-section {
-                padding: 0 5%;
-                margin-bottom: 2.5rem;
+                max-width: 1400px;
+                margin: 0 auto 2.5rem;
+                padding: 0 4%;
             }
             .hc-header {
                 display: flex;
-                align-items: center;
+                align-items: baseline;
                 justify-content: space-between;
                 margin-bottom: 1rem;
             }
@@ -1069,48 +1070,55 @@ function getPages() {
             .hc-viewmore:hover { color: var(--text-primary); }
             .hc-carousel-wrap {
                 position: relative;
-                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
-                mask-image: linear-gradient(to right, transparent 0%, black 3%, black 97%, transparent 100%);
             }
             .hc-carousel {
-                display: flex;
+                display: grid;
+                grid-template-columns: repeat(5, 1fr);
                 gap: 1rem;
+            }
+            .hc-carousel .hc-card:nth-child(n+6) { display: none; }
+            .hc-carousel.hc-expanded .hc-card:nth-child(n+6) { display: flex; }
+            .hc-carousel.hc-expanded {
+                display: flex;
                 overflow-x: auto;
                 scroll-behavior: smooth;
-                scroll-snap-type: x mandatory;
                 scrollbar-width: none;
                 -ms-overflow-style: none;
-                padding: 0 1rem 4px;
             }
-            .hc-carousel::-webkit-scrollbar { display: none; }
+            .hc-carousel.hc-expanded::-webkit-scrollbar { display: none; }
             .hc-card {
-                flex-shrink: 0;
-                width: 240px;
                 display: flex;
                 flex-direction: column;
-                scroll-snap-align: start;
+                min-width: 0;
             }
+            .hc-carousel.hc-expanded .hc-card {
+                flex-shrink: 0;
+                width: calc((100% - 4rem) / 5);
+                min-width: 200px;
+            }
+            .hc-card .product-image { height: 220px; }
             .hc-arrow {
                 position: absolute;
-                top: 50%;
-                transform: translateY(-70%);
-                width: 36px;
-                height: 36px;
+                top: 45%;
+                transform: translateY(-50%);
+                width: 40px;
+                height: 40px;
                 border-radius: 50%;
-                background: rgba(30,30,30,0.85);
+                background: rgba(20,20,20,0.9);
                 border: 1px solid #363636;
                 color: #f0f0f0;
-                display: flex;
+                display: none;
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
                 z-index: 5;
-                transition: background 0.15s, opacity 0.15s;
+                transition: background 0.15s;
                 backdrop-filter: blur(4px);
             }
+            .hc-carousel-wrap:hover .hc-arrow { display: flex; }
             .hc-arrow:hover { background: rgba(50,50,50,0.95); }
-            .hc-arrow-left { left: -12px; }
-            .hc-arrow-right { right: -12px; }
+            .hc-arrow-left { left: 8px; }
+            .hc-arrow-right { right: 8px; }
         </style>
         <div style="position:relative;min-height:calc(100vh - 5rem);">
             <div class="jf-hero">
@@ -1921,13 +1929,24 @@ function initApp() {
                 (window.navigateTo||renderPage)('products');
             });
         });
-        // Carousel arrow handlers
+        // Carousel arrow handlers — expand to scroll mode on first click
         mainContent.querySelectorAll('.hc-arrow').forEach(btn => {
             btn.addEventListener('click', () => {
                 const id = btn.getAttribute('data-carousel');
                 const dir = parseInt(btn.getAttribute('data-dir'), 10);
                 const carousel = document.getElementById(id);
-                if (carousel) { const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240; carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' }); }
+                if (!carousel) return;
+                if (!carousel.classList.contains('hc-expanded')) {
+                    carousel.classList.add('hc-expanded');
+                    // scroll to show 6th card
+                    requestAnimationFrame(() => {
+                        const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
+                        if (dir === 1) carousel.scrollBy({ left: cardW + 16, behavior: 'smooth' });
+                    });
+                } else {
+                    const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
+                    carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' });
+                }
             });
         });
         mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
@@ -2633,7 +2652,17 @@ function refreshHomeMarquee() {
             const id = btn.getAttribute('data-carousel');
             const dir = parseInt(btn.getAttribute('data-dir'), 10);
             const carousel = document.getElementById(id);
-            if (carousel) { const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240; carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' }); }
+            if (!carousel) return;
+            if (!carousel.classList.contains('hc-expanded')) {
+                carousel.classList.add('hc-expanded');
+                requestAnimationFrame(() => {
+                    const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
+                    if (dir === 1) carousel.scrollBy({ left: cardW + 16, behavior: 'smooth' });
+                });
+            } else {
+                const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
+                carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' });
+            }
         });
     });
     // Re-attach category link handlers
