@@ -1033,58 +1033,80 @@ function getPages() {
                 padding: 2rem 0 0.5rem;
                 overflow: hidden;
             }
-            .rv-label {
-                font-size: 0.66rem;
-                font-weight: 700;
-                letter-spacing: 0.12em;
-                text-transform: uppercase;
-                color: var(--text-secondary);
-                padding: 0 5% 0.5rem;
+            /* ── Category carousel sections ── */
+            .hc-section {
+                padding: 0 5%;
+                margin-bottom: 2.5rem;
             }
-            .rv-track-wrap {
-                overflow: hidden;
-                width: 100%;
-                -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-                mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-            }
-            .rv-track {
+            .hc-header {
                 display: flex;
-                gap: 0;
-                width: max-content;
-                animation: rv-scroll 60s linear infinite;
-                will-change: transform;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 1rem;
             }
-            .rv-half {
+            .hc-title {
+                font-family: 'Inter Tight', system-ui, sans-serif;
+                font-size: 26px;
+                font-weight: 400;
+                line-height: 31px;
+                color: var(--text-primary);
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                cursor: pointer;
+                text-decoration: none;
+            }
+            .hc-title:hover { color: #ff9f0a; }
+            .hc-title svg { transition: transform 0.15s; }
+            .hc-title:hover svg { transform: translateX(3px); }
+            .hc-viewmore {
+                font-family: 'Inter Tight', system-ui, sans-serif;
+                font-size: 14px;
+                color: var(--text-secondary);
+                text-decoration: none;
+                cursor: pointer;
+            }
+            .hc-viewmore:hover { color: var(--text-primary); }
+            .hc-carousel-wrap {
+                position: relative;
+            }
+            .hc-carousel {
                 display: flex;
                 gap: 1rem;
-                flex-shrink: 0;
-                padding-right: 1rem;
+                overflow-x: auto;
+                scroll-behavior: smooth;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding-bottom: 4px;
             }
-            /* Pure-CSS hover-pause: applies to the wrap so hovering a card
-               (which lives inside the track) reliably pauses scrolling.
-               Survives marquee re-renders without re-attaching JS listeners. */
-            .rv-track-wrap:hover .rv-track { animation-play-state: paused; }
-            @keyframes rv-scroll {
-                0%   { transform: translateX(0); }
-                100% { transform: translateX(-50%); }
-            }
-            .rv-card {
-                background: linear-gradient(to bottom, #333, #262626);
-                border: 1px solid #363636;
-                box-shadow: 0 18px 40px rgba(0,0,0,0.3);
-                border-radius: 16px;
-                width: 280px;
+            .hc-carousel::-webkit-scrollbar { display: none; }
+            .hc-card {
                 flex-shrink: 0;
-                overflow: hidden;
-                transition: transform 220ms ease, border-color 220ms ease;
+                width: 240px;
                 display: flex;
                 flex-direction: column;
             }
-            .rv-card:hover { transform: translateY(-3px); border-color: #525252; }
-            .rv-card .product-image {
-                height: 280px;
-                background: #2a2a2a;
+            .hc-arrow {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-70%);
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: rgba(30,30,30,0.85);
+                border: 1px solid #363636;
+                color: #f0f0f0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 5;
+                transition: background 0.15s, opacity 0.15s;
+                backdrop-filter: blur(4px);
             }
+            .hc-arrow:hover { background: rgba(50,50,50,0.95); }
+            .hc-arrow-left { left: -12px; }
+            .hc-arrow-right { right: -12px; }
         </style>
         <div style="position:relative;min-height:calc(100vh - 5rem);">
             <div class="jf-hero">
@@ -1100,7 +1122,9 @@ function getPages() {
                     ${t('btn_explore')}
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </button>
-                ${buildRecentlyViewedMarquee()}
+            </div>
+            <div id="home-sections">${buildHomeSections()}</div>
+            <div style="padding-bottom:3rem;">
             </div>
         </div>
     `,
@@ -1886,7 +1910,21 @@ function initApp() {
 
         // CSP-safe: handle data-action buttons instead of inline onclick
         mainContent.querySelectorAll('[data-action="go-products"]').forEach(el => {
-            el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('products'); });
+            el.addEventListener('click', e => {
+                e.preventDefault();
+                const cat = el.getAttribute('data-cat');
+                if (cat) { filterState.category = cat; }
+                (window.navigateTo||renderPage)('products');
+            });
+        });
+        // Carousel arrow handlers
+        mainContent.querySelectorAll('.hc-arrow').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-carousel');
+                const dir = parseInt(btn.getAttribute('data-dir'), 10);
+                const carousel = document.getElementById(id);
+                if (carousel) carousel.scrollBy({ left: dir * 300, behavior: 'smooth' });
+            });
         });
         mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
             el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('tools'); });
@@ -2578,90 +2616,96 @@ window.jfTrackClick = function(title) {
     } catch (_) {}
 };
 
-// Replace the marquee in the live DOM. Used after the catalog finishes
-// loading on a fresh visit so the marquee fills in instead of staying empty.
+// Refresh home category sections after catalog loads.
 function refreshHomeMarquee() {
-    const section = document.querySelector('.rv-section');
-    const fresh = buildRecentlyViewedMarquee();
+    const container = document.getElementById('home-sections');
+    if (!container) return;
+    const fresh = buildHomeSections();
     if (!fresh) return;
-    if (section) {
-        // Preserve animation progress: only swap the track innerHTML
-        const track = section.querySelector('.rv-track');
-        const tmp = document.createElement('div');
-        tmp.innerHTML = fresh;
-        const newTrack = tmp.querySelector('.rv-track');
-        if (track && newTrack) {
-            track.innerHTML = newTrack.innerHTML;
-        } else {
-            section.replaceWith(tmp.firstElementChild);
-        }
-    } else {
-        const home = document.querySelector('.jf-hero') || document.getElementById('main-content');
-        if (home) {
-            const tmp = document.createElement('div');
-            tmp.innerHTML = fresh;
-            home.appendChild(tmp.firstElementChild);
-        }
-    }
+    container.innerHTML = fresh;
+    // Re-attach carousel arrow handlers
+    container.querySelectorAll('.hc-arrow').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.getAttribute('data-carousel');
+            const dir = parseInt(btn.getAttribute('data-dir'), 10);
+            const carousel = document.getElementById(id);
+            if (carousel) carousel.scrollBy({ left: dir * 300, behavior: 'smooth' });
+        });
+    });
+    // Re-attach category link handlers
+    container.querySelectorAll('[data-action="go-products"]').forEach(el => {
+        el.addEventListener('click', e => {
+            e.preventDefault();
+            const cat = el.getAttribute('data-cat');
+            if (cat) filterState.category = cat;
+            (window.navigateTo||renderPage)('products');
+        });
+    });
 }
 
-function buildRecentlyViewedMarquee() {
-    const rv = getRecentlyViewed();
-    if (rv.length === 0) return '';
-    const kakobuyAffcode = 'affcode=keviinn';
-    const cards = rv.map(item => {
-        // Re-validate every URL coming from localStorage — an attacker who can
-        // write to localStorage (XSS elsewhere, malicious browser extension)
-        // must not be able to plant javascript: URLs that fire when we render.
-        const kakobuyClean = sanitizeStoredUrl(item.kakobuy);
-        const kakobuy = kakobuyClean
-            ? (kakobuyClean.includes('affcode') ? kakobuyClean : kakobuyClean + (kakobuyClean.includes('?') ? '&' : '?') + kakobuyAffcode)
-            : '#';
-        const picksly = sanitizeStoredUrl(item.picksly) || '#';
-        const imgUrl = sanitizeStoredUrl(item.img);
-        const img = imgUrl
-            ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" data-fallback="hide" />`
-            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
+function buildHomeSections() {
+    const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+    if (!cache.length) return '';
+    const HOME_CATS = ['Shoes', 'T-shirts', 'Hoodies', 'Jackets', 'Shorts', 'Pants', 'Long-sleeve', 'Accessories'];
+    const arrow = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+    const arrowLeft = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+    const arrowRight = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
-        // Build batch flair identical to product cards
-        const batchRaw = (item.batch || '').trim().toLowerCase();
-        let batchFlair = '';
-        if (batchRaw === 'best batch') {
-            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#ff9f0a;letter-spacing:.03em;">BEST BATCH</span>';
-        } else if (batchRaw === 'budget batch') {
-            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
-        } else if (batchRaw === 'random batch') {
-            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">RANDOM</span>';
-        } else if (batchRaw) {
-            batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
-        }
-
-        return `
-        <div class="rv-card">
-            <div class="product-image" style="overflow:hidden;">${img}</div>
-            <div class="product-info">
-                <div class="product-batch-row">
-                    <span class="product-store-badge">店</span>
-                    <span class="product-store-name">${escapeHtml(item.category || '')}</span>
-                    ${batchFlair}
+    return HOME_CATS.map(cat => {
+        const items = cache.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase()).slice(0, 15);
+        if (items.length < 3) return '';
+        const id = 'hc-' + cat.toLowerCase().replace(/[^a-z]/g, '');
+        const cards = items.map(item => {
+            const safeTitle = escapeHtml(stripEmojis(item.title || 'Untitled'));
+            const rawImg = (item.img || '').trim();
+            const isHttp = rawImg.startsWith('http');
+            const isKnownPlaceholder =
+                /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) ||
+                /s\.yupoo\.com\/website\/.*\/logo_/i.test(rawImg) ||
+                /picks\.ly\/marketplace-logos\//i.test(rawImg) ||
+                /picks\.ly\/agent-logos\//i.test(rawImg) ||
+                /picks\.ly\/twitter-image/i.test(rawImg);
+            const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
+            const img = safeImg
+                ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />`
+                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
+            const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
+            const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
+            const batchRaw = (item.batch || '').trim().toLowerCase();
+            let batchFlair = '';
+            if (batchRaw === 'best batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#ff9f0a;letter-spacing:.03em;">BEST BATCH</span>';
+            else if (batchRaw === 'budget batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
+            else if (batchRaw === 'random batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">RANDOM</span>';
+            else if (batchRaw) batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
+            return `<div class="hc-card product-card">
+                <div class="product-image" style="overflow:hidden;height:220px;">${img}</div>
+                <div class="product-info">
+                    <div class="product-batch-row">
+                        <span class="product-store-badge">店</span>
+                        <span class="product-store-name">${escapeHtml(item.category || '')}</span>
+                        ${batchFlair}
+                    </div>
+                    <h3 class="product-title">${safeTitle}</h3>
+                    <div class="product-price">${formatPrice(item.price)}</div>
+                    <div class="product-actions">
+                        <a href="${kakobuy}" target="_blank" rel="noopener noreferrer" class="card-btn-buy">Buy Now</a>
+                        <a href="${picksly}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                    </div>
                 </div>
-                <h3 class="product-title rv-title">${escapeHtml(stripEmojis(item.title))}</h3>
-                <div class="product-price">${formatPrice(item.price)}</div>
-                <div class="product-actions">
-                    <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="card-btn-buy">Buy Now</a>
-                    <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
-                </div>
+            </div>`;
+        }).join('');
+        return `<div class="hc-section">
+            <div class="hc-header">
+                <a class="hc-title" data-action="go-products" data-cat="${escapeHtml(cat)}">${escapeHtml(cat)} ${arrow}</a>
+                <a class="hc-viewmore" data-action="go-products" data-cat="${escapeHtml(cat)}">View more</a>
+            </div>
+            <div class="hc-carousel-wrap">
+                <button class="hc-arrow hc-arrow-left" data-carousel="${id}" data-dir="-1">${arrowLeft}</button>
+                <div class="hc-carousel" id="${id}">${cards}</div>
+                <button class="hc-arrow hc-arrow-right" data-carousel="${id}" data-dir="1">${arrowRight}</button>
             </div>
         </div>`;
-    }).join('');
-
-    return `
-    <div class="rv-section">
-        <div class="rv-label">Most Popular</div>
-        <div class="rv-track-wrap">
-            <div class="rv-track" id="rv-track"><div class="rv-half">${cards}</div><div class="rv-half">${cards}</div></div>
-        </div>
-    </div>`;
+    }).filter(Boolean).join('');
 }
 
 // ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────
