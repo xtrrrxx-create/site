@@ -2456,7 +2456,7 @@ document.addEventListener('keydown', (e) => {
 // ─── LINK CONVERTER ────────────────────────────────────────────────────────
 // ─── RECENTLY VIEWED ───────────────────────────────────────────────────────
 const RV_KEY = 'jf_recently_viewed';
-const RV_MAX = 12;
+const RV_MAX = 20;
 
 // Delegated listener: picks up clicks on .product-card and reads the
 // HTML-escaped JSON from data-rv. Inline onclick removed to harden against
