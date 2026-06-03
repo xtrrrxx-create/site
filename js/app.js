@@ -1067,20 +1067,21 @@ function getPages() {
                 100% { transform: translateX(-50%); }
             }
             .rv-card {
-                background: #2a2a2a;
-                border: none;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
+                background: #1e1e1e;
+                border: 1px solid #2a2a2a;
+                box-shadow: none;
                 border-radius: 16px;
                 width: 280px;
                 flex-shrink: 0;
                 overflow: hidden;
-                transition: transform 220ms ease, box-shadow 220ms ease;
+                transition: transform 220ms ease, border-color 220ms ease;
                 display: flex;
                 flex-direction: column;
             }
-            .rv-card:hover { transform: translateY(-5px); box-shadow: 0 20px 48px rgba(0,0,0,0.55); }
+            .rv-card:hover { transform: translateY(-3px); border-color: #3a3a3a; }
             .rv-card .product-image {
-                height: 300px;
+                height: 280px;
+                background: #161616;
             }
         </style>
         <div style="position:relative;min-height:calc(100vh - 5rem);">
