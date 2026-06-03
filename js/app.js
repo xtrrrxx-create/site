@@ -893,9 +893,10 @@ function injectHomeStyles() {
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            border: 1px solid rgba(255,140,0,0.35);
+            border: 1px solid rgba(255,159,10,0.3);
             border-radius: 9999px;
             padding: 0.35rem 0.9rem;
+            font-family: 'Inter Tight', system-ui, sans-serif;
             font-size: 0.72rem;
             font-weight: 600;
             letter-spacing: 0.07em;
@@ -967,11 +968,12 @@ function injectHomeStyles() {
         /* Subtext */
         .jf-sub {
             color: var(--text-secondary);
-            font-size: 0.95rem;
+            font-family: 'Inter Tight', system-ui, sans-serif;
+            font-size: 16px;
             font-weight: 400;
-            line-height: 1.6;
+            line-height: 24px;
             margin-bottom: 0.5rem;
-            max-width: 380px;
+            max-width: 420px;
             animation: jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.4s;
         }
 
@@ -1094,7 +1096,7 @@ function getPages() {
                     <h1 class="jf-title" style="white-space:nowrap;margin-bottom:0;"><span style="color:var(--text-primary);">jarvis </span><span style="color:transparent;-webkit-text-stroke:1.5px var(--text-primary);">finder</span></h1>
                 </div>
                 <p class="jf-sub">${t('hero_desc')}</p>
-                <button data-action="go-products" style="display:inline-flex;align-items:center;gap:9px;background:#ff9f0a;color:#fff;font-family:'Inter Tight','Inter',sans-serif;font-weight:700;font-size:0.9rem;padding:0.9rem 2rem;border-radius:9999px;border:none;cursor:pointer;box-shadow:0 4px 24px rgba(255,140,0,0.35);margin-top:1.5rem;animation:jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.52s;">
+                <button data-action="go-products" style="display:inline-flex;align-items:center;gap:9px;background:#ff9f0a;color:#fff;font-family:'Inter Tight',system-ui,sans-serif;font-weight:600;font-size:0.85rem;padding:0.7rem 1.6rem;border-radius:9999px;border:none;cursor:pointer;margin-top:1.5rem;animation:jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.52s;">
                     ${t('btn_explore')}
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                 </button>
