@@ -1078,54 +1078,19 @@ function getPages() {
                 transition: transform 220ms ease, box-shadow 220ms ease;
                 display: flex;
                 flex-direction: column;
-                height: calc(100vh - 480px);
-                min-height: 280px;
+                height: auto;
             }
             .rv-card:hover { transform: translateY(-5px); box-shadow: 0 20px 48px rgba(0,0,0,0.55); }
-            .rv-img {
-                width: 100%;
-                flex: 1;
-                overflow: hidden;
-                background: #111;
-            }
-            .rv-info {
-                padding: 0.85rem 1rem 1rem;
+            .rv-card .product-image {
+                height: 200px;
                 flex-shrink: 0;
             }
-            .rv-title {
-                font-size: 0.95rem;
-                font-weight: 600;
-                color: #fff;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                margin-bottom: 0.4rem;
-            }
-            .rv-price {
-                font-size: 1.1rem;
-                font-weight: 700;
-                color: #fff;
-                margin-bottom: 0.75rem;
-            }
-            .rv-actions {
-                display: flex;
-                gap: 0.5rem;
-            }
-            .rv-btn {
+            .rv-card .product-info {
                 flex: 1;
-                text-align: center;
-                text-decoration: none;
-                border-radius: 999px;
-                padding: 0.65rem 1rem;
-                font-size: 0.82rem;
-                font-weight: 700;
-                transition: background-color 160ms ease, opacity 160ms ease;
             }
-            .rv-btn:hover { opacity: 0.85; }
-            .rv-btn-qc {
-                background: #2c2c2e;
-                color: #fff;
-                border-radius: 999px;
+            .rv-card .product-title {
+                -webkit-line-clamp: 2;
+                white-space: normal;
             }
         </style>
         <div style="position:relative;min-height:calc(100vh - 5rem);">
