@@ -1071,26 +1071,16 @@ function getPages() {
                 border: none;
                 box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
                 border-radius: 16px;
-                width: calc((100vw - 80px) / 5.2);
-                min-width: 220px;
+                width: 280px;
                 flex-shrink: 0;
                 overflow: hidden;
                 transition: transform 220ms ease, box-shadow 220ms ease;
                 display: flex;
                 flex-direction: column;
-                height: auto;
             }
             .rv-card:hover { transform: translateY(-5px); box-shadow: 0 20px 48px rgba(0,0,0,0.55); }
             .rv-card .product-image {
-                height: 200px;
-                flex-shrink: 0;
-            }
-            .rv-card .product-info {
-                flex: 1;
-            }
-            .rv-card .product-title {
-                -webkit-line-clamp: 2;
-                white-space: normal;
+                height: 300px;
             }
         </style>
         <div style="position:relative;min-height:calc(100vh - 5rem);">
