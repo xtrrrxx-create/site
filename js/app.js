@@ -2629,15 +2629,34 @@ function buildRecentlyViewedMarquee() {
         const img = imgUrl
             ? `<img src="${escapeHtml(imgUrl)}" alt="${escapeHtml(item.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" data-fallback="hide" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
+
+        // Build batch flair identical to product cards
+        const batchRaw = (item.batch || '').trim().toLowerCase();
+        let batchFlair = '';
+        if (batchRaw === 'best batch') {
+            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#ff9f0a;letter-spacing:.03em;">BEST BATCH</span>';
+        } else if (batchRaw === 'budget batch') {
+            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
+        } else if (batchRaw === 'random batch') {
+            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">RANDOM</span>';
+        } else if (batchRaw) {
+            batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
+        }
+
         return `
         <div class="rv-card">
             <div class="product-image" style="overflow:hidden;">${img}</div>
             <div class="product-info">
+                <div class="product-batch-row">
+                    <span class="product-store-badge">店</span>
+                    <span class="product-store-name">${escapeHtml(item.category || '')}</span>
+                    ${batchFlair}
+                </div>
                 <h3 class="product-title rv-title">${escapeHtml(stripEmojis(item.title))}</h3>
                 <div class="product-price">${formatPrice(item.price)}</div>
                 <div class="product-actions">
                     <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="card-btn-buy">Buy Now</a>
-                    <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">QC</a>
+                    <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
                 </div>
             </div>
         </div>`;
