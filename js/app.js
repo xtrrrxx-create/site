@@ -1120,20 +1120,19 @@ function getPages() {
             .hc-arrow-left { left: 8px; }
             .hc-arrow-right { right: 8px; }
         </style>
-        <div style="position:relative;min-height:calc(100vh - 5rem);">
-            <div class="jf-hero">
-                <div class="jf-eyebrow">
-                    <span class="jf-eyebrow-dot"></span>
-                    ${t('hero_eyebrow')}
+        <div style="position:relative;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:1.2rem 4%;max-width:1400px;margin:0 auto;">
+                <span style="font-family:'Inter Tight',system-ui,sans-serif;font-size:1.3rem;font-weight:700;color:var(--text-primary);letter-spacing:0.5px;cursor:pointer;" data-action="go-home">jarvis finder</span>
+                <div style="display:flex;align-items:center;gap:1.5rem;">
+                    <a href="/products" data-page="products" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:0.9rem;color:var(--text-secondary);text-decoration:none;font-weight:500;">Products</a>
+                    <a href="/tutorials" data-page="tutorials" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:0.9rem;color:var(--text-secondary);text-decoration:none;font-weight:500;">Tutorials</a>
+                    <a href="/qccheck" data-page="qccheck" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:0.9rem;color:var(--text-secondary);text-decoration:none;font-weight:500;">QC Check</a>
+                    <a href="/tools" data-page="tools" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:0.9rem;color:var(--text-secondary);text-decoration:none;font-weight:500;">Tools</a>
                 </div>
-                <div style="position:relative;width:100%;display:flex;justify-content:center;">
-                    <h1 class="jf-title" style="white-space:nowrap;margin-bottom:0;"><span style="color:var(--text-primary);">jarvis </span><span style="color:transparent;-webkit-text-stroke:1.5px var(--text-primary);">finder</span></h1>
-                </div>
-                <p class="jf-sub">${t('hero_desc')}</p>
-                <button data-action="go-products" style="display:inline-flex;align-items:center;gap:9px;background:#ff9f0a;color:#fff;font-family:'Inter Tight',system-ui,sans-serif;font-weight:600;font-size:0.85rem;padding:0.7rem 1.6rem;border-radius:9999px;border:none;cursor:pointer;margin-top:1.5rem;animation:jfFadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both 0.52s;">
-                    ${t('btn_explore')}
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </button>
+            </div>
+            <div class="jf-hero" style="min-height:auto;padding-top:2rem;padding-bottom:2.5rem;">
+                <h1 style="font-family:'Inter Tight',system-ui,sans-serif;font-size:clamp(2rem,5vw,42px);font-weight:800;line-height:1.3;color:var(--text-primary);margin-bottom:0.75rem;animation:jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 0.05s;">Your Go-to <span style="color:#ff9f0a;font-style:italic;">Spreadsheet</span></h1>
+                <p class="jf-sub" style="margin-bottom:0;">${t('hero_desc')}</p>
             </div>
             <div id="home-sections">${buildHomeSections()}</div>
             <div style="padding-bottom:3rem;">
@@ -1917,6 +1916,10 @@ function initApp() {
         }
         // Inject home styles before rendering home page
         if (pageId === 'home') injectHomeStyles();
+
+        // Hide navbar on home, show on other pages
+        const navEl = document.querySelector('.nav-container');
+        if (navEl) navEl.style.display = (pageId === 'home') ? 'none' : '';
 
         mainContent.innerHTML = getPages()[pageId] || getPages().home;
 
