@@ -1367,7 +1367,7 @@ function getPages() {
                         <h3>${t('htb_1_h')}</h3>
                     </div>
                     <p>${t('htb_1_p')}</p>
-                    <div class="htb-img"><img src="images/how-to-buy/step-1.jpg?v=2" alt="Step 1" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <div class="htb-img"><img src="/images/how-to-buy/step-1.jpg?v=2" alt="Step 1" loading="eager" fetchpriority="high" decoding="async" /></div>
                     <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">${t('htb_signup')}</a>
                 </section>
 
@@ -1377,7 +1377,7 @@ function getPages() {
                         <h3>${t('htb_2_h')}</h3>
                     </div>
                     <p>${t('htb_2_p')}</p>
-                    <div class="htb-img"><img src="images/how-to-buy/step-2.jpg?v=2" alt="Step 2" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <div class="htb-img"><img src="/images/how-to-buy/step-2.jpg?v=2" alt="Step 2" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1390,7 +1390,7 @@ function getPages() {
                         <li>${t('htb_3_l2')}</li>
                         <li>${t('htb_3_l3')}</li>
                     </ul>
-                    <div class="htb-img"><img src="images/how-to-buy/step-3.jpg?v=2" alt="Step 3" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <div class="htb-img"><img src="/images/how-to-buy/step-3.jpg?v=2" alt="Step 3" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1403,7 +1403,7 @@ function getPages() {
                         <li>${t('htb_4_l2')}</li>
                         <li>${t('htb_4_l3')}</li>
                     </ul>
-                    <div class="htb-img"><img src="images/how-to-buy/step-4.jpg?v=2" alt="Step 4" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <div class="htb-img"><img src="/images/how-to-buy/step-4.jpg?v=2" alt="Step 4" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
 
                 <section class="htb-step">
@@ -1413,7 +1413,7 @@ function getPages() {
                     </div>
                     <p>${t('htb_5_p')}</p>
                     <div class="htb-coupon">keviinn</div>
-                    <div class="htb-img"><img src="images/how-to-buy/step-5.jpg?v=2" alt="Step 5" loading="eager" fetchpriority="high" decoding="async" /></div>
+                    <div class="htb-img"><img src="/images/how-to-buy/step-5.jpg?v=2" alt="Step 5" loading="eager" fetchpriority="high" decoding="async" /></div>
                 </section>
             </div>
 
@@ -1947,7 +1947,7 @@ function getPages() {
                         <span class="tracker-open-btn">${t('open_btn')}</span>
                     </a>
                     <a class="tracker-card" href="https://www.dhl.de/en/privatkunden/pakete-empfangen/verfolgen.html" target="_blank" rel="noopener" id="track-dhl">
-                        <div class="tracker-icon" style="background:#FFCC00;border-radius:14px;display:flex;align-items:center;justify-content:center;padding:10px;"><img src="images/dhl-logo.svg" style="width:54px;height:auto;" alt="DHL" /></div>
+                        <div class="tracker-icon" style="background:#FFCC00;border-radius:14px;display:flex;align-items:center;justify-content:center;padding:10px;"><img src="/images/dhl-logo.svg" style="width:54px;height:auto;" alt="DHL" /></div>
                         <span class="tracker-name">DHL</span>
                         <span class="tracker-open-btn">${t('open_btn')}</span>
                     </a>
