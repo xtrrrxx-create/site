@@ -1126,8 +1126,8 @@ function getPages() {
             .hc-carousel {
                 display: flex;
                 gap: 16px;
-                padding: 16px 0;
-                margin: -16px 0;
+                padding: 24px 0;
+                margin: -24px 0;
                 overflow-x: auto;
                 overflow-y: hidden;
                 scroll-behavior: smooth;
