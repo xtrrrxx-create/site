@@ -2153,31 +2153,7 @@ function initApp() {
         return null;
     }
     function updateNavIndicator(pageId) {
-        const navList = document.querySelector('.nav-center');
-        if (!navList) return;
-        const activeLink = navList.querySelector(`a[data-page="${pageId}"]`);
-        if (!activeLink) return;
-
-        let indicator = navList.querySelector('.nav-indicator');
-        const isFirst = !indicator;
-        if (isFirst) {
-            indicator = document.createElement('div');
-            indicator.className = 'nav-indicator';
-            indicator.style.transition = 'none';
-            navList.insertBefore(indicator, navList.firstChild);
-        }
-
-        const listRect = navList.getBoundingClientRect();
-        const linkRect = activeLink.getBoundingClientRect();
-        indicator.style.width  = linkRect.width + 'px';
-        indicator.style.height = linkRect.height + 'px';
-        indicator.style.transform = `translateX(${linkRect.left - listRect.left}px) translateY(${linkRect.top - listRect.top}px)`;
-
-        if (isFirst) {
-            requestAnimationFrame(() => requestAnimationFrame(() => {
-                indicator.style.transition = '';
-            }));
-        }
+        // Disabled — no pill indicator needed
     }
 
     function navigateTo(pageId, replace) {
@@ -2386,6 +2362,12 @@ function showWelcomeModal() {
     };
 }
 
+// Save scroll position before unload
+window.addEventListener('beforeunload', () => {
+    sessionStorage.setItem('jf-scroll', window.scrollY);
+    sessionStorage.setItem('jf-path', window.location.pathname);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('theme') === 'light') {
         document.body.classList.add('light-mode');
@@ -2396,7 +2378,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === currentCurrency);
     });
-    // Welcome modal removed — agent selection now happens via Buy Now popup
+
+    // Restore scroll position on refresh (same path only)
+    const savedPath = sessionStorage.getItem('jf-path');
+    const savedScroll = sessionStorage.getItem('jf-scroll');
+    if (savedPath === window.location.pathname && savedScroll) {
+        // Wait for content to render then restore
+        setTimeout(() => window.scrollTo(0, parseInt(savedScroll)), 300);
+    }
 });
 
 // ─── AGENT DROPDOWN ────────────────────────────────────────────────────────
