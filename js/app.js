@@ -131,30 +131,103 @@ function extractWeidianItemId(kakobuyUrl) {
     } catch { return null; }
 }
 
-function buildAgentLink(kakobuyRaw) {
-    const agent = (localStorage.getItem('jf_agent') || 'kakobuy').toLowerCase();
+// ── Agent definitions (popup + link converter) ──
+const AGENTS = [
+    { id: 'kakobuy',  name: 'Kakobuy',  icon: 'https://kakobuy.com/favicon.ico',  domain: 'kakobuy.com' },
+    { id: 'oopbuy',   name: 'Oopbuy',   icon: 'https://oopbuy.com/favicon.ico',   domain: 'oopbuy.com' },
+    { id: 'acbuy',    name: 'ACBuy',     icon: 'https://www.acbuy.com/favicon.ico', domain: 'acbuy.com' },
+    { id: 'mulebuy',  name: 'Mulebuy',   icon: 'https://www.mulebuy.com/favicon.ico', domain: 'mulebuy.com' },
+    { id: 'superbuy', name: 'Superbuy',  icon: 'https://www.superbuy.com/favicon.ico', domain: 'superbuy.com' },
+    { id: 'joyagoo',  name: 'Joyagoo',   icon: 'https://joyagoo.com/favicon.ico',  domain: 'joyagoo.com' },
+    { id: 'usfans',   name: 'USFans',    icon: 'https://usfans.com/favicon.ico',   domain: 'usfans.com' },
+];
+
+function buildAgentUrl(agentId, kakobuyRaw) {
     const clean = safeExternalUrl(kakobuyRaw || '#');
     if (clean === '#') return '#';
-
-    if (agent === 'kakobuy') return appendAffcodeIfMissing(clean);
-
+    if (agentId === 'kakobuy') return appendAffcodeIfMissing(clean);
     const itemId = extractWeidianItemId(clean);
     if (!itemId) return appendAffcodeIfMissing(clean);
-
     const weidianUrl = `https://weidian.com/item.html?itemID=${itemId}`;
     const enc = encodeURIComponent(weidianUrl);
-
-    switch (agent) {
-        case 'sugargoo': return `https://www.sugargoo.com/#/home/productDetail?productLink=${enc}`;
-        case 'cssbuy':   return `https://www.cssbuy.com/item-micro-${itemId}.html`;
-        case 'mulebuy':  return `https://www.mulebuy.com/product/?url=${enc}`;
-        case 'acbuy':    return `https://www.acbuy.com/en/page/buy/?url=${enc}`;
-        case 'joyagoo':  return `https://joyagoo.com/product?id=${itemId}&platform=WEIDIAN`;
+    switch (agentId) {
         case 'oopbuy':   return `https://oopbuy.com/product/2/${itemId}`;
-        case 'litbuy':   return `https://litbuy.com/product/2/${itemId}`;
-        case 'gtbuy':    return `https://www.gtbuy.com/product/weidian/${itemId}`;
+        case 'acbuy':    return `https://www.acbuy.com/en/page/buy/?url=${enc}`;
+        case 'mulebuy':  return `https://www.mulebuy.com/product/?url=${enc}`;
+        case 'superbuy': return `https://www.superbuy.com/en/page/buy/?url=${enc}`;
+        case 'joyagoo':  return `https://joyagoo.com/product?id=${itemId}&platform=WEIDIAN`;
+        case 'usfans':   return `https://usfans.com/product?url=${enc}`;
         default:         return appendAffcodeIfMissing(clean);
     }
+}
+
+// Legacy wrapper — still used in product card href for middle-click
+function buildAgentLink(kakobuyRaw) {
+    const agent = (localStorage.getItem('jf_agent') || 'kakobuy').toLowerCase();
+    return buildAgentUrl(agent, kakobuyRaw);
+}
+
+// ── Agent selection popup ──
+function showAgentPopup(kakobuyRaw) {
+    // Remove existing popup
+    const old = document.getElementById('agent-popup-overlay');
+    if (old) old.remove();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'agent-popup-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:apFadeIn .2s ease;';
+    overlay.innerHTML = `
+        <style>
+            @keyframes apFadeIn { from { opacity:0; } to { opacity:1; } }
+            @keyframes apSlideUp { from { transform:translateY(20px);opacity:0; } to { transform:translateY(0);opacity:1; } }
+            .ap-modal { background:#2a2a2a;border:1px solid #363636;border-radius:16px;padding:1.5rem;width:380px;max-width:92vw;animation:apSlideUp .25s ease; }
+            .ap-title { font-family:'Inter Tight',system-ui,sans-serif;font-size:18px;font-weight:600;color:#f0f0f0;margin-bottom:0.25rem; }
+            .ap-sub { font-size:13px;color:#a0a0a0;margin-bottom:1.25rem; }
+            .ap-grid { display:grid;grid-template-columns:1fr 1fr;gap:0.5rem; }
+            .ap-btn { display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid #363636;background:#1e1e1e;color:#f0f0f0;font-family:'Inter Tight',system-ui,sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:border-color .15s,background .15s;text-decoration:none; }
+            .ap-btn:hover { border-color:#ff9f0a;background:#2a2a2a; }
+            .ap-btn img { width:20px;height:20px;border-radius:4px;background:#333;object-fit:contain; }
+            .ap-close { position:absolute;top:12px;right:14px;background:none;border:none;color:#a0a0a0;font-size:20px;cursor:pointer;line-height:1; }
+            .ap-close:hover { color:#f0f0f0; }
+        </style>
+        <div class="ap-modal" style="position:relative;">
+            <button class="ap-close" id="ap-close">&times;</button>
+            <div class="ap-title">Select your agent</div>
+            <div class="ap-sub">Choose where to buy this item</div>
+            <div class="ap-grid">
+                ${AGENTS.map(a => `<a class="ap-btn" data-agent="${a.id}" href="#"><img src="${escapeHtml(a.icon)}" alt="" onerror="this.style.display='none'">${escapeHtml(a.name)}</a>`).join('')}
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+
+    // Close on overlay click
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    overlay.querySelector('#ap-close').addEventListener('click', () => overlay.remove());
+
+    // Agent click
+    overlay.querySelectorAll('.ap-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+            e.preventDefault();
+            const agentId = btn.getAttribute('data-agent');
+            const url = buildAgentUrl(agentId, kakobuyRaw);
+            if (url && url !== '#') {
+                // Validate against whitelist
+                try {
+                    const parsed = new URL(url);
+                    const host = parsed.hostname.toLowerCase();
+                    const isAllowed = AGENTS.some(a => host === a.domain || host.endsWith('.' + a.domain)) ||
+                                      host === 'ikako.vip' || host.endsWith('.ikako.vip') ||
+                                      host === 'kakobuy.com' || host.endsWith('.kakobuy.com');
+                    if (isAllowed) {
+                        localStorage.setItem('jf_agent', agentId);
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                    }
+                } catch {}
+            }
+            overlay.remove();
+        });
+    });
 }
 
 function appendAffcodeIfMissing(rawUrl) {
@@ -817,7 +890,7 @@ function renderFilteredProducts() {
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
                     <div class="product-actions">
-                        <a href="${escapeHtml(kakobuy)}" target="_blank" rel="noopener noreferrer" class="card-btn-buy">${t('btn_buy')}</a>
+                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}">${t('btn_buy')}</button>
                         <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
                     </div>
                 </div>
@@ -1121,13 +1194,13 @@ function getPages() {
         </div>
     `,
         products: `
-        <div class="section-container" style="animation: fadeIn 0.4s ease-out;">
-            <h2 style="font-size:2.5rem;margin-bottom:0.25rem;font-weight:800;letter-spacing:-1px;">${t('title_products')}</h2>
-            <p style="color:var(--text-secondary);font-size:1.1rem;">${t('desc_products')}</p>
+        <div style="max-width:1400px;margin:0 auto;padding:1.5rem 4% 3rem;">
+            <h2 style="font-family:'Inter Tight',system-ui,sans-serif;font-size:26px;font-weight:600;letter-spacing:-0.025em;color:var(--text-primary);margin-bottom:0.25rem;">${t('title_products')}</h2>
+            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:1.25rem;">${t('desc_products')}</p>
 
             <div id="kf-filter-root">${buildFilterUI()}</div>
 
-            <div class="products-grid" id="products-container" style="margin-top:0.5rem;">
+            <div class="products-grid" id="products-container" style="margin-top:0.75rem;">
                 <p style="color:var(--text-primary);font-weight:600;" id="loading-text">${t('loading')}</p>
             </div>
         </div>
@@ -1135,28 +1208,27 @@ function getPages() {
         tutorials: `
         <style>
             .htb-wrap {
-                max-width: 980px;
+                max-width: 1400px;
                 margin: 0 auto;
-                padding: 3.2rem 1.4rem 2.6rem;
-                animation: fadeIn 0.35s ease-out;
+                padding: 1.5rem 4% 2.6rem;
             }
             .htb-head {
-                text-align: center;
-                margin-bottom: 2rem;
+                text-align: left;
+                margin-bottom: 1.5rem;
             }
             .htb-title {
-                font-size: clamp(2rem, 4.3vw, 3rem);
-                line-height: 1;
-                font-weight: 900;
-                letter-spacing: -1.4px;
-                margin-bottom: 0.7rem;
+                font-family: 'Inter Tight', system-ui, sans-serif;
+                font-size: 26px;
+                line-height: 31px;
+                font-weight: 600;
+                letter-spacing: -0.025em;
+                margin-bottom: 0.4rem;
                 color: var(--text-primary);
             }
             .htb-sub {
                 color: var(--text-secondary);
                 max-width: 720px;
-                margin: 0 auto;
-                font-size: 0.98rem;
+                font-size: 14px;
             }
             .htb-steps {
                 display: grid;
@@ -1347,14 +1419,14 @@ function getPages() {
     `,
         qccheck: `
         <style>
-            .qc-wrap { max-width: 1800px; margin: 0 auto; padding: 5rem 5% 3rem;
+            .qc-wrap { max-width: 1400px; margin: 0 auto; padding: 1.5rem 4% 3rem;
                 display: flex; flex-direction: column; gap: 1.5rem;
-                animation: fadeIn 0.4s ease-out; width: 100%; box-sizing: border-box; }
+                width: 100%; box-sizing: border-box; }
             .qc-card { background: var(--nav-bg); border: 1px solid var(--border-color);
-                border-radius: 24px; padding: 2.5rem 2.5rem 2rem; width: 100%; box-sizing: border-box; }
-            .qc-title { font-size: 2.6rem; font-weight: 900; letter-spacing: -1.5px;
-                color: var(--text-primary); margin-bottom: 0.4rem; line-height: 1; text-align: center; }
-            .qc-subtitle { color: var(--text-secondary); font-size: 0.92rem; margin-bottom: 1.75rem; text-align: center; }
+                border-radius: 16px; padding: 2rem; width: 100%; box-sizing: border-box; }
+            .qc-title { font-family:'Inter Tight',system-ui,sans-serif; font-size: 26px; font-weight: 600; letter-spacing: -0.025em;
+                color: var(--text-primary); margin-bottom: 0.4rem; line-height: 31px; text-align: left; }
+            .qc-subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 1.5rem; text-align: left; }
             .qc-row { display: flex; gap: 0.75rem; align-items: stretch; }
             .qc-input { flex: 1; background: var(--bg-color); border: 1px solid var(--border-color);
                 border-radius: 14px; padding: 0 1.1rem; height: 52px; color: var(--text-primary);
@@ -1475,21 +1547,20 @@ function getPages() {
         tools: `
         <style>
             .tools-wrap {
-                max-width: 1800px;
+                max-width: 1400px;
                 margin: 0 auto;
-                padding: 5rem 5% 3rem;
+                padding: 1.5rem 4% 3rem;
                 display: flex;
                 flex-direction: column;
                 gap: 1.5rem;
-                animation: fadeIn 0.4s ease-out;
                 width: 100%;
                 box-sizing: border-box;
             }
             .tool-card {
                 background: var(--nav-bg);
                 border: 1px solid var(--border-color);
-                border-radius: 24px;
-                padding: 2.5rem 2.5rem 2rem;
+                border-radius: 16px;
+                padding: 2rem;
                 width: 100%;
                 box-sizing: border-box;
             }
@@ -1498,9 +1569,10 @@ function getPages() {
                 box-sizing: border-box;
             }
             .tool-eyebrow {
+                font-family: 'Inter Tight', system-ui, sans-serif;
                 font-size: 0.72rem;
-                font-weight: 700;
-                letter-spacing: 0.12em;
+                font-weight: 600;
+                letter-spacing: 0.1em;
                 text-transform: uppercase;
                 color: var(--text-secondary);
                 margin-bottom: 0.5rem;
@@ -2498,14 +2570,29 @@ document.addEventListener('click', function(e) {
         if (raw) window.trackRecentlyViewed(raw);
     }
 
-    // Universal popularity tracking: any click on a Buy / QC link inside a
-    // product card OR a marquee card increments the global counter for that
-    // title. Used by /api/popular -> "Most Popular" marquee.
-    const link = e.target.closest && e.target.closest('a.card-btn-buy, a.card-btn-qc, a.rv-btn');
-    if (link) {
-        const cardEl = link.closest('.product-card, .rv-card');
+    // Agent popup: intercept Buy Now button clicks
+    const buyBtn = e.target.closest && e.target.closest('button.card-btn-buy[data-kakobuy]');
+    if (buyBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const kakobuyUrl = buyBtn.getAttribute('data-kakobuy');
+        if (kakobuyUrl && kakobuyUrl !== '#') showAgentPopup(kakobuyUrl);
+        // Also track popularity
+        const cardEl = buyBtn.closest('.product-card, .hc-card');
         if (cardEl) {
-            const titleEl = cardEl.querySelector('.product-title, .rv-title');
+            const titleEl = cardEl.querySelector('.product-title');
+            const title = titleEl ? titleEl.textContent.trim() : '';
+            if (title && window.jfTrackClick) window.jfTrackClick(title);
+        }
+        return;
+    }
+
+    // Universal popularity tracking for QC links
+    const link = e.target.closest && e.target.closest('a.card-btn-qc');
+    if (link) {
+        const cardEl = link.closest('.product-card, .hc-card');
+        if (cardEl) {
+            const titleEl = cardEl.querySelector('.product-title');
             const title = titleEl ? titleEl.textContent.trim() : '';
             if (title && window.jfTrackClick) window.jfTrackClick(title);
         }
@@ -2698,7 +2785,7 @@ function buildHomeSections() {
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(item.price)}</div>
                     <div class="product-actions">
-                        <a href="${kakobuy}" target="_blank" rel="noopener noreferrer" class="card-btn-buy">Buy Now</a>
+                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}">Buy Now</button>
                         <a href="${picksly}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
                     </div>
                 </div>
