@@ -1175,13 +1175,44 @@ function getPages() {
             .hc-arrow-right { right: 8px; }
         </style>
         <div style="position:relative;">
-            <div class="jf-hero" style="min-height:auto;padding-top:2rem;padding-bottom:2.5rem;">
-                <h1 style="font-family:'Inter Tight',system-ui,sans-serif;font-size:clamp(2rem,5vw,42px);font-weight:600;letter-spacing:-0.025em;line-height:1.3;color:var(--text-primary);margin-bottom:0.75rem;animation:jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 0.05s;">Your Go-to <span style="color:#ff9f0a;font-weight:800;">Spreadsheet</span></h1>
-                <p class="jf-sub" style="margin-bottom:0;">${t('hero_desc')}</p>
+            <!-- Hero section (picks.ly style) -->
+            <div class="pl-hero">
+                <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
+                <p class="pl-hero-sub">${t('hero_desc')}</p>
+                <!-- Search bar -->
+                <div class="pl-search-wrap">
+                    <svg class="pl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" class="pl-search-input" id="home-search" placeholder="Search products..." autocomplete="off" spellcheck="false">
+                    <button class="pl-search-paste" id="home-paste-btn" aria-label="Paste">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <!-- Category tabs -->
+                <div class="pl-cats">
+                    <button class="pl-cat active" data-home-cat="All">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        Trending
+                    </button>
+                    <button class="pl-cat" data-home-cat="Shoes">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 18h20l-2-6H8L6 6H2z"/></svg>
+                        Shoes
+                    </button>
+                    <button class="pl-cat" data-home-cat="T-shirts">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2 12 5 8 2 3.62 3.46a2 2 0 0 0-1.34 1.22L1 8l4 1v11h14V9l4-1-1.28-3.32a2 2 0 0 0-1.34-1.22z"/></svg>
+                        Tops
+                    </button>
+                    <button class="pl-cat" data-home-cat="Accessories">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
+                        Accessories
+                    </button>
+                    <button class="pl-cat" data-home-cat="Hoodies">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7v6a10 10 0 0 0 10 11 10 10 0 0 0 10-11V7z"/></svg>
+                        Hoodies
+                    </button>
+                </div>
             </div>
             <div id="home-sections">${buildHomeSections()}</div>
-            <div style="padding-bottom:3rem;">
-            </div>
+            <div style="padding-bottom:3rem;"></div>
         </div>
     `,
         products: `
@@ -1955,9 +1986,9 @@ function initApp() {
         // Inject home styles before rendering home page
         if (pageId === 'home') injectHomeStyles();
 
-        // Show navbar on all pages
+        // Show navbar only on home, hide on other pages
         const navEl = document.querySelector('.nav-container');
-        if (navEl) navEl.style.display = '';
+        if (navEl) navEl.style.display = (pageId === 'home') ? '' : 'none';
 
         mainContent.innerHTML = getPages()[pageId] || getPages().home;
 
@@ -1993,6 +2024,37 @@ function initApp() {
         // The home DOM (including #rv-track) is rebuilt on each navigation,
         // so a single startup call would only work for the first visit.
         if (pageId === 'home') {
+            // Home search bar
+            const homeSearch = document.getElementById('home-search');
+            if (homeSearch) {
+                homeSearch.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && homeSearch.value.trim()) {
+                        filterState.search = homeSearch.value.trim();
+                        navigateTo('products');
+                    }
+                });
+            }
+            const pasteBtn = document.getElementById('home-paste-btn');
+            if (pasteBtn) {
+                pasteBtn.addEventListener('click', async () => {
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        if (homeSearch && text) { homeSearch.value = text; homeSearch.focus(); }
+                    } catch(e) {}
+                });
+            }
+            // Home category tabs
+            document.querySelectorAll('.pl-cat[data-home-cat]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const cat = btn.getAttribute('data-home-cat');
+                    if (cat === 'All') {
+                        filterState.category = 'All';
+                    } else {
+                        filterState.category = cat;
+                    }
+                    navigateTo('products');
+                });
+            });
             initRvMarquee();
             // 12s after home is shown, refetch popularity bypassing the
             // edge cache. Catches the case where the first call happened
