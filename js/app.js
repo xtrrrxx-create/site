@@ -113,6 +113,16 @@ function safeExternalUrl(rawUrl) {
     }
 }
 
+// Route product images through wsrv.nl: an edge-cached image proxy that
+// resizes and re-encodes to webp. Thumbnails are a fraction of the original
+// size so the grid paints almost instantly and repeat visits hit the cache.
+function thumb(rawUrl, w) {
+    const clean = safeExternalUrl(rawUrl);
+    if (clean === "#") return "#";
+    const width = w || 460;
+    return `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=78&we&maxage=30d`;
+}
+
 // Variant for URLs we are about to persist or render in localStorage. Returns
 // "" for invalid/javascript: URLs so we can drop the field instead of writing
 // the literal string "#" into stored data.
@@ -850,7 +860,7 @@ function renderFilteredProducts() {
             /picks\.ly\/twitter-image/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
-            ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" />`
+            ? `<img src="${escapeHtml(thumb(safeImg, 460))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
 
         const kakobuy = buildAgentLink(p.kakobuy || '#');
@@ -2849,7 +2859,7 @@ function buildHomeSections() {
             const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/marketplace-logos\//i.test(rawImg) || /picks\.ly\/agent-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
+                ? `<img src="${escapeHtml(thumb(safeImg, 460))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const sellerName = (item.seller || item.category || '').toString();
             return `<div class="hc-card product-card">
@@ -2895,7 +2905,7 @@ function buildHomeSections() {
                 /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
+                ? `<img src="${escapeHtml(thumb(safeImg, 460))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
@@ -2938,7 +2948,7 @@ function buildHomeSections() {
             const isHttp = rawImg.startsWith('http');
             const isPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/(marketplace|agent)-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isPlaceholder) ? rawImg : '';
-            return safeImg ? `<div class="store-thumb"><img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="" loading="lazy" /></div>` : '';
+            return safeImg ? `<div class="store-thumb"><img src="${escapeHtml(thumb(safeImg, 200))}" alt="" loading="lazy" /></div>` : '';
         }).filter(Boolean).join('');
         return `<div class="store-card" data-action="go-products" data-cat="${escapeHtml(cat)}">
             <div class="store-header">
