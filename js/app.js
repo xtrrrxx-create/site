@@ -2930,36 +2930,39 @@ function buildHomeSections() {
         </div>`;
     }).filter(Boolean).join('');
 
-    // ── Stores section (grouped by category) ──
+    // ── Stores section (picks.ly style — carousel with icon + thumbnails) ──
     const storeCards = HOME_CATS.map(cat => {
         const items = cache.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase());
         if (!items.length) return '';
-        const previews = items.slice(0, 4).map(item => {
+        const thumbs = items.slice(0, 4).map(item => {
             const rawImg = (item.img || '').trim();
             const isHttp = rawImg.startsWith('http');
-            const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/(marketplace|agent)-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
-            const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
-            return safeImg ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />` : '';
-        }).filter(Boolean);
-        const grid = previews.length >= 4
-            ? `<div class="store-preview-grid">${previews.slice(0,4).map(i => `<div class="store-preview-img">${i}</div>`).join('')}</div>`
-            : previews.length
-                ? `<div class="store-preview-single">${previews[0]}</div>`
-                : `<div class="store-preview-empty"></div>`;
+            const isPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/(marketplace|agent)-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
+            const safeImg = (isHttp && !isPlaceholder) ? rawImg : '';
+            return safeImg ? `<div class="store-thumb"><img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="" loading="lazy" /></div>` : '';
+        }).filter(Boolean).join('');
         return `<div class="store-card" data-action="go-products" data-cat="${escapeHtml(cat)}">
-            ${grid}
-            <div class="store-info">
-                <span class="store-name">${escapeHtml(cat)}</span>
-                <span class="store-count">${items.length} items</span>
+            <div class="store-header">
+                <div class="store-icon">店</div>
+                <div class="store-meta">
+                    <span class="store-name">${escapeHtml(cat)}</span>
+                    <span class="store-sub">${items.length} items</span>
+                </div>
             </div>
+            <div class="store-thumbs">${thumbs}</div>
         </div>`;
     }).filter(Boolean).join('');
 
+    const storesId = 'hc-stores';
     const storesHtml = storeCards ? `<div class="hc-section">
         <div class="hc-header">
             <span class="hc-title">Stores ${arrow}</span>
         </div>
-        <div class="stores-grid">${storeCards}</div>
+        <div class="hc-carousel-wrap">
+            <button class="hc-arrow hc-arrow-left" data-carousel="${storesId}" data-dir="-1">${arrowLeft}</button>
+            <div class="hc-carousel" id="${storesId}">${storeCards}</div>
+            <button class="hc-arrow hc-arrow-right" data-carousel="${storesId}" data-dir="1">${arrowRight}</button>
+        </div>
     </div>` : '';
 
     return trendingHtml + storesHtml + catSections;
