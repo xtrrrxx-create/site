@@ -1134,7 +1134,7 @@ function getPages() {
             }
             .hc-carousel {
                 display: flex;
-                gap: 1rem;
+                gap: 1.1rem;
                 overflow-x: auto;
                 scroll-behavior: smooth;
                 scrollbar-width: none;
