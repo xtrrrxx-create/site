@@ -562,28 +562,33 @@ main {
 }
 
 .product-info {
-    padding: 10px 12px 14px;
+    padding: 8px 10px 10px;
     display: flex;
     flex-direction: column;
     flex: 1;
     min-width: 0;
+    overflow: hidden;
 }
 
 .product-batch-row {
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     margin-bottom: 2px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .product-store-badge {
-    background: #ff9f0a;
-    color: #fff;
-    font-size: 0.5rem;
-    font-weight: 800;
+    background: #363636;
+    color: #f0f0f0;
+    font-size: 0.6rem;
+    font-weight: 700;
     width: 20px;
     height: 20px;
-    border-radius: 6px;
+    border-radius: 9999px;
+    border: 2px solid var(--bg-color, #2a2a2a);
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -617,7 +622,7 @@ main {
     font-weight: 600;
     font-size: 16px;
     line-height: 24px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .product-actions {

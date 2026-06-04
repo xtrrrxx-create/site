@@ -840,8 +840,6 @@ function renderFilteredProducts() {
 
     container.innerHTML = visible.map(p => {
         const safeTitle = escapeHtml(stripEmojis(p.title || "Untitled"));
-        const batchRaw = (p.batch || '').trim();
-        const batch = batchRaw.toLowerCase();
         const rawImg = (p.img || '').trim();
         const isHttp = rawImg.startsWith('http');
         const isKnownPlaceholder =
@@ -857,16 +855,7 @@ function renderFilteredProducts() {
 
         const kakobuy = buildAgentLink(p.kakobuy || '#');
         const picksly = safeExternalUrl(p.picksly || '#');
-        let batchFlair = '';
-        if (batch === 'best batch') {
-            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#ff9f0a;letter-spacing:.03em;">BEST BATCH</span>';
-        } else if (batch === 'budget batch') {
-            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
-        } else if (batch === 'random batch') {
-            batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">RANDOM</span>';
-        } else if (batchRaw) {
-            batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
-        }
+        const sellerName = (p.seller || p.category || '').toString();
 
         // Recently-viewed payload travels via a data attribute (HTML-escaped),
         // not via inline onclick. Avoids breaking out of attribute quoting if
@@ -875,6 +864,8 @@ function renderFilteredProducts() {
             title: stripEmojis(p.title || ''),
             price: p.price,
             img: safeImg,
+            category: p.category || '',
+            seller: p.seller || '',
             // Sanitize URLs at write time so they cannot smuggle javascript: etc.
             kakobuy: safeExternalUrl(p.kakobuy || ''),
             picksly: safeExternalUrl(p.picksly || '')
@@ -885,8 +876,7 @@ function renderFilteredProducts() {
                 <div class="product-info">
                     <div class="product-batch-row">
                         <span class="product-store-badge">店</span>
-                        <span class="product-store-name">${escapeHtml(p.category || '')}</span>
-                        ${batchFlair}
+                        <span class="product-store-name">${escapeHtml(sellerName)}</span>
                     </div>
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
@@ -1136,7 +1126,10 @@ function getPages() {
             .hc-carousel {
                 display: flex;
                 gap: 16px;
+                padding: 16px 0;
+                margin: -16px 0;
                 overflow-x: auto;
+                overflow-y: hidden;
                 scroll-behavior: smooth;
                 scrollbar-width: none;
                 -ms-overflow-style: none;
@@ -1146,8 +1139,7 @@ function getPages() {
             .hc-carousel::-webkit-scrollbar { display: none; }
             .hc-card {
                 flex-shrink: 0;
-                width: calc((100% - 64px) / 5);
-                min-width: 220px;
+                width: 243.2px;
                 display: flex;
                 flex-direction: column;
             }
@@ -2859,15 +2851,11 @@ function buildHomeSections() {
             const img = safeImg
                 ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
-            const batchRaw = (item.batch || '').trim().toLowerCase();
-            let batchFlair = '';
-            if (batchRaw === 'best batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#ff9f0a;letter-spacing:.03em;">BEST BATCH</span>';
-            else if (batchRaw === 'budget batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
-            else if (batchRaw) batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
+            const sellerName = (item.seller || item.category || '').toString();
             return `<div class="hc-card product-card">
                 <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
-                    <div class="product-batch-row"><span class="product-store-badge">店</span><span class="product-store-name">${escapeHtml(item.category || '')}</span>${batchFlair}</div>
+                    <div class="product-batch-row"><span class="product-store-badge">店</span><span class="product-store-name">${escapeHtml(sellerName)}</span></div>
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(item.price)}</div>
                     <div class="product-actions">
@@ -2911,19 +2899,13 @@ function buildHomeSections() {
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
-            const batchRaw = (item.batch || '').trim().toLowerCase();
-            let batchFlair = '';
-            if (batchRaw === 'best batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#ff9f0a;letter-spacing:.03em;">BEST BATCH</span>';
-            else if (batchRaw === 'budget batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
-            else if (batchRaw === 'random batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">RANDOM</span>';
-            else if (batchRaw) batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
+            const sellerName = (item.seller || item.category || '').toString();
             return `<div class="hc-card product-card">
                 <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
                         <span class="product-store-badge">店</span>
-                        <span class="product-store-name">${escapeHtml(item.category || '')}</span>
-                        ${batchFlair}
+                        <span class="product-store-name">${escapeHtml(sellerName)}</span>
                     </div>
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(item.price)}</div>
