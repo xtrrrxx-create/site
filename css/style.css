@@ -126,7 +126,7 @@ body {
 
 /* Navbar search reuses .pl-search-wrap styling so it is visually identical
    to the hero search bar, but stays hidden until the user scrolls past it. */
-.nav-search-wrap {
+.navbar .nav-search-wrap {
     position: absolute;
     left: 50%;
     top: 50%;
@@ -134,12 +134,13 @@ body {
     width: 560px;
     max-width: 44vw;
     height: 44px;
+    margin: 0;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
-.nav-search-wrap.show {
+.navbar .nav-search-wrap.show {
     opacity: 1;
     visibility: visible;
 }
