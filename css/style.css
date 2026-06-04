@@ -85,20 +85,15 @@ body {
     display: none;
 }
 
-/* ===== NAVBAR (flat, full-width) ===== */
+/* ===== NAVBAR (flat, inline — no fixed, no background) ===== */
 .nav-container {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 200;
-    background: var(--nav-bg);
-    border-bottom: 1px solid var(--border-color);
+    width: 100%;
 }
 
 .navbar {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 2rem;
-    height: 52px;
+    max-width: 100%;
+    margin: 0;
+    padding: 1.2rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -693,7 +688,7 @@ main {
     #bg-canvas { display: none; }
 
     /* Main gets padding for bottom nav on mobile */
-    main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); padding-top: 52px; }
+    main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); padding-top: 0; }
 
     /* Hide nav links + actions on mobile (use bottom nav instead) */
     .nav-center { display: none; }
@@ -971,7 +966,7 @@ input, textarea {
 
 main {
     padding-right: 0;
-    padding-top: 52px;
+    padding-top: 0;
 }
 
 /* ═══════════════════════════════════════════════════════════
