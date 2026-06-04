@@ -1151,7 +1151,7 @@ function getPages() {
                 display: flex;
                 flex-direction: column;
             }
-            .hc-card .product-image { height: 220px; }
+            .hc-card .product-image { height: auto; aspect-ratio: 1; }
             .hc-arrow {
                 position: absolute;
                 top: 45%;
@@ -2876,7 +2876,7 @@ function buildHomeSections() {
             else if (batchRaw === 'budget batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
             else if (batchRaw) batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
             return `<div class="hc-card product-card">
-                <div class="product-image" style="overflow:hidden;height:220px;">${img}</div>
+                <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
                     <div class="product-batch-row"><span class="product-store-badge">店</span><span class="product-store-name">${escapeHtml(item.category || '')}</span>${batchFlair}</div>
                     <h3 class="product-title">${safeTitle}</h3>
@@ -2929,7 +2929,7 @@ function buildHomeSections() {
             else if (batchRaw === 'random batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">RANDOM</span>';
             else if (batchRaw) batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
             return `<div class="hc-card product-card">
-                <div class="product-image" style="overflow:hidden;height:220px;">${img}</div>
+                <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
                         <span class="product-store-badge">店</span>
