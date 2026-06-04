@@ -109,10 +109,10 @@ body {
 }
 
 .navbar {
-    display: grid;
-    grid-template-columns: 1fr minmax(0, 560px) 1fr;
+    display: flex;
     align-items: center;
-    gap: 1.5rem;
+    justify-content: space-between;
+    position: relative;
     padding: 1.2rem 24px;
     transition: padding 0.3s ease;
     max-width: 1280px;
@@ -124,26 +124,24 @@ body {
     width: 100%;
 }
 
-.navbar > .logo { justify-self: start; }
-.navbar > .nav-center { justify-self: end; }
-
 /* Navbar search reuses .pl-search-wrap styling so it is visually identical
    to the hero search bar, but stays hidden until the user scrolls past it. */
 .nav-search-wrap {
-    justify-self: center;
-    width: 100%;
-    max-width: 560px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 560px;
+    max-width: 44vw;
     height: 44px;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(-6px);
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .nav-search-wrap.show {
     opacity: 1;
     visibility: visible;
-    transform: none;
 }
 
 .logo {
