@@ -98,7 +98,7 @@ body {
 }
 
 .nav-container.scrolled {
-    background: rgba(18, 18, 26, 0.82);
+    background: rgba(18, 18, 18, 0.85);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom-color: var(--border-color);
@@ -116,9 +116,9 @@ body.light-mode .nav-container.scrolled {
 }
 
 .navbar {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 560px) 1fr;
     align-items: center;
-    justify-content: space-between;
     gap: 1.5rem;
     padding: 1.2rem 24px;
     transition: padding 0.3s ease;
@@ -131,12 +131,15 @@ body.light-mode .nav-container.scrolled {
     width: 100%;
 }
 
+.navbar > .logo { justify-self: start; }
+.navbar > .nav-center { justify-self: end; }
+
 /* Navbar search reuses .pl-search-wrap styling so it is visually identical
    to the hero search bar, but stays hidden until the user scrolls past it. */
 .nav-search-wrap {
-    flex: 1 1 auto;
+    justify-self: center;
+    width: 100%;
     max-width: 560px;
-    margin: 0 auto;
     height: 44px;
     opacity: 0;
     visibility: hidden;
