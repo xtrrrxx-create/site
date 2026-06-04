@@ -129,9 +129,9 @@ function thumb(rawUrl, w) {
 function platformBadge(pickslyRaw) {
     const m = String(pickslyRaw || "").match(/\/item\/([A-Za-z]{2})/);
     const map = {
-        WD: { src: "/weidian.png", alt: "Weidian" },
-        TB: { src: "/taobao.png",  alt: "Taobao" },
-        AL: { src: "/1688.png",    alt: "1688" },
+        WD: { src: "/images/weidian.png", alt: "Weidian" },
+        TB: { src: "/images/taobao.png",  alt: "Taobao" },
+        AL: { src: "/images/1688.png",    alt: "1688" },
     };
     const hit = m && map[m[1].toUpperCase()];
     if (hit) {
