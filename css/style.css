@@ -118,8 +118,8 @@ body.light-mode .nav-container.scrolled {
 .navbar {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 2.2rem;
+    justify-content: space-between;
+    gap: 1.5rem;
     padding: 1.2rem 24px;
     transition: padding 0.3s ease;
     max-width: 1280px;
@@ -130,6 +130,45 @@ body.light-mode .nav-container.scrolled {
     box-shadow: none;
     width: 100%;
 }
+
+.nav-search {
+    flex: 1 1 auto;
+    max-width: 560px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.6rem 1rem;
+    background: #2a2a2a;
+    border: 1px solid var(--border-color);
+    border-radius: 9999px;
+    color: var(--text-secondary);
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.nav-search:focus-within {
+    border-color: var(--text-secondary);
+    background: #2f2f33;
+}
+
+.nav-search input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 0.95rem;
+}
+
+.nav-search input::placeholder { color: var(--text-secondary); }
+
+body.light-mode .nav-search {
+    background: #f1f1f3;
+    border-color: #e5e5e5;
+}
+body.light-mode .nav-search:focus-within { background: #ececef; }
 
 .logo {
     font-family: 'Inter Tight', system-ui, sans-serif;
@@ -934,6 +973,7 @@ main {
 
     /* Hide nav links on mobile (use bottom nav instead) */
     .nav-center { display: none; }
+    .nav-search { display: none; }
     .navbar { padding: 0.8rem 4%; }
     .online-pill .online-label { display: none; }
     .online-pill { padding: 0.35rem 0.7rem 0.35rem 0.6rem; font-size: 0.75rem; }

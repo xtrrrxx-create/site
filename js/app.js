@@ -2209,6 +2209,18 @@ function initApp() {
         });
     });
 
+    // Global navbar search (persists across pages since the navbar is static).
+    // Enter applies the term to the product filter and jumps to /products.
+    const navSearch = document.getElementById('nav-search');
+    if (navSearch) {
+        navSearch.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                filterState.search = navSearch.value.trim();
+                navigateTo('products');
+            }
+        });
+    }
+
     window.addEventListener('popstate', () => {
         const urlCat = catFromPath();
         if (urlCat) filterState.category = urlCat;
