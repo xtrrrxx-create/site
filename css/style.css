@@ -543,16 +543,7 @@ main {
     position: relative;
 }
 
-.product-image::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(to top, rgba(42,42,42,0.7) 0%, transparent 100%);
-    pointer-events: none;
-}
+/* no gradient overlay — QC photos look better without it */
 
 .product-image img {
     width: 100%;
