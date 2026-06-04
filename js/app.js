@@ -1099,7 +1099,7 @@ function getPages() {
             .hc-section {
                 max-width: 1280px;
                 margin: 0 auto 2.5rem;
-                padding: 0 24px;
+                padding: 0;
             }
             .hc-header {
                 display: flex;
