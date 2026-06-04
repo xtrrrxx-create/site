@@ -162,33 +162,7 @@
 
 // ─── 2. 3D CARD TILT ───────────────────────────────────────────────────────
 function applyTilt(cards) {
-    cards.forEach(card => {
-        if (card._tiltBound) return;
-        card._tiltBound = true;
-        card.style.transformStyle = 'preserve-3d';
-        card.style.willChange = 'transform';
-
-        card.addEventListener('mousemove', e => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const cx = rect.width / 2;
-            const cy = rect.height / 2;
-            const rotateX = ((y - cy) / cy) * -8;
-            const rotateY = ((x - cx) / cx) * 8;
-            card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02,1.02,1.02)`;
-            card.style.boxShadow = `${-rotateY * 1.5}px ${rotateX * 1.5}px 30px rgba(0,0,0,0.4)`;
-        });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = '';
-            card.style.boxShadow = '';
-            card.style.transition = 'transform 0.4s ease, box-shadow 0.4s ease, border-color 0.3s ease';
-            setTimeout(() => { card.style.transition = ''; }, 400);
-        });
-        card.addEventListener('mouseenter', () => {
-            card.style.transition = 'none';
-        });
-    });
+    // Tilt effect disabled
 }
 
 window.applyTilt = applyTilt;

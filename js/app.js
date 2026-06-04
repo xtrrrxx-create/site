@@ -2930,7 +2930,39 @@ function buildHomeSections() {
         </div>`;
     }).filter(Boolean).join('');
 
-    return trendingHtml + catSections;
+    // ── Stores section (grouped by category) ──
+    const storeCards = HOME_CATS.map(cat => {
+        const items = cache.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase());
+        if (!items.length) return '';
+        const previews = items.slice(0, 4).map(item => {
+            const rawImg = (item.img || '').trim();
+            const isHttp = rawImg.startsWith('http');
+            const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/(marketplace|agent)-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
+            const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
+            return safeImg ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy" />` : '';
+        }).filter(Boolean);
+        const grid = previews.length >= 4
+            ? `<div class="store-preview-grid">${previews.slice(0,4).map(i => `<div class="store-preview-img">${i}</div>`).join('')}</div>`
+            : previews.length
+                ? `<div class="store-preview-single">${previews[0]}</div>`
+                : `<div class="store-preview-empty"></div>`;
+        return `<div class="store-card" data-action="go-products" data-cat="${escapeHtml(cat)}">
+            ${grid}
+            <div class="store-info">
+                <span class="store-name">${escapeHtml(cat)}</span>
+                <span class="store-count">${items.length} items</span>
+            </div>
+        </div>`;
+    }).filter(Boolean).join('');
+
+    const storesHtml = storeCards ? `<div class="hc-section">
+        <div class="hc-header">
+            <span class="hc-title">Stores ${arrow}</span>
+        </div>
+        <div class="stores-grid">${storeCards}</div>
+    </div>` : '';
+
+    return trendingHtml + storesHtml + catSections;
 }
 
 // ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────
