@@ -331,7 +331,7 @@ function updateThemeIcon(isLightMode) {
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
-const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Merch', 'Accessories'];
+const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 const SEARCH_DEBOUNCE_MS = 140;
 /** Short text fields (search, tracking #) — avoids UI lag on huge paste. */
@@ -874,19 +874,7 @@ function injectHomeStyles() {
             position: relative;
         }
 
-        /* Subtle radial glow behind the text */
-        .jf-hero::before {
-            content: '';
-            position: absolute;
-            top: 30%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 700px;
-            height: 400px;
-            background: radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 70%);
-            pointer-events: none;
-            border-radius: 50%;
-        }
+        /* Hero glow removed */
 
         /* Eyebrow pill */
         .jf-eyebrow {
@@ -1072,29 +1060,22 @@ function getPages() {
                 position: relative;
             }
             .hc-carousel {
-                display: grid;
-                grid-template-columns: repeat(5, 1fr);
-                gap: 1rem;
-            }
-            .hc-carousel .hc-card:nth-child(n+6) { display: none; }
-            .hc-carousel.hc-expanded .hc-card:nth-child(n+6) { display: flex; }
-            .hc-carousel.hc-expanded {
                 display: flex;
+                gap: 1rem;
                 overflow-x: auto;
                 scroll-behavior: smooth;
                 scrollbar-width: none;
                 -ms-overflow-style: none;
+                cursor: grab;
             }
-            .hc-carousel.hc-expanded::-webkit-scrollbar { display: none; }
+            .hc-carousel:active { cursor: grabbing; }
+            .hc-carousel::-webkit-scrollbar { display: none; }
             .hc-card {
-                display: flex;
-                flex-direction: column;
-                min-width: 0;
-            }
-            .hc-carousel.hc-expanded .hc-card {
                 flex-shrink: 0;
                 width: calc((100% - 4rem) / 5);
                 min-width: 200px;
+                display: flex;
+                flex-direction: column;
             }
             .hc-card .product-image { height: 220px; }
             .hc-arrow {
@@ -1932,26 +1913,8 @@ function initApp() {
                 (window.navigateTo||renderPage)('products');
             });
         });
-        // Carousel arrow handlers — expand to scroll mode on first click
-        mainContent.querySelectorAll('.hc-arrow').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-carousel');
-                const dir = parseInt(btn.getAttribute('data-dir'), 10);
-                const carousel = document.getElementById(id);
-                if (!carousel) return;
-                if (!carousel.classList.contains('hc-expanded')) {
-                    carousel.classList.add('hc-expanded');
-                    // scroll to show 6th card
-                    requestAnimationFrame(() => {
-                        const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
-                        if (dir === 1) carousel.scrollBy({ left: cardW + 16, behavior: 'smooth' });
-                    });
-                } else {
-                    const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
-                    carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' });
-                }
-            });
-        });
+        // Carousel handlers (arrows + drag scroll)
+        attachCarouselHandlers(mainContent);
         mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
             el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('tools'); });
         });
@@ -2642,34 +2605,35 @@ window.jfTrackClick = function(title) {
     } catch (_) {}
 };
 
-// Refresh home category sections after catalog loads.
-function refreshHomeMarquee() {
-    const container = document.getElementById('home-sections');
-    if (!container) return;
-    const fresh = buildHomeSections();
-    if (!fresh) return;
-    container.innerHTML = fresh;
-    // Re-attach carousel arrow handlers
-    container.querySelectorAll('.hc-arrow').forEach(btn => {
+// ── Drag-to-scroll for carousels ──
+function initDragScroll(el) {
+    let isDown = false, startX, scrollL;
+    el.addEventListener('mousedown', e => {
+        if (e.button !== 0) return;
+        isDown = true; startX = e.pageX - el.offsetLeft; scrollL = el.scrollLeft;
+        el.style.scrollBehavior = 'auto'; el.style.cursor = 'grabbing';
+    });
+    el.addEventListener('mouseleave', () => { isDown = false; el.style.cursor = 'grab'; el.style.scrollBehavior = 'smooth'; });
+    el.addEventListener('mouseup', () => { isDown = false; el.style.cursor = 'grab'; el.style.scrollBehavior = 'smooth'; });
+    el.addEventListener('mousemove', e => {
+        if (!isDown) return; e.preventDefault();
+        el.scrollLeft = scrollL - (e.pageX - el.offsetLeft - startX) * 1.2;
+    });
+}
+
+function attachCarouselHandlers(root) {
+    root.querySelectorAll('.hc-arrow').forEach(btn => {
         btn.addEventListener('click', () => {
             const id = btn.getAttribute('data-carousel');
             const dir = parseInt(btn.getAttribute('data-dir'), 10);
             const carousel = document.getElementById(id);
             if (!carousel) return;
-            if (!carousel.classList.contains('hc-expanded')) {
-                carousel.classList.add('hc-expanded');
-                requestAnimationFrame(() => {
-                    const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
-                    if (dir === 1) carousel.scrollBy({ left: cardW + 16, behavior: 'smooth' });
-                });
-            } else {
-                const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
-                carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' });
-            }
+            const cardW = carousel.querySelector('.hc-card')?.offsetWidth || 240;
+            carousel.scrollBy({ left: dir * (cardW + 16), behavior: 'smooth' });
         });
     });
-    // Re-attach category link handlers
-    container.querySelectorAll('[data-action="go-products"]').forEach(el => {
+    root.querySelectorAll('.hc-carousel').forEach(initDragScroll);
+    root.querySelectorAll('[data-action="go-products"]').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
             const cat = el.getAttribute('data-cat');
@@ -2677,6 +2641,16 @@ function refreshHomeMarquee() {
             (window.navigateTo||renderPage)('products');
         });
     });
+}
+
+// Refresh home category sections after catalog loads.
+function refreshHomeMarquee() {
+    const container = document.getElementById('home-sections');
+    if (!container) return;
+    const fresh = buildHomeSections();
+    if (!fresh) return;
+    container.innerHTML = fresh;
+    attachCarouselHandlers(container);
 }
 
 function buildHomeSections() {
@@ -2746,16 +2720,15 @@ function buildHomeSections() {
 
 // ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────
 const WEIGHT_CATS = [
-    { id: 'footwear',     label: 'Footwear',     weight: 900 },
-    { id: 'tops',         label: 'Tops',          weight: 250 },
-    { id: 'bottoms',      label: 'Bottoms',       weight: 400 },
-    { id: 'hoodies',      label: 'Hoodies',       weight: 600 },
-    { id: 'jackets',      label: 'Jackets',       weight: 750 },
-    { id: 'bags',         label: 'Bags',          weight: 500 },
-    { id: 'accessories',  label: 'Accessories',   weight: 120 },
-    { id: 'electronics',  label: 'Electronics',   weight: 350 },
-    { id: 'socks',        label: 'Socks',         weight: 60  },
-    { id: 'hats',         label: 'Hats / Caps',   weight: 150 },
+    { id: 'footwear',     label: 'Shoes',         weight: 2000 },
+    { id: 'tops',         label: 'Tops & T-shirts', weight: 300 },
+    { id: 'bottoms',      label: 'Bottoms',       weight: 500 },
+    { id: 'hoodies',      label: 'Hoodies',       weight: 750 },
+    { id: 'bags',         label: 'Bags',           weight: 1000 },
+    { id: 'accessories',  label: 'Accessories',   weight: 300 },
+    { id: 'electronics',  label: 'Electronics',   weight: 300 },
+    { id: 'socks',        label: 'Socks',         weight: 100 },
+    { id: 'hats',         label: 'Hats / Caps',   weight: 200 },
 ];
 const PKG_WEIGHT = 50;
 let weightQty = {};

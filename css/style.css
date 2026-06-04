@@ -1132,13 +1132,8 @@ main {
    SCROLL REVEAL
 ═══════════════════════════════════════════════════════════ */
 .product-card {
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 380ms var(--ease-out), transform 380ms var(--ease-out), border-color 200ms var(--ease-out), box-shadow 220ms var(--ease-out);
-}
-.product-card.sr-visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
 }
 
 .btn-icon:active {
