@@ -92,22 +92,15 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    /* Solid background, same as the site — no translucent/blur effect. */
+    background: var(--bg-color);
     border-bottom: 1px solid transparent;
-    transition: background 0.3s ease, backdrop-filter 0.3s ease,
-                box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
 .nav-container.scrolled {
-    background: rgba(18, 18, 18, 0.85);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
     border-bottom-color: var(--border-color);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
-}
-
-body.light-mode .nav-container.scrolled {
-    background: rgba(255, 255, 255, 0.85);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
 }
 
 .nav-container.scrolled .navbar {
