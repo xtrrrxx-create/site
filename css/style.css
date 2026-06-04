@@ -23,13 +23,13 @@ body.light-mode {
 
 body.light-mode .product-card {
     background: #ffffff;
-    border-color: transparent;
-    box-shadow: rgba(0,0,0,0.12) 0px 2px 4px 0px, rgba(0,0,0,0.18) 0px 8px 16px 0px;
+    border-color: #e5e5e5;
+    box-shadow: rgba(0,0,0,0.08) 0px 2px 8px 0px;
 }
 
 body.light-mode .product-card:hover {
-    border-color: transparent;
-    box-shadow: rgba(0,0,0,0.18) 0px 6px 12px 0px, rgba(0,0,0,0.22) 0px 16px 32px 0px;
+    border-color: #d0d0d0;
+    box-shadow: rgba(0,0,0,0.12) 0px 4px 16px 0px;
 }
 
 body.light-mode .product-image {
@@ -109,10 +109,11 @@ body {
 }
 
 .logo {
+    font-family: 'Inter Tight', system-ui, sans-serif;
     font-size: 1.3rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: 1.5px;
+    letter-spacing: 0.5px;
     margin-left: 1rem;
     cursor: pointer;
 }
@@ -150,8 +151,9 @@ body {
 .nav-links a {
     text-decoration: none;
     color: var(--text-secondary);
-    font-weight: 600;
-    font-size: 0.95rem;
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
     padding: 0.7rem 1.5rem;
     border-radius: 9999px;
     transition: color 180ms var(--ease-out);
@@ -294,11 +296,10 @@ main {
 
 /* Sections for products and tools */
 .section-container {
-    max-width: 1800px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 3rem 5%;
+    padding: 1.5rem 4%;
     width: 100%;
-    animation: fadeIn 0.4s ease-out;
 }
 
 .glass-card {
@@ -313,8 +314,8 @@ main {
 .products-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 1.5rem;
-    margin-top: 2rem;
+    gap: 1rem;
+    margin-top: 1rem;
     align-items: stretch;
 }
 
