@@ -2028,6 +2028,10 @@ function initApp() {
             item.classList.toggle('active', item.getAttribute('data-page') === pageId);
         });
 
+        // Show/hide the navbar search depending on scroll past the hero search.
+        if (window.requestAnimationFrame) requestAnimationFrame(setupNavSearchReveal);
+        else setupNavSearchReveal();
+
         if (pageId === 'tools') {
             if (window.initWeightEstimator) window.initWeightEstimator();
         }
@@ -2218,6 +2222,15 @@ function initApp() {
                 filterState.search = navSearch.value.trim();
                 navigateTo('products');
             }
+        });
+    }
+    const navPaste = document.getElementById('nav-paste-btn');
+    if (navPaste && navSearch) {
+        navPaste.addEventListener('click', async () => {
+            try {
+                const text = await navigator.clipboard.readText();
+                if (text) { navSearch.value = text; navSearch.focus(); }
+            } catch (_) {}
         });
     }
 
@@ -2785,6 +2798,23 @@ function getRecentlyViewed() {
         }
     }
     return out;
+}
+
+// Reveal the navbar search bar once the page's primary (hero/products) search
+// bar has been scrolled out of view, mirroring picks.ly. Re-run on every page
+// render because the page DOM (and thus the big search bar) is rebuilt.
+let _navSearchObserver = null;
+function setupNavSearchReveal() {
+    const navWrap = document.getElementById('nav-search-wrap');
+    if (!navWrap) return;
+    if (_navSearchObserver) { _navSearchObserver.disconnect(); _navSearchObserver = null; }
+    const hero = document.getElementById('home-search') || document.getElementById('kf-search');
+    if (!hero) { navWrap.classList.remove('show'); return; }
+    const target = hero.closest('.pl-search-wrap') || hero;
+    _navSearchObserver = new IntersectionObserver((entries) => {
+        navWrap.classList.toggle('show', !entries[0].isIntersecting);
+    }, { rootMargin: '-70px 0px 0px 0px', threshold: 0 });
+    _navSearchObserver.observe(target);
 }
 
 // Top-N most-clicked products within a single category (global click data),
