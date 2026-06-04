@@ -43,31 +43,33 @@
 <body>
     <div id="cursor-glow" class="cursor-glow"></div>
 
-    <!-- Simple top header bar -->
-    <header class="site-header">
-        <div class="site-header-inner">
+    <!-- TOP NAVBAR -->
+    <div class="nav-container">
+        <nav class="navbar">
             <div class="logo" data-action="home-nav">jarvis finder</div>
-            <nav class="header-nav">
-                <a href="/products" data-page="products">Products</a>
-                <a href="/tutorials" data-page="tutorials">Tutorials</a>
-                <a href="/qccheck" data-page="qccheck">QC Check</a>
-                <a href="/tools" data-page="tools">Tools</a>
-            </nav>
-            <div class="header-actions">
+            <div class="nav-center">
+                <ul class="nav-links">
+                    <li><a href="/products" data-page="products">Products</a></li>
+                    <li><a href="/tutorials" data-page="tutorials">Tutorials</a></li>
+                    <li><a href="/qccheck" data-page="qccheck">QC Check</a></li>
+                    <li><a href="/tools" data-page="tools">Tools</a></li>
+                </ul>
+            </div>
+            <div class="nav-actions">
                 <button class="btn-icon" aria-label="Toggle Theme" id="theme-btn" data-action="toggleTheme">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
                     </svg>
                 </button>
-                <button class="btn-icon" aria-label="Settings" id="settings-btn" data-action="openSettings">
+                <button class="btn-icon" aria-label="Settings" id="settings-btn" style="margin-left: 0.5rem;" data-action="openSettings">
                     <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
                 </button>
             </div>
-        </div>
-    </header>
+        </nav>
+    </div>
 
     <!-- COMMAND PALETTE -->
     <div id="cmd-palette" class="cmd-overlay" style="display:none;" role="dialog" aria-modal="true">

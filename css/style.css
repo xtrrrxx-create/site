@@ -81,8 +81,12 @@ body {
     flex-direction: column;
 }
 
-/* ===== SITE HEADER ===== */
-.site-header {
+.cursor-glow {
+    display: none;
+}
+
+/* ===== NAVBAR (flat, full-width) ===== */
+.nav-container {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 200;
@@ -90,36 +94,49 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
-.site-header-inner {
+.navbar {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
     height: 52px;
     display: flex;
     align-items: center;
-    gap: 2rem;
+    justify-content: space-between;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
 }
 
-.site-header-inner .logo {
+.logo {
     font-family: 'Inter Tight', system-ui, sans-serif;
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 0.5px;
     cursor: pointer;
+    margin-left: 0;
     flex-shrink: 0;
+}
+
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
     margin-left: 0;
 }
 
-.header-nav {
-    flex: 1;
+.nav-links {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
+    list-style: none;
     gap: 2rem;
+    align-items: center;
+    position: relative;
+    margin: 0; padding: 0;
 }
 
-.header-nav a {
+.nav-links li a {
     color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.88rem;
@@ -127,57 +144,9 @@ body {
     transition: color 0.2s ease;
 }
 
-.header-nav a:hover,
-.header-nav a.active {
+.nav-links li a:hover,
+.nav-links li a.active {
     color: var(--text-primary);
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    margin-left: 1rem;
-}
-
-.cursor-glow {
-    display: none;
-}
-
-.navbar {
-    background-color: var(--nav-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 9999px;
-    width: 1200px;
-    max-width: 96%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.35rem 0.6rem;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-}
-
-.logo {
-    font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 0.5px;
-    margin-left: 1rem;
-    cursor: pointer;
-}
-
-.nav-center {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    margin-left: -1rem; /* optical visual balance since logo text is wider than the right icon */
-}
-
-.nav-links {
-    display: flex;
-    list-style: none;
-    gap: 0.25rem;
-    position: relative;
 }
 
 .nav-indicator {
@@ -723,13 +692,13 @@ main {
     /* Disable canvas animation on mobile */
     #bg-canvas { display: none; }
 
-    /* Main gets padding for bottom nav */
-    main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
+    /* Main gets padding for bottom nav on mobile */
+    main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); padding-top: 52px; }
 
-    /* Hide header nav links on mobile (use bottom nav instead) */
-    .header-nav { display: none; }
-    .header-actions { display: none; }
-    .site-header-inner .logo { font-size: 1rem; }
+    /* Hide nav links + actions on mobile (use bottom nav instead) */
+    .nav-center { display: none; }
+    .nav-actions { display: none; }
+    .navbar { padding: 0 1rem; }
     .online-pill .online-label { display: none; }
     .online-pill { padding: 0.35rem 0.7rem 0.35rem 0.6rem; font-size: 0.75rem; }
 
@@ -1003,7 +972,6 @@ input, textarea {
 main {
     padding-right: 0;
     padding-top: 52px;
-    padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
 /* ═══════════════════════════════════════════════════════════

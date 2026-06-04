@@ -32,14 +32,14 @@ window.changeCurrencyUI = function (curr) {
 
     updateNavbarLanguage();
     // Re-render current page so translated strings apply immediately.
-    const activeLink = document.querySelector('.header-nav a.active');
+    const activeLink = document.querySelector('.nav-links a.active');
     const pageId = activeLink ? activeLink.getAttribute('data-page') : 'home';
     if (window.navigateTo) window.navigateTo(pageId, true);
     else if (activeLink) activeLink.click();
 }
 
 function updateNavbarLanguage() {
-    const navLinks = document.querySelectorAll('.header-nav a[data-page]');
+    const navLinks = document.querySelectorAll('.nav-links a[data-page]');
     navLinks.forEach(a => {
         const page = a.getAttribute('data-page');
         if (page === 'home') a.innerHTML = t('nav_home');
@@ -1954,7 +1954,7 @@ function getPages() {
 // ─── APP INIT ──────────────────────────────────────────────────────────────
 function initApp() {
     const mainContent = document.getElementById('app-content');
-    const navLinks = document.querySelectorAll('.header-nav a');
+    const navLinks = document.querySelectorAll('.nav-links a');
 
     function renderPage(pageId) {
         if (productsRefreshTimer) {
@@ -2072,7 +2072,7 @@ function initApp() {
         return null;
     }
     function updateNavIndicator(pageId) {
-        const navList = document.querySelector('.header-nav');
+        const navList = document.querySelector('.nav-links');
         if (!navList) return;
         const activeLink = navList.querySelector(`a[data-page="${pageId}"]`);
         if (!activeLink) return;
