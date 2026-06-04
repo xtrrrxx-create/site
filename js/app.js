@@ -32,21 +32,21 @@ window.changeCurrencyUI = function (curr) {
 
     updateNavbarLanguage();
     // Re-render current page so translated strings apply immediately.
-    const activeLink = document.querySelector('.nav-links a.active');
+    const activeLink = document.querySelector('.nav-link.active');
     const pageId = activeLink ? activeLink.getAttribute('data-page') : 'home';
     if (window.navigateTo) window.navigateTo(pageId, true);
     else if (activeLink) activeLink.click();
 }
 
 function updateNavbarLanguage() {
-    const navLinks = document.querySelectorAll('.nav-links a[data-page]');
+    const navLinks = document.querySelectorAll('.nav-link[data-page]');
     navLinks.forEach(a => {
         const page = a.getAttribute('data-page');
         if (page === 'home') a.innerHTML = t('nav_home');
         if (page === 'products') a.innerHTML = t('nav_products');
         if (page === 'tutorials') a.innerHTML = t('nav_tutorials');
         if (page === 'qccheck') a.innerHTML = t('nav_qc');
-        if (page === 'tools') a.innerHTML = t('nav_tools') + ' <span style="font-size: 0.7em; vertical-align: middle; margin-left: 2px;">▼</span>';
+        if (page === 'tools') a.innerHTML = t('nav_tools');
     });
     // Bottom nav
     document.querySelectorAll('.bottom-nav-item[data-page]').forEach(item => {
@@ -1175,15 +1175,6 @@ function getPages() {
             .hc-arrow-right { right: 8px; }
         </style>
         <div style="position:relative;">
-            <div style="display:flex;align-items:center;justify-content:space-between;padding:1.2rem 4%;max-width:1400px;margin:0 auto;">
-                <span style="font-family:'Inter Tight',system-ui,sans-serif;font-size:1.3rem;font-weight:700;color:var(--text-primary);letter-spacing:0.5px;cursor:pointer;" data-action="go-home">jarvis finder</span>
-                <div style="display:flex;align-items:center;gap:1.5rem;">
-                    <a href="/products" data-page="products" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:0.9rem;color:var(--text-secondary);text-decoration:none;font-weight:500;">Products</a>
-                    <a href="/tutorials" data-page="tutorials" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:0.9rem;color:var(--text-secondary);text-decoration:none;font-weight:500;">Tutorials</a>
-                    <a href="/qccheck" data-page="qccheck" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:0.9rem;color:var(--text-secondary);text-decoration:none;font-weight:500;">QC Check</a>
-                    <a href="/tools" data-page="tools" style="font-family:'Inter Tight',system-ui,sans-serif;font-size:0.9rem;color:var(--text-secondary);text-decoration:none;font-weight:500;">Tools</a>
-                </div>
-            </div>
             <div class="jf-hero" style="min-height:auto;padding-top:2rem;padding-bottom:2.5rem;">
                 <h1 style="font-family:'Inter Tight',system-ui,sans-serif;font-size:clamp(2rem,5vw,42px);font-weight:600;letter-spacing:-0.025em;line-height:1.3;color:var(--text-primary);margin-bottom:0.75rem;animation:jfFadeUp 0.6s cubic-bezier(0.16,1,0.3,1) both 0.05s;">Your Go-to <span style="color:#ff9f0a;font-weight:800;">Spreadsheet</span></h1>
                 <p class="jf-sub" style="margin-bottom:0;">${t('hero_desc')}</p>
@@ -1954,7 +1945,7 @@ function getPages() {
 // ─── APP INIT ──────────────────────────────────────────────────────────────
 function initApp() {
     const mainContent = document.getElementById('app-content');
-    const navLinks = document.querySelectorAll('.nav-links a');
+    const navLinks = document.querySelectorAll('.nav-link');
 
     function renderPage(pageId) {
         if (productsRefreshTimer) {
@@ -2072,7 +2063,7 @@ function initApp() {
         return null;
     }
     function updateNavIndicator(pageId) {
-        const navList = document.querySelector('.nav-links');
+        const navList = document.querySelector('.nav-center');
         if (!navList) return;
         const activeLink = navList.querySelector(`a[data-page="${pageId}"]`);
         if (!activeLink) return;

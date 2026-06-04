@@ -85,18 +85,18 @@ body {
     display: none;
 }
 
-/* ===== NAVBAR (flat, inline — no fixed, no background) ===== */
+/* ===== NAVBAR (flat, inline) ===== */
 .nav-container {
     width: 100%;
 }
 
 .navbar {
-    max-width: 100%;
-    margin: 0;
-    padding: 1.2rem 2rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 1.2rem 4%;
+    max-width: 1400px;
+    margin: 0 auto;
     background: transparent;
     border: none;
     border-radius: 0;
@@ -106,41 +106,30 @@ body {
 
 .logo {
     font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: 0.5px;
     cursor: pointer;
-    margin-left: 0;
-    flex-shrink: 0;
 }
 
 .nav-center {
-    flex: 1;
     display: flex;
-    justify-content: flex-end;
-    margin-left: 0;
-}
-
-.nav-links {
-    display: flex;
-    list-style: none;
-    gap: 2rem;
     align-items: center;
-    position: relative;
-    margin: 0; padding: 0;
+    gap: 1.5rem;
 }
 
-.nav-links li a {
+.nav-link {
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 0.9rem;
     color: var(--text-secondary);
     text-decoration: none;
-    font-size: 0.88rem;
     font-weight: 500;
     transition: color 0.2s ease;
 }
 
-.nav-links li a:hover,
-.nav-links li a.active {
+.nav-link:hover,
+.nav-link.active {
     color: var(--text-primary);
 }
 
@@ -690,10 +679,9 @@ main {
     /* Main gets padding for bottom nav on mobile */
     main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); padding-top: 0; }
 
-    /* Hide nav links + actions on mobile (use bottom nav instead) */
+    /* Hide nav links on mobile (use bottom nav instead) */
     .nav-center { display: none; }
-    .nav-actions { display: none; }
-    .navbar { padding: 0 1rem; }
+    .navbar { padding: 0.8rem 4%; }
     .online-pill .online-label { display: none; }
     .online-pill { padding: 0.35rem 0.7rem 0.35rem 0.6rem; font-size: 0.75rem; }
 
