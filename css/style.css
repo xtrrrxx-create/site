@@ -87,6 +87,30 @@ body {
 /* ===== NAVBAR (flat, inline) ===== */
 .nav-container {
     width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid transparent;
+    transition: background 0.3s ease, backdrop-filter 0.3s ease,
+                box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.nav-container.scrolled {
+    background: rgba(18, 18, 26, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom-color: var(--border-color);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
+}
+
+body.light-mode .nav-container.scrolled {
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.nav-container.scrolled .navbar {
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
 }
 
 .navbar {
@@ -94,6 +118,7 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 1.2rem 24px;
+    transition: padding 0.3s ease;
     max-width: 1280px;
     margin: 0 auto;
     background: transparent;

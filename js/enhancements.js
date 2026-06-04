@@ -1,5 +1,22 @@
 /* ─── JARVIS FINDER ENHANCEMENTS ─────────────────────────────────────────── */
 
+// ─── 0. STICKY NAVBAR ──────────────────────────────────────────────────────
+// Fade in a blurred background on the top bar once the page is scrolled,
+// matching the smooth sticky-header behaviour on picks.ly.
+(function initStickyNav() {
+    const nav = document.querySelector('.nav-container');
+    if (!nav) return;
+    let ticking = false;
+    function update() {
+        nav.classList.toggle('scrolled', window.scrollY > 8);
+        ticking = false;
+    }
+    window.addEventListener('scroll', () => {
+        if (!ticking) { requestAnimationFrame(update); ticking = true; }
+    }, { passive: true });
+    update();
+})();
+
 // ─── 1. COMMAND PALETTE ────────────────────────────────────────────────────
 (function initCommandPalette() {
     const PAGES = [
