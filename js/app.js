@@ -1890,15 +1890,9 @@ function getPages() {
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                         <div class="agent-dropdown-menu" id="agent-dropdown-menu">
-                            <div class="agent-option selected" data-value="kakobuy" data-action="selectAgent" data-arg="kakobuy" data-arg2="KakoBuy" data-arg3="https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64">
-                                <img src="https://www.google.com/s2/favicons?domain=kakobuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> KakoBuy
-                            </div>
-                            <div class="agent-option" data-value="acbuy" data-action="selectAgent" data-arg="acbuy" data-arg2="ACBuy" data-arg3="https://www.google.com/s2/favicons?domain=acbuy.com&sz=64">
-                                <img src="https://www.google.com/s2/favicons?domain=acbuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ACBuy
-                            </div>
-                            <div class="agent-option" data-value="mulebuy" data-action="selectAgent" data-arg="mulebuy" data-arg2="Mulebuy" data-arg3="https://www.google.com/s2/favicons?domain=mulebuy.com&sz=64">
-                                <img src="https://www.google.com/s2/favicons?domain=mulebuy.com&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> Mulebuy
-                            </div>
+                            ${AGENTS.map(a => `<div class="agent-option${a.id === 'kakobuy' ? ' selected' : ''}" data-value="${a.id}" data-action="selectAgent" data-arg="${a.id}" data-arg2="${escapeHtml(a.name)}" data-arg3="https://www.google.com/s2/favicons?domain=${a.domain}&sz=64">
+                                <img src="https://www.google.com/s2/favicons?domain=${a.domain}&sz=64" style="width:20px;height:20px;border-radius:4px;object-fit:contain;" /> ${escapeHtml(a.name)}
+                            </div>`).join('')}
                         </div>
                     </div>
                     <button class="convert-btn" data-action="convertLink">${t('convert_link')}</button>
@@ -2748,7 +2742,52 @@ function buildHomeSections() {
     const arrowLeft = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
     const arrowRight = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
-    return HOME_CATS.map(cat => {
+    // ── Trending Items section (most-clicked first, padded with newest) ──
+    const trending = getRecentlyViewed().slice(0, 10);
+    let trendingHtml = '';
+    if (trending.length >= 3) {
+        const tCards = trending.map((item, idx) => {
+            const safeTitle = escapeHtml(stripEmojis(item.title || 'Untitled'));
+            const rawImg = (item.img || '').trim();
+            const isHttp = rawImg.startsWith('http');
+            const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/marketplace-logos\//i.test(rawImg) || /picks\.ly\/agent-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
+            const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
+            const img = safeImg
+                ? `<img src="${escapeHtml(safeExternalUrl(safeImg))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
+                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
+            const batchRaw = (item.batch || '').trim().toLowerCase();
+            let batchFlair = '';
+            if (batchRaw === 'best batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#ff9f0a;letter-spacing:.03em;">BEST BATCH</span>';
+            else if (batchRaw === 'budget batch') batchFlair = '<span style="font-size:0.72rem;font-weight:700;color:#60a5fa;letter-spacing:.03em;">BUDGET</span>';
+            else if (batchRaw) batchFlair = `<span style="font-size:0.72rem;font-weight:700;color:#a1a1aa;letter-spacing:.03em;">${escapeHtml(batchRaw.toUpperCase())}</span>`;
+            return `<div class="hc-card product-card">
+                <div class="product-image" style="overflow:hidden;height:220px;">${img}</div>
+                <div class="product-info">
+                    <div class="product-batch-row"><span class="product-store-badge">店</span><span class="product-store-name">${escapeHtml(item.category || '')}</span>${batchFlair}</div>
+                    <h3 class="product-title">${safeTitle}</h3>
+                    <div class="product-price">${formatPrice(item.price)}</div>
+                    <div class="product-actions">
+                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}">Buy Now</button>
+                        <a href="${escapeHtml(safeExternalUrl(item.picksly || '#'))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+        trendingHtml = `<div class="hc-section">
+            <div class="hc-header">
+                <a class="hc-title" data-action="go-products">Trending Items ${arrow}</a>
+                <a class="hc-viewmore" data-action="go-products">View more</a>
+            </div>
+            <div class="hc-carousel-wrap">
+                <button class="hc-arrow hc-arrow-left" data-carousel="hc-trending" data-dir="-1">${arrowLeft}</button>
+                <div class="hc-carousel" id="hc-trending">${tCards}</div>
+                <button class="hc-arrow hc-arrow-right" data-carousel="hc-trending" data-dir="1">${arrowRight}</button>
+            </div>
+        </div>`;
+    }
+
+    // ── Category sections ──
+    const catSections = HOME_CATS.map(cat => {
         const items = cache.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase()).slice(0, 8);
         if (items.length < 3) return '';
         const id = 'hc-' + cat.toLowerCase().replace(/[^a-z]/g, '');
@@ -2803,6 +2842,8 @@ function buildHomeSections() {
             </div>
         </div>`;
     }).filter(Boolean).join('');
+
+    return trendingHtml + catSections;
 }
 
 // ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────
@@ -2873,8 +2914,8 @@ window.initWeightEstimator = function() {
 window.convertLink = function () {
     const input = document.getElementById('link-input').value.trim().slice(0, LINK_INPUT_MAX_LEN);
     const agentValue = selectedAgent;
-    const agentNames = { kakobuy: 'KakoBuy', acbuy: 'ACBuy', mulebuy: 'Mulebuy' };
-    const agentText = agentNames[agentValue] || agentValue;
+    const agentObj = AGENTS.find(a => a.id === agentValue);
+    const agentText = agentObj ? agentObj.name : agentValue;
     const resultDiv = document.getElementById('converter-result');
 
     if (!input) {
@@ -2915,28 +2956,33 @@ window.convertLink = function () {
     const encoded = encodeURIComponent(input);
     let finalUrl = '';
 
-    if (agentValue === 'kakobuy') {
-        finalUrl = `https://www.kakobuy.com/item/details?url=${encoded}&affcode=keviinn`;
-    } else if (agentValue === 'acbuy') {
-        finalUrl = `https://www.acbuy.com/en/page/buy/?url=${encoded}`;
-    } else if (agentValue === 'mulebuy') {
-        let shopType = '', itemId = '';
-        if (input.includes('weidian.com')) {
-            shopType = 'weidian';
-            const m = input.match(/itemID=(\d+)/i);
-            if (m) itemId = m[1];
-        } else if (input.includes('taobao.com') || input.includes('tmall.com')) {
-            shopType = 'taobao';
-            const m = input.match(/[?&]id=(\d+)/i);
-            if (m) itemId = m[1];
-        } else if (input.includes('1688.com')) {
-            shopType = '1688';
-            const m = input.match(/\/(\d+)\.html/i);
-            if (m) itemId = m[1];
+    // Extract item ID for agents that need it
+    let itemId = '';
+    const weidianMatch = input.match(/itemID=(\d+)/i);
+    const taobaoMatch = input.match(/[?&]id=(\d+)/i);
+    const alibMatch = input.match(/\/(\d+)\.html/i);
+    if (weidianMatch) itemId = weidianMatch[1];
+    else if (taobaoMatch) itemId = taobaoMatch[1];
+    else if (alibMatch) itemId = alibMatch[1];
+
+    switch (agentValue) {
+        case 'kakobuy':  finalUrl = `https://www.kakobuy.com/item/details?url=${encoded}&affcode=keviinn`; break;
+        case 'oopbuy':   finalUrl = itemId ? `https://oopbuy.com/product/2/${itemId}` : `https://oopbuy.com/product?url=${encoded}`; break;
+        case 'acbuy':    finalUrl = `https://www.acbuy.com/en/page/buy/?url=${encoded}`; break;
+        case 'mulebuy': {
+            let shopType = '';
+            if (input.includes('weidian.com')) shopType = 'weidian';
+            else if (input.includes('taobao.com') || input.includes('tmall.com')) shopType = 'taobao';
+            else if (input.includes('1688.com')) shopType = '1688';
+            finalUrl = (shopType && itemId)
+                ? `https://mulebuy.com/product/?shop_type=${shopType}&id=${itemId}`
+                : `https://mulebuy.com/product/?url=${encoded}`;
+            break;
         }
-        finalUrl = (shopType && itemId)
-            ? `https://mulebuy.com/product/?shop_type=${shopType}&id=${itemId}`
-            : `https://mulebuy.com/product/?url=${encoded}`;
+        case 'superbuy': finalUrl = `https://www.superbuy.com/en/page/buy/?url=${encoded}`; break;
+        case 'joyagoo':  finalUrl = itemId ? `https://joyagoo.com/product?id=${itemId}&platform=WEIDIAN` : `https://joyagoo.com/product?url=${encoded}`; break;
+        case 'usfans':   finalUrl = `https://usfans.com/product?url=${encoded}`; break;
+        default:         finalUrl = `https://www.kakobuy.com/item/details?url=${encoded}&affcode=keviinn`; break;
     }
 
     resultDiv.style.border = '1px solid var(--border-color)';
