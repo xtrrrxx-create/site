@@ -2801,20 +2801,31 @@ function getRecentlyViewed() {
 }
 
 // Reveal the navbar search bar once the page's primary (hero/products) search
-// bar has been scrolled out of view, mirroring picks.ly. Re-run on every page
-// render because the page DOM (and thus the big search bar) is rebuilt.
-let _navSearchObserver = null;
-function setupNavSearchReveal() {
+// bar has been scrolled out of view, mirroring picks.ly. A plain scroll
+// listener is used instead of IntersectionObserver because the page's
+// overflow:clip ancestor stops IO (viewport root) from ever firing.
+let _navSearchScrollBound = false;
+function _updateNavSearchReveal() {
     const navWrap = document.getElementById('nav-search-wrap');
     if (!navWrap) return;
-    if (_navSearchObserver) { _navSearchObserver.disconnect(); _navSearchObserver = null; }
     const hero = document.getElementById('home-search') || document.getElementById('kf-search');
     if (!hero) { navWrap.classList.remove('show'); return; }
-    const target = hero.closest('.pl-search-wrap') || hero;
-    _navSearchObserver = new IntersectionObserver((entries) => {
-        navWrap.classList.toggle('show', !entries[0].isIntersecting);
-    }, { rootMargin: '-70px 0px 0px 0px', threshold: 0 });
-    _navSearchObserver.observe(target);
+    const wrap = hero.closest('.pl-search-wrap') || hero;
+    // Show once the hero bar has scrolled up under the sticky navbar (~70px).
+    const past = wrap.getBoundingClientRect().bottom < 70;
+    navWrap.classList.toggle('show', past);
+}
+function setupNavSearchReveal() {
+    if (!_navSearchScrollBound) {
+        let ticking = false;
+        const onScroll = () => {
+            if (!ticking) { requestAnimationFrame(() => { _updateNavSearchReveal(); ticking = false; }); ticking = true; }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        _navSearchScrollBound = true;
+    }
+    _updateNavSearchReveal();
 }
 
 // Top-N most-clicked products within a single category (global click data),
