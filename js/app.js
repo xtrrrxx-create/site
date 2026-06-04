@@ -2063,11 +2063,14 @@ function initApp() {
         if (pageId === 'products') {
             filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags' };
 
-            // Bind pl-cat tabs on products page
+            // Bind pl-cat tabs on products page — each updates URL
             document.querySelectorAll('.pl-cat[data-pl-cat]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const cat = btn.getAttribute('data-pl-cat');
                     filterState.category = cat;
+                    // Update URL
+                    const slug = cat.toLowerCase();
+                    history.pushState({ page: 'products' }, '', '/products/' + slug);
                     document.querySelectorAll('.pl-cat[data-pl-cat]').forEach(b => b.classList.toggle('active', b.getAttribute('data-pl-cat') === cat));
                     renderFilteredProducts();
                 });
@@ -2130,7 +2133,7 @@ function initApp() {
 
     const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools'];
     // Product sub-routes: /products/shoes, /products/hoodies etc.
-    const PRODUCT_CATS_ROUTES = ['shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
+    const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
     function pageFromPath() {
         const path = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
         if (VALID_PAGES.includes(path)) return path;
@@ -2141,10 +2144,11 @@ function initApp() {
     }
     function catFromPath() {
         const parts = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase().split('/');
-        if (parts[0] === 'products' && parts[1] && PRODUCT_CATS_ROUTES.includes(parts[1])) {
-            // Capitalize properly to match CATEGORIES
-            const raw = parts[1];
-            return CATEGORIES.find(c => c.toLowerCase() === raw) || 'All';
+        if (parts[0] === 'products' && parts[1]) {
+            if (parts[1] === 'all') return 'All';
+            if (PRODUCT_CATS_ROUTES.includes(parts[1])) {
+                return CATEGORIES.find(c => c.toLowerCase() === parts[1]) || 'All';
+            }
         }
         return null;
     }
@@ -2179,8 +2183,8 @@ function initApp() {
     function navigateTo(pageId, replace) {
         if (!VALID_PAGES.includes(pageId)) pageId = 'home';
         let path;
-        if (pageId === 'products' && filterState.category && filterState.category !== 'All') {
-            path = '/products/' + filterState.category.toLowerCase();
+        if (pageId === 'products') {
+            path = '/products/' + (filterState.category || 'All').toLowerCase();
         } else {
             path = pageId === 'home' ? '/' : '/' + pageId;
         }
