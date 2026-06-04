@@ -123,6 +123,23 @@ function thumb(rawUrl, w) {
     return `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=78&we&maxage=30d`;
 }
 
+// Derive the source marketplace from a picks.ly link and render its logo as
+// the store badge. Item ids are prefixed: WD=Weidian, TB=Taobao, AL=1688.
+// Falls back to the generic 店 glyph when the platform can't be determined.
+function platformBadge(pickslyRaw) {
+    const m = String(pickslyRaw || "").match(/\/item\/([A-Za-z]{2})/);
+    const map = {
+        WD: { src: "/weidian.png", alt: "Weidian" },
+        TB: { src: "/taobao.png",  alt: "Taobao" },
+        AL: { src: "/1688.png",    alt: "1688" },
+    };
+    const hit = m && map[m[1].toUpperCase()];
+    if (hit) {
+        return `<span class="product-store-badge"><img src="${hit.src}" alt="${hit.alt}" loading="lazy" decoding="async" /></span>`;
+    }
+    return '<span class="product-store-badge">店</span>';
+}
+
 // Variant for URLs we are about to persist or render in localStorage. Returns
 // "" for invalid/javascript: URLs so we can drop the field instead of writing
 // the literal string "#" into stored data.
@@ -885,7 +902,7 @@ function renderFilteredProducts() {
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
-                        <span class="product-store-badge">店</span>
+                        ${platformBadge(p.picksly)}
                         <span class="product-store-name">${escapeHtml(sellerName)}</span>
                     </div>
                     <h3 class="product-title">${safeTitle}</h3>
@@ -2865,7 +2882,7 @@ function buildHomeSections() {
             return `<div class="hc-card product-card">
                 <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
-                    <div class="product-batch-row"><span class="product-store-badge">店</span><span class="product-store-name">${escapeHtml(sellerName)}</span></div>
+                    <div class="product-batch-row">${platformBadge(item.picksly)}<span class="product-store-name">${escapeHtml(sellerName)}</span></div>
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(item.price)}</div>
                     <div class="product-actions">
@@ -2914,7 +2931,7 @@ function buildHomeSections() {
                 <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
-                        <span class="product-store-badge">店</span>
+                        ${platformBadge(item.picksly)}
                         <span class="product-store-name">${escapeHtml(sellerName)}</span>
                     </div>
                     <h3 class="product-title">${safeTitle}</h3>
