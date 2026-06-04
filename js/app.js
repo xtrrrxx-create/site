@@ -1978,9 +1978,9 @@ function initApp() {
         // Inject home styles before rendering home page
         if (pageId === 'home') injectHomeStyles();
 
-        // Show navbar only on home, hide on other pages
+        // Show navbar on all pages
         const navEl = document.querySelector('.nav-container');
-        if (navEl) navEl.style.display = (pageId === 'home') ? '' : 'none';
+        if (navEl) navEl.style.display = '';
 
         mainContent.innerHTML = getPages()[pageId] || getPages().home;
 
