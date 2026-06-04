@@ -1189,26 +1189,7 @@ function getPages() {
                 </div>
                 <!-- Category tabs -->
                 <div class="pl-cats">
-                    <button class="pl-cat active" data-home-cat="All">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        Trending
-                    </button>
-                    <button class="pl-cat" data-home-cat="Shoes">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 18h20l-2-6H8L6 6H2z"/></svg>
-                        Shoes
-                    </button>
-                    <button class="pl-cat" data-home-cat="T-shirts">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2 12 5 8 2 3.62 3.46a2 2 0 0 0-1.34 1.22L1 8l4 1v11h14V9l4-1-1.28-3.32a2 2 0 0 0-1.34-1.22z"/></svg>
-                        Tops
-                    </button>
-                    <button class="pl-cat" data-home-cat="Accessories">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
-                        Accessories
-                    </button>
-                    <button class="pl-cat" data-home-cat="Hoodies">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7v6a10 10 0 0 0 10 11 10 10 0 0 0 10-11V7z"/></svg>
-                        Hoodies
-                    </button>
+                    ${CATEGORIES.map(cat => `<button class="pl-cat ${cat === 'All' ? 'active' : ''}" data-home-cat="${cat}">${cat}</button>`).join('')}
                 </div>
             </div>
             <div id="home-sections">${buildHomeSections()}</div>
