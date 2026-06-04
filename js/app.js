@@ -2233,6 +2233,9 @@ function initApp() {
             } catch (_) {}
         });
     }
+    // Bind the scroll-reveal once; the handler resolves the current hero bar
+    // dynamically, so it works on every page without per-render setup.
+    setupNavSearchReveal();
 
     window.addEventListener('popstate', () => {
         const urlCat = catFromPath();
