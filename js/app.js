@@ -1216,11 +1216,41 @@ function getPages() {
         </div>
     `,
         products: `
-        <div style="max-width:1400px;margin:0 auto;padding:1.5rem 4% 3rem;">
-            <h2 style="font-family:'Inter Tight',system-ui,sans-serif;font-size:26px;font-weight:600;letter-spacing:-0.025em;color:var(--text-primary);margin-bottom:0.25rem;">${t('title_products')}</h2>
-            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:1.25rem;">${t('desc_products')}</p>
-
-            <div id="kf-filter-root">${buildFilterUI()}</div>
+        <div style="max-width:1400px;margin:0 auto;padding:0 4% 3rem;">
+            <!-- Hero search (same as home) -->
+            <div class="pl-hero" style="padding-top:2.5rem;padding-bottom:1rem;">
+                <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
+                <p class="pl-hero-sub">${t('hero_desc')}</p>
+                <div class="pl-search-wrap">
+                    <svg class="pl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" class="pl-search-input" id="kf-search" placeholder="Search products..." autocomplete="off" spellcheck="false">
+                    <button class="pl-search-paste" id="products-paste-btn" aria-label="Paste">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    </button>
+                </div>
+                <div class="pl-cats" id="pl-product-cats">
+                    <button class="pl-cat ${filterState.category === 'All' ? 'active' : ''}" data-pl-cat="All">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        Trending
+                    </button>
+                    <button class="pl-cat ${filterState.category === 'Shoes' ? 'active' : ''}" data-pl-cat="Shoes">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 18h20l-2-6H8L6 6H2z"/></svg>
+                        Shoes
+                    </button>
+                    <button class="pl-cat ${filterState.category === 'T-shirts' ? 'active' : ''}" data-pl-cat="T-shirts">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2 12 5 8 2 3.62 3.46a2 2 0 0 0-1.34 1.22L1 8l4 1v11h14V9l4-1-1.28-3.32a2 2 0 0 0-1.34-1.22z"/></svg>
+                        Tops
+                    </button>
+                    <button class="pl-cat ${filterState.category === 'Accessories' ? 'active' : ''}" data-pl-cat="Accessories">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5a4 4 0 0 0-8 0v2"/></svg>
+                        Accessories
+                    </button>
+                    <button class="pl-cat ${filterState.category === 'Hoodies' ? 'active' : ''}" data-pl-cat="Hoodies">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7v6a10 10 0 0 0 10 11 10 10 0 0 0 10-11V7z"/></svg>
+                        Hoodies
+                    </button>
+                </div>
+            </div>
 
             <div class="products-grid" id="products-container" style="margin-top:0.75rem;">
                 <p style="color:var(--text-primary);font-weight:600;" id="loading-text">${t('loading')}</p>
@@ -2068,7 +2098,38 @@ function initApp() {
         }
 
         if (pageId === 'products') {
-            filterState = { search: '', category: 'All', batch: 'All Tags' };
+            filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags' };
+
+            // Bind pl-cat tabs on products page
+            document.querySelectorAll('.pl-cat[data-pl-cat]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const cat = btn.getAttribute('data-pl-cat');
+                    filterState.category = cat;
+                    document.querySelectorAll('.pl-cat[data-pl-cat]').forEach(b => b.classList.toggle('active', b.getAttribute('data-pl-cat') === cat));
+                    renderFilteredProducts();
+                });
+            });
+
+            // Bind search input
+            const plSearch = document.getElementById('kf-search');
+            if (plSearch) {
+                if (filterState.search) plSearch.value = filterState.search;
+                plSearch.addEventListener('input', () => {
+                    filterState.search = plSearch.value.trim();
+                    renderFilteredProducts();
+                });
+            }
+
+            // Paste button
+            const pasteBtn = document.getElementById('products-paste-btn');
+            if (pasteBtn && plSearch) {
+                pasteBtn.addEventListener('click', async () => {
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        if (text) { plSearch.value = text; plSearch.dispatchEvent(new Event('input')); }
+                    } catch(e) {}
+                });
+            }
 
             const onData = (data) => {
                 lastProductsSignature = JSON.stringify(data);
