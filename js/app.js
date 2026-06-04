@@ -1146,8 +1146,8 @@ function getPages() {
             .hc-carousel::-webkit-scrollbar { display: none; }
             .hc-card {
                 flex-shrink: 0;
-                width: calc((100% - 4rem) / 5);
-                min-width: 200px;
+                width: calc((100% - 4.4rem) / 5);
+                min-width: 220px;
                 display: flex;
                 flex-direction: column;
             }
