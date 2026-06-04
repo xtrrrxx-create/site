@@ -81,14 +81,62 @@ body {
     flex-direction: column;
 }
 
-.nav-container {
-    display: flex;
-    justify-content: center;
-    padding-top: 1.5rem;
+/* ===== SITE HEADER ===== */
+.site-header {
     position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 100;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.site-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.site-header-inner .logo {
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 0;
+}
+
+.header-nav {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2rem;
+}
+
+.header-nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.header-nav a:hover,
+.header-nav a.active {
+    color: var(--text-primary);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-left: 1rem;
 }
 
 .cursor-glow {
@@ -238,7 +286,7 @@ main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding-top: 4rem; /* space for fixed navbar */
+    padding-top: 0;
     width: 100%;
 }
 
@@ -669,7 +717,7 @@ main {
 /* ===== MOBILE (≤ 768px) ===== */
 @media (max-width: 768px) {
 
-    /* Show bottom nav */
+    /* Show bottom nav on mobile */
     .bottom-nav { display: flex; }
 
     /* Disable canvas animation on mobile */
@@ -678,10 +726,10 @@ main {
     /* Main gets padding for bottom nav */
     main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
 
-    /* Simplify top navbar */
-    .navbar { width: 92%; padding: 0.6rem 0.75rem; }
-    .nav-center { display: none; }
-    .logo { font-size: 1.1rem; margin-left: 0.25rem; }
+    /* Hide header nav links on mobile (use bottom nav instead) */
+    .header-nav { display: none; }
+    .header-actions { display: none; }
+    .site-header-inner .logo { font-size: 1rem; }
     .online-pill .online-label { display: none; }
     .online-pill { padding: 0.35rem 0.7rem 0.35rem 0.6rem; font-size: 0.75rem; }
 
@@ -952,10 +1000,10 @@ input, textarea {
     width: auto;
 }
 
-/* Main padding — original navbar is back */
 main {
     padding-right: 0;
-    padding-top: 4rem;
+    padding-top: 52px;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
 }
 
 /* ═══════════════════════════════════════════════════════════
