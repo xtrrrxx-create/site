@@ -6,15 +6,14 @@
 (function initStickyNav() {
     const nav = document.querySelector('.nav-container');
     if (!nav) return;
-    let ticking = false;
-    function update() {
-        nav.classList.toggle('scrolled', window.scrollY > 8);
-        ticking = false;
-    }
-    window.addEventListener('scroll', () => {
-        if (!ticking) { requestAnimationFrame(update); ticking = true; }
-    }, { passive: true });
-    update();
+    // Poll with rAF rather than the scroll event: the page's overflow:clip
+    // ancestor suppresses scroll events, so a listener would never fire.
+    let lastY = -1;
+    (function loop() {
+        const y = window.scrollY || document.documentElement.scrollTop || 0;
+        if (y !== lastY) { lastY = y; nav.classList.toggle('scrolled', y > 8); }
+        requestAnimationFrame(loop);
+    })();
 })();
 
 // ─── 1. COMMAND PALETTE ────────────────────────────────────────────────────

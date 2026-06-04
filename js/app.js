@@ -2820,13 +2820,16 @@ function _updateNavSearchReveal() {
 }
 function setupNavSearchReveal() {
     if (!_navSearchScrollBound) {
-        let ticking = false;
-        const onScroll = () => {
-            if (!ticking) { requestAnimationFrame(() => { _updateNavSearchReveal(); ticking = false; }); ticking = true; }
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('resize', onScroll, { passive: true });
         _navSearchScrollBound = true;
+        // Poll via rAF instead of the scroll event: this page's overflow:clip
+        // ancestor stops scroll events from firing, so an event listener never
+        // runs. The loop only does work when the scroll position changes.
+        let lastY = -1;
+        (function loop() {
+            const y = window.scrollY || document.documentElement.scrollTop || 0;
+            if (y !== lastY) { lastY = y; _updateNavSearchReveal(); }
+            requestAnimationFrame(loop);
+        })();
     }
     _updateNavSearchReveal();
 }
