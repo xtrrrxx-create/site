@@ -1097,9 +1097,9 @@ function getPages() {
             }
             /* ── Category carousel sections (picks.ly clone) ── */
             .hc-section {
-                max-width: 1400px;
+                max-width: 1280px;
                 margin: 0 auto 2.5rem;
-                padding: 0 4%;
+                padding: 0 24px;
             }
             .hc-header {
                 display: flex;
@@ -1135,7 +1135,7 @@ function getPages() {
             }
             .hc-carousel {
                 display: flex;
-                gap: 1.1rem;
+                gap: 16px;
                 overflow-x: auto;
                 scroll-behavior: smooth;
                 scrollbar-width: none;
@@ -1146,7 +1146,7 @@ function getPages() {
             .hc-carousel::-webkit-scrollbar { display: none; }
             .hc-card {
                 flex-shrink: 0;
-                width: calc((100% - 4.4rem) / 5);
+                width: calc((100% - 64px) / 5);
                 min-width: 220px;
                 display: flex;
                 flex-direction: column;
