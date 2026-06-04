@@ -2052,9 +2052,24 @@ function initApp() {
     }
 
     const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools'];
+    // Product sub-routes: /products/shoes, /products/hoodies etc.
+    const PRODUCT_CATS_ROUTES = ['shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
     function pageFromPath() {
-        const seg = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
-        return VALID_PAGES.includes(seg) ? seg : 'home';
+        const path = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
+        if (VALID_PAGES.includes(path)) return path;
+        // Handle /products/category routes
+        const parts = path.split('/');
+        if (parts[0] === 'products' && parts[1] && PRODUCT_CATS_ROUTES.includes(parts[1])) return 'products';
+        return 'home';
+    }
+    function catFromPath() {
+        const parts = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase().split('/');
+        if (parts[0] === 'products' && parts[1] && PRODUCT_CATS_ROUTES.includes(parts[1])) {
+            // Capitalize properly to match CATEGORIES
+            const raw = parts[1];
+            return CATEGORIES.find(c => c.toLowerCase() === raw) || 'All';
+        }
+        return null;
     }
     function updateNavIndicator(pageId) {
         const navList = document.querySelector('.nav-links');
@@ -2086,7 +2101,12 @@ function initApp() {
 
     function navigateTo(pageId, replace) {
         if (!VALID_PAGES.includes(pageId)) pageId = 'home';
-        const path = pageId === 'home' ? '/' : '/' + pageId;
+        let path;
+        if (pageId === 'products' && filterState.category && filterState.category !== 'All') {
+            path = '/products/' + filterState.category.toLowerCase();
+        } else {
+            path = pageId === 'home' ? '/' : '/' + pageId;
+        }
         if (window.location.pathname !== path) {
             if (replace) history.replaceState({ page: pageId }, '', path);
             else history.pushState({ page: pageId }, '', path);
@@ -2114,11 +2134,17 @@ function initApp() {
     });
 
     window.addEventListener('popstate', () => {
+        const urlCat = catFromPath();
+        if (urlCat) filterState.category = urlCat;
+        else if (pageFromPath() === 'products') filterState.category = 'All';
         renderPage(pageFromPath());
     });
 
     const initial = pageFromPath();
-    history.replaceState({ page: initial }, '', initial === 'home' ? '/' : '/' + initial);
+    // If URL is /products/shoes etc., set the category filter before rendering
+    const urlCat = catFromPath();
+    if (urlCat) filterState.category = urlCat;
+    history.replaceState({ page: initial }, '', window.location.pathname === '/' ? '/' : window.location.pathname);
     renderPage(initial);
 
     // Hover-pause is now handled by .rv-track-wrap:hover in CSS — no
@@ -2289,7 +2315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === currentCurrency);
     });
-    showWelcomeModal();
+    // Welcome modal removed — agent selection now happens via Buy Now popup
 });
 
 // ─── AGENT DROPDOWN ────────────────────────────────────────────────────────
@@ -2477,12 +2503,20 @@ window.runQcCheck = async function () {
 
         // "View on picks.ly" button — original link if it was picks.ly, otherwise derive from source.
         const pickslyUrl = /picks\.ly\/item\//i.test(raw) ? raw : qcSourceToPicksly(src);
-        if (pickslyUrl && actionsEl) {
+        if (actionsEl) {
             actionsEl.style.display = 'flex';
-            actionsEl.innerHTML = `<a class="qc-picksly-btn" href="${escapeHtml(safeExternalUrl(pickslyUrl))}" target="_blank" rel="noopener noreferrer">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                ${t('qc_view_picksly')}
-            </a>`;
+            // Build Buy Now button — derive marketplace URL from source
+            const buyUrl = safeExternalUrl(src);
+            const buyBtnHtml = (buyUrl && buyUrl !== '#')
+                ? `<button class="card-btn-buy" data-kakobuy="${escapeHtml(buyUrl)}" style="padding:0.55rem 1.2rem;font-size:0.85rem;">Buy Now</button>`
+                : '';
+            const pickslyBtnHtml = pickslyUrl
+                ? `<a class="qc-picksly-btn" href="${escapeHtml(safeExternalUrl(pickslyUrl))}" target="_blank" rel="noopener noreferrer">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    ${t('qc_view_picksly')}
+                </a>`
+                : '';
+            actionsEl.innerHTML = buyBtnHtml + pickslyBtnHtml;
         }
     } catch (err) {
         statusEl.textContent = t('qc_failed', { e: err.message });
