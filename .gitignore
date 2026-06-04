@@ -92,3 +92,4 @@ jarvis-finder/.obsidian/
 # Skill lock files
 skills-lock.json
 .env*.local
+.venv/
