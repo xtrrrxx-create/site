@@ -799,6 +799,7 @@ function updateFilterBadge() {
 }
 
 function getFiltered() {
+    if (!allProductsCache || !allProductsCache.length) return [];
     return allProductsCache.filter(p => {
         const s = filterState.search.toLowerCase().slice(0, INPUT_MAX_LEN);
         const matchSearch = !s || p.title.toLowerCase().includes(s);
