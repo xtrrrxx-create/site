@@ -2775,6 +2775,38 @@ function getRecentlyViewed() {
     return out;
 }
 
+// Top-N most-clicked products within a single category (global click data),
+// padded with the newest items of that category so a section is never thin.
+function getPopularInCategory(cat, n) {
+    const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+    const lc = String(cat || '').toLowerCase();
+    const inCat = cache.filter(p => (p.category || '').toLowerCase() === lc);
+    if (!inCat.length) return [];
+
+    const out = [];
+    const seen = new Set();
+    if (popularTitlesOrder.length) {
+        const byTitle = new Map(inCat.map(p => [String(p.title || '').toLowerCase(), p]));
+        for (const t of popularTitlesOrder) {
+            const p = byTitle.get(t);
+            if (p && !seen.has(p.title)) {
+                out.push(p);
+                seen.add(p.title);
+                if (out.length >= n) return out;
+            }
+        }
+    }
+    const newest = inCat.slice().reverse();
+    for (const p of newest) {
+        if (!seen.has(p.title)) {
+            out.push(p);
+            seen.add(p.title);
+            if (out.length >= n) break;
+        }
+    }
+    return out;
+}
+
 async function loadPopularProducts(opts) {
     const force = opts && opts.force;
     if (popularLoaded && !force) return;
@@ -2866,7 +2898,7 @@ function buildHomeSections() {
     const arrowRight = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
 
     // ── Trending Items section (most-clicked first, padded with newest) ──
-    const trending = getRecentlyViewed().slice(0, 10);
+    const trending = getRecentlyViewed().slice(0, 20);
     let trendingHtml = '';
     if (trending.length >= 3) {
         const tCards = trending.map((item, idx) => {
@@ -2907,7 +2939,7 @@ function buildHomeSections() {
 
     // ── Category sections ──
     const catSections = HOME_CATS.map(cat => {
-        const items = cache.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase()).slice(0, 8);
+        const items = getPopularInCategory(cat, 20);
         if (items.length < 3) return '';
         const id = 'hc-' + cat.toLowerCase().replace(/[^a-z]/g, '');
         const cards = items.map((item, idx) => {
