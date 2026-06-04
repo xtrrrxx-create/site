@@ -7,11 +7,7 @@
     }
   ],
   "rewrites": [
-    { "source": "/home", "destination": "/index.html" },
-    { "source": "/products", "destination": "/index.html" },
-    { "source": "/tutorials", "destination": "/index.html" },
-    { "source": "/qccheck", "destination": "/index.html" },
-    { "source": "/tools", "destination": "/index.html" }
+    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
