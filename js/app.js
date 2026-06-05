@@ -440,10 +440,17 @@ function platformName(pickslyRaw) {
     return (m && map[m[1].toUpperCase()]) || '';
 }
 
+// Reject junk seller values picks.ly sometimes returns (e.g. "-1", pure
+// numbers) so they never show on cards or in the Stores section.
+function validSeller(s) {
+    s = String(s || '').trim();
+    return (s && !/^-?\d+$/.test(s)) ? s : '';
+}
+
 // "Category | Seller" label for product cards. Falls back gracefully.
 function catSellerLabel(p) {
     const cat = String((p && p.category) || '').trim();
-    const seller = String((p && p.seller) || '').trim();
+    const seller = validSeller(p && p.seller);
     if (cat && seller) return cat + ' | ' + seller;
     return seller || cat || '';
 }
@@ -3145,7 +3152,7 @@ function buildHomeSections() {
     }
     const sellerMap = new Map();
     cache.forEach(p => {
-        const s = (p.seller || '').trim();
+        const s = validSeller(p.seller);
         if (!s) return;
         if (!sellerMap.has(s)) sellerMap.set(s, []);
         sellerMap.get(s).push(p);
