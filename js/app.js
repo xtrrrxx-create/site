@@ -2705,6 +2705,26 @@ document.addEventListener('keydown', (e) => {
 const RV_KEY = 'jf_recently_viewed';
 const RV_MAX = 20;
 
+// Exposed for the search-focus panel (Trending chips). Derives the most common
+// meaningful words across the most-clicked product titles.
+window.jfTrendingTerms = function(n) {
+    const STOP = new Set(['the','and','for','with','new','set','pcs','size','color','colour','style','men','women','of','pack','quality','version','tee','shirt','shoes','batch','best','budget','random']);
+    const freq = new Map();
+    (popularTitlesOrder || []).slice(0, 300).forEach(t => {
+        String(t).split(/[^a-z0-9]+/i).forEach(w => {
+            w = w.trim().toLowerCase();
+            if (w.length < 3 || STOP.has(w) || /^\d+$/.test(w)) return;
+            freq.set(w, (freq.get(w) || 0) + 1);
+        });
+    });
+    return [...freq.entries()].sort((a, b) => b[1] - a[1]).slice(0, n || 8).map(e => e[0]);
+};
+
+// Exposed raw recently-viewed list (personal, from localStorage) for thumbnails.
+window.jfRecentlyViewedRaw = function() {
+    try { return JSON.parse(localStorage.getItem(RV_KEY)) || []; } catch (e) { return []; }
+};
+
 // Delegated listener: picks up clicks on .product-card and reads the
 // HTML-escaped JSON from data-rv. Inline onclick removed to harden against
 // stored XSS via product fields.

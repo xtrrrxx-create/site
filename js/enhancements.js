@@ -318,6 +318,182 @@ window.applyTilt = applyTilt;
 })();
 
 
+// ─── 4b. SEARCH FOCUS PANEL (Recent / Trending / Recently viewed) ──────────
+(function initSearchPanel() {
+    const RECENT_KEY = 'jf_recent_searches';
+    let panel = null;
+    let activeInput = null;
+
+    function getRecent() { try { return JSON.parse(localStorage.getItem(RECENT_KEY)) || []; } catch (e) { return []; } }
+    function addRecent(term) {
+        term = (term || '').trim();
+        if (!term) return;
+        let r = getRecent().filter(t => t.toLowerCase() !== term.toLowerCase());
+        r.unshift(term);
+        localStorage.setItem(RECENT_KEY, JSON.stringify(r.slice(0, 8)));
+    }
+    function clearRecent() { localStorage.removeItem(RECENT_KEY); }
+
+    function ensurePanel() {
+        if (panel) return panel;
+        panel = document.createElement('div');
+        panel.className = 'search-panel';
+        panel.style.display = 'none';
+        document.body.appendChild(panel);
+        // Keep panel open while interacting with it.
+        panel.addEventListener('mousedown', e => e.preventDefault());
+        document.addEventListener('click', e => {
+            if (panel.contains(e.target)) return;
+            if (e.target.classList && e.target.classList.contains('pl-search-input')) return;
+            hide();
+        });
+        window.addEventListener('resize', () => { if (activeInput) position(activeInput); });
+        return panel;
+    }
+
+    function position(input) {
+        const r = input.getBoundingClientRect();
+        panel.style.top = (r.bottom + window.scrollY + 8) + 'px';
+        panel.style.left = (r.left + window.scrollX) + 'px';
+        panel.style.width = r.width + 'px';
+    }
+
+    function runSearch(input, term) {
+        addRecent(term);
+        input.value = term;
+        input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+        hide();
+    }
+
+    function chip(label, iconSvg, onClick) {
+        const b = document.createElement('button');
+        b.className = 'sp-chip';
+        b.innerHTML = iconSvg + '<span>' + label.replace(/[<>&]/g, '') + '</span>';
+        b.addEventListener('click', onClick);
+        return b;
+    }
+
+    const CLOCK = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+    const BOLT = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+
+    function renderSections(input) {
+        ensurePanel();
+        panel.innerHTML = '';
+
+        // Recent
+        const recent = getRecent();
+        if (recent.length) {
+            const sec = document.createElement('div'); sec.className = 'sp-section';
+            const head = document.createElement('div'); head.className = 'sp-head';
+            head.innerHTML = '<span>Recent</span>';
+            const clr = document.createElement('button'); clr.className = 'sp-clear'; clr.textContent = 'Clear';
+            clr.addEventListener('click', () => { clearRecent(); renderSections(input); });
+            head.appendChild(clr); sec.appendChild(head);
+            const chips = document.createElement('div'); chips.className = 'sp-chips';
+            recent.forEach(t => chips.appendChild(chip(t, CLOCK, () => runSearch(input, t))));
+            sec.appendChild(chips); panel.appendChild(sec);
+        }
+
+        // Trending
+        const trending = (window.jfTrendingTerms ? window.jfTrendingTerms(10) : []);
+        if (trending.length) {
+            const sec = document.createElement('div'); sec.className = 'sp-section';
+            const head = document.createElement('div'); head.className = 'sp-head';
+            head.innerHTML = '<span>Trending</span>'; sec.appendChild(head);
+            const chips = document.createElement('div'); chips.className = 'sp-chips';
+            trending.forEach(t => {
+                const label = t.charAt(0).toUpperCase() + t.slice(1);
+                chips.appendChild(chip(label, BOLT, () => runSearch(input, t)));
+            });
+            sec.appendChild(chips); panel.appendChild(sec);
+        }
+
+        // Recently viewed (thumbnails)
+        const rv = (window.jfRecentlyViewedRaw ? window.jfRecentlyViewedRaw() : []).filter(p => p && p.img).slice(0, 10);
+        if (rv.length) {
+            const sec = document.createElement('div'); sec.className = 'sp-section';
+            const head = document.createElement('div'); head.className = 'sp-head';
+            head.innerHTML = '<span>Recently viewed</span>';
+            const va = document.createElement('a'); va.className = 'sp-viewall'; va.textContent = 'View all';
+            va.addEventListener('click', () => { hide(); (window.navigateTo || function(){})('products'); });
+            head.appendChild(va); sec.appendChild(head);
+            const row = document.createElement('div'); row.className = 'sp-thumbs';
+            rv.forEach(p => {
+                const a = document.createElement('div'); a.className = 'sp-thumb';
+                const img = document.createElement('img');
+                img.src = (window.thumb ? window.thumb(p.img, 120) : p.img);
+                img.loading = 'lazy'; img.alt = '';
+                img.onerror = function () { a.style.display = 'none'; };
+                a.appendChild(img);
+                a.addEventListener('click', () => {
+                    const url = (typeof safeExternalUrl === 'function') ? safeExternalUrl(p.kakobuy || '') : (p.kakobuy || '');
+                    if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
+                    hide();
+                });
+                row.appendChild(a);
+            });
+            sec.appendChild(row); panel.appendChild(sec);
+        }
+
+        if (!panel.children.length) { hide(); return; }
+        position(input);
+        panel.style.display = 'block';
+    }
+
+    function renderResults(input, q) {
+        ensurePanel();
+        const products = window.allProductsCache || [];
+        const matches = products.filter(p => p.title && p.title.toLowerCase().includes(q)).slice(0, 6);
+        if (!matches.length) { renderSections(input); return; }
+        panel.innerHTML = '';
+        const sec = document.createElement('div'); sec.className = 'sp-section';
+        matches.forEach(p => {
+            const item = document.createElement('div'); item.className = 'sp-result';
+            const img = document.createElement('img'); img.className = 'sp-result-img';
+            img.src = (window.thumb ? window.thumb(p.img, 80) : p.img); img.loading = 'lazy';
+            img.onerror = function () { this.style.visibility = 'hidden'; };
+            const info = document.createElement('div'); info.className = 'sp-result-info';
+            const t = document.createElement('div'); t.className = 'sp-result-title'; t.textContent = (p.title || '').slice(0, 50);
+            const pr = document.createElement('div'); pr.className = 'sp-result-price';
+            pr.textContent = p.price ? (window.formatPrice ? window.formatPrice(p.price) : '$' + p.price) : '';
+            info.appendChild(t); info.appendChild(pr);
+            item.appendChild(img); item.appendChild(info);
+            item.addEventListener('click', () => {
+                const url = (typeof safeExternalUrl === 'function') ? safeExternalUrl(p.kakobuy || '') : (p.kakobuy || '');
+                if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
+                hide();
+            });
+            sec.appendChild(item);
+        });
+        panel.appendChild(sec);
+        position(input);
+        panel.style.display = 'block';
+    }
+
+    function hide() { if (panel) panel.style.display = 'none'; }
+
+    document.addEventListener('focusin', e => {
+        if (!e.target.classList || !e.target.classList.contains('pl-search-input')) return;
+        activeInput = e.target;
+        const q = e.target.value.trim().toLowerCase();
+        if (q) renderResults(e.target, q); else renderSections(e.target);
+    });
+    document.addEventListener('input', e => {
+        if (!e.target.classList || !e.target.classList.contains('pl-search-input')) return;
+        activeInput = e.target;
+        const q = e.target.value.trim().toLowerCase();
+        if (q) renderResults(e.target, q); else renderSections(e.target);
+    });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') hide();
+        if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('pl-search-input')) {
+            addRecent(e.target.value);
+            hide();
+        }
+    });
+})();
+
+
 // ─── 5. SKELETON LOADING ───────────────────────────────────────────────────
 function showSkeletonCards(count) {
     const container = document.getElementById('products-container');
