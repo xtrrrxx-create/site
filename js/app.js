@@ -2813,9 +2813,9 @@ function _updateNavSearchReveal() {
     if (!navWrap) return;
     const hero = document.getElementById('home-search') || document.getElementById('kf-search');
     if (!hero) { navWrap.classList.remove('show'); return; }
-    const wrap = hero.closest('.pl-search-wrap') || hero;
-    // Show once the hero search bar has scrolled up under the 77px navbar.
-    const past = wrap.getBoundingClientRect().bottom < 80;
+    // Trigger on the input text itself: reveal the navbar search the moment
+    // the hero "Search products..." input scrolls up under the 77px navbar.
+    const past = hero.getBoundingClientRect().bottom < 77;
     navWrap.classList.toggle('show', past);
 }
 function setupNavSearchReveal() {
