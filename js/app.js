@@ -2814,8 +2814,8 @@ function _updateNavSearchReveal() {
     const hero = document.getElementById('home-search') || document.getElementById('kf-search');
     if (!hero) { navWrap.classList.remove('show'); return; }
     const wrap = hero.closest('.pl-search-wrap') || hero;
-    // Show once the hero bar has scrolled up under the sticky navbar (~70px).
-    const past = wrap.getBoundingClientRect().bottom < 70;
+    // Show once the hero search bar has scrolled up under the 77px navbar.
+    const past = wrap.getBoundingClientRect().bottom < 80;
     navWrap.classList.toggle('show', past);
 }
 function setupNavSearchReveal() {
