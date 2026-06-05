@@ -437,14 +437,24 @@ const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Lo
 function catIcon(cat) {
     const s = '<svg class="pl-cat-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
     const grid = '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 12h18M12 3v18"/>';
+    // short-sleeve tee
     const shirt = '<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>';
     const footprints = '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4M4 13h4"/>';
-    const bottoms = '<path d="M9 2 8 22M15 2l1 20M8 2h8M6 22h4M14 22h4M12 2v7"/>';
+    // long trousers
+    const pants = '<path d="M5 3h14l-1.5 18h-4.5L12 9l-1 12H6.5L5 3Z"/>';
+    // short pants
+    const shorts = '<path d="M5 4h14l-1 11h-4.5L12 8l-1.5 7H6L5 4Z"/>';
+    // long-sleeve top (no hood)
+    const longSleeve = '<path d="M9 3 4 6l1 7 2.5-1V21h9V12l2.5 1 1-7-5-3-3 2-3-2Z"/>';
+    // hooded long-sleeve (hoodie)
+    const hoodie = '<path d="M9 4 4 7l1 7 2.5-1V21h9V13l2.5 1 1-7-5-3"/><path d="M9 4a3 3 0 0 1 6 0"/><path d="M12 7v3"/>';
+    // puffer jacket with quilting + zip
+    const jacket = '<path d="M7 4 4 6l1 7 2-1v9h10v-9l2 1 1-7-3-2-5 1.5L7 4Z"/><path d="M12 5.5V21"/><path d="M8.5 10h2M13.5 10h2M8.5 14h2M13.5 14h2M8.5 18h2M13.5 18h2"/>';
     const watch = '<circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/>';
     const map = {
         'all': grid, 'shoes': footprints, 'slides': footprints,
-        'shorts': bottoms, 'pants': bottoms,
-        't-shirts': shirt, 'long-sleeve': shirt, 'hoodies': shirt, 'jackets': shirt,
+        'shorts': shorts, 'pants': pants,
+        't-shirts': shirt, 'long-sleeve': longSleeve, 'hoodies': hoodie, 'jackets': jacket,
         'accessories': watch,
     };
     return s + (map[String(cat).toLowerCase()] || shirt) + '</svg>';
