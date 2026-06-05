@@ -131,9 +131,9 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 560px;
-    max-width: 44vw;
-    height: 44px;
+    width: 620px;
+    max-width: 46vw;
+    height: 50px;
     margin: 0;
     opacity: 0;
     visibility: hidden;
