@@ -432,6 +432,23 @@ function updateThemeIcon(isLightMode) {
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
 const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
+
+// Small line icon per category, shown on the .pl-cat tabs (picks.ly style).
+function catIcon(cat) {
+    const s = '<svg class="pl-cat-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
+    const grid = '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 12h18M12 3v18"/>';
+    const shirt = '<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/>';
+    const footprints = '<path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C14.63 6 14 7.8 14 9.5c0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4M4 13h4"/>';
+    const bottoms = '<path d="M9 2 8 22M15 2l1 20M8 2h8M6 22h4M14 22h4M12 2v7"/>';
+    const watch = '<circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/>';
+    const map = {
+        'all': grid, 'shoes': footprints, 'slides': footprints,
+        'shorts': bottoms, 'pants': bottoms,
+        't-shirts': shirt, 'long-sleeve': shirt, 'hoodies': shirt, 'jackets': shirt,
+        'accessories': watch,
+    };
+    return s + (map[String(cat).toLowerCase()] || shirt) + '</svg>';
+}
 const BATCHES = ['All Tags', 'Best Batch', 'Budget Batch', 'Random Batch'];
 const SEARCH_DEBOUNCE_MS = 140;
 /** Short text fields (search, tracking #) — avoids UI lag on huge paste. */
@@ -1209,7 +1226,7 @@ function getPages() {
                 </div>
                 <!-- Category tabs -->
                 <div class="pl-cats">
-                    ${CATEGORIES.map(cat => `<button class="pl-cat ${cat === 'All' ? 'active' : ''}" data-home-cat="${cat}">${cat}</button>`).join('')}
+                    ${CATEGORIES.map(cat => `<button class="pl-cat ${cat === 'All' ? 'active' : ''}" data-home-cat="${cat}">${catIcon(cat)}<span>${cat}</span></button>`).join('')}
                 </div>
             </div>
             <div id="home-sections">${buildHomeSections()}</div>
@@ -1230,7 +1247,7 @@ function getPages() {
                     </button>
                 </div>
                 <div class="pl-cats" id="pl-product-cats">
-                    ${CATEGORIES.map(cat => `<button class="pl-cat ${filterState.category === cat ? 'active' : ''}" data-pl-cat="${cat}">${cat}</button>`).join('')}
+                    ${CATEGORIES.map(cat => `<button class="pl-cat ${filterState.category === cat ? 'active' : ''}" data-pl-cat="${cat}">${catIcon(cat)}<span>${cat}</span></button>`).join('')}
                 </div>
             </div>
 

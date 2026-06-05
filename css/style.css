@@ -360,6 +360,8 @@ body {
     transition: color 0.2s, background 0.2s;
 }
 
+.pl-cat-icon { flex-shrink: 0; opacity: 0.9; }
+
 .pl-cat:hover {
     color: var(--text-primary);
     background: rgba(255,255,255,0.05);
