@@ -496,7 +496,7 @@ window.applyTilt = applyTilt;
 
 // ─── 4c. ANIMATED SEARCH PLACEHOLDER (typewriter) ──────────────────────────
 (function initPlaceholderTypewriter() {
-    const phrases = ['Enter product name...', 'Check QCs...', 'Buy item...'];
+    const phrases = ['Enter product name...', 'Check QCs...', 'Buy the item...'];
     let pi = 0, ci = 0, deleting = false;
     function apply(txt) {
         document.querySelectorAll('.pl-search-input').forEach(el => {
