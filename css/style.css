@@ -436,6 +436,54 @@ body.light-mode .pl-cat:hover {
     color: var(--text-secondary);
 }
 
+.store-cats {
+    display: flex;
+    gap: 0.5rem;
+}
+.store-cat {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.store-cat-thumb {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #222;
+}
+.store-cat-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.store-cat-name {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.store-cat-count {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
+.store-view-btn {
+    background: #ff9f0a;
+    color: #fff;
+    border: none;
+    border-radius: 9999px;
+    height: 38px;
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+}
+.store-view-btn:hover { opacity: 0.9; }
+
 .store-thumbs {
     display: flex;
     gap: 0.5rem;

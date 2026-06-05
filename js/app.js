@@ -433,6 +433,13 @@ function updateThemeIcon(isLightMode) {
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
 const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
 
+// Marketplace name from a picks.ly item link prefix (WD/TB/AL).
+function platformName(pickslyRaw) {
+    const m = String(pickslyRaw || '').match(/\/item\/([A-Za-z]{2})/);
+    const map = { WD: 'weidian', TB: 'taobao', AL: '1688' };
+    return (m && map[m[1].toUpperCase()]) || '';
+}
+
 // "Category | Seller" label for product cards. Falls back gracefully.
 function catSellerLabel(p) {
     const cat = String((p && p.category) || '').trim();
@@ -482,7 +489,7 @@ async function fetchFromSupabase() {
     return res.json();
 }
 
-let filterState = { search: '', category: 'All', batch: 'All Tags' };
+let filterState = { search: '', category: 'All', batch: 'All Tags', seller: '' };
 let allProductsCache = [];
 let productsRefreshTimer = null;
 let searchInputTimer = null;
@@ -869,7 +876,9 @@ function getFiltered() {
             (p.category || '').toLowerCase() === filterState.category.toLowerCase();
         const matchBatch = filterState.batch === 'All Tags' ||
             (p.batch || '').toLowerCase() === filterState.batch.toLowerCase();
-        return matchSearch && matchCategory && matchBatch;
+        const matchSeller = !filterState.seller ||
+            (p.seller || '').toLowerCase() === filterState.seller.toLowerCase();
+        return matchSearch && matchCategory && matchBatch && matchSeller;
     });
 }
 
@@ -2043,8 +2052,10 @@ function initApp() {
         mainContent.querySelectorAll('[data-action="go-products"]').forEach(el => {
             el.addEventListener('click', e => {
                 e.preventDefault();
+                const seller = el.getAttribute('data-seller');
                 const cat = el.getAttribute('data-cat');
-                if (cat) { filterState.category = cat; }
+                if (seller) { filterState.seller = seller; filterState.category = 'All'; }
+                else if (cat) { filterState.category = cat; filterState.seller = ''; }
                 (window.navigateTo||renderPage)('products');
             });
         });
@@ -2098,6 +2109,7 @@ function initApp() {
             document.querySelectorAll('.pl-cat[data-home-cat]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const cat = btn.getAttribute('data-home-cat');
+                    filterState.seller = '';
                     if (cat === 'All') {
                         filterState.category = 'All';
                     } else {
@@ -2119,13 +2131,14 @@ function initApp() {
         }
 
         if (pageId === 'products') {
-            filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags' };
+            filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags', seller: filterState.seller || '' };
 
             // Bind pl-cat tabs on products page — each updates URL
             document.querySelectorAll('.pl-cat[data-pl-cat]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const cat = btn.getAttribute('data-pl-cat');
                     filterState.category = cat;
+                    filterState.seller = '';
                     // Update URL
                     const slug = cat.toLowerCase();
                     history.pushState({ page: 'products' }, '', '/products/' + slug);
@@ -3005,8 +3018,10 @@ function attachCarouselHandlers(root) {
     root.querySelectorAll('[data-action="go-products"]').forEach(el => {
         el.addEventListener('click', e => {
             e.preventDefault();
+            const seller = el.getAttribute('data-seller');
             const cat = el.getAttribute('data-cat');
-            if (cat) filterState.category = cat;
+            if (seller) { filterState.seller = seller; filterState.category = 'All'; }
+            else if (cat) { filterState.category = cat; filterState.seller = ''; }
             (window.navigateTo||renderPage)('products');
         });
     });
@@ -3121,15 +3136,63 @@ function buildHomeSections() {
         </div>`;
     }).filter(Boolean).join('');
 
-    // ── Stores section (picks.ly style — carousel with icon + thumbnails) ──
-    const storeCards = HOME_CATS.map(cat => {
+    // ── Stores section (picks.ly style — grouped by seller) ──
+    function storeGoodImg(p) {
+        const raw = (p.img || '').trim();
+        if (!raw.startsWith('http')) return '';
+        if (/nstatic\.kakobuy\.com\/banner\//i.test(raw) || /picks\.ly\/(marketplace|agent)-logos\//i.test(raw) || /picks\.ly\/twitter-image/i.test(raw)) return '';
+        return raw;
+    }
+    const sellerMap = new Map();
+    cache.forEach(p => {
+        const s = (p.seller || '').trim();
+        if (!s) return;
+        if (!sellerMap.has(s)) sellerMap.set(s, []);
+        sellerMap.get(s).push(p);
+    });
+    const sellerList = [...sellerMap.entries()]
+        .filter(([, items]) => items.length >= 3)
+        .sort((a, b) => b[1].length - a[1].length)
+        .slice(0, 15);
+    const useSellers = sellerList.length >= 4;
+    const sellerCards = sellerList.map(([seller, items]) => {
+        const platform = platformName((items.find(p => p.picksly) || {}).picksly);
+        const catMap = new Map();
+        items.forEach(p => {
+            const c = (p.category || 'Other').trim() || 'Other';
+            if (!catMap.has(c)) catMap.set(c, []);
+            catMap.get(c).push(p);
+        });
+        const topCats = [...catMap.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 3);
+        const catCells = topCats.map(([c, cps]) => {
+            const imgSrc = cps.map(storeGoodImg).find(Boolean) || '';
+            const imgHtml = imgSrc ? `<img src="${escapeHtml(thumb(imgSrc, 200))}" alt="" loading="lazy" />` : '';
+            return `<div class="store-cat">
+                <div class="store-cat-thumb">${imgHtml}</div>
+                <div class="store-cat-name">${escapeHtml(c)}</div>
+                <div class="store-cat-count">${cps.length} items</div>
+            </div>`;
+        }).join('');
+        return `<div class="store-card">
+            <div class="store-header">
+                <div class="store-icon">店</div>
+                <div class="store-meta">
+                    <span class="store-name">${escapeHtml(seller)}</span>
+                    <span class="store-sub">${escapeHtml(platform)}</span>
+                </div>
+            </div>
+            <div class="store-cats">${catCells}</div>
+            <button class="store-view-btn" data-action="go-products" data-seller="${escapeHtml(seller)}">View Store</button>
+        </div>`;
+    }).join('');
+
+    // Fallback: until enough sellers are populated, show the category-based
+    // store cards so the section is never empty.
+    const catStoreCards = HOME_CATS.map(cat => {
         const items = cache.filter(p => (p.category || '').toLowerCase() === cat.toLowerCase());
         if (!items.length) return '';
         const thumbs = items.slice(0, 4).map(item => {
-            const rawImg = (item.img || '').trim();
-            const isHttp = rawImg.startsWith('http');
-            const isPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/(marketplace|agent)-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
-            const safeImg = (isHttp && !isPlaceholder) ? rawImg : '';
+            const safeImg = storeGoodImg(item);
             return safeImg ? `<div class="store-thumb"><img src="${escapeHtml(thumb(safeImg, 200))}" alt="" loading="lazy" /></div>` : '';
         }).filter(Boolean).join('');
         return `<div class="store-card" data-action="go-products" data-cat="${escapeHtml(cat)}">
@@ -3144,10 +3207,11 @@ function buildHomeSections() {
         </div>`;
     }).filter(Boolean).join('');
 
+    const storeCards = useSellers ? sellerCards : catStoreCards;
     const storesId = 'hc-stores';
     const storesHtml = storeCards ? `<div class="hc-section">
         <div class="hc-header">
-            <span class="hc-title">Stores ${arrow}</span>
+            <span class="hc-title">${useSellers ? 'Best Stores' : 'Stores'} ${arrow}</span>
         </div>
         <div class="hc-carousel-wrap">
             <button class="hc-arrow hc-arrow-left" data-carousel="${storesId}" data-dir="-1">${arrowLeft}</button>
