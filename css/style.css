@@ -100,12 +100,6 @@ body {
 
 .nav-container.scrolled {
     border-bottom-color: var(--border-color);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28);
-}
-
-.nav-container.scrolled .navbar {
-    padding-top: 0.7rem;
-    padding-bottom: 0.7rem;
 }
 
 .navbar {
@@ -113,9 +107,9 @@ body {
     align-items: center;
     justify-content: space-between;
     position: relative;
-    padding: 1.2rem 24px;
-    transition: padding 0.3s ease;
-    max-width: 1280px;
+    height: 77px;
+    padding: 0 24px;
+    max-width: 1240px;
     margin: 0 auto;
     background: transparent;
     border: none;
