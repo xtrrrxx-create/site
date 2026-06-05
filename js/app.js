@@ -1137,15 +1137,15 @@ function getPages() {
             }
             .hc-header {
                 display: flex;
-                align-items: baseline;
+                align-items: center;
                 justify-content: space-between;
-                margin-bottom: 1rem;
+                margin-bottom: 16px;
             }
             .hc-title {
                 font-family: 'Inter Tight', system-ui, sans-serif;
-                font-size: 26px;
+                font-size: 32px;
                 font-weight: 400;
-                line-height: 31px;
+                line-height: 48px;
                 color: var(--text-primary);
                 display: inline-flex;
                 align-items: center;
