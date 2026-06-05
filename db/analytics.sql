@@ -51,8 +51,9 @@ as $$
     );
 $$;
 
+-- /api/visit (anon key) needs to insert visits. get_site_stats is read only
+-- by the local Electron admin (service key), so it is NOT granted to anon.
 grant execute on function public.log_visit(text, text) to anon;
-grant execute on function public.get_site_stats()      to anon;
 
 -- Optional: keep the table from growing forever (delete visits older than 1 year).
 -- delete from public.site_visits where ts < now() - interval '365 days';
