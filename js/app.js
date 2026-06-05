@@ -433,6 +433,14 @@ function updateThemeIcon(isLightMode) {
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
 const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
 
+// "Category | Seller" label for product cards. Falls back gracefully.
+function catSellerLabel(p) {
+    const cat = String((p && p.category) || '').trim();
+    const seller = String((p && p.seller) || '').trim();
+    if (cat && seller) return cat + ' | ' + seller;
+    return seller || cat || '';
+}
+
 // Small line icon per category, shown on the .pl-cat tabs (picks.ly style).
 function catIcon(cat) {
     const s = '<svg class="pl-cat-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">';
@@ -909,7 +917,7 @@ function renderFilteredProducts() {
 
         const kakobuy = buildAgentLink(p.kakobuy || '#');
         const picksly = safeExternalUrl(p.picksly || '#');
-        const sellerName = (p.seller || p.category || '').toString();
+        const sellerName = catSellerLabel(p);
 
         // Recently-viewed payload travels via a data attribute (HTML-escaped),
         // not via inline onclick. Avoids breaking out of attribute quoting if
@@ -3035,7 +3043,7 @@ function buildHomeSections() {
             const img = safeImg
                 ? `<img src="${escapeHtml(thumb(safeImg, 460))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
-            const sellerName = (item.seller || item.category || '').toString();
+            const sellerName = catSellerLabel(item);
             return `<div class="hc-card product-card">
                 <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
@@ -3083,7 +3091,7 @@ function buildHomeSections() {
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
-            const sellerName = (item.seller || item.category || '').toString();
+            const sellerName = catSellerLabel(item);
             return `<div class="hc-card product-card">
                 <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
