@@ -2932,6 +2932,25 @@ async function loadPopularProducts(opts) {
     } catch (_) { /* silent — fallback already in place */ }
 }
 
+// Fire-and-forget visit tracker. One beacon per full page load. A random
+// visitor id (persisted in localStorage) lets the backend count unique
+// visitors and "online now" without any personal data.
+(function trackVisit() {
+    try {
+        let vid = localStorage.getItem('jf_visitor');
+        if (!vid) {
+            vid = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+            localStorage.setItem('jf_visitor', vid);
+        }
+        const body = JSON.stringify({ visitor: vid, path: location.pathname.slice(0, 200) });
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon('/api/visit', new Blob([body], { type: 'application/json' }));
+        } else {
+            fetch('/api/visit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+        }
+    } catch (_) {}
+})();
+
 // Fire-and-forget click tracker. Uses sendBeacon when available so the
 // request survives navigation (clicking Buy Now opens a new tab but the
 // browser still flushes the beacon).
