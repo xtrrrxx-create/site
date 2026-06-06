@@ -3552,6 +3552,7 @@ function buildHomeSections() {
                     <span class="store-sub">${escapeHtml(platform)}</span>
                 </div>
             </div>
+            <div class="store-card-divider"></div>
             <div class="store-cats">${catCells}</div>
             <button class="store-view-btn" data-action="go-products" data-seller="${escapeHtml(seller)}">View Store</button>
         </div>`;
@@ -3582,7 +3583,7 @@ function buildHomeSections() {
     const storesId = 'hc-stores';
     const storesHtml = storeCards ? `<div class="hc-section">
         <div class="hc-header">
-            <a class="hc-title" data-action="go-stores">Stores ${arrow}</a>
+            <a class="hc-title" data-action="go-stores">Best Stores ${arrow}</a>
             ${useSellers ? '<a class="hc-viewmore" data-action="go-stores">View more</a>' : ''}
         </div>
         <div class="hc-carousel-wrap">
