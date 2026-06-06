@@ -1282,13 +1282,14 @@ function getPages() {
             .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
             .stores-page-head { max-width: 1280px; margin: 2.5rem auto 1rem; padding: 0; }
             .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); }
-            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #2a2a2a; border: 1px solid #333; border-radius: 24px; padding: 24px 28px 28px; }
-            .store-page-header { display: flex; align-items: center; justify-content: space-between; }
-            .store-section-divider { height: 1px; background: #2a2a2a; margin: 16px 0 0; }
-            .store-section-card .hc-carousel { padding: 20px 0 4px; margin: 0; }
-            .store-section-card .hc-arrow-left { left: -6px; }
-            .store-section-card .hc-arrow-right { right: -6px; }
-            .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.6rem; height: 36px; }
+            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #2a2a2a; border: none; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0; }
+            .store-page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0; }
+            .store-section-card .store-icon { width: 48px; height: 48px; font-size: 1.2rem; border: 3px solid var(--bg-color); }
+            .store-section-divider { height: 1px; background: #333; margin: 16px 20px 0; }
+            .store-section-card .hc-carousel { padding: 16px 20px 14px; margin: 0; }
+            .store-section-card .hc-arrow-left { left: 8px; }
+            .store-section-card .hc-arrow-right { right: 8px; }
+            .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.4rem; height: 36px; }
         </style>
         <div style="padding: 0 4% 3rem;">
             <div class="stores-page-head"><h1>Stores</h1></div>
