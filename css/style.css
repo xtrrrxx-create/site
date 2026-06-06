@@ -65,6 +65,18 @@ body.light-mode .navbar {
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif; }
 
+/* Anti-poaching: prevent dragging/selecting images and links (URLs). */
+img, a {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+img { -webkit-touch-callout: none; pointer-events: auto; }
+/* Inputs must stay selectable so users can edit search text. */
+input, textarea { user-select: text; -webkit-user-select: text; }
+
 html, body {
     /* clip (not hidden) prevents horizontal scroll WITHOUT creating a
        scroll container, so position: sticky on the navbar keeps working. */
@@ -193,15 +205,23 @@ body {
 
 /* Navbar search reuses .pl-search-wrap styling so it is visually identical
    to the hero search bar, but stays hidden until the user scrolls past it. */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-shrink: 0;
+}
+
+/* Search is a flex item (not absolute) so it can never overlap the nav links
+   on scroll. Hidden state still reserves its space to keep the layout stable. */
 .navbar .nav-search-wrap {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    position: relative;
+    flex: 0 1 520px;
     width: 520px;
-    max-width: 46vw;
+    max-width: 100%;
     height: 48px;
-    margin: 0;
+    margin: 0 auto;
+    transform: none;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.25s ease, visibility 0.25s ease;
@@ -367,12 +387,36 @@ body {
     background: rgba(255,255,255,0.05);
 }
 
-.pl-cat.active {
-    color: var(--text-primary);
+.pl-cat.active,
+.pl-cat-home {
+    background: #fff;
+    color: #111;
 }
+.pl-cat-home { text-decoration: none; }
+.pl-cat-home:hover { background: #fff; color: #111; opacity: 0.9; }
+.pl-cat-home svg { color: #111; }
 
 body.light-mode .pl-cat:hover {
     background: rgba(0,0,0,0.04);
+}
+
+/* Right-edge fade on horizontal carousels — hints that more content scrolls. */
+.hc-carousel-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 64px;
+    background: linear-gradient(to right, rgba(30, 30, 30, 0), var(--bg-color));
+    pointer-events: none;
+    z-index: 3;
+}
+.store-section-card .hc-carousel-wrap::after {
+    background: linear-gradient(to right, rgba(42, 42, 42, 0), #2a2a2a);
+}
+body.light-mode .hc-carousel-wrap::after {
+    background: linear-gradient(to right, rgba(245, 245, 245, 0), var(--bg-color));
 }
 
 /* ===== STORES SECTION (picks.ly style) ===== */
@@ -416,6 +460,13 @@ body.light-mode .pl-cat:hover {
     justify-content: center;
     flex-shrink: 0;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
+}
+
+.store-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
 .store-icon::after {

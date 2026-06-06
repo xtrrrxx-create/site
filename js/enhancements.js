@@ -1,5 +1,34 @@
 /* ─── JARVIS FINDER ENHANCEMENTS ─────────────────────────────────────────── */
 
+// ─── 0a. ANTI-POACHING (disable right-click / drag / copy of links & images) ──
+(function initCopyProtection() {
+    // Block the context menu site-wide.
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    // Block dragging images / links (which would expose the URL).
+    document.addEventListener('dragstart', e => {
+        const tag = e.target && e.target.tagName;
+        if (tag === 'IMG' || tag === 'A') e.preventDefault();
+    });
+    // Mark every image non-draggable, now and as new ones are rendered.
+    function mark(root) {
+        if (!root.querySelectorAll) return;
+        root.querySelectorAll('img').forEach(i => i.setAttribute('draggable', 'false'));
+    }
+    function ready() {
+        mark(document);
+        if (!document.body) return;
+        new MutationObserver(recs => {
+            for (const r of recs) for (const n of r.addedNodes) {
+                if (n.nodeType !== 1) continue;
+                if (n.tagName === 'IMG') n.setAttribute('draggable', 'false');
+                else mark(n);
+            }
+        }).observe(document.body, { childList: true, subtree: true });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready);
+    else ready();
+})();
+
 // ─── 0. STICKY NAVBAR ──────────────────────────────────────────────────────
 // Fade in a blurred background on the top bar once the page is scrolled,
 // matching the smooth sticky-header behaviour on picks.ly.

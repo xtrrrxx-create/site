@@ -194,8 +194,92 @@ function buildAgentLink(kakobuyRaw) {
     return buildAgentUrl(agent, kakobuyRaw);
 }
 
+// ── Source-platform agent routing (picks.ly link → platform + product id) ──
+// A picks.ly item link encodes the source marketplace and id:
+//   /item/WD<id> → Weidian, /item/TB<id> → Taobao, /item/AL<id> → 1688
+function parseSourcePlatform(pickslyRaw) {
+    const m = String(pickslyRaw || '').match(/\/item\/(WD|TB|AL)(\d+)/i);
+    if (!m) return null;
+    const map = { WD: 'weidian', TB: 'taobao', AL: '1688' };
+    const platform = map[m[1].toUpperCase()];
+    return platform ? { platform, id: m[2] } : null;
+}
+
+// Build the exact affiliate URL for a given agent + source platform + id.
+function buildAgentUrlFromSource(agentId, platform, id) {
+    if (!id || !platform) return null;
+    const enc = {
+        weidian: encodeURIComponent(`https://weidian.com/item.html?itemID=${id}`),
+        taobao:  encodeURIComponent(`https://item.taobao.com/item.htm?id=${id}`),
+        '1688':  encodeURIComponent(`https://detail.1688.com/offer/${id}.html`),
+    };
+    const T = {
+        kakobuy: {
+            weidian: `https://www.kakobuy.com/item/details?url=${enc.weidian}&affcode=keviinn`,
+            taobao:  `https://www.kakobuy.com/item/details?url=${enc.taobao}&affcode=keviinn`,
+            '1688':  `https://www.kakobuy.com/item/details?url=${enc['1688']}&affcode=keviinn`,
+        },
+        acbuy: {
+            weidian: `https://www.acbuy.com/product?id=${id}&source=WD&u=3R6HXS`,
+            '1688':  `https://www.acbuy.com/product?id=${id}&source=AL&u=3R6HXS`,
+            taobao:  `https://www.acbuy.com/product?id=${id}&source=TB&u=3R6HXS`,
+        },
+        superbuy: {
+            weidian: `https://www.superbuy.com/en/page/buy/?platform=WD&id=${id}&partnercode=kevnek`,
+            '1688':  `https://www.superbuy.com/en/page/buy/?platform=ALIBABA&id=${id}&partnercode=kevnek`,
+            taobao:  `https://www.superbuy.com/en/page/buy/?platform=TMALL&id=${id}&partnercode=kevnek`,
+        },
+        usfans: {
+            weidian: `https://usfans.com/product/3/${id}?ref=SDXCQX`,
+            '1688':  `https://usfans.com/product/1/${id}?ref=SDXCQX`,
+            taobao:  `https://usfans.com/product/2/${id}?ref=SDXCQX`,
+        },
+        oopbuy: {
+            weidian: `https://oopbuy.com/product/weidian/${id}?inviteCode=KVK77PNEM`,
+            '1688':  `https://oopbuy.com/product/0/${id}?inviteCode=KVK77PNEM`,
+            taobao:  `https://oopbuy.com/product/1/${id}?inviteCode=KVK77PNEM`,
+        },
+        mulebuy: {
+            weidian: `https://mulebuy.com/product?id=${id}&platform=WEIDIAN&ref=200541300`,
+            '1688':  `https://mulebuy.com/product?id=${id}&platform=ALI_1688&ref=200541300`,
+            taobao:  `https://mulebuy.com/product?id=${id}&platform=TAOBAO&ref=200541300`,
+        },
+        joyagoo: {
+            weidian: `https://joyagoo.com/product?id=${id}&platform=WEIDIAN&ref=301005780`,
+            '1688':  `https://joyagoo.com/product?id=${id}&platform=ALI_1688&ref=301005780`,
+            taobao:  `https://joyagoo.com/product?id=${id}&platform=TAOBAO&ref=301005780`,
+        },
+    };
+    return (T[agentId] && T[agentId][platform]) || null;
+}
+
+// Append ?ref=keviinn to a QC / picks.ly destination link.
+function withRef(rawUrl) {
+    const clean = safeExternalUrl(rawUrl);
+    if (clean === '#') return '#';
+    if (/[?&]ref=keviinn\b/.test(clean)) return clean;
+    return clean + (clean.includes('?') ? '&' : '?') + 'ref=keviinn';
+}
+
+const PREFERRED_AGENT_KEY = 'preferredAgent';
+
+// Resolve the destination for a Buy Now click, given the product's picks.ly
+// link (preferred, encodes source) with a kakobuy fallback. Returns the agent
+// URL for the saved agent, or null when no agent is chosen yet.
+function resolveBuyUrl(pickslyRaw, kakobuyRaw, agentId) {
+    agentId = (agentId || localStorage.getItem(PREFERRED_AGENT_KEY) || '').toLowerCase();
+    if (!agentId) return null;
+    const src = parseSourcePlatform(pickslyRaw);
+    if (src) {
+        const u = buildAgentUrlFromSource(agentId, src.platform, src.id);
+        if (u) return u;
+    }
+    // Fallback to the legacy kakobuy-based builder if we couldn't parse source.
+    return buildAgentUrl(agentId, kakobuyRaw);
+}
+
 // ── Agent selection popup ──
-function showAgentPopup(kakobuyRaw) {
+function showAgentPopup(pickslyRaw, kakobuyRaw) {
     // Remove existing popup
     const old = document.getElementById('agent-popup-overlay');
     if (old) old.remove();
@@ -219,8 +303,8 @@ function showAgentPopup(kakobuyRaw) {
         </style>
         <div class="ap-modal" style="position:relative;">
             <button class="ap-close" id="ap-close">&times;</button>
-            <div class="ap-title">Select your agent</div>
-            <div class="ap-sub">Choose where to buy this item</div>
+            <div class="ap-title">Select Your Agent</div>
+            <div class="ap-sub">Choose your agent once — we'll remember it for next time.</div>
             <div class="ap-grid">
                 ${AGENTS.map(a => `<a class="ap-btn" data-agent="${a.id}" href="#"><img src="${escapeHtml(a.icon)}" alt="" onerror="this.style.display='none'">${escapeHtml(a.name)}</a>`).join('')}
             </div>
@@ -237,19 +321,18 @@ function showAgentPopup(kakobuyRaw) {
         btn.addEventListener('click', e => {
             e.preventDefault();
             const agentId = btn.getAttribute('data-agent');
-            const url = buildAgentUrl(agentId, kakobuyRaw);
+            // Persist the choice permanently — never prompt again.
+            localStorage.setItem(PREFERRED_AGENT_KEY, agentId);
+            localStorage.setItem('jf_agent', agentId);
+            const url = resolveBuyUrl(pickslyRaw, kakobuyRaw, agentId);
             if (url && url !== '#') {
-                // Validate against whitelist
                 try {
                     const parsed = new URL(url);
                     const host = parsed.hostname.toLowerCase();
                     const isAllowed = AGENTS.some(a => host === a.domain || host.endsWith('.' + a.domain)) ||
                                       host === 'ikako.vip' || host.endsWith('.ikako.vip') ||
                                       host === 'kakobuy.com' || host.endsWith('.kakobuy.com');
-                    if (isAllowed) {
-                        localStorage.setItem('jf_agent', agentId);
-                        window.open(url, '_blank', 'noopener,noreferrer');
-                    }
+                    if (isAllowed) window.open(url, '_blank', 'noopener,noreferrer');
                 } catch {}
             }
             overlay.remove();
@@ -432,6 +515,15 @@ function updateThemeIcon(isLightMode) {
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
 const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
+
+// Round store avatar showing the source marketplace logo (Weidian / Taobao /
+// 1688). Falls back to the generic 店 glyph when the platform is unknown.
+function storeAvatar(platform) {
+    const map = { weidian: '/images/weidian.png', taobao: '/images/taobao.png', '1688': '/images/1688.png' };
+    const src = map[platform];
+    if (src) return `<div class="store-icon"><img src="${src}" alt="${escapeHtml(platform)}" loading="lazy" decoding="async" /></div>`;
+    return '<div class="store-icon">店</div>';
+}
 
 // Marketplace name from a picks.ly item link prefix (WD/TB/AL).
 function platformName(pickslyRaw) {
@@ -960,8 +1052,8 @@ function renderFilteredProducts() {
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(p.price)}</div>
                     <div class="product-actions">
-                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}">${t('btn_buy')}</button>
-                        <a href="${escapeHtml(picksly)}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(p.picksly || ''))}">${t('btn_buy')}</button>
+                        <a href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
                     </div>
                 </div>
             </div>
@@ -1167,7 +1259,7 @@ function getPages() {
             /* ── Category carousel sections (picks.ly clone) ── */
             .hc-section {
                 max-width: 1280px;
-                margin: 0 auto 2.5rem;
+                margin: 0 auto 2rem;
                 padding: 0;
             }
             .hc-header {
@@ -1261,7 +1353,8 @@ function getPages() {
                 </div>
                 <!-- Category tabs -->
                 <div class="pl-cats">
-                    ${CATEGORIES.map(cat => `<button class="pl-cat ${cat === 'All' ? 'active' : ''}" data-home-cat="${cat}">${catIcon(cat)}<span>${cat}</span></button>`).join('')}
+                    <a class="pl-cat pl-cat-home" href="https://www.jarvis-finder.com/" data-action="home-nav"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+                    ${CATEGORIES.map(cat => `<button class="pl-cat ${(cat !== 'All' && filterState.category === cat) ? 'active' : ''}" data-home-cat="${cat}">${catIcon(cat)}<span>${cat}</span></button>`).join('')}
                 </div>
             </div>
             <div id="home-sections">${buildHomeSections()}</div>
@@ -1270,7 +1363,7 @@ function getPages() {
     `,
         stores: `
         <style>
-            .hc-section { max-width: 1280px; margin: 0 auto 2.5rem; padding: 0; }
+            .hc-section { max-width: 1280px; margin: 0 auto 2rem; padding: 0; }
             .hc-carousel-wrap { position: relative; }
             .hc-carousel { display: flex; gap: 16px; padding: 24px 0; margin: -24px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; cursor: grab; }
             .hc-carousel:active { cursor: grabbing; }
@@ -2192,6 +2285,18 @@ function initApp() {
                     if (pageFromPath() === 'home') refreshHomeMarquee();
                 });
             }, 12000);
+
+            // Auto-refresh Trending Items every 60s without a page reload.
+            if (window._trendingTimer) clearInterval(window._trendingTimer);
+            window._trendingTimer = setInterval(() => {
+                if (pageFromPath() !== 'home') { clearInterval(window._trendingTimer); window._trendingTimer = null; return; }
+                Promise.all([
+                    loadPopularProducts({ force: true }),
+                    (typeof refreshProductsFromServer === 'function') ? refreshProductsFromServer(true) : Promise.resolve()
+                ]).then(() => {
+                    if (pageFromPath() === 'home') refreshHomeMarquee();
+                }).catch(() => {});
+            }, 60000);
         }
 
         if (pageId === 'stores') {
@@ -2769,10 +2874,10 @@ window.runQcCheck = async function () {
             // Build Buy Now button — derive marketplace URL from source
             const buyUrl = safeExternalUrl(src);
             const buyBtnHtml = (buyUrl && buyUrl !== '#')
-                ? `<button class="card-btn-buy" data-kakobuy="${escapeHtml(buyUrl)}" style="padding:0.55rem 1.2rem;font-size:0.85rem;">Buy Now</button>`
+                ? `<button class="card-btn-buy" data-kakobuy="${escapeHtml(buyUrl)}" data-picksly="${escapeHtml(safeExternalUrl(pickslyUrl || ''))}" style="padding:0.55rem 1.2rem;font-size:0.85rem;">Buy Now</button>`
                 : '';
             const pickslyBtnHtml = pickslyUrl
-                ? `<a class="qc-picksly-btn" href="${escapeHtml(safeExternalUrl(pickslyUrl))}" target="_blank" rel="noopener noreferrer">
+                ? `<a class="qc-picksly-btn" href="${escapeHtml(withRef(pickslyUrl))}" target="_blank" rel="noopener noreferrer">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     ${t('qc_view_picksly')}
                 </a>`
@@ -2885,7 +2990,15 @@ document.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
         const kakobuyUrl = buyBtn.getAttribute('data-kakobuy');
-        if (kakobuyUrl && kakobuyUrl !== '#') showAgentPopup(kakobuyUrl);
+        const pickslyUrl = buyBtn.getAttribute('data-picksly') || '';
+        const saved = (localStorage.getItem(PREFERRED_AGENT_KEY) || localStorage.getItem('jf_agent') || '').toLowerCase();
+        if (saved) {
+            // Agent already chosen — build and open directly, no prompt.
+            const url = resolveBuyUrl(pickslyUrl, kakobuyUrl, saved);
+            if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
+        } else if ((pickslyUrl && pickslyUrl !== '#') || (kakobuyUrl && kakobuyUrl !== '#')) {
+            showAgentPopup(pickslyUrl, kakobuyUrl);
+        }
         // Also track popularity
         const cardEl = buyBtn.closest('.product-card, .hc-card');
         if (cardEl) {
@@ -3154,8 +3267,8 @@ function buildProductCard(item, idx) {
             <h3 class="product-title">${safeTitle}</h3>
             <div class="product-price">${formatPrice(item.price)}</div>
             <div class="product-actions">
-                <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}">Buy Now</button>
-                <a href="${picksly}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(item.picksly || ''))}">Buy Now</button>
+                <a href="${escapeHtml(withRef(item.picksly || '#'))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
             </div>
         </div>
     </div>`;
@@ -3201,7 +3314,7 @@ function buildStoresPage() {
         return `<div class="store-section-card">
             <div class="store-page-header">
                 <div class="store-header">
-                    <div class="store-icon">店</div>
+                    ${storeAvatar(platform)}
                     <div class="store-meta">
                         <span class="store-name">${escapeHtml(seller)}</span>
                         <span class="store-sub">${escapeHtml(platform)}</span>
@@ -3248,8 +3361,8 @@ function buildHomeSections() {
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(item.price)}</div>
                     <div class="product-actions">
-                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}">Buy Now</button>
-                        <a href="${escapeHtml(safeExternalUrl(item.picksly || '#'))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(item.picksly || ''))}">Buy Now</button>
+                        <a href="${escapeHtml(withRef(item.picksly || '#'))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
                     </div>
                 </div>
             </div>`;
@@ -3299,8 +3412,8 @@ function buildHomeSections() {
                     <h3 class="product-title">${safeTitle}</h3>
                     <div class="product-price">${formatPrice(item.price)}</div>
                     <div class="product-actions">
-                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}">Buy Now</button>
-                        <a href="${picksly}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(item.picksly || ''))}">Buy Now</button>
+                        <a href="${escapeHtml(withRef(item.picksly || '#'))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
                     </div>
                 </div>
             </div>`;
@@ -3357,7 +3470,7 @@ function buildHomeSections() {
         }).join('');
         return `<div class="store-card">
             <div class="store-header">
-                <div class="store-icon">店</div>
+                ${storeAvatar(platform)}
                 <div class="store-meta">
                     <span class="store-name">${escapeHtml(seller)}</span>
                     <span class="store-sub">${escapeHtml(platform)}</span>
@@ -3379,7 +3492,7 @@ function buildHomeSections() {
         }).filter(Boolean).join('');
         return `<div class="store-card" data-action="go-products" data-cat="${escapeHtml(cat)}">
             <div class="store-header">
-                <div class="store-icon">店</div>
+                ${storeAvatar(platformName((items.find(p => p.picksly) || {}).picksly))}
                 <div class="store-meta">
                     <span class="store-name">${escapeHtml(cat)}</span>
                     <span class="store-sub">${items.length} items</span>
