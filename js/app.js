@@ -1282,8 +1282,13 @@ function getPages() {
             .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
             .stores-page-head { max-width: 1280px; margin: 2.5rem auto 1rem; padding: 0; }
             .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); }
-            .store-page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-            .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.6rem; }
+            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #1a1a1a; border: 1px solid #262626; border-radius: 24px; padding: 24px 28px 28px; }
+            .store-page-header { display: flex; align-items: center; justify-content: space-between; }
+            .store-section-divider { height: 1px; background: #2a2a2a; margin: 16px 0 0; }
+            .store-section-card .hc-carousel { padding: 20px 0 4px; margin: 0; }
+            .store-section-card .hc-arrow-left { left: -6px; }
+            .store-section-card .hc-arrow-right { right: -6px; }
+            .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.6rem; height: 36px; }
         </style>
         <div style="padding: 0 4% 3rem;">
             <div class="stores-page-head"><h1>Stores</h1></div>
@@ -3124,7 +3129,7 @@ function buildStoresPage() {
         const platform = platformName((items.find(p => p.picksly) || {}).picksly);
         const id = 'st-' + si;
         const cards = items.slice(0, 20).map((it, i) => buildProductCard(it, i)).join('');
-        return `<div class="hc-section">
+        return `<div class="store-section-card">
             <div class="store-page-header">
                 <div class="store-header">
                     <div class="store-icon">店</div>
@@ -3135,6 +3140,7 @@ function buildStoresPage() {
                 </div>
                 <button class="store-view-btn store-view-btn-sm" data-action="go-products" data-seller="${escapeHtml(seller)}">View Store</button>
             </div>
+            <div class="store-section-divider"></div>
             <div class="hc-carousel-wrap">
                 <button class="hc-arrow hc-arrow-left" data-carousel="${id}" data-dir="-1">${aL}</button>
                 <div class="hc-carousel" id="${id}">${cards}</div>

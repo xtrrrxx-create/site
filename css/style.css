@@ -415,6 +415,7 @@ body.light-mode .pl-cat:hover {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.55);
 }
 
 .store-icon::after {
