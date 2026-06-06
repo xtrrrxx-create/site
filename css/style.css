@@ -389,12 +389,13 @@ body {
 
 .pl-cat.active,
 .pl-cat-home {
-    background: #fff;
-    color: #111;
+    background: transparent;
+    color: var(--text-primary);
 }
+.pl-cat.active svg,
+.pl-cat-home svg { color: var(--accent-color); }
 .pl-cat-home { text-decoration: none; }
-.pl-cat-home:hover { background: #fff; color: #111; opacity: 0.9; }
-.pl-cat-home svg { color: #111; }
+.pl-cat-home:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
 
 body.light-mode .pl-cat:hover {
     background: rgba(0,0,0,0.04);
