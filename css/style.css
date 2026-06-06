@@ -275,7 +275,7 @@ body {
 /* ===== PICKS.LY-STYLE HERO ===== */
 .pl-hero {
     text-align: center;
-    padding: 3.5rem 24px 1.5rem;
+    padding: 2.25rem 24px 1rem;
     max-width: 1280px;
     margin: 0 auto;
 }
@@ -1732,12 +1732,12 @@ main {
    HOME HERO — exact 1394x375 container
 ═══════════════════════════════════════════════════════════ */
 .pl-hero-fixed {
-    width: 1394px; height: 375px; max-width: 100%; margin: 0 auto;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    width: 1394px; max-width: 100%; margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
     gap: 0.25rem; padding: 0 24px; box-sizing: border-box;
 }
 @media (max-width: 1440px) { .pl-hero-fixed { width: 100%; } }
-@media (max-width: 768px) { .pl-hero-fixed { height: auto; padding: 2rem 1.25rem 1rem; } }
+@media (max-width: 768px) { .pl-hero-fixed { padding: 0 1.25rem; } }
 
 /* ═══════════════════════════════════════════════════════════
    STORES CARDS — exact picks.ly spec
@@ -1759,14 +1759,6 @@ main {
 .hc-card .product-image { width: 243.19px; height: 243.19px; aspect-ratio: auto; }
 .hc-card .product-image img { width: 243.19px; height: 243.19px; object-fit: cover; }
 
-/* Ambient glow on scroll */
-body.is-scrolling .hc-card .product-image,
-body.is-scrolling .product-card .product-image {
-    box-shadow: 0 0 32px rgba(255,159,10,0.18); transition: box-shadow 0.6s ease;
-}
-body.is-scrolling .hc-section, body.is-scrolling .rv-section {
-    filter: drop-shadow(0 0 24px rgba(255,159,10,0.08));
-}
 @media (max-width: 768px) {
     .hc-card, .hc-card .product-image, .hc-card .product-image img { width: 100%; height: auto; }
     .hc-card .product-image { aspect-ratio: 1; }
