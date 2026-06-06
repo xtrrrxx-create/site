@@ -497,6 +497,7 @@ async function fetchFromSupabase() {
 }
 
 let filterState = { search: '', category: 'All', batch: 'All Tags', seller: '' };
+let storesFilter = { platform: 'all', query: '' };
 let allProductsCache = [];
 let productsRefreshTimer = null;
 let searchInputTimer = null;
@@ -1280,8 +1281,17 @@ function getPages() {
             .hc-carousel-wrap:hover .hc-arrow { display: flex; }
             .hc-arrow:hover { background: rgba(50,50,50,0.95); }
             .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
-            .stores-page-head { max-width: 1280px; margin: 2.5rem auto 1rem; padding: 0; }
-            .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); }
+            .stores-page-head { max-width: 1280px; margin: 2.5rem auto 1.2rem; padding: 0; }
+            .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem; }
+            .stores-filter-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+            .stores-pills { display: flex; gap: 8px; }
+            .stores-pill { padding: 7px 16px; background: #2a2a2a; border: 1px solid #333; border-radius: 9999px; color: var(--text-secondary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; }
+            .stores-pill:hover { color: var(--text-primary); }
+            .stores-pill.active { background: #fff; color: #111; border-color: #fff; }
+            .stores-search { display: flex; align-items: center; gap: 8px; background: #2a2a2a; border: 1px solid #333; border-radius: 9999px; padding: 0 1rem; height: 42px; width: 340px; max-width: 100%; }
+            .stores-search input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.95rem; }
+            .stores-search input::placeholder { color: var(--text-secondary); }
+            .stores-search svg { color: var(--text-secondary); flex-shrink: 0; }
             .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #2a2a2a; border: none; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0; }
             .store-page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0; }
             .store-section-card .store-icon { width: 48px; height: 48px; font-size: 1.2rem; border: 3px solid var(--bg-color); }
@@ -1292,7 +1302,21 @@ function getPages() {
             .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.4rem; height: 36px; }
         </style>
         <div style="padding: 0 4% 3rem;">
-            <div class="stores-page-head"><h1>Stores</h1></div>
+            <div class="stores-page-head">
+                <h1>Stores</h1>
+                <div class="stores-filter-row">
+                    <div class="stores-pills">
+                        <button class="stores-pill active" data-plat="all">All</button>
+                        <button class="stores-pill" data-plat="weidian">Weidian</button>
+                        <button class="stores-pill" data-plat="1688">1688</button>
+                        <button class="stores-pill" data-plat="taobao">Taobao</button>
+                    </div>
+                    <div class="stores-search">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="stores-search-input" placeholder="Search sellers & products..." autocomplete="off" spellcheck="false" />
+                    </div>
+                </div>
+            </div>
             <div id="stores-page">${buildStoresPage()}</div>
         </div>
     `,
@@ -2082,6 +2106,7 @@ function initApp() {
         const navEl = document.querySelector('.nav-container');
         if (navEl) navEl.style.display = '';
 
+        if (pageId === 'stores') storesFilter = { platform: 'all', query: '' };
         mainContent.innerHTML = getPages()[pageId] || getPages().home;
 
         // CSP-safe: handle data-action buttons instead of inline onclick
@@ -2169,12 +2194,36 @@ function initApp() {
             }, 12000);
         }
 
-        if (pageId === 'stores' && allProductsCache.length === 0) {
-            (window._prefetchPromise || fetchFromSupabase()).then(data => {
-                if (Array.isArray(data) && !allProductsCache.length) allProductsCache = data;
+        if (pageId === 'stores') {
+            const reRenderStores = () => {
                 const el = document.getElementById('stores-page');
                 if (el) { el.innerHTML = buildStoresPage(); attachCarouselHandlers(mainContent); }
-            }).catch(() => {});
+            };
+            // Platform pills
+            document.querySelectorAll('.stores-pill').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    storesFilter.platform = btn.dataset.plat;
+                    document.querySelectorAll('.stores-pill').forEach(b => b.classList.toggle('active', b === btn));
+                    reRenderStores();
+                });
+            });
+            // Search (sellers + products), debounced
+            const ss = document.getElementById('stores-search-input');
+            if (ss) {
+                ss.value = storesFilter.query || '';
+                let tmr;
+                ss.addEventListener('input', () => {
+                    clearTimeout(tmr);
+                    tmr = setTimeout(() => { storesFilter.query = ss.value; reRenderStores(); }, 200);
+                });
+            }
+            // Fill the catalog first if this was a cold deep-link.
+            if (allProductsCache.length === 0) {
+                (window._prefetchPromise || fetchFromSupabase()).then(data => {
+                    if (Array.isArray(data) && !allProductsCache.length) allProductsCache = data;
+                    reRenderStores();
+                }).catch(() => {});
+            }
         }
 
         if (pageId === 'products') {
@@ -3124,8 +3173,27 @@ function buildStoresPage() {
         if (!sellerMap.has(s)) sellerMap.set(s, []);
         sellerMap.get(s).push(p);
     });
-    const sellers = [...sellerMap.entries()].filter(([, it]) => it.length >= 3).sort((a, b) => b[1].length - a[1].length);
-    if (!sellers.length) return '<p style="text-align:center;color:var(--text-secondary);padding:4rem 1rem;">No stores yet — sellers are still being indexed.</p>';
+    let sellers = [...sellerMap.entries()].filter(([, it]) => it.length >= 3);
+    // Platform filter (All / Weidian / 1688 / Taobao)
+    const plat = (typeof storesFilter !== 'undefined' && storesFilter.platform) || 'all';
+    if (plat !== 'all') {
+        sellers = sellers.filter(([, items]) => platformName((items.find(p => p.picksly) || {}).picksly) === plat);
+    }
+    // Search: match seller name (show all its products) or product titles (show
+    // only matching products within that store).
+    const q = ((typeof storesFilter !== 'undefined' && storesFilter.query) || '').toLowerCase().trim();
+    if (q) {
+        sellers = sellers.map(([s, items]) => {
+            if (s.toLowerCase().includes(q)) return [s, items];
+            const m = items.filter(p => (p.title || '').toLowerCase().includes(q));
+            return m.length ? [s, m] : null;
+        }).filter(Boolean);
+    }
+    sellers.sort((a, b) => b[1].length - a[1].length);
+    if (!sellers.length) {
+        const msg = q || plat !== 'all' ? 'No stores match your filter.' : 'No stores yet — sellers are still being indexed.';
+        return `<p style="text-align:center;color:var(--text-secondary);padding:4rem 1rem;">${msg}</p>`;
+    }
     return sellers.map(([seller, items], si) => {
         const platform = platformName((items.find(p => p.picksly) || {}).picksly);
         const id = 'st-' + si;
