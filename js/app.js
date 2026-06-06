@@ -1267,6 +1267,29 @@ function getPages() {
             <div style="padding-bottom:3rem;"></div>
         </div>
     `,
+        stores: `
+        <style>
+            .hc-section { max-width: 1280px; margin: 0 auto 2.5rem; padding: 0; }
+            .hc-carousel-wrap { position: relative; }
+            .hc-carousel { display: flex; gap: 16px; padding: 24px 0; margin: -24px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; cursor: grab; }
+            .hc-carousel:active { cursor: grabbing; }
+            .hc-carousel::-webkit-scrollbar { display: none; }
+            .hc-card { flex-shrink: 0; width: 243.2px; display: flex; flex-direction: column; }
+            .hc-card .product-image { height: auto; aspect-ratio: 1; }
+            .hc-arrow { position: absolute; top: 45%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(20,20,20,0.9); border: 1px solid #363636; color: #f0f0f0; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 5; transition: background 0.15s; backdrop-filter: blur(4px); }
+            .hc-carousel-wrap:hover .hc-arrow { display: flex; }
+            .hc-arrow:hover { background: rgba(50,50,50,0.95); }
+            .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
+            .stores-page-head { max-width: 1280px; margin: 2.5rem auto 1rem; padding: 0; }
+            .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); }
+            .store-page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+            .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.6rem; }
+        </style>
+        <div style="padding: 0 4% 3rem;">
+            <div class="stores-page-head"><h1>Stores</h1></div>
+            <div id="stores-page">${buildStoresPage()}</div>
+        </div>
+    `,
         products: `
         <div style="max-width:1400px;margin:0 auto;padding:0 4% 3rem;">
             <!-- Hero search (same as home) -->
@@ -2066,6 +2089,9 @@ function initApp() {
                 (window.navigateTo||renderPage)('products');
             });
         });
+        mainContent.querySelectorAll('[data-action="go-stores"]').forEach(el => {
+            el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('stores'); });
+        });
         // Carousel handlers (arrows + drag scroll)
         attachCarouselHandlers(mainContent);
         mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
@@ -2135,6 +2161,14 @@ function initApp() {
                     if (pageFromPath() === 'home') refreshHomeMarquee();
                 });
             }, 12000);
+        }
+
+        if (pageId === 'stores' && allProductsCache.length === 0) {
+            (window._prefetchPromise || fetchFromSupabase()).then(data => {
+                if (Array.isArray(data) && !allProductsCache.length) allProductsCache = data;
+                const el = document.getElementById('stores-page');
+                if (el) { el.innerHTML = buildStoresPage(); attachCarouselHandlers(mainContent); }
+            }).catch(() => {});
         }
 
         if (pageId === 'products') {
@@ -2209,7 +2243,7 @@ function initApp() {
         }
     }
 
-    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools'];
+    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores'];
     // Product sub-routes: /products/shoes, /products/hoodies etc.
     const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
     function pageFromPath() {
@@ -3032,6 +3066,9 @@ function attachCarouselHandlers(root) {
             (window.navigateTo||renderPage)('products');
         });
     });
+    root.querySelectorAll('[data-action="go-stores"]').forEach(el => {
+        el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('stores'); });
+    });
 }
 
 // Refresh home category sections after catalog loads.
@@ -3042,6 +3079,69 @@ function refreshHomeMarquee() {
     if (!fresh) return;
     container.innerHTML = fresh;
     attachCarouselHandlers(container);
+}
+
+// Reusable product card (picks.ly style) used by the Stores page.
+function buildProductCard(item, idx) {
+    const safeTitle = escapeHtml(stripEmojis(item.title || 'Untitled'));
+    const rawImg = (item.img || '').trim();
+    const isHttp = rawImg.startsWith('http');
+    const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/(marketplace|agent)-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
+    const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
+    const img = safeImg
+        ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
+    const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
+    return `<div class="hc-card product-card">
+        <div class="product-image" style="overflow:hidden;">${img}</div>
+        <div class="product-info">
+            <div class="product-batch-row">${platformBadge(item.picksly)}<span class="product-store-name">${escapeHtml(catSellerLabel(item))}</span></div>
+            <h3 class="product-title">${safeTitle}</h3>
+            <div class="product-price">${formatPrice(item.price)}</div>
+            <div class="product-actions">
+                <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}">Buy Now</button>
+                <a href="${picksly}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+            </div>
+        </div>
+    </div>`;
+}
+
+// Full Stores page: one section per seller (picks.ly /stores style).
+function buildStoresPage() {
+    const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+    const aL = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+    const aR = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+    const sellerMap = new Map();
+    cache.forEach(p => {
+        const s = validSeller(p.seller);
+        if (!s) return;
+        if (!sellerMap.has(s)) sellerMap.set(s, []);
+        sellerMap.get(s).push(p);
+    });
+    const sellers = [...sellerMap.entries()].filter(([, it]) => it.length >= 3).sort((a, b) => b[1].length - a[1].length);
+    if (!sellers.length) return '<p style="text-align:center;color:var(--text-secondary);padding:4rem 1rem;">No stores yet — sellers are still being indexed.</p>';
+    return sellers.map(([seller, items], si) => {
+        const platform = platformName((items.find(p => p.picksly) || {}).picksly);
+        const id = 'st-' + si;
+        const cards = items.slice(0, 20).map((it, i) => buildProductCard(it, i)).join('');
+        return `<div class="hc-section">
+            <div class="store-page-header">
+                <div class="store-header">
+                    <div class="store-icon">店</div>
+                    <div class="store-meta">
+                        <span class="store-name">${escapeHtml(seller)}</span>
+                        <span class="store-sub">${escapeHtml(platform)}</span>
+                    </div>
+                </div>
+                <button class="store-view-btn store-view-btn-sm" data-action="go-products" data-seller="${escapeHtml(seller)}">View Store</button>
+            </div>
+            <div class="hc-carousel-wrap">
+                <button class="hc-arrow hc-arrow-left" data-carousel="${id}" data-dir="-1">${aL}</button>
+                <div class="hc-carousel" id="${id}">${cards}</div>
+                <button class="hc-arrow hc-arrow-right" data-carousel="${id}" data-dir="1">${aR}</button>
+            </div>
+        </div>`;
+    }).join('');
 }
 
 function buildHomeSections() {
@@ -3218,7 +3318,8 @@ function buildHomeSections() {
     const storesId = 'hc-stores';
     const storesHtml = storeCards ? `<div class="hc-section">
         <div class="hc-header">
-            <span class="hc-title">${useSellers ? 'Best Stores' : 'Stores'} ${arrow}</span>
+            <a class="hc-title" data-action="go-stores">Stores ${arrow}</a>
+            ${useSellers ? '<a class="hc-viewmore" data-action="go-stores">View more</a>' : ''}
         </div>
         <div class="hc-carousel-wrap">
             <button class="hc-arrow hc-arrow-left" data-carousel="${storesId}" data-dir="-1">${arrowLeft}</button>
