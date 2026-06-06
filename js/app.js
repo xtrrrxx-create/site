@@ -928,7 +928,7 @@ function renderFilteredProducts() {
             /picks\.ly\/twitter-image/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
-            ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" />`
+            ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
 
         const kakobuy = buildAgentLink(p.kakobuy || '#');
@@ -3063,7 +3063,7 @@ function buildHomeSections() {
             const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/marketplace-logos\//i.test(rawImg) || /picks\.ly\/agent-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
+                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const sellerName = catSellerLabel(item);
             return `<div class="hc-card product-card">
@@ -3109,7 +3109,7 @@ function buildHomeSections() {
                 /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" />`
+                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
@@ -3173,7 +3173,7 @@ function buildHomeSections() {
         const topCats = [...catMap.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 3);
         const catCells = topCats.map(([c, cps]) => {
             const imgSrc = cps.map(storeGoodImg).find(Boolean) || '';
-            const imgHtml = imgSrc ? `<img src="${escapeHtml(thumb(imgSrc, 260))}" alt="" loading="lazy" />` : '';
+            const imgHtml = imgSrc ? `<img src="${escapeHtml(thumb(imgSrc, 260))}" alt="" loading="lazy" data-fallback="hide" data-orig="${escapeHtml(safeExternalUrl(imgSrc))}" />` : '';
             return `<div class="store-cat">
                 <div class="store-cat-thumb">${imgHtml}</div>
                 <div class="store-cat-name">${escapeHtml(c)}</div>
@@ -3200,7 +3200,7 @@ function buildHomeSections() {
         if (!items.length) return '';
         const thumbs = items.slice(0, 4).map(item => {
             const safeImg = storeGoodImg(item);
-            return safeImg ? `<div class="store-thumb"><img src="${escapeHtml(thumb(safeImg, 260))}" alt="" loading="lazy" /></div>` : '';
+            return safeImg ? `<div class="store-thumb"><img src="${escapeHtml(thumb(safeImg, 260))}" alt="" loading="lazy" data-fallback="hide" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" /></div>` : '';
         }).filter(Boolean).join('');
         return `<div class="store-card" data-action="go-products" data-cat="${escapeHtml(cat)}">
             <div class="store-header">
@@ -3552,8 +3552,17 @@ window.updateTrackerLinks = function (code) {
         if (img._fallbackBound) return;
         img._fallbackBound = true;
         const mode = img.dataset.fallback;
-        img.addEventListener('error', function() {
-            this.onerror = null;
+        img.addEventListener('error', function onErr() {
+            // If the proxied (wsrv) image failed — which happens under burst
+            // load — retry once with the original, unproxied URL before giving
+            // up. The original always loads (just larger/uncompressed).
+            const orig = this.dataset.orig;
+            if (orig && !this._triedOrig && this.src !== orig) {
+                this._triedOrig = true;
+                this.src = orig;
+                return;
+            }
+            this.removeEventListener('error', onErr);
             this.style.display = 'none';
             if (mode === 'no-image-text' && this.parentElement) {
                 if (!this.parentElement.querySelector('.img-fallback-text')) {
@@ -3564,7 +3573,7 @@ window.updateTrackerLinks = function (code) {
                     this.parentElement.appendChild(div);
                 }
             }
-        }, { once: true });
+        });
     }
     function bindAll(root) {
         root.querySelectorAll('img[data-fallback]').forEach(bind);
