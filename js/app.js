@@ -1,11 +1,41 @@
 // Fixed Kakobuy-like conversion rates from CNY base.
-// 1 USD ~= 6.31 CNY  =>  1 CNY ~= 0.1585 USD
+// 1 USD ~= 6.31 CNY  =>  1 CNY ~= 0.1585 USD. Every rate below is expressed
+// as "currency units per 1 CNY" so formatPrice can multiply a CNY base price.
+const USD_PER_CNY = 1 / 6.31;
 const FIXED_KAKOBUY_RATES = {
     CNY: 1,
-    USD: 1 / 6.31,
-    EUR: (1 / 6.31) * 0.92, // USD -> EUR approximation
-    RON: (1 / 6.31) * 4.58, // USD -> RON approximation
-    PLN: (1 / 6.31) * 3.98  // USD -> PLN approximation
+    USD: USD_PER_CNY,
+    EUR: USD_PER_CNY * 0.92,
+    GBP: USD_PER_CNY * 0.79,
+    CAD: USD_PER_CNY * 1.36,
+    AUD: USD_PER_CNY * 1.52,
+    CHF: USD_PER_CNY * 0.88,
+    JPY: USD_PER_CNY * 157,
+    KRW: USD_PER_CNY * 1380,
+    PLN: USD_PER_CNY * 3.98,
+    CZK: USD_PER_CNY * 23.2,
+    SEK: USD_PER_CNY * 10.6,
+    DKK: USD_PER_CNY * 6.9,
+    NOK: USD_PER_CNY * 10.8,
+    BRL: USD_PER_CNY * 5.4,
+    MXN: USD_PER_CNY * 18.5,
+    NZD: USD_PER_CNY * 1.66,
+    SGD: USD_PER_CNY * 1.35,
+    HKD: USD_PER_CNY * 7.8,
+    RON: USD_PER_CNY * 4.58
+};
+// Symbol + placement for each supported currency. suffix=true → "12.00 zł".
+const CURRENCY_FORMATS = {
+    CNY: { sym: '￥', suffix: false }, USD: { sym: '$', suffix: false },
+    EUR: { sym: '€', suffix: false }, GBP: { sym: '£', suffix: false },
+    CAD: { sym: 'CA$', suffix: false }, AUD: { sym: 'A$', suffix: false },
+    CHF: { sym: 'CHF ', suffix: false }, JPY: { sym: '¥', suffix: false },
+    KRW: { sym: '₩', suffix: false }, PLN: { sym: ' zł', suffix: true },
+    CZK: { sym: ' Kč', suffix: true }, SEK: { sym: ' kr', suffix: true },
+    DKK: { sym: ' kr', suffix: true }, NOK: { sym: ' kr', suffix: true },
+    BRL: { sym: 'R$', suffix: false }, MXN: { sym: 'MX$', suffix: false },
+    NZD: { sym: 'NZ$', suffix: false }, SGD: { sym: 'S$', suffix: false },
+    HKD: { sym: 'HK$', suffix: false }, RON: { sym: ' lei', suffix: true }
 };
 let exchangeRates = { ...FIXED_KAKOBUY_RATES };
 let currentCurrency = localStorage.getItem('currency') || 'USD';
@@ -25,17 +55,23 @@ window.changeCurrencyUI = function (curr) {
     currentCurrency = curr;
     localStorage.setItem('currency', curr);
 
-    const cards = document.querySelectorAll('.cur-card');
-    cards.forEach(c => {
+    // Legacy currency cards (welcome modal) + new settings <select>.
+    document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === curr);
     });
+    const sel = document.getElementById('settings-currency-select');
+    if (sel && sel.value !== curr) sel.value = curr;
 
     updateNavbarLanguage();
-    // Re-render current page so translated strings apply immediately.
-    const activeLink = document.querySelector('.nav-link.active');
-    const pageId = activeLink ? activeLink.getAttribute('data-page') : 'home';
+    // Re-render current page so translated strings + reconverted prices apply
+    // immediately. Derive the page from the URL so it also works on the
+    // Stores / QC Checker pages (which use .nav-pill, not .nav-link.active).
+    const VALID = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores'];
+    const seg = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').split('/')[0].toLowerCase();
+    const pageId = VALID.includes(seg) ? seg : 'home';
     if (window.navigateTo) window.navigateTo(pageId, true);
-    else if (activeLink) activeLink.click();
+    // Bonus: reconvert any standalone price nodes outside the main grid.
+    if (window.updateAllPrices) window.updateAllPrices();
 }
 
 function updateNavbarLanguage() {
@@ -73,15 +109,26 @@ function formatPrice(cnyPriceStr) {
     let numeric = parseFloat(String(cnyPriceStr).replace(/[^0-9.]/g, ''));
     if (isNaN(numeric)) numeric = 0;
     const rate = exchangeRates[currentCurrency] || 1;
-    const converted = (numeric * rate).toFixed(2);
-    switch (currentCurrency) {
-        case 'USD': return '$' + converted;
-        case 'EUR': return '€' + converted;
-        case 'RON': return converted + ' lei';
-        case 'PLN': return converted + ' zł';
-        case 'CNY': default: return '￥' + converted;
-    }
+    // JPY/KRW are conventionally shown with no decimals.
+    const noDecimals = currentCurrency === 'JPY' || currentCurrency === 'KRW';
+    const converted = (numeric * rate).toFixed(noDecimals ? 0 : 2);
+    const fmt = CURRENCY_FORMATS[currentCurrency] || CURRENCY_FORMATS.CNY;
+    return fmt.suffix ? (converted + fmt.sym) : (fmt.sym + converted);
 }
+
+// Global utility: re-render every price node on the page for the active
+// currency. Price elements carry their base CNY value in data-cny so we can
+// reconvert without re-fetching. Used by the settings currency selector.
+window.updateAllPrices = function () {
+    document.querySelectorAll('[data-cny]').forEach(el => {
+        el.textContent = formatPrice(el.getAttribute('data-cny'));
+    });
+    // Product/store grids are re-rendered wholesale (they rebuild data-cny too).
+    if (typeof renderFilteredProducts === 'function') {
+        const c = document.getElementById('products-container');
+        if (c) renderFilteredProducts();
+    }
+};
 
 function stripEmojis(str) {
     return String(str ?? "")
@@ -1341,8 +1388,11 @@ function getPages() {
         <div style="position:relative;">
             <!-- Hero section (picks.ly style) -->
             <div class="pl-hero">
-                <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
-                <p class="pl-hero-sub">${t('hero_desc')}</p>
+                <!-- Fixed 1394x375 hero container: header + subtext -->
+                <div class="pl-hero-fixed">
+                    <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
+                    <p class="pl-hero-sub">${t('hero_desc')}</p>
+                </div>
                 <!-- Search bar -->
                 <div class="pl-search-wrap">
                     <svg class="pl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1394,22 +1444,8 @@ function getPages() {
             .store-section-card .hc-arrow-right { right: 8px; }
             .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.4rem; height: 36px; }
         </style>
-        <div style="padding: 0 4% 3rem;">
-            <div class="stores-page-head">
-                <h1>Stores</h1>
-                <div class="stores-filter-row">
-                    <div class="stores-pills">
-                        <button class="stores-pill active" data-plat="all">All</button>
-                        <button class="stores-pill" data-plat="weidian">Weidian</button>
-                        <button class="stores-pill" data-plat="1688">1688</button>
-                        <button class="stores-pill" data-plat="taobao">Taobao</button>
-                    </div>
-                    <div class="stores-search">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                        <input type="text" id="stores-search-input" placeholder="Search sellers & products..." autocomplete="off" spellcheck="false" />
-                    </div>
-                </div>
-            </div>
+        <div style="padding: 1.5rem 4% 3rem;">
+            <!-- Filter toolbar lives in the navbar (see #stores-nav-toolbar) -->
             <div id="stores-page">${buildStoresPage()}</div>
         </div>
     `,
@@ -1437,214 +1473,149 @@ function getPages() {
         </div>
     `,
         tutorials: `
-        <style>
-            .htb-wrap {
-                max-width: 1400px;
-                margin: 0 auto;
-                padding: 1.5rem 4% 2.6rem;
-            }
-            .htb-head {
-                text-align: left;
-                margin-bottom: 1.5rem;
-            }
-            .htb-title {
-                font-family: 'Inter Tight', system-ui, sans-serif;
-                font-size: 26px;
-                line-height: 31px;
-                font-weight: 600;
-                letter-spacing: -0.025em;
-                margin-bottom: 0.4rem;
-                color: var(--text-primary);
-            }
-            .htb-sub {
-                color: var(--text-secondary);
-                max-width: 720px;
-                font-size: 14px;
-            }
-            .htb-steps {
-                display: grid;
-                gap: 0.85rem;
-            }
-            .htb-step {
-                background: var(--nav-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 16px;
-                padding: 1.05rem 1.15rem;
-                display: grid;
-                gap: 0.5rem;
-            }
-            .htb-step-top {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                gap: 0.8rem;
-            }
-            .htb-num {
-                font-size: 0.72rem;
-                font-weight: 800;
-                letter-spacing: 0.09em;
-                text-transform: uppercase;
-                color: var(--text-secondary);
-            }
-            .htb-step h3 {
-                font-size: 1.03rem;
-                margin: 0;
-                color: var(--text-primary);
-                font-weight: 800;
-                letter-spacing: -0.2px;
-            }
-            .htb-step p {
-                margin: 0;
-                color: var(--text-secondary);
-                font-size: 0.9rem;
-                line-height: 1.55;
-            }
-            .htb-list {
-                margin: 0.2rem 0 0;
-                padding-left: 1.05rem;
-                color: var(--text-secondary);
-                display: grid;
-                gap: 0.3rem;
-                font-size: 0.88rem;
-            }
-            .htb-link {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 0.45rem;
-                margin-top: 0.45rem;
-                width: fit-content;
-                text-decoration: none;
-                border-radius: 999px;
-                padding: 0.52rem 0.9rem;
-                font-size: 0.82rem;
-                font-weight: 800;
-                border: 1px solid var(--border-color);
-                color: var(--text-primary);
-                background: transparent;
-            }
-            .htb-link:hover {
-                border-color: var(--text-primary);
-            }
-            .htb-img {
-                margin-top: 0.35rem;
-                border-radius: 14px;
-                overflow: hidden;
-                border: 1px solid var(--border-color);
-                background: #0f0f12;
-            }
-            .htb-img img {
-                display: block;
-                width: 100%;
-                height: auto;
-                vertical-align: middle;
-            }
-            .htb-coupon {
-                margin-top: 0.35rem;
-                display: inline-flex;
-                align-items: center;
-                border-radius: 12px;
-                border: 1px dashed #4f5d87;
-                color: #dbe3ff;
-                padding: 0.4rem 0.65rem;
-                font-size: 0.84rem;
-                font-weight: 900;
-                letter-spacing: 0.06em;
-            }
-            .htb-cta {
-                margin-top: 1.05rem;
-                background: var(--nav-bg);
-                border: 1px solid var(--border-color);
-                border-radius: 18px;
-                padding: 1.2rem;
-                text-align: center;
-            }
-            .htb-cta h3 {
-                margin: 0 0 0.45rem;
-                color: var(--text-primary);
-                font-size: 1.18rem;
-                font-weight: 900;
-                letter-spacing: -0.4px;
-            }
-            .htb-cta p {
-                margin: 0 0 0.85rem;
-                color: var(--text-secondary);
-                font-size: 0.9rem;
-            }
-            .htb-cta .htb-link {
-                margin: 0 auto;
-                background: var(--text-primary);
-                color: var(--bg-color);
-                border-color: var(--text-primary);
-            }
-        </style>
-        <div class="htb-wrap">
-            <div class="htb-head">
-                <h2 class="htb-title">${t('htb_title')}</h2>
-                <p class="htb-sub">${t('htb_sub')}</p>
+        <div class="tut-wrap">
+            <div class="tut-head">
+                <h1>Tutorials</h1>
+                <p>Step-by-step guides for ordering, sourcing and QC. Pick a topic below.</p>
             </div>
 
-            <div class="htb-steps">
-                <section class="htb-step">
-                    <div class="htb-step-top">
-                        <span class="htb-num">01</span>
-                        <h3>${t('htb_1_h')}</h3>
-                    </div>
-                    <p>${t('htb_1_p')}</p>
-                    <div class="htb-img"><img src="/images/how-to-buy/step-1.jpg?v=2" alt="Step 1" loading="eager" fetchpriority="high" decoding="async" /></div>
-                    <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">${t('htb_signup')}</a>
-                </section>
-
-                <section class="htb-step">
-                    <div class="htb-step-top">
-                        <span class="htb-num">02</span>
-                        <h3>${t('htb_2_h')}</h3>
-                    </div>
-                    <p>${t('htb_2_p')}</p>
-                    <div class="htb-img"><img src="/images/how-to-buy/step-2.jpg?v=2" alt="Step 2" loading="eager" fetchpriority="high" decoding="async" /></div>
-                </section>
-
-                <section class="htb-step">
-                    <div class="htb-step-top">
-                        <span class="htb-num">03</span>
-                        <h3>${t('htb_3_h')}</h3>
-                    </div>
-                    <ul class="htb-list">
-                        <li>${t('htb_3_l1')}</li>
-                        <li>${t('htb_3_l2')}</li>
-                        <li>${t('htb_3_l3')}</li>
-                    </ul>
-                    <div class="htb-img"><img src="/images/how-to-buy/step-3.jpg?v=2" alt="Step 3" loading="eager" fetchpriority="high" decoding="async" /></div>
-                </section>
-
-                <section class="htb-step">
-                    <div class="htb-step-top">
-                        <span class="htb-num">04</span>
-                        <h3>${t('htb_4_h')}</h3>
-                    </div>
-                    <ul class="htb-list">
-                        <li>${t('htb_4_l1')}</li>
-                        <li>${t('htb_4_l2')}</li>
-                        <li>${t('htb_4_l3')}</li>
-                    </ul>
-                    <div class="htb-img"><img src="/images/how-to-buy/step-4.jpg?v=2" alt="Step 4" loading="eager" fetchpriority="high" decoding="async" /></div>
-                </section>
-
-                <section class="htb-step">
-                    <div class="htb-step-top">
-                        <span class="htb-num">05</span>
-                        <h3>${t('htb_5_h')}</h3>
-                    </div>
-                    <p>${t('htb_5_p')}</p>
-                    <div class="htb-coupon">keviinn</div>
-                    <div class="htb-img"><img src="/images/how-to-buy/step-5.jpg?v=2" alt="Step 5" loading="eager" fetchpriority="high" decoding="async" /></div>
-                </section>
+            <div class="tut-tabs" id="tut-tabs">
+                <button class="tut-tab active" data-tut-tab="agent">Agent Tutorial</button>
+                <button class="tut-tab" data-tut-tab="xianyu">Xianyu Tutorial</button>
+                <button class="tut-tab" data-tut-tab="yupoo">Yupoo Tutorial</button>
+                <button class="tut-tab" data-tut-tab="rehearsal">Rehearsal Help</button>
             </div>
 
-            <div class="htb-cta">
-                <h3>${t('htb_cta_h')}</h3>
-                <p>${t('htb_cta_p')}</p>
-                <a class="htb-link" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener">${t('htb_cta_btn')}</a>
+            <div class="tut-panel" data-tut-panel="agent">
+                <div class="tut-grid">
+                    <div class="tut-card">
+                        <div class="tut-card-img"><img src="/images/how-to-buy/step-1.jpg?v=2" alt="Step 1" loading="lazy" decoding="async" /></div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 01</span>
+                            <span class="tut-card-title">Create your account</span>
+                            <span class="tut-card-text">Sign up with your shopping agent so you can place orders and manage shipping.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img"><img src="/images/how-to-buy/step-2.jpg?v=2" alt="Step 2" loading="lazy" decoding="async" /></div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 02</span>
+                            <span class="tut-card-title">Browse and pick items</span>
+                            <span class="tut-card-text">Find products here, then hit Buy Now to open the item with your agent.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img"><img src="/images/how-to-buy/step-3.jpg?v=2" alt="Step 3" loading="lazy" decoding="async" /></div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 03</span>
+                            <span class="tut-card-title">Purchase your items</span>
+                            <span class="tut-card-text">Check title, batch and price, then complete checkout with your agent.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img"><img src="/images/how-to-buy/step-4.jpg?v=2" alt="Step 4" loading="lazy" decoding="async" /></div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 04</span>
+                            <span class="tut-card-title">International shipping</span>
+                            <span class="tut-card-text">Wait for warehouse arrival and QC photos, pick a line, pay shipping and track.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img"><img src="/images/how-to-buy/step-5.jpg?v=2" alt="Step 5" loading="lazy" decoding="async" /></div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 05</span>
+                            <span class="tut-card-title">Apply coupon</span>
+                            <span class="tut-card-text">Use code keviinn at checkout for an extra discount before paying.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tut-panel" data-tut-panel="xianyu" style="display:none;">
+                <div class="tut-grid">
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 01</span>
+                            <span class="tut-card-title">Xianyu - placeholder</span>
+                            <span class="tut-card-text">Plug in your Xianyu sourcing instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 02</span>
+                            <span class="tut-card-title">Xianyu - placeholder</span>
+                            <span class="tut-card-text">Plug in your Xianyu sourcing instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 03</span>
+                            <span class="tut-card-title">Xianyu - placeholder</span>
+                            <span class="tut-card-text">Plug in your Xianyu sourcing instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tut-panel" data-tut-panel="yupoo" style="display:none;">
+                <div class="tut-grid">
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 01</span>
+                            <span class="tut-card-title">Yupoo - placeholder</span>
+                            <span class="tut-card-text">Plug in your Yupoo browsing instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 02</span>
+                            <span class="tut-card-title">Yupoo - placeholder</span>
+                            <span class="tut-card-text">Plug in your Yupoo browsing instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 03</span>
+                            <span class="tut-card-title">Yupoo - placeholder</span>
+                            <span class="tut-card-text">Plug in your Yupoo browsing instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tut-panel" data-tut-panel="rehearsal" style="display:none;">
+                <div class="tut-grid">
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 01</span>
+                            <span class="tut-card-title">Rehearsal - placeholder</span>
+                            <span class="tut-card-text">Plug in your rehearsal (test order) help instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 02</span>
+                            <span class="tut-card-title">Rehearsal - placeholder</span>
+                            <span class="tut-card-text">Plug in your rehearsal (test order) help instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                    <div class="tut-card">
+                        <div class="tut-card-img">Image placeholder</div>
+                        <div class="tut-card-body">
+                            <span class="tut-card-step">Step 03</span>
+                            <span class="tut-card-title">Rehearsal - placeholder</span>
+                            <span class="tut-card-text">Plug in your rehearsal (test order) help instructions and asset URL here.</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     `,
@@ -2200,6 +2171,11 @@ function initApp() {
         if (navEl) navEl.style.display = '';
 
         if (pageId === 'stores') storesFilter = { platform: 'all', query: '' };
+        // Toggle the navbar-integrated stores filter toolbar.
+        if (window.setStoresToolbar) window.setStoresToolbar(pageId);
+        // Active state for the center Stores / QC Checker pills.
+        document.querySelectorAll('.nav-pill').forEach(p =>
+            p.classList.toggle('active', p.getAttribute('data-page') === pageId));
         mainContent.innerHTML = getPages()[pageId] || getPages().home;
 
         // CSP-safe: handle data-action buttons instead of inline onclick
@@ -2300,35 +2276,22 @@ function initApp() {
         }
 
         if (pageId === 'stores') {
+            // Filter pills + search are wired once on the navbar toolbar via
+            // bindStoresNavToolbar(); here we just ensure the catalog is loaded.
             const reRenderStores = () => {
                 const el = document.getElementById('stores-page');
                 if (el) { el.innerHTML = buildStoresPage(); attachCarouselHandlers(mainContent); }
             };
-            // Platform pills
-            document.querySelectorAll('.stores-pill').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    storesFilter.platform = btn.dataset.plat;
-                    document.querySelectorAll('.stores-pill').forEach(b => b.classList.toggle('active', b === btn));
-                    reRenderStores();
-                });
-            });
-            // Search (sellers + products), debounced
-            const ss = document.getElementById('stores-search-input');
-            if (ss) {
-                ss.value = storesFilter.query || '';
-                let tmr;
-                ss.addEventListener('input', () => {
-                    clearTimeout(tmr);
-                    tmr = setTimeout(() => { storesFilter.query = ss.value; reRenderStores(); }, 200);
-                });
-            }
-            // Fill the catalog first if this was a cold deep-link.
             if (allProductsCache.length === 0) {
                 (window._prefetchPromise || fetchFromSupabase()).then(data => {
                     if (Array.isArray(data) && !allProductsCache.length) allProductsCache = data;
                     reRenderStores();
                 }).catch(() => {});
             }
+        }
+
+        if (pageId === 'tutorials') {
+            if (window.initTutorials) window.initTutorials();
         }
 
         if (pageId === 'products') {
@@ -2452,6 +2415,14 @@ function initApp() {
         link.addEventListener('click', e => {
             e.preventDefault();
             navigateTo(link.getAttribute('data-page'));
+        });
+    });
+
+    // Center pills (Stores / QC Checker) navigate like nav links.
+    document.querySelectorAll('.nav-pill[data-page]').forEach(pill => {
+        pill.addEventListener('click', e => {
+            e.preventDefault();
+            navigateTo(pill.getAttribute('data-page'));
         });
     });
 
@@ -2658,6 +2629,109 @@ function showWelcomeModal() {
     };
 }
 
+// ─── SETTINGS MODAL (agent + currency selectors) ───────────────────────────
+function initSettingsModal() {
+    const modal = document.getElementById('settings-modal');
+    if (!modal) return;
+    const agentSel = document.getElementById('settings-agent-select');
+    const curSel   = document.getElementById('settings-currency-select');
+
+    // Hydrate from localStorage.
+    if (agentSel) agentSel.value = (localStorage.getItem(PREFERRED_AGENT_KEY) || '').toLowerCase();
+    if (curSel)   curSel.value   = currentCurrency;
+
+    if (agentSel) {
+        agentSel.addEventListener('change', () => {
+            const v = agentSel.value;
+            if (v) { localStorage.setItem(PREFERRED_AGENT_KEY, v); localStorage.setItem('jf_agent', v); }
+            else   { localStorage.removeItem(PREFERRED_AGENT_KEY); localStorage.removeItem('jf_agent'); }
+        });
+    }
+    if (curSel) {
+        curSel.addEventListener('change', () => window.changeCurrencyUI(curSel.value));
+    }
+    // Close on backdrop click.
+    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && modal.style.display === 'flex') modal.style.display = 'none';
+    });
+}
+
+// ─── TUTORIALS TABS ─────────────────────────────────────────────────────────
+window.initTutorials = function () {
+    const tabs = document.getElementById('tut-tabs');
+    if (!tabs) return;
+    const panels = document.querySelectorAll('.tut-panel');
+    const saved = localStorage.getItem('jf_tut_tab') || 'agent';
+    const show = (key) => {
+        tabs.querySelectorAll('.tut-tab').forEach(b =>
+            b.classList.toggle('active', b.dataset.tutTab === key));
+        panels.forEach(p => { p.style.display = (p.dataset.tutPanel === key) ? '' : 'none'; });
+        localStorage.setItem('jf_tut_tab', key);
+    };
+    tabs.querySelectorAll('.tut-tab').forEach(btn => {
+        btn.addEventListener('click', () => show(btn.dataset.tutTab));
+    });
+    show(saved);
+};
+
+// ─── STORES TOOLBAR (lives in the navbar container, shown only on /stores) ──
+function bindStoresNavToolbar() {
+    const toolbar = document.getElementById('stores-nav-toolbar');
+    if (!toolbar || toolbar._bound) return;
+    toolbar._bound = true;
+    const reRenderStores = () => {
+        const el = document.getElementById('stores-page');
+        if (el) {
+            el.innerHTML = buildStoresPage();
+            const main = document.getElementById('app-content');
+            if (main && typeof attachCarouselHandlers === 'function') attachCarouselHandlers(main);
+        }
+    };
+    toolbar.querySelectorAll('.stores-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+            storesFilter.platform = btn.dataset.plat;
+            toolbar.querySelectorAll('.stores-pill').forEach(b => b.classList.toggle('active', b === btn));
+            reRenderStores();
+        });
+    });
+    const ss = document.getElementById('stores-search-input');
+    if (ss) {
+        let tmr;
+        ss.addEventListener('input', () => {
+            clearTimeout(tmr);
+            tmr = setTimeout(() => { storesFilter.query = ss.value; reRenderStores(); }, 200);
+        });
+    }
+}
+// Show/hide the stores toolbar for the active page and sync its controls.
+window.setStoresToolbar = function (pageId) {
+    const toolbar = document.getElementById('stores-nav-toolbar');
+    if (!toolbar) return;
+    toolbar.style.display = (pageId === 'stores') ? 'flex' : 'none';
+    if (pageId === 'stores') {
+        toolbar.querySelectorAll('.stores-pill').forEach(b =>
+            b.classList.toggle('active', b.dataset.plat === storesFilter.platform));
+        const ss = document.getElementById('stores-search-input');
+        if (ss) ss.value = storesFilter.query || '';
+    }
+};
+
+// ─── AMBIENT SCROLL GLOW ────────────────────────────────────────────────────
+// Adds body.is-scrolling once the user scrolls down, removes it back at top.
+(function initScrollGlow() {
+    let ticking = false;
+    function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+            document.body.classList.toggle('is-scrolling', window.scrollY > 40);
+            ticking = false;
+        });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+})();
+
 // Save scroll position before unload
 window.addEventListener('beforeunload', () => {
     sessionStorage.setItem('jf-scroll', window.scrollY);
@@ -2671,6 +2745,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateNavbarLanguage();
     initApp();
+    initSettingsModal();
+    bindStoresNavToolbar();
     document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === currentCurrency);
     });
