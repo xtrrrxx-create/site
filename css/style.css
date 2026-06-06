@@ -1623,39 +1623,28 @@ main {
 ═══════════════════════════════════════════════════════════ */
 .navbar { gap: 1.5rem; }
 
+/* Left: Stores / QC Checker — plain text links */
 .nav-left { display: flex; align-items: center; gap: 1.4rem; flex-shrink: 0; }
-.nav-left .nav-link {
+
+/* Center: search bar (revealed on scroll, same as before) */
+.nav-center { display: flex; align-items: center; justify-content: center; flex: 1 1 auto; min-width: 0; }
+.navbar .nav-center .nav-search-wrap { flex: 0 1 520px; width: 520px; max-width: 100%; margin: 0 auto; }
+
+/* Right: Products / Tutorials / Tools + settings gear */
+.nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 1.4rem; flex-shrink: 0; }
+
+/* All navbar links share the same plain-text look */
+.nav-left .nav-link, .nav-right .nav-link {
     font-family: 'Inter Tight', system-ui, sans-serif;
     font-size: 0.92rem; font-weight: 500; color: var(--text-secondary);
     text-decoration: none; transition: color 0.2s ease; white-space: nowrap;
 }
-.nav-left .nav-link:hover, .nav-left .nav-link.active { color: var(--text-primary); }
+.nav-left .nav-link:hover, .nav-left .nav-link.active,
+.nav-right .nav-link:hover, .nav-right .nav-link.active { color: var(--text-primary); }
 
-.nav-gear-btn { width: 34px; height: 34px; border: 1px solid var(--border-color); }
+.nav-gear-btn { width: 34px; height: 34px; border: 1px solid var(--border-color); flex-shrink: 0; }
 .nav-gear-btn .gear-icon { transition: transform 0.4s ease; }
 .nav-gear-btn:hover .gear-icon { transform: rotate(90deg); }
-
-.nav-center-pills {
-    display: flex; align-items: center; gap: 0.6rem;
-    position: absolute; left: 50%; transform: translateX(-50%);
-}
-.nav-pill {
-    display: inline-flex; align-items: center; justify-content: center;
-    height: 40px; padding: 0 1.5rem; border-radius: 9999px;
-    background: var(--nav-bg); border: 1px solid var(--border-color);
-    color: var(--text-primary);
-    font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 0.92rem; font-weight: 600; text-decoration: none; white-space: nowrap;
-    transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease, color 0.18s ease;
-}
-.nav-pill:hover { border-color: var(--text-primary); transform: translateY(-1px); }
-.nav-pill.active { background: #fff; color: #111; border-color: #fff; }
-.nav-pill-accent { background: #ff9f0a; border-color: #ff9f0a; color: #fff; }
-.nav-pill-accent:hover { opacity: 0.92; border-color: #ff9f0a; }
-.nav-pill-accent.active { background: #ff9f0a; color: #fff; }
-
-.nav-right { display: flex; align-items: center; justify-content: flex-end; flex: 0 1 360px; margin-left: auto; }
-.navbar .nav-right .nav-search-wrap { flex: 1 1 auto; width: 100%; max-width: 360px; margin: 0; }
 
 /* ═══════════════════════════════════════════════════════════
    STORES FILTER TOOLBAR (integrated into navbar container)
@@ -1819,13 +1808,13 @@ body.is-scrolling .hc-section, body.is-scrolling .rv-section {
 .tut-card-text { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; }
 body.light-mode .tut-card { background: #fff; }
 @media (max-width: 768px) {
-    .navbar { gap: 0.5rem; }
-    .nav-center-pills { position: static; transform: none; gap: 0.4rem; }
-    .nav-pill { height: 36px; padding: 0 1rem; font-size: 0.85rem; }
-    .nav-left { gap: 0.5rem; }
-    .nav-left .nav-link { display: none; }
-    .nav-right { flex: 0 0 auto; }
-    .navbar .nav-right .nav-search-wrap { display: none; }
+    .navbar { gap: 0.5rem; justify-content: space-between; }
+    /* Text links hidden on mobile — navigation handled by the bottom nav.
+       Keep only the Stores/QC on the left and the settings gear on the right. */
+    .nav-right .nav-link { display: none; }
+    .nav-left { gap: 1rem; }
+    .nav-left .nav-link { display: inline; font-size: 0.85rem; }
+    .nav-right { gap: 0.5rem; }
     .stores-nav-toolbar { padding: 0.4rem 4% 0.7rem; }
     .stores-nav-toolbar .stores-search { width: 100%; }
     .tut-grid { grid-template-columns: 1fr; }
