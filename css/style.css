@@ -1753,6 +1753,12 @@ main {
 }
 .store-section-card .hc-carousel { gap: 10px; }
 
+/* Push the first home row down so the trending cards sit near the bottom of
+   the viewport on load (Buy Now buttons just above the fold, picks.ly-style).
+   Viewport-relative so it adapts to screen height. */
+#home-sections { margin-top: clamp(2rem, 17vh, 13rem); }
+@media (max-width: 768px) { #home-sections { margin-top: 1.5rem; } }
+
 /* ═══════════════════════════════════════════════════════════
    TRENDING / ITEMS GRID — exact 243.19px images
 ═══════════════════════════════════════════════════════════ */
