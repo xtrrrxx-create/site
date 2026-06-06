@@ -1282,7 +1282,7 @@ function getPages() {
             .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
             .stores-page-head { max-width: 1280px; margin: 2.5rem auto 1rem; padding: 0; }
             .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); }
-            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #1a1a1a; border: 1px solid #262626; border-radius: 24px; padding: 24px 28px 28px; }
+            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #2a2a2a; border: 1px solid #333; border-radius: 24px; padding: 24px 28px 28px; }
             .store-page-header { display: flex; align-items: center; justify-content: space-between; }
             .store-section-divider { height: 1px; background: #2a2a2a; margin: 16px 0 0; }
             .store-section-card .hc-carousel { padding: 20px 0 4px; margin: 0; }
