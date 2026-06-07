@@ -3530,9 +3530,32 @@ function buildStoresPage() {
     }).join('');
 }
 
+// Skeleton placeholder for the home carousels (Trending / categories) while
+// the catalog loads — picks.ly style.
+function buildHomeSkeleton(sections) {
+    const card = `<div class="hc-card skeleton-card skel-store-item">
+        <div class="skeleton-img skel-anim"></div>
+        <div class="skeleton-body">
+            <div class="skel-badge skel-anim"></div>
+            <div class="skel-title skel-anim"></div>
+            <div class="skel-price skel-anim"></div>
+            <div class="skel-btns"><div class="skel-btn-main skel-anim"></div><div class="skel-btn-qc skel-anim"></div></div>
+        </div>
+    </div>`;
+    const row = Array.from({ length: 6 }, () => card).join('');
+    const section = `<div class="hc-section">
+        <div class="hc-header">
+            <div class="skel-anim" style="width:200px;height:30px;border-radius:8px;"></div>
+            <div class="skel-anim" style="width:72px;height:16px;border-radius:8px;"></div>
+        </div>
+        <div class="hc-carousel skel-store-row">${row}</div>
+    </div>`;
+    return Array.from({ length: sections || 3 }, () => section).join('');
+}
+
 function buildHomeSections() {
     const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
-    if (!cache.length) return '';
+    if (!cache.length) return buildHomeSkeleton(3);
     const HOME_CATS = ['Shoes', 'T-shirts', 'Hoodies', 'Jackets', 'Shorts', 'Pants', 'Long-sleeve', 'Accessories'];
     const arrow = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
     const arrowLeft = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
