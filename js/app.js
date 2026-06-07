@@ -3873,6 +3873,17 @@ window.convertLink = function () {
         return;
     }
 
+    // Accept agent links too (kakobuy, oopbuy, acbuy, mulebuy, superbuy,
+    // joyagoo, usfans, picks.ly): extract the underlying marketplace URL first.
+    let src = input;
+    if (!/weidian\.com|taobao\.com|tmall\.com|1688\.com/i.test(parsedInput.hostname)) {
+        const extracted = qcNormalizeSource(input);
+        if (extracted && /weidian\.com|taobao\.com|tmall\.com|1688\.com/i.test(extracted)) {
+            src = extracted;
+            try { parsedInput = new URL(src); } catch {}
+        }
+    }
+
     const validHosts = ['weidian.com', 'taobao.com', 'tmall.com', '1688.com'];
     const host = parsedInput.hostname.toLowerCase();
     // Suffix match — `weidian.com.evil.tld` must NOT pass.
@@ -3881,12 +3892,12 @@ window.convertLink = function () {
         resultDiv.style.border = '1px solid rgba(239,68,68,0.3)';
         resultDiv.style.background = 'rgba(239,68,68,0.1)';
         resultDiv.style.color = '#ef4444';
-        resultDiv.innerHTML = `<strong>Error:</strong> Unsupported domain. Use Weidian, Taobao, Tmall, or 1688 links.`;
+        resultDiv.innerHTML = `<strong>Error:</strong> Unsupported domain. Use Weidian, Taobao, Tmall, 1688 or an agent link.`;
         resultDiv.style.display = 'block';
         return;
     }
 
-    const encoded = encodeURIComponent(input);
+    const encoded = encodeURIComponent(src);
 
     // Detect marketplace + item id from the pasted link.
     let platform = '';
@@ -3895,9 +3906,9 @@ window.convertLink = function () {
     else if (host.includes('1688.com')) platform = '1688';
 
     let itemId = '';
-    const weidianMatch = input.match(/itemID=(\d+)/i);
-    const taobaoMatch = input.match(/[?&]id=(\d+)/i);
-    const alibMatch = input.match(/\/(?:offer\/)?(\d+)\.html/i);
+    const weidianMatch = src.match(/itemID=(\d+)/i);
+    const taobaoMatch = src.match(/[?&]id=(\d+)/i);
+    const alibMatch = src.match(/\/(?:offer\/)?(\d+)\.html/i);
     if (weidianMatch) itemId = weidianMatch[1];
     else if (taobaoMatch) itemId = taobaoMatch[1];
     else if (alibMatch) itemId = alibMatch[1];
