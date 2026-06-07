@@ -104,7 +104,7 @@ export default async function handler(req, res) {
         while (true) {
             const base = `${supabaseBase.protocol}//${supabaseBase.host}`;
             const r = await fetch(
-                `${base}/rest/v1/products?select=title,price,img,kakobuy,picksly,category,batch,seller&order=id.asc&limit=${pageSize}&offset=${offset}`,
+                `${base}/rest/v1/products?select=id,title,price,img,kakobuy,picksly,category,batch,seller&order=id.asc&limit=${pageSize}&offset=${offset}`,
                 { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
             );
             if (!r.ok) {

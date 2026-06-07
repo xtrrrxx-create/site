@@ -204,6 +204,26 @@ function imgFrameStyle(rawUrl) {
     return s;
 }
 
+// ── Product detail URL helpers (SEO routes) ─────────────────────────────────
+function jfSlugify(s) {
+    return stripEmojis(String(s || '')).toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60) || 'item';
+}
+function pickslyIdOf(p) {
+    const m = String((p && p.picksly) || '').match(/(WD|TB|AL|1688)\d+/i);
+    return m ? m[0].toUpperCase() : '';
+}
+// Build the SEO product URL: /products/<cat>/<name>-<PICKSLYID>?color=<c>
+function productUrl(p, color) {
+    const id = pickslyIdOf(p);
+    if (!id) return '';
+    const cat = jfSlugify(p.category || 'item');
+    const name = jfSlugify(p.title || 'item');
+    let u = `/products/${cat}/${name}-${id}`;
+    if (color) u += '?color=' + encodeURIComponent(color);
+    return u;
+}
+
 // Derive the source marketplace from a picks.ly link and render its logo as
 // the store badge. Item ids are prefixed: WD=Weidian, TB=Taobao, AL=1688.
 // Falls back to the generic 店 glyph when the platform can't be determined.
@@ -1123,7 +1143,7 @@ function renderFilteredProducts() {
             picksly: safeExternalUrl(p.picksly || '')
         }));
         return `
-            <div class="product-card" data-rv="${rvItem}">
+            <div class="product-card" data-rv="${rvItem}" data-purl="${escapeHtml(productUrl(p))}">
                 <div class="product-image" style="overflow:hidden;">${renderImg}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
@@ -2207,10 +2227,28 @@ function initApp() {
         if (pageId === 'stores') storesFilter = { platform: 'all', query: '' };
         // Toggle the navbar-integrated stores filter toolbar.
         if (window.setStoresToolbar) window.setStoresToolbar(pageId);
+        // Navbar search stays visible on the product detail page too.
+        document.body.classList.toggle('on-product', pageId === 'product');
         // Active state for the center Stores / QC Checker pills.
         document.querySelectorAll('.nav-pill').forEach(p =>
             p.classList.toggle('active', p.getAttribute('data-page') === pageId));
-        mainContent.innerHTML = getPages()[pageId] || getPages().home;
+
+        if (pageId === 'product') {
+            _pdState = { product: resolveProductFromUrl(), batches: [], color: new URLSearchParams(location.search).get('color') || '', qcOpen: false };
+            if (_pdState.product) {
+                mainContent.innerHTML = buildProductDetail(_pdState.product);
+            } else if (allProductsCache.length === 0) {
+                mainContent.innerHTML = `<div class="pd-wrap"><div style="display:flex;justify-content:center;padding:5rem;"><div class="jf-spinner"></div></div></div>`;
+                (window._prefetchPromise || fetchFromSupabase()).then(data => {
+                    if (Array.isArray(data) && !allProductsCache.length) { allProductsCache = data; window.allProductsCache = data; }
+                    if (pageFromPath() === 'product') renderPage('product');
+                }).catch(() => {});
+            } else {
+                mainContent.innerHTML = `<div class="pd-wrap"><p style="text-align:center;padding:4rem 1rem;color:var(--text-secondary);">Product not found.</p><div style="text-align:center;"><a class="pd-back" data-action="go-products">Browse products</a></div></div>`;
+            }
+        } else {
+            mainContent.innerHTML = getPages()[pageId] || getPages().home;
+        }
 
         // CSP-safe: handle data-action buttons instead of inline onclick
         mainContent.querySelectorAll('[data-action="go-products"]').forEach(el => {
@@ -2328,6 +2366,10 @@ function initApp() {
             if (window.initTutorials) window.initTutorials();
         }
 
+        if (pageId === 'product' && _pdState.product) {
+            initProductDetail();
+        }
+
         if (pageId === 'products') {
             filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags', seller: filterState.seller || '' };
 
@@ -2406,11 +2448,14 @@ function initApp() {
     // Product sub-routes: /products/shoes, /products/hoodies etc.
     const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
     function pageFromPath() {
-        const path = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '').toLowerCase();
+        const rawPath = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '');
+        const path = rawPath.toLowerCase();
         if (VALID_PAGES.includes(path)) return path;
-        // Handle /products/category routes
-        const parts = path.split('/');
-        if (parts[0] === 'products' && parts[1] && PRODUCT_CATS_ROUTES.includes(parts[1])) return 'products';
+        const parts = rawPath.split('/');
+        // Product detail: /products/<cat>/<slug-with-PICKSLYID>
+        if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'product';
+        // /products/category listing route
+        if (parts[0].toLowerCase() === 'products' && parts[1] && PRODUCT_CATS_ROUTES.includes(parts[1].toLowerCase())) return 'products';
         return 'home';
     }
     function catFromPath() {
@@ -2455,6 +2500,15 @@ function initApp() {
         }, 120);
     }
     window.navigateTo = navigateTo;
+
+    // Navigate to a product detail page (SEO URL) without a full reload.
+    window.openProduct = function (url) {
+        if (!url) return;
+        if (location.pathname + location.search !== url) history.pushState({ page: 'product' }, '', url);
+        window.scrollTo(0, 0);
+        mainContent.classList.add('page-exit');
+        setTimeout(() => { renderPage('product'); mainContent.classList.remove('page-exit'); }, 120);
+    };
 
     // Live-update the URL's ?search= without re-rendering (keeps input focus).
     window.syncSearchUrl = function () {
@@ -3281,6 +3335,14 @@ document.addEventListener('click', function(e) {
         if (raw) window.trackRecentlyViewed(raw);
     }
 
+    // Navigate to the product detail page when clicking a card (but not when
+    // clicking an action button/link inside it).
+    if (!(e.target.closest('button, a'))) {
+        const navCard = e.target.closest && e.target.closest('[data-purl]');
+        const url = navCard && navCard.getAttribute('data-purl');
+        if (url && window.openProduct) { e.preventDefault(); window.openProduct(url); return; }
+    }
+
     // Agent popup: intercept Buy Now button clicks
     const buyBtn = e.target.closest && e.target.closest('button.card-btn-buy[data-kakobuy]');
     if (buyBtn) {
@@ -3440,6 +3502,193 @@ function getPopularInCategory(cat, n) {
     return out;
 }
 
+// ─── PRODUCT DETAIL PAGE (SEO route /products/<cat>/<slug>-<id>) ────────────
+let _pdState = { product: null, batches: [], color: '', qcOpen: false };
+
+// Resolve the product behind the current URL: SSR-injected payload first, then
+// the in-memory catalog (matched by Picks.ly id). Reads DB state directly so
+// admin transforms (rotation/position/zoom baked into img) always reflect.
+function resolveProductFromUrl() {
+    const parts = (location.pathname || '').replace(/^\/+|\/+$/g, '').split('/');
+    const slug = parts[2] || '';
+    const m = slug.match(/(WD|TB|AL|1688)\d+/i);
+    const pid = m ? m[0].toUpperCase() : '';
+    if (!pid) return null;
+    // SSR hydration payload (only present on a cold server-rendered load).
+    try {
+        const el = document.getElementById('jf-product-data');
+        if (el) {
+            const ssr = JSON.parse(el.textContent || 'null');
+            if (ssr && pickslyIdOf(ssr) === pid) return ssr;
+        }
+    } catch (_) {}
+    const cache = (allProductsCache || []);
+    return cache.find(p => pickslyIdOf(p) === pid) || null;
+}
+
+function buildProductDetail(p) {
+    const safeTitle = escapeHtml(stripEmojis(p.title || 'Untitled'));
+    const rawImg = (p.img || '').trim();
+    const safeImg = rawImg.startsWith('http') ? rawImg : '';
+    const imgHtml = safeImg
+        ? `<img src="${escapeHtml(thumb(safeImg, 900))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" decoding="async" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);">No image</div>`;
+    const seller = catSellerLabel(p);
+    const picksly = safeExternalUrl(p.picksly || '#');
+    const cat = escapeHtml(p.category || '');
+    return `
+    <div class="pd-wrap">
+        <a class="pd-back" data-action="go-products"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Back</a>
+        <div class="pd-main">
+            <div class="pd-gallery">
+                <div class="pd-image">${imgHtml}</div>
+            </div>
+            <div class="pd-info">
+                ${cat ? `<div class="pd-crumb">${cat}</div>` : ''}
+                <h1 class="pd-title" id="pd-title">${safeTitle}</h1>
+                <div class="pd-seller">${platformBadge(p.picksly)}<span>${escapeHtml(seller)}</span></div>
+                <div class="pd-price">${formatPrice(p.price)}</div>
+
+                <div class="pd-meta" id="pd-meta">
+                    <span class="pd-meta-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg><b id="pd-qc-count">…</b> QC photos</span>
+                    <span class="pd-meta-item" id="pd-weight" hidden></span>
+                    <span class="pd-meta-item" id="pd-sold" hidden></span>
+                </div>
+
+                <div class="pd-colors" id="pd-colors" hidden></div>
+
+                <div class="pd-actions">
+                    <button class="card-btn-buy pd-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(p.picksly || ''))}">Buy Now</button>
+                    <button class="pd-btn pd-qc-toggle" id="pd-qc-toggle">View QC</button>
+                    <button class="pd-btn pd-share" id="pd-share">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        Share
+                    </button>
+                </div>
+                <a class="pd-viewpicksly" href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer">View on picks.ly →</a>
+            </div>
+        </div>
+        <div class="pd-qc-gallery" id="pd-qc-gallery" hidden></div>
+    </div>`;
+}
+
+// Fetch QC batches for the product (metadata only — images render on toggle).
+async function loadProductQc(p) {
+    const src = qcNormalizeSource(p.picksly || p.kakobuy || '');
+    if (!src) return [];
+    try {
+        const r = await fetch(`/api/qc?url=${encodeURIComponent(src)}`);
+        if (!r.ok) return [];
+        const data = await r.json();
+        if (!data.success) return [];
+        const raw = data.groups || data.albums || data.qc || data.results || data.data || [];
+        return (Array.isArray(raw) ? raw : []).map(g => {
+            const imgsRaw = g.images || g.photos || g.pictures || g.imgs || [];
+            const imgs = (Array.isArray(imgsRaw) ? imgsRaw : [])
+                .map(i => typeof i === 'string' ? i : (i.url || i.src || i.href || i.image || ''))
+                .filter(Boolean);
+            return {
+                color: (g.color || '').toString().trim(),
+                size: (g.size || '').toString().trim(),
+                weight: (g.weight || '').toString().trim(),
+                imgs,
+            };
+        }).filter(b => b.imgs.length);
+    } catch (_) { return []; }
+}
+
+function pdImagesForColor(color) {
+    const b = _pdState.batches;
+    if (!color) return b.flatMap(x => x.imgs);
+    return b.filter(x => (x.color || '').toLowerCase() === color.toLowerCase()).flatMap(x => x.imgs);
+}
+
+function pdRenderColors() {
+    const wrap = document.getElementById('pd-colors');
+    if (!wrap) return;
+    const colors = [...new Set(_pdState.batches.map(b => b.color).filter(Boolean))];
+    if (colors.length < 2) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    wrap.innerHTML = `<span class="pd-colors-label">Color</span>` + colors.map(c =>
+        `<button class="pd-swatch${c.toLowerCase() === _pdState.color.toLowerCase() ? ' active' : ''}" data-color="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+    ).join('');
+    wrap.querySelectorAll('.pd-swatch').forEach(btn => {
+        btn.addEventListener('click', () => pdSelectColor(btn.dataset.color));
+    });
+}
+
+function pdUpdateCount() {
+    const el = document.getElementById('pd-qc-count');
+    if (el) el.textContent = pdImagesForColor(_pdState.color).length;
+    const toggle = document.getElementById('pd-qc-toggle');
+    if (toggle && !_pdState.qcOpen) toggle.textContent = `View QC (${pdImagesForColor(_pdState.color).length})`;
+    // Weight (only if the QC data provides it).
+    const wEl = document.getElementById('pd-weight');
+    const wb = _pdState.batches.find(b => b.weight);
+    if (wEl) {
+        if (wb) { wEl.hidden = false; wEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a4 4 0 0 0-3.8 2.8L5 14h14l-3.2-8.2A4 4 0 0 0 12 3Z"/></svg> ${escapeHtml(wb.weight)} g`; }
+        else wEl.hidden = true;
+    }
+}
+
+function pdRenderGallery() {
+    const g = document.getElementById('pd-qc-gallery');
+    if (!g) return;
+    if (!_pdState.qcOpen) { g.hidden = true; g.innerHTML = ''; return; }
+    const imgs = pdImagesForColor(_pdState.color);
+    g.hidden = false;
+    g.innerHTML = imgs.map(u => {
+        const safe = safeExternalUrl(u);
+        return `<div class="pd-qc-tile"><img src="${escapeHtml(safe)}" loading="lazy" decoding="async" alt="QC" data-fallback="hide"/></div>`;
+    }).join('') || `<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);padding:2rem;">No QC photos for this color yet.</p>`;
+}
+
+function pdSelectColor(color) {
+    _pdState.color = color || '';
+    const p = _pdState.product;
+    // Update URL ?color without reload.
+    if (p) history.replaceState({ page: 'product' }, '', productUrl(p, _pdState.color));
+    // Update title to include color.
+    const titleEl = document.getElementById('pd-title');
+    if (titleEl && p) titleEl.textContent = stripEmojis(p.title || '') + (_pdState.color ? ' ' + _pdState.color : '');
+    document.querySelectorAll('.pd-swatch').forEach(b =>
+        b.classList.toggle('active', (b.dataset.color || '').toLowerCase() === _pdState.color.toLowerCase()));
+    pdUpdateCount();
+    pdRenderGallery();
+}
+
+function initProductDetail() {
+    const p = _pdState.product;
+    if (!p) return;
+    // Buy button works via the global delegated card-btn-buy handler.
+    const share = document.getElementById('pd-share');
+    if (share) share.addEventListener('click', async () => {
+        const url = location.origin + productUrl(p, _pdState.color);
+        try { await navigator.clipboard.writeText(url); share.classList.add('copied'); const t0 = share.innerHTML; share.textContent = 'Copied!'; setTimeout(() => { share.innerHTML = t0; share.classList.remove('copied'); }, 1500); }
+        catch (_) {}
+    });
+    const toggle = document.getElementById('pd-qc-toggle');
+    if (toggle) toggle.addEventListener('click', () => {
+        _pdState.qcOpen = !_pdState.qcOpen;
+        toggle.textContent = _pdState.qcOpen ? 'Hide QC' : `View QC (${pdImagesForColor(_pdState.color).length})`;
+        pdRenderGallery();
+        if (_pdState.qcOpen) document.getElementById('pd-qc-gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    // Fetch QC metadata (count + colors); images stay lazy until toggled.
+    loadProductQc(p).then(batches => {
+        _pdState.batches = batches;
+        // Pre-select color from URL ?color= if valid.
+        const urlColor = new URLSearchParams(location.search).get('color') || '';
+        if (urlColor && batches.some(b => (b.color || '').toLowerCase() === urlColor.toLowerCase())) {
+            _pdState.color = urlColor;
+        }
+        pdRenderColors();
+        pdUpdateCount();
+        if (_pdState.color) pdSelectColor(_pdState.color);
+        if (_pdState.qcOpen) pdRenderGallery();
+    });
+}
+
 async function loadPopularProducts(opts) {
     const force = opts && opts.force;
     if (popularLoaded && !force) return;
@@ -3557,7 +3806,7 @@ function buildProductCard(item, idx) {
         ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
     const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
-    return `<div class="hc-card product-card">
+    return `<div class="hc-card product-card" data-purl="${escapeHtml(productUrl(item))}">
         <div class="product-image" style="overflow:hidden;">${img}</div>
         <div class="product-info">
             <div class="product-batch-row">${platformBadge(item.picksly)}<span class="product-store-name">${escapeHtml(catSellerLabel(item))}</span></div>
@@ -3708,7 +3957,7 @@ function buildHomeSections() {
                 ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const sellerName = catSellerLabel(item);
-            return `<div class="hc-card product-card">
+            return `<div class="hc-card product-card" data-purl="${escapeHtml(productUrl(item))}">
                 <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
                     <div class="product-batch-row">${platformBadge(item.picksly)}<span class="product-store-name">${escapeHtml(sellerName)}</span></div>
@@ -3756,7 +4005,7 @@ function buildHomeSections() {
             const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
             const sellerName = catSellerLabel(item);
-            return `<div class="hc-card product-card">
+            return `<div class="hc-card product-card" data-purl="${escapeHtml(productUrl(item))}">
                 <div class="product-image" style="overflow:hidden;">${img}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
