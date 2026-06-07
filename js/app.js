@@ -190,6 +190,20 @@ function imgPosY(rawUrl) {
     return Math.max(0, Math.min(100, parseInt(m[1], 10) || 50));
 }
 
+// Zoom percentage baked into an image URL ("#...z=<pct>"). 100 = no zoom.
+function imgZoom(rawUrl) {
+    const m = String(rawUrl || '').match(/[#&]z=(\d+)/);
+    if (!m) return 100;
+    return Math.max(50, Math.min(300, parseInt(m[1], 10) || 100));
+}
+// Combined inline style for product images (framing + zoom).
+function imgFrameStyle(rawUrl) {
+    const oy = imgPosY(rawUrl), z = imgZoom(rawUrl);
+    let s = `object-position:50% ${oy}%;`;
+    if (z !== 100) s += `transform:scale(${z / 100});transform-origin:50% ${oy}%;`;
+    return s;
+}
+
 // Derive the source marketplace from a picks.ly link and render its logo as
 // the store badge. Item ids are prefixed: WD=Weidian, TB=Taobao, AL=1688.
 // Falls back to the generic 店 glyph when the platform can't be determined.
@@ -1088,7 +1102,7 @@ function renderFilteredProducts() {
             /picks\.ly\/twitter-image/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
-            ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;object-position:50% ${imgPosY(safeImg)}%;" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+            ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
 
         const kakobuy = buildAgentLink(p.kakobuy || '#');
@@ -3540,7 +3554,7 @@ function buildProductCard(item, idx) {
     const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/(marketplace|agent)-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
     const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
     const img = safeImg
-        ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;object-position:50% ${imgPosY(safeImg)}%;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+        ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
     const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
     return `<div class="hc-card product-card">
@@ -3691,7 +3705,7 @@ function buildHomeSections() {
             const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/marketplace-logos\//i.test(rawImg) || /picks\.ly\/agent-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;object-position:50% ${imgPosY(safeImg)}%;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const sellerName = catSellerLabel(item);
             return `<div class="hc-card product-card">
@@ -3737,7 +3751,7 @@ function buildHomeSections() {
                 /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;object-position:50% ${imgPosY(safeImg)}%;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
