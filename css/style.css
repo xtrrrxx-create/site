@@ -1696,7 +1696,8 @@ main {
 
 .settings-back { justify-content: flex-start; gap: 6px; color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; margin-bottom: 2px; }
 .settings-back svg { width: 14px; height: 14px; }
-.settings-options { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.settings-options { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; scrollbar-width: none; -ms-overflow-style: none; }
+.settings-options::-webkit-scrollbar { display: none; }
 .settings-option { justify-content: flex-start; }
 .settings-option-label { font-size: 0.82rem; font-weight: 500; color: var(--text-primary); flex: 1; }
 .settings-option.active .settings-option-label { color: var(--accent-color); }
