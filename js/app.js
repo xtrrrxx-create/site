@@ -166,15 +166,28 @@ function safeExternalUrl(rawUrl) {
 function thumb(rawUrl, w) {
     let clean = safeExternalUrl(rawUrl);
     if (clean === "#") return "#";
-    // Honour an admin-set rotation baked into the URL as "#ro=<deg>". The
-    // fragment is stripped before proxying and applied via wsrv's &ro= param.
+    // Honour admin-set framing baked into the URL fragment ("#ro=<deg>&oy=<pct>").
+    // Rotation is applied via wsrv's &ro=; the vertical offset is a CSS concern
+    // (see imgPosY) so we just strip the whole fragment before proxying.
     let ro = 0;
-    const rm = clean.match(/#ro=(\d+)$/);
-    if (rm) { ro = ((parseInt(rm[1], 10) || 0) % 360); clean = clean.slice(0, rm.index); }
+    const hashIdx = clean.indexOf('#');
+    if (hashIdx >= 0) {
+        const m = clean.slice(hashIdx + 1).match(/ro=(\d+)/);
+        if (m) ro = (parseInt(m[1], 10) || 0) % 360;
+        clean = clean.slice(0, hashIdx);
+    }
     const width = w || 460;
     let url = `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=85&we&maxage=30d`;
     if (ro) url += `&ro=${ro}`;
     return url;
+}
+
+// Vertical framing percentage baked into an image URL ("#...oy=<pct>").
+// Returns 50 (centred) when not set. Used for CSS object-position.
+function imgPosY(rawUrl) {
+    const m = String(rawUrl || '').match(/[#&]oy=(\d+)/);
+    if (!m) return 50;
+    return Math.max(0, Math.min(100, parseInt(m[1], 10) || 50));
 }
 
 // Derive the source marketplace from a picks.ly link and render its logo as
@@ -1075,7 +1088,7 @@ function renderFilteredProducts() {
             /picks\.ly\/twitter-image/i.test(rawImg);
         const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
         const renderImg = safeImg
-            ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+            ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;object-position:50% ${imgPosY(safeImg)}%;" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
 
         const kakobuy = buildAgentLink(p.kakobuy || '#');
@@ -3467,7 +3480,7 @@ function buildProductCard(item, idx) {
     const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/(marketplace|agent)-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
     const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
     const img = safeImg
-        ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+        ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;object-position:50% ${imgPosY(safeImg)}%;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
     const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
     return `<div class="hc-card product-card">
@@ -3618,7 +3631,7 @@ function buildHomeSections() {
             const isKnownPlaceholder = /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) || /picks\.ly\/marketplace-logos\//i.test(rawImg) || /picks\.ly\/agent-logos\//i.test(rawImg) || /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;object-position:50% ${imgPosY(safeImg)}%;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const sellerName = catSellerLabel(item);
             return `<div class="hc-card product-card">
@@ -3664,7 +3677,7 @@ function buildHomeSections() {
                 /picks\.ly\/twitter-image/i.test(rawImg);
             const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
             const img = safeImg
-                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;object-position:50% ${imgPosY(safeImg)}%;" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const kakobuy = escapeHtml(buildAgentLink(item.kakobuy || '#'));
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
