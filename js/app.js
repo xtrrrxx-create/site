@@ -3623,7 +3623,7 @@ function buildHomeSections() {
             catMap.get(c).push(p);
         });
         const topCats = [...catMap.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 3);
-        const catCells = topCats.map(([c, cps]) => {
+        let catCells = topCats.map(([c, cps]) => {
             const imgSrc = cps.map(storeGoodImg).find(Boolean) || '';
             const imgHtml = imgSrc ? `<img src="${escapeHtml(thumb(imgSrc, 260))}" alt="" loading="lazy" data-fallback="hide" data-orig="${escapeHtml(safeExternalUrl(imgSrc))}" />` : '';
             return `<div class="store-cat">
@@ -3632,6 +3632,11 @@ function buildHomeSections() {
                 <div class="store-cat-count">${cps.length} items</div>
             </div>`;
         }).join('');
+        // Pad to 3 columns with empty cells so thumbs keep their 84px size
+        // even when a store has fewer than 3 categories (picks.ly behaviour).
+        for (let i = topCats.length; i < 3; i++) {
+            catCells += `<div class="store-cat store-cat-empty"><div class="store-cat-thumb"></div></div>`;
+        }
         return `<div class="store-card">
             <div class="store-header">
                 ${storeAvatar(platform)}
