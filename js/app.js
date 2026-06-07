@@ -3439,15 +3439,41 @@ function buildProductCard(item, idx) {
 }
 
 // Full Stores page: one section per seller (picks.ly /stores style).
+// Skeleton placeholder for the /stores page while the catalog loads.
+function buildStoresSkeleton(sections) {
+    const card = `<div class="hc-card skeleton-card skel-store-item">
+        <div class="skeleton-img skel-anim"></div>
+        <div class="skeleton-body">
+            <div class="skel-badge skel-anim"></div>
+            <div class="skel-title skel-anim"></div>
+            <div class="skel-price skel-anim"></div>
+            <div class="skel-btns"><div class="skel-btn-main skel-anim"></div><div class="skel-btn-qc skel-anim"></div></div>
+        </div>
+    </div>`;
+    const row = Array.from({ length: 5 }, () => card).join('');
+    const section = `<div class="store-section-card">
+        <div class="store-page-header">
+            <div class="store-header">
+                <div class="skel-anim" style="width:48px;height:48px;border-radius:50%;flex-shrink:0;"></div>
+                <div class="store-meta" style="gap:6px;">
+                    <div class="skel-anim" style="width:150px;height:14px;"></div>
+                    <div class="skel-anim" style="width:90px;height:11px;"></div>
+                </div>
+            </div>
+            <div class="skel-anim" style="width:90px;height:30px;border-radius:9999px;"></div>
+        </div>
+        <div class="store-section-divider"></div>
+        <div class="hc-carousel skel-store-row">${row}</div>
+    </div>`;
+    return Array.from({ length: sections || 3 }, () => section).join('');
+}
+
 function buildStoresPage() {
     const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
-    // Cold deep-link / refresh: catalog not fetched yet. Show a loading state
-    // instead of the "No stores yet" message (which falsely implies emptiness).
+    // Cold deep-link / refresh: catalog not fetched yet. Show skeleton store
+    // sections (picks.ly style) instead of the "No stores yet" message.
     if (!cache.length) {
-        return `<div style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:5rem 1rem;color:var(--text-secondary);">
-            <div class="jf-spinner"></div>
-            <p>Loading stores…</p>
-        </div>`;
+        return buildStoresSkeleton(3);
     }
     const aL = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
     const aR = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;

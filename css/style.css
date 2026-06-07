@@ -1571,6 +1571,15 @@ main {
 .skel-btn-main { height: 28px; flex: 1; border-radius: 9999px; }
 .skel-btn-qc { height: 28px; flex: 1; border-radius: 9999px; }
 
+/* Stores page skeleton: product-card placeholders inside a store section */
+.skel-store-row { gap: 16px; overflow: hidden; }
+.skel-store-item { flex-shrink: 0; width: 243.19px; border: none; background: var(--bg-color); }
+.skel-store-item .skeleton-img { width: 243.19px; height: 243.19px; }
+@media (max-width: 768px) {
+    .skel-store-item { width: 70vw; }
+    .skel-store-item .skeleton-img { width: 100%; height: auto; aspect-ratio: 1; }
+}
+
 /* ═══════════════════════════════════════════════════════════
    SCROLL REVEAL
 ═══════════════════════════════════════════════════════════ */
