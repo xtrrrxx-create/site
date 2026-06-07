@@ -26,7 +26,7 @@
     <meta name="twitter:title" content="Jarvis Finder – Best Taobao & Weidian Finds" />
     <meta name="twitter:description" content="Discover the best Taobao and Weidian products curated for agent shopping. Convert links for Kakobuy, Mulebuy and Acbuy and track your packages." />
     <meta name="twitter:image" content="https://www.jarvis-finder.com/og-image.png" />
-    <link rel="stylesheet" href="/css/style.css?v=30">
+    <link rel="stylesheet" href="/css/style.css?v=31">
     <link rel="preconnect" href="https://wsrv.nl" crossorigin>
     <link rel="dns-prefetch" href="https://wsrv.nl">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,11 +66,43 @@
                 <a href="/products" data-page="products" class="nav-link">Products</a>
                 <a href="/tutorials" data-page="tutorials" class="nav-link">Tutorials</a>
                 <a href="/tools" data-page="tools" class="nav-link">Tools</a>
-                <button class="btn-icon nav-gear-btn" id="nav-settings-btn" aria-label="Settings" data-action="openSettings">
-                    <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                    </svg>
-                </button>
+                <div class="settings-wrap">
+                    <button class="btn-icon nav-gear-btn" id="nav-settings-btn" aria-label="Settings" aria-haspopup="true" aria-expanded="false">
+                        <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                    </button>
+                    <div id="settings-menu" class="settings-menu" role="menu" aria-hidden="true">
+                        <div class="settings-menu-head"><h3>Preferences</h3></div>
+                        <div class="settings-menu-body" id="settings-main">
+                            <button class="settings-row" id="set-row-theme" role="menuitem">
+                                <span class="settings-row-label">Theme</span>
+                                <span class="settings-row-val"><span id="set-theme-val">Dark</span>
+                                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                                </span>
+                            </button>
+                            <button class="settings-row" id="set-row-agent" role="menuitem">
+                                <span class="settings-row-label">Agent</span>
+                                <span class="settings-row-val"><img id="set-agent-icon" class="settings-agent-icon" alt="" /><span id="set-agent-val">None</span>
+                                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                                </span>
+                            </button>
+                            <button class="settings-row" id="set-row-currency" role="menuitem">
+                                <span class="settings-row-label">Currency</span>
+                                <span class="settings-row-val"><span id="set-cur-val">$ USD</span>
+                                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                                </span>
+                            </button>
+                        </div>
+                        <div class="settings-submenu" id="settings-sub" hidden>
+                            <button class="settings-back" id="settings-back">
+                                <svg viewBox="0 0 20 20" fill="currentColor" style="transform:rotate(180deg)"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                                <span id="settings-sub-title">Back</span>
+                            </button>
+                            <div class="settings-options" id="settings-options"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </nav>
         <!-- Stores filter toolbar — shown only on /stores page -->
@@ -103,63 +135,6 @@
     <main id="app-content">
         <!-- Content will be dynamically loaded here by app.js -->
     </main>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content settings-modal-card">
-            <div class="settings-modal-header">
-                <h2 class="settings-modal-title">Settings</h2>
-                <button class="btn-icon settings-close-btn" data-action="closeSettings" aria-label="Close">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="settings-modal-body">
-                <!-- Agent selector -->
-                <div class="settings-group">
-                    <label class="settings-label">Shopping Agent</label>
-                    <select id="settings-agent-select" class="settings-select">
-                        <option value="">— No preference —</option>
-                        <option value="kakobuy">Kakobuy</option>
-                        <option value="oopbuy">Oopbuy</option>
-                        <option value="acbuy">ACBuy</option>
-                        <option value="mulebuy">Mulebuy</option>
-                        <option value="superbuy">Superbuy</option>
-                        <option value="joyagoo">Joyagoo</option>
-                        <option value="usfans">USFans</option>
-                    </select>
-                    <p class="settings-hint">Your agent choice is saved and used on all Buy Now buttons.</p>
-                </div>
-                <!-- Currency selector -->
-                <div class="settings-group">
-                    <label class="settings-label">Currency</label>
-                    <select id="settings-currency-select" class="settings-select">
-                        <option value="CNY">¥ Chinese Yuan (CNY)</option>
-                        <option value="USD">$ US Dollar (USD)</option>
-                        <option value="EUR">€ Euro (EUR)</option>
-                        <option value="GBP">£ British Pound (GBP)</option>
-                        <option value="CAD">CA$ Canadian Dollar (CAD)</option>
-                        <option value="AUD">A$ Australian Dollar (AUD)</option>
-                        <option value="CHF">Fr Swiss Franc (CHF)</option>
-                        <option value="JPY">¥ Japanese Yen (JPY)</option>
-                        <option value="KRW">₩ South Korean Won (KRW)</option>
-                        <option value="PLN">zł Polish Zloty (PLN)</option>
-                        <option value="CZK">Kč Czech Koruna (CZK)</option>
-                        <option value="SEK">kr Swedish Krona (SEK)</option>
-                        <option value="DKK">kr Danish Krone (DKK)</option>
-                        <option value="NOK">kr Norwegian Krone (NOK)</option>
-                        <option value="BRL">R$ Brazilian Real (BRL)</option>
-                        <option value="MXN">MX$ Mexican Peso (MXN)</option>
-                        <option value="NZD">NZ$ New Zealand Dollar (NZD)</option>
-                        <option value="SGD">S$ Singapore Dollar (SGD)</option>
-                        <option value="HKD">HK$ Hong Kong Dollar (HKD)</option>
-                        <option value="RON">lei Romanian Leu (RON)</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Mobile bottom navigation -->
     <nav class="bottom-nav" id="bottom-nav">
@@ -205,7 +180,7 @@
         <span class="discord-text">Join us</span>
     </a>
 
-    <script src="/js/app.js?v=29"></script>
+    <script src="/js/app.js?v=30"></script>
     <script src="/js/enhancements.js?v=7"></script>
 </body>
 

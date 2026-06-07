@@ -2629,32 +2629,120 @@ function showWelcomeModal() {
     };
 }
 
-// ─── SETTINGS MODAL (agent + currency selectors) ───────────────────────────
+// ─── SETTINGS DROPDOWN (picks.ly-style: Theme / Agent / Currency) ──────────
+// Full label per currency code for the dropdown rows + options list.
+const CURRENCY_LABELS = {
+    CNY: '¥ Chinese Yuan (CNY)', USD: '$ US Dollar (USD)', EUR: '€ Euro (EUR)',
+    GBP: '£ British Pound (GBP)', CAD: 'CA$ Canadian Dollar (CAD)', AUD: 'A$ Australian Dollar (AUD)',
+    CHF: 'CHF Swiss Franc (CHF)', JPY: '¥ Japanese Yen (JPY)', KRW: '₩ South Korean Won (KRW)',
+    PLN: 'zł Polish Zloty (PLN)', CZK: 'Kč Czech Koruna (CZK)', SEK: 'kr Swedish Krona (SEK)',
+    DKK: 'kr Danish Krone (DKK)', NOK: 'kr Norwegian Krone (NOK)', BRL: 'R$ Brazilian Real (BRL)',
+    MXN: 'MX$ Mexican Peso (MXN)', NZD: 'NZ$ New Zealand Dollar (NZD)', SGD: 'S$ Singapore Dollar (SGD)',
+    HKD: 'HK$ Hong Kong Dollar (HKD)', RON: 'lei Romanian Leu (RON)'
+};
+// Compact label shown on the collapsed Currency row (symbol + code).
+const CURRENCY_SHORT = {
+    CNY: '¥ CNY', USD: '$ USD', EUR: '€ EUR', GBP: '£ GBP', CAD: 'CA$ CAD', AUD: 'A$ AUD',
+    CHF: 'CHF', JPY: '¥ JPY', KRW: '₩ KRW', PLN: 'zł PLN', CZK: 'Kč CZK', SEK: 'kr SEK',
+    DKK: 'kr DKK', NOK: 'kr NOK', BRL: 'R$ BRL', MXN: 'MX$ MXN', NZD: 'NZ$ NZD',
+    SGD: 'S$ SGD', HKD: 'HK$ HKD', RON: 'lei RON'
+};
+
 function initSettingsModal() {
-    const modal = document.getElementById('settings-modal');
-    if (!modal) return;
-    const agentSel = document.getElementById('settings-agent-select');
-    const curSel   = document.getElementById('settings-currency-select');
+    const wrap   = document.querySelector('.settings-wrap');
+    const btn    = document.getElementById('nav-settings-btn');
+    const menu   = document.getElementById('settings-menu');
+    if (!wrap || !btn || !menu) return;
 
-    // Hydrate from localStorage.
-    if (agentSel) agentSel.value = (localStorage.getItem(PREFERRED_AGENT_KEY) || '').toLowerCase();
-    if (curSel)   curSel.value   = currentCurrency;
+    const mainView = document.getElementById('settings-main');
+    const subView  = document.getElementById('settings-sub');
+    const subTitle = document.getElementById('settings-sub-title');
+    const optionsEl= document.getElementById('settings-options');
 
-    if (agentSel) {
-        agentSel.addEventListener('change', () => {
-            const v = agentSel.value;
+    const agentVal  = document.getElementById('set-agent-val');
+    const agentIcon = document.getElementById('set-agent-icon');
+    const curVal    = document.getElementById('set-cur-val');
+    const themeVal  = document.getElementById('set-theme-val');
+
+    function syncLabels() {
+        // Agent
+        const aid = (localStorage.getItem(PREFERRED_AGENT_KEY) || '').toLowerCase();
+        const agent = AGENTS.find(a => a.id === aid);
+        if (agent) {
+            agentVal.textContent = agent.name;
+            agentIcon.src = agent.icon; agentIcon.style.display = '';
+        } else {
+            agentVal.textContent = 'None';
+            agentIcon.style.display = 'none';
+        }
+        // Currency
+        curVal.textContent = CURRENCY_SHORT[currentCurrency] || currentCurrency;
+        // Theme
+        themeVal.textContent = document.body.classList.contains('light-mode') ? 'Light' : 'Dark';
+    }
+    window._syncSettingsLabels = syncLabels;
+
+    function showMain() { subView.hidden = true; mainView.hidden = false; }
+    function openMenu() {
+        menu.classList.add('open'); menu.setAttribute('aria-hidden', 'false');
+        btn.setAttribute('aria-expanded', 'true'); showMain(); syncLabels();
+    }
+    function closeMenu() {
+        menu.classList.remove('open'); menu.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+    }
+    function toggleMenu() { menu.classList.contains('open') ? closeMenu() : openMenu(); }
+
+    // Render a submenu list (agent or currency) and switch to the sub view.
+    function openSub(title, items, currentVal, onPick) {
+        subTitle.textContent = title;
+        optionsEl.innerHTML = items.map(it => `
+            <button class="settings-option${it.value === currentVal ? ' active' : ''}" data-val="${escapeHtml(it.value)}">
+                ${it.icon ? `<img class="settings-agent-icon" src="${escapeHtml(it.icon)}" alt="" onerror="this.style.display='none'"/>` : ''}
+                <span class="settings-option-label">${escapeHtml(it.label)}</span>
+                ${it.value === currentVal ? '<svg class="settings-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+            </button>`).join('');
+        optionsEl.querySelectorAll('.settings-option').forEach(o => {
+            o.addEventListener('click', () => { onPick(o.dataset.val); });
+        });
+        mainView.hidden = true; subView.hidden = false;
+    }
+
+    btn.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
+    document.getElementById('settings-back').addEventListener('click', showMain);
+
+    // Theme row → toggle immediately.
+    document.getElementById('set-row-theme').addEventListener('click', () => {
+        window.toggleTheme();
+        syncLabels();
+    });
+
+    // Agent row → submenu.
+    document.getElementById('set-row-agent').addEventListener('click', () => {
+        const items = [{ value: '', label: 'No preference' }]
+            .concat(AGENTS.map(a => ({ value: a.id, label: a.name, icon: a.icon })));
+        const cur = (localStorage.getItem(PREFERRED_AGENT_KEY) || '').toLowerCase();
+        openSub('Agent', items, cur, (v) => {
             if (v) { localStorage.setItem(PREFERRED_AGENT_KEY, v); localStorage.setItem('jf_agent', v); }
             else   { localStorage.removeItem(PREFERRED_AGENT_KEY); localStorage.removeItem('jf_agent'); }
+            syncLabels(); showMain();
         });
-    }
-    if (curSel) {
-        curSel.addEventListener('change', () => window.changeCurrencyUI(curSel.value));
-    }
-    // Close on backdrop click.
-    modal.addEventListener('click', e => { if (e.target === modal) modal.style.display = 'none'; });
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape' && modal.style.display === 'flex') modal.style.display = 'none';
     });
+
+    // Currency row → submenu.
+    document.getElementById('set-row-currency').addEventListener('click', () => {
+        const items = Object.keys(CURRENCY_LABELS).map(code => ({ value: code, label: CURRENCY_LABELS[code] }));
+        openSub('Currency', items, currentCurrency, (v) => {
+            window.changeCurrencyUI(v);
+            syncLabels(); showMain();
+        });
+    });
+
+    // Close on outside click / Esc.
+    document.addEventListener('click', e => { if (!wrap.contains(e.target)) closeMenu(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
+    syncLabels();
 }
 
 // ─── TUTORIALS TABS ─────────────────────────────────────────────────────────

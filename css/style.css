@@ -1664,34 +1664,43 @@ main {
 .stores-nav-toolbar .stores-search svg { color: var(--text-secondary); flex-shrink: 0; }
 
 /* ═══════════════════════════════════════════════════════════
-   SETTINGS MODAL (agent + currency selectors)
+   SETTINGS DROPDOWN (picks.ly-style menu under the gear icon)
 ═══════════════════════════════════════════════════════════ */
-.settings-modal-card {
+.settings-wrap { position: relative; display: inline-flex; }
+.settings-menu {
+    position: absolute; right: 0; top: calc(100% + 8px);
+    width: 256px; max-width: calc(100vw - 24px);
     background: var(--nav-bg); border: 1px solid var(--border-color);
-    border-radius: 24px; padding: 1.75rem; width: 420px; max-width: 92vw;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
-    animation: jfFadeUp 0.3s cubic-bezier(0.16,1,0.3,1);
+    border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+    z-index: 200; overflow: hidden;
+    transform-origin: top right;
+    opacity: 0; transform: scale(0.97) translateY(-6px); pointer-events: none;
+    transition: opacity 0.18s cubic-bezier(0.16,1,0.3,1), transform 0.18s cubic-bezier(0.16,1,0.3,1);
 }
-.settings-modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-.settings-modal-title { font-size: 1.5rem; font-weight: 900; color: var(--text-primary); }
-.settings-close-btn { width: 34px; height: 34px; background: var(--border-color); border: none; color: var(--text-secondary); }
-.settings-close-btn:hover { background: var(--text-primary); color: var(--bg-color); }
-.settings-modal-body { display: flex; flex-direction: column; gap: 1.4rem; }
-.settings-group { display: flex; flex-direction: column; gap: 0.5rem; }
-.settings-label {
-    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase; color: var(--text-secondary);
+.settings-menu.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+.settings-menu-head { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+.settings-menu-head h3 { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+.settings-menu-body, .settings-submenu { padding: 6px; }
+
+.settings-row, .settings-option, .settings-back {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; padding: 10px 12px; border: none; background: transparent;
+    border-radius: 8px; cursor: pointer; text-align: left;
+    font-family: 'Inter Tight', system-ui, sans-serif; transition: background 0.15s ease;
 }
-.settings-select {
-    appearance: none; -webkit-appearance: none;
-    background: var(--bg-color) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 1rem center;
-    border: 1px solid var(--border-color); border-radius: 12px;
-    padding: 0.85rem 2.5rem 0.85rem 1rem; color: var(--text-primary);
-    font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.95rem; font-weight: 600;
-    cursor: pointer; outline: none; transition: border-color 0.2s ease;
-}
-.settings-select:focus { border-color: var(--text-primary); }
-.settings-hint { font-size: 0.78rem; color: var(--text-secondary); margin-top: -0.1rem; }
+.settings-row:hover, .settings-option:hover, .settings-back:hover { background: var(--border-color); }
+.settings-row-label { font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
+.settings-row-val { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; color: var(--text-primary); }
+.settings-chev { width: 14px; height: 14px; color: var(--text-secondary); flex-shrink: 0; }
+.settings-agent-icon { width: 16px; height: 16px; border-radius: 4px; object-fit: contain; flex-shrink: 0; }
+
+.settings-back { justify-content: flex-start; gap: 6px; color: var(--text-secondary); font-size: 0.8rem; font-weight: 700; margin-bottom: 2px; }
+.settings-back svg { width: 14px; height: 14px; }
+.settings-options { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+.settings-option { justify-content: flex-start; }
+.settings-option-label { font-size: 0.82rem; font-weight: 500; color: var(--text-primary); flex: 1; }
+.settings-option.active .settings-option-label { color: var(--accent-color); }
+.settings-check { width: 16px; height: 16px; color: var(--accent-color); flex-shrink: 0; }
 
 /* ═══════════════════════════════════════════════════════════
    DISCORD FLOATING BUTTON
