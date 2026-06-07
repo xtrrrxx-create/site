@@ -2915,6 +2915,17 @@ function qcBuildSource(shop, id) {
     if (s === '1688' || s === 'ali' || s === 'al') return `https://detail.1688.com/offer/${id}.html`;
     return null;
 }
+// Normalise any platform code/name used by the various agents to a canonical
+// shop key understood by qcBuildSource.
+function canonShop(code) {
+    const c = String(code || '').toLowerCase().trim();
+    if (c === 'wd' || c === 'weidian') return 'weidian';
+    if (c === 'tb' || c === 'taobao') return 'taobao';
+    if (c === 'tmall' || c === 'tm') return 'tmall';
+    if (c === 'al' || c === 'ali' || c === '1688' || c === 'alibaba' || c === 'ali_1688' || c === 'ali1688') return '1688';
+    return null;
+}
+
 function qcNormalizeSource(raw) {
     let u = (raw || '').trim();
     if (!u) return null;
@@ -2925,27 +2936,49 @@ function qcNormalizeSource(raw) {
     // Direct source — pass through
     if (/weidian\.com|taobao\.com|tmall\.com|1688\.com/i.test(u)) return u;
 
-    // Agent links: extract url= / link= query param (kakobuy, superbuy, cssbuy, etc.)
+    // Agent links — supports kakobuy, oopbuy, acbuy, mulebuy, superbuy, joyagoo,
+    // usfans (and similar) in all their URL shapes.
     try {
         const urlObj = new URL(u);
+        const host = urlObj.hostname.toLowerCase().replace(/^www\./, '');
         const q = urlObj.searchParams;
+
+        // 1) Nested source URL param (kakobuy / acbuy /page/buy / superbuy /page/buy / usfans / mulebuy fallback)
         const nested = q.get('url') || q.get('link') || q.get('u') || q.get('target') || q.get('href');
         if (nested) {
             const dec = decodeURIComponent(nested);
             if (/weidian\.com|taobao\.com|tmall\.com|1688\.com/i.test(dec)) return dec;
+            if (/picks\.ly\/item\//i.test(dec)) return qcPickslyToSource(dec);
         }
-        // ACBuy / Mulebuy / Hoobuy style: shop_type=X&id=Y  OR  source=X&id=Y  OR  platform=X&id=Y  OR  /<shop>/<id>
-        const shop = q.get('shop_type') || q.get('source') || q.get('platform') || q.get('shoptype') || q.get('from');
-        const id   = q.get('id') || q.get('goods_id') || q.get('itemID') || q.get('goodsId');
+
+        // 2) platform/source + id query params (acbuy, mulebuy, joyagoo, superbuy, hoobuy…)
+        const shop = q.get('shop_type') || q.get('shopType') || q.get('source') || q.get('platform') || q.get('shoptype') || q.get('from');
+        const id   = q.get('id') || q.get('goods_id') || q.get('itemID') || q.get('itemId') || q.get('goodsId');
         if (shop && id) {
-            const built = qcBuildSource(shop, id);
+            const built = qcBuildSource(canonShop(shop) || shop, id);
             if (built) return built;
         }
-        // Path style: /product/weidian/123456 or /item/tb-123456
-        const pathMatch = urlObj.pathname.match(/\/(weidian|taobao|tmall|1688|wd|tb|al)[\/\-_]+(\d{6,})/i);
-        if (pathMatch) {
-            const built = qcBuildSource(pathMatch[1], pathMatch[2]);
+
+        // 3) Path style with a word platform: /product/weidian/123, /item/tb-123
+        const wordPath = urlObj.pathname.match(/\/(weidian|taobao|tmall|1688|wd|tb|al|alibaba)[\/\-_]+(\d{5,})/i);
+        if (wordPath) {
+            const built = qcBuildSource(canonShop(wordPath[1]), wordPath[2]);
             if (built) return built;
+        }
+
+        // 4) Agent-specific numeric platform codes: /product/{code}/{id}
+        //    (usfans + oopbuy encode the marketplace as a number in the path)
+        const numPath = urlObj.pathname.match(/\/product\/(\d+)\/(\d{5,})/i);
+        if (numPath) {
+            const NUM_MAPS = {
+                'usfans.com': { '1': '1688', '2': 'taobao', '3': 'weidian' },
+                'oopbuy.com': { '0': '1688', '1': 'taobao', '2': 'weidian' },
+            };
+            const map = NUM_MAPS[host];
+            if (map && map[numPath[1]]) {
+                const built = qcBuildSource(map[numPath[1]], numPath[2]);
+                if (built) return built;
+            }
         }
     } catch (_) { /* bad URL */ }
     return null;
@@ -2964,16 +2997,16 @@ window.runQcCheck = async function () {
     const actionsEl = document.getElementById('qc-actions');
     if (actionsEl) { actionsEl.innerHTML = ''; actionsEl.style.display = 'none'; }
 
-    // picks.ly → source conversion (partner API doesn't accept picks.ly links directly)
-    let src = raw;
-    if (/picks\.ly\/item\//i.test(raw)) {
-        src = qcPickslyToSource(raw);
-        if (!src) {
-            statusEl.textContent = t('qc_invalid_picksly');
-            statusEl.classList.add('err');
-            statusEl.style.display = 'block';
-            return;
-        }
+    // Resolve the marketplace source from whatever was pasted: a direct
+    // Weidian/Taobao/1688 link, a picks.ly link, OR any supported agent link
+    // (kakobuy, oopbuy, acbuy, mulebuy, superbuy, joyagoo, usfans). The partner
+    // API only accepts the original marketplace URL.
+    let src = qcNormalizeSource(raw) || raw;
+    if (/picks\.ly\/item\//i.test(raw) && (!src || !/^https?:\/\//i.test(src))) {
+        statusEl.textContent = t('qc_invalid_picksly');
+        statusEl.classList.add('err');
+        statusEl.style.display = 'block';
+        return;
     }
     if (!/^https?:\/\//i.test(src)) {
         statusEl.textContent = t('qc_paste_full');
@@ -3854,35 +3887,37 @@ window.convertLink = function () {
     }
 
     const encoded = encodeURIComponent(input);
-    let finalUrl = '';
 
-    // Extract item ID for agents that need it
+    // Detect marketplace + item id from the pasted link.
+    let platform = '';
+    if (host === 'weidian.com' || host.endsWith('.weidian.com')) platform = 'weidian';
+    else if (host.includes('taobao.com') || host.includes('tmall.com')) platform = 'taobao';
+    else if (host.includes('1688.com')) platform = '1688';
+
     let itemId = '';
     const weidianMatch = input.match(/itemID=(\d+)/i);
     const taobaoMatch = input.match(/[?&]id=(\d+)/i);
-    const alibMatch = input.match(/\/(\d+)\.html/i);
+    const alibMatch = input.match(/\/(?:offer\/)?(\d+)\.html/i);
     if (weidianMatch) itemId = weidianMatch[1];
     else if (taobaoMatch) itemId = taobaoMatch[1];
     else if (alibMatch) itemId = alibMatch[1];
 
-    switch (agentValue) {
-        case 'kakobuy':  finalUrl = `https://www.kakobuy.com/item/details?url=${encoded}&affcode=keviinn`; break;
-        case 'oopbuy':   finalUrl = itemId ? `https://oopbuy.com/product/2/${itemId}` : `https://oopbuy.com/product?url=${encoded}`; break;
-        case 'acbuy':    finalUrl = `https://www.acbuy.com/en/page/buy/?url=${encoded}`; break;
-        case 'mulebuy': {
-            let shopType = '';
-            if (input.includes('weidian.com')) shopType = 'weidian';
-            else if (input.includes('taobao.com') || input.includes('tmall.com')) shopType = 'taobao';
-            else if (input.includes('1688.com')) shopType = '1688';
-            finalUrl = (shopType && itemId)
-                ? `https://mulebuy.com/product/?shop_type=${shopType}&id=${itemId}`
-                : `https://mulebuy.com/product/?url=${encoded}`;
-            break;
+    // Preferred path: build the proper affiliate URL for the chosen agent +
+    // marketplace + id (this is what carries every agent's referral code).
+    let finalUrl = (platform && itemId) ? buildAgentUrlFromSource(agentValue, platform, itemId) : null;
+
+    // Fallback when we couldn't parse the id: use each agent's url= form.
+    if (!finalUrl) {
+        switch (agentValue) {
+            case 'kakobuy':  finalUrl = `https://www.kakobuy.com/item/details?url=${encoded}&affcode=keviinn`; break;
+            case 'oopbuy':   finalUrl = `https://oopbuy.com/product?url=${encoded}&inviteCode=KVK77PNEM`; break;
+            case 'acbuy':    finalUrl = `https://www.acbuy.com/en/page/buy/?url=${encoded}&u=3R6HXS`; break;
+            case 'mulebuy':  finalUrl = `https://mulebuy.com/product/?url=${encoded}&ref=200541300`; break;
+            case 'superbuy': finalUrl = `https://www.superbuy.com/en/page/buy/?url=${encoded}&partnercode=kevnek`; break;
+            case 'joyagoo':  finalUrl = `https://joyagoo.com/product?url=${encoded}&ref=301005780`; break;
+            case 'usfans':   finalUrl = `https://usfans.com/product?url=${encoded}&ref=SDXCQX`; break;
+            default:         finalUrl = `https://www.kakobuy.com/item/details?url=${encoded}&affcode=keviinn`; break;
         }
-        case 'superbuy': finalUrl = `https://www.superbuy.com/en/page/buy/?url=${encoded}`; break;
-        case 'joyagoo':  finalUrl = itemId ? `https://joyagoo.com/product?id=${itemId}&platform=WEIDIAN` : `https://joyagoo.com/product?url=${encoded}`; break;
-        case 'usfans':   finalUrl = `https://usfans.com/product?url=${encoded}`; break;
-        default:         finalUrl = `https://www.kakobuy.com/item/details?url=${encoded}&affcode=keviinn`; break;
     }
 
     resultDiv.style.border = '1px solid var(--border-color)';
