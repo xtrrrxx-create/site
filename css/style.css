@@ -1639,7 +1639,12 @@ main {
    STORES FILTER TOOLBAR (integrated into navbar container)
 ═══════════════════════════════════════════════════════════ */
 .stores-nav-toolbar {
-    max-width: 1240px; margin: 0 auto; padding: 0.5rem 24px 0.9rem;
+    /* Match the stores page wrapper (padding 4%) so the inner content box
+       lines up exactly with the .store-section-card (max-width 1280, auto). */
+    padding: 0.5rem 4% 0.9rem;
+}
+.stores-nav-inner {
+    width: 100%; max-width: 1280px; margin: 0 auto;
     display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
 }
 .stores-nav-toolbar .stores-pills { display: flex; gap: 8px; }
