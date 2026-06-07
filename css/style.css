@@ -1647,6 +1647,14 @@ main {
     width: 100%; max-width: 1280px; margin: 0 auto;
     display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
 }
+
+/* Generic loading spinner (used on /stores cold load, etc.) */
+.jf-spinner {
+    width: 36px; height: 36px; border: 3px solid var(--border-color);
+    border-top-color: var(--text-primary); border-radius: 50%;
+    animation: jfspin 0.8s linear infinite;
+}
+@keyframes jfspin { to { transform: rotate(360deg); } }
 .stores-nav-toolbar .stores-pills { display: flex; gap: 8px; }
 .stores-nav-toolbar .stores-pill {
     padding: 7px 16px; background: var(--nav-bg); border: 1px solid var(--border-color);

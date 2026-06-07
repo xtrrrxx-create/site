@@ -3441,6 +3441,14 @@ function buildProductCard(item, idx) {
 // Full Stores page: one section per seller (picks.ly /stores style).
 function buildStoresPage() {
     const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+    // Cold deep-link / refresh: catalog not fetched yet. Show a loading state
+    // instead of the "No stores yet" message (which falsely implies emptiness).
+    if (!cache.length) {
+        return `<div style="display:flex;flex-direction:column;align-items:center;gap:1rem;padding:5rem 1rem;color:var(--text-secondary);">
+            <div class="jf-spinner"></div>
+            <p>Loading stores…</p>
+        </div>`;
+    }
     const aL = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
     const aR = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
     const sellerMap = new Map();
