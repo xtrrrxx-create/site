@@ -2933,8 +2933,13 @@ function qcNormalizeSource(raw) {
     // picks.ly
     if (/picks\.ly\/item\//i.test(u)) return qcPickslyToSource(u);
 
-    // Direct source — pass through
-    if (/weidian\.com|taobao\.com|tmall\.com|1688\.com/i.test(u)) return u;
+    // Direct source — pass through ONLY if the HOSTNAME is a marketplace.
+    // (A substring test would wrongly match agent links whose url= param
+    //  contains "weidian.com" etc. in plain text.)
+    try {
+        const h0 = new URL(u).hostname.toLowerCase();
+        if (/(^|\.)(weidian|taobao|tmall|1688)\.com$/.test(h0)) return u;
+    } catch (_) { /* fall through */ }
 
     // Agent links — supports kakobuy, oopbuy, acbuy, mulebuy, superbuy, joyagoo,
     // usfans (and similar) in all their URL shapes.
