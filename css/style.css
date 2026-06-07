@@ -370,6 +370,8 @@ body.on-stores .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
     gap: 6px;
     background: transparent;
     border: none;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
     color: var(--text-secondary);
     font-family: 'Inter Tight', system-ui, sans-serif;
     font-size: 0.85rem;
@@ -379,6 +381,7 @@ body.on-stores .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
     border-radius: 8px;
     transition: color 0.2s, background 0.2s;
 }
+.pl-cat:focus, .pl-cat:focus-visible { outline: none; box-shadow: none; }
 
 .pl-cat-icon { flex-shrink: 0; opacity: 0.9; }
 
