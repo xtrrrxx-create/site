@@ -2670,7 +2670,8 @@ function initSettingsModal() {
         const agent = AGENTS.find(a => a.id === aid);
         if (agent) {
             agentVal.textContent = agent.name;
-            agentIcon.src = agent.icon; agentIcon.style.display = '';
+            agentIcon.src = `https://www.google.com/s2/favicons?domain=${agent.domain}&sz=64`;
+            agentIcon.style.display = '';
         } else {
             agentVal.textContent = 'None';
             agentIcon.style.display = 'none';
@@ -2720,7 +2721,7 @@ function initSettingsModal() {
     // Agent row → submenu.
     document.getElementById('set-row-agent').addEventListener('click', () => {
         const items = [{ value: '', label: 'No preference' }]
-            .concat(AGENTS.map(a => ({ value: a.id, label: a.name, icon: a.icon })));
+            .concat(AGENTS.map(a => ({ value: a.id, label: a.name, icon: `https://www.google.com/s2/favicons?domain=${a.domain}&sz=64` })));
         const cur = (localStorage.getItem(PREFERRED_AGENT_KEY) || '').toLowerCase();
         openSub('Agent', items, cur, (v) => {
             if (v) { localStorage.setItem(PREFERRED_AGENT_KEY, v); localStorage.setItem('jf_agent', v); }
