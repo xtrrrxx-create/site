@@ -1571,10 +1571,15 @@ main {
 .skel-btn-main { height: 28px; flex: 1; border-radius: 9999px; }
 .skel-btn-qc { height: 28px; flex: 1; border-radius: 9999px; }
 
-/* Stores page skeleton: product-card placeholders inside a store section */
+/* Stores page skeleton: product-card placeholders inside a store section.
+   Lighter gray to match picks.ly (was too dark on var(--bg-color)). */
 .skel-store-row { gap: 16px; overflow: hidden; }
-.skel-store-item { flex-shrink: 0; width: 243.19px; border: none; background: var(--bg-color); }
+.skel-store-item { flex-shrink: 0; width: 243.19px; border: none; background: #313131; }
 .skel-store-item .skeleton-img { width: 243.19px; height: 243.19px; }
+.skel-store-item .skel-anim {
+    background: linear-gradient(90deg, #3a3a3a 25%, #454545 50%, #3a3a3a 75%);
+    background-size: 800px 100%;
+}
 @media (max-width: 768px) {
     .skel-store-item { width: 70vw; }
     .skel-store-item .skeleton-img { width: 100%; height: auto; aspect-ratio: 1; }
