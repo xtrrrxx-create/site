@@ -1821,3 +1821,22 @@ body.light-mode .tut-card { background: #fff; }
     .tut-grid { grid-template-columns: 1fr; }
     .tut-card { width: 100%; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   QC CHECKER + TOOLS cards — same theme as Stores cards
+   (no border, elevated shadow). Dimensions unchanged.
+   #app-content prefix beats the inline template rules.
+═══════════════════════════════════════════════════════════ */
+#app-content .qc-card,
+#app-content .tool-card,
+#app-content .tracking-card {
+    background: #2a2a2a;
+    border: none;
+    box-shadow: rgba(0,0,0,0.35) 0px 2px 4px 0px, rgba(0,0,0,0.5) 0px 8px 20px 0px;
+}
+body.light-mode #app-content .qc-card,
+body.light-mode #app-content .tool-card,
+body.light-mode #app-content .tracking-card {
+    background: #fff;
+    box-shadow: rgba(0,0,0,0.08) 0px 2px 8px 0px, rgba(0,0,0,0.12) 0px 4px 16px 0px;
+}
