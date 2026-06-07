@@ -2457,8 +2457,23 @@ function initApp() {
     // Enter applies the term to the product filter and jumps to /products.
     const navSearch = document.getElementById('nav-search');
     if (navSearch) {
+        // On the Stores page the navbar search filters stores live; elsewhere
+        // it searches products (Enter jumps to /products).
+        let navStoresTmr;
+        navSearch.addEventListener('input', () => {
+            if (pageFromPath() !== 'stores') return;
+            clearTimeout(navStoresTmr);
+            navStoresTmr = setTimeout(() => {
+                storesFilter.query = navSearch.value;
+                const el = document.getElementById('stores-page');
+                if (el) {
+                    el.innerHTML = buildStoresPage();
+                    if (typeof attachCarouselHandlers === 'function') attachCarouselHandlers(mainContent);
+                }
+            }, 200);
+        });
         navSearch.addEventListener('keydown', e => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && pageFromPath() !== 'stores') {
                 filterState.search = navSearch.value.trim();
                 navigateTo('products');
             }
@@ -2816,13 +2831,18 @@ function bindStoresNavToolbar() {
 // Show/hide the stores toolbar for the active page and sync its controls.
 window.setStoresToolbar = function (pageId) {
     const toolbar = document.getElementById('stores-nav-toolbar');
-    if (!toolbar) return;
-    toolbar.style.display = (pageId === 'stores') ? 'flex' : 'none';
+    const navSearch = document.getElementById('nav-search');
+    if (toolbar) toolbar.style.display = (pageId === 'stores') ? 'flex' : 'none';
     if (pageId === 'stores') {
-        toolbar.querySelectorAll('.stores-pill').forEach(b =>
+        if (toolbar) toolbar.querySelectorAll('.stores-pill').forEach(b =>
             b.classList.toggle('active', b.dataset.plat === storesFilter.platform));
-        const ss = document.getElementById('stores-search-input');
-        if (ss) ss.value = storesFilter.query || '';
+        // Navbar search now drives the stores filter.
+        if (navSearch) {
+            navSearch.value = storesFilter.query || '';
+            navSearch.placeholder = 'Search sellers & products...';
+        }
+    } else if (navSearch) {
+        navSearch.placeholder = 'Search products...';
     }
 };
 
