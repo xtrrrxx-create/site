@@ -164,10 +164,17 @@ function safeExternalUrl(rawUrl) {
 // resizes and re-encodes to webp. Thumbnails are a fraction of the original
 // size so the grid paints almost instantly and repeat visits hit the cache.
 function thumb(rawUrl, w) {
-    const clean = safeExternalUrl(rawUrl);
+    let clean = safeExternalUrl(rawUrl);
     if (clean === "#") return "#";
+    // Honour an admin-set rotation baked into the URL as "#ro=<deg>". The
+    // fragment is stripped before proxying and applied via wsrv's &ro= param.
+    let ro = 0;
+    const rm = clean.match(/#ro=(\d+)$/);
+    if (rm) { ro = ((parseInt(rm[1], 10) || 0) % 360); clean = clean.slice(0, rm.index); }
     const width = w || 460;
-    return `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=85&we&maxage=30d`;
+    let url = `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=85&we&maxage=30d`;
+    if (ro) url += `&ro=${ro}`;
+    return url;
 }
 
 // Derive the source marketplace from a picks.ly link and render its logo as
