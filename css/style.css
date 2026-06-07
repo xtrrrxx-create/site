@@ -222,10 +222,15 @@ body {
     height: 48px;
     margin: 0 auto;
     transform: none;
-    /* Always visible (picks.ly style) — no longer hidden until scroll. */
-    opacity: 1;
-    visibility: visible;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
+
+/* Revealed on scroll (home/products) … */
+.navbar .nav-search-wrap.show { opacity: 1; visibility: visible; }
+/* … and ALWAYS visible on the Stores page. */
+body.on-stores .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 
 .logo {
     font-family: 'Inter Tight', system-ui, sans-serif;

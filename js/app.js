@@ -2323,9 +2323,10 @@ function initApp() {
                     const cat = btn.getAttribute('data-pl-cat');
                     filterState.category = cat;
                     filterState.seller = '';
-                    // Update URL
-                    const slug = cat.toLowerCase();
-                    history.pushState({ page: 'products' }, '', '/products/' + slug);
+                    // Update URL (preserve the active ?search=)
+                    const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
+                    const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
+                    history.pushState({ page: 'products' }, '', path + qs);
                     document.querySelectorAll('.pl-cat[data-pl-cat]').forEach(b => b.classList.toggle('active', b.getAttribute('data-pl-cat') === cat));
                     renderFilteredProducts();
                 });
@@ -2337,6 +2338,7 @@ function initApp() {
                 if (filterState.search) plSearch.value = filterState.search;
                 plSearch.addEventListener('input', () => {
                     filterState.search = plSearch.value.trim();
+                    if (window.syncSearchUrl) window.syncSearchUrl();
                     renderFilteredProducts();
                 });
             }
@@ -2411,17 +2413,26 @@ function initApp() {
         // Disabled — no pill indicator needed
     }
 
+    // Build the "?search=" query for the active page (products/stores).
+    function searchQS(pageId) {
+        if (pageId === 'products' && filterState.search) return '?search=' + encodeURIComponent(filterState.search);
+        if (pageId === 'stores' && storesFilter.query) return '?search=' + encodeURIComponent(storesFilter.query);
+        return '';
+    }
+
     function navigateTo(pageId, replace) {
         if (!VALID_PAGES.includes(pageId)) pageId = 'home';
         let path;
         if (pageId === 'products') {
-            path = '/products/' + (filterState.category || 'All').toLowerCase();
+            const cat = (filterState.category || 'All');
+            path = cat && cat !== 'All' ? '/products/' + cat.toLowerCase() : '/products';
         } else {
             path = pageId === 'home' ? '/' : '/' + pageId;
         }
-        if (window.location.pathname !== path) {
-            if (replace) history.replaceState({ page: pageId }, '', path);
-            else history.pushState({ page: pageId }, '', path);
+        const full = path + searchQS(pageId);
+        if (window.location.pathname + window.location.search !== full) {
+            if (replace) history.replaceState({ page: pageId }, '', full);
+            else history.pushState({ page: pageId }, '', full);
         }
         mainContent.classList.add('page-exit');
         setTimeout(() => {
@@ -2430,6 +2441,20 @@ function initApp() {
         }, 120);
     }
     window.navigateTo = navigateTo;
+
+    // Live-update the URL's ?search= without re-rendering (keeps input focus).
+    window.syncSearchUrl = function () {
+        const page = pageFromPath();
+        if (page !== 'products' && page !== 'stores') return;
+        let path;
+        if (page === 'products') {
+            const cat = (filterState.category || 'All');
+            path = cat && cat !== 'All' ? '/products/' + cat.toLowerCase() : '/products';
+        } else {
+            path = '/stores';
+        }
+        history.replaceState({ page }, '', path + searchQS(page));
+    };
 
     navLinks.forEach(link => {
         link.addEventListener('click', e => {
@@ -2465,6 +2490,7 @@ function initApp() {
             clearTimeout(navStoresTmr);
             navStoresTmr = setTimeout(() => {
                 storesFilter.query = navSearch.value;
+                if (window.syncSearchUrl) window.syncSearchUrl();
                 const el = document.getElementById('stores-page');
                 if (el) {
                     el.innerHTML = buildStoresPage();
@@ -2492,10 +2518,18 @@ function initApp() {
     // dynamically, so it works on every page without per-render setup.
     setupNavSearchReveal();
 
+    // Apply a "?search=" query from the URL to the right filter state.
+    function applySearchFromUrl(page) {
+        const q = new URLSearchParams(window.location.search).get('search') || '';
+        if (page === 'products') filterState.search = q;
+        else if (page === 'stores') storesFilter.query = q;
+    }
+
     window.addEventListener('popstate', () => {
         const urlCat = catFromPath();
         if (urlCat) filterState.category = urlCat;
         else if (pageFromPath() === 'products') filterState.category = 'All';
+        applySearchFromUrl(pageFromPath());
         renderPage(pageFromPath());
     });
 
@@ -2503,7 +2537,10 @@ function initApp() {
     // If URL is /products/shoes etc., set the category filter before rendering
     const urlCat = catFromPath();
     if (urlCat) filterState.category = urlCat;
-    history.replaceState({ page: initial }, '', window.location.pathname === '/' ? '/' : window.location.pathname);
+    applySearchFromUrl(initial);
+    // Preserve the full URL (path + ?search=) on first load so a refresh keeps it.
+    history.replaceState({ page: initial }, '',
+        (window.location.pathname === '/' ? '/' : window.location.pathname) + (window.location.search || ''));
     renderPage(initial);
 
     // Hover-pause is now handled by .rv-track-wrap:hover in CSS — no
@@ -2832,6 +2869,9 @@ function bindStoresNavToolbar() {
 window.setStoresToolbar = function (pageId) {
     const toolbar = document.getElementById('stores-nav-toolbar');
     const navSearch = document.getElementById('nav-search');
+    // Body flag keeps the navbar search permanently visible on /stores
+    // (elsewhere it only appears on scroll).
+    document.body.classList.toggle('on-stores', pageId === 'stores');
     if (toolbar) toolbar.style.display = (pageId === 'stores') ? 'flex' : 'none';
     if (pageId === 'stores') {
         if (toolbar) toolbar.querySelectorAll('.stores-pill').forEach(b =>
