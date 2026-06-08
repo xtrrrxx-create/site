@@ -110,18 +110,26 @@ body {
 }
 
 .navbar {
+    /* Full-width bar; inner content is constrained to the same 1280 container
+       as the cards so the left/right nav groups line up with the card edges. */
+    height: 77px;
+    padding: 0 4%;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+.navbar-inner {
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: relative;
     height: 77px;
-    padding: 0 24px;
-    max-width: 1240px;
+    gap: 1.5rem;
+    max-width: 1280px;
     margin: 0 auto;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
     width: 100%;
 }
 
@@ -1840,7 +1848,7 @@ main {
 .tut-card-text { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; }
 body.light-mode .tut-card { background: #fff; }
 @media (max-width: 768px) {
-    .navbar { gap: 0.5rem; justify-content: space-between; }
+    .navbar-inner { gap: 0.5rem; justify-content: space-between; }
     /* Text links hidden on mobile — navigation handled by the bottom nav.
        Keep only the Stores/QC on the left and the settings gear on the right. */
     .nav-right .nav-link { display: none; }

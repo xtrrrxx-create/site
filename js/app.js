@@ -2950,7 +2950,7 @@ window.setStoresToolbar = function (pageId) {
             navSearch.placeholder = 'Search sellers & products...';
         }
     } else if (navSearch) {
-        navSearch.placeholder = 'Search products...';
+        navSearch.placeholder = 'Enter product name...';
     }
 };
 
@@ -3572,17 +3572,20 @@ function buildProductDetail(p) {
     </div>`;
 }
 
-// Fetch QC batches for the product (metadata only — images render on toggle).
+// Fetch QC batches + product meta (weight / sold) from Picksly.
+// Images render lazily on toggle; weight/sold show only when the API provides
+// them (keys read defensively across common shapes).
 async function loadProductQc(p) {
+    const empty = { batches: [], weight: '', sold: '' };
     const src = qcNormalizeSource(p.picksly || p.kakobuy || '');
-    if (!src) return [];
+    if (!src) return empty;
     try {
         const r = await fetch(`/api/qc?url=${encodeURIComponent(src)}`);
-        if (!r.ok) return [];
+        if (!r.ok) return empty;
         const data = await r.json();
-        if (!data.success) return [];
+        if (!data.success) return empty;
         const raw = data.groups || data.albums || data.qc || data.results || data.data || [];
-        return (Array.isArray(raw) ? raw : []).map(g => {
+        const batches = (Array.isArray(raw) ? raw : []).map(g => {
             const imgsRaw = g.images || g.photos || g.pictures || g.imgs || [];
             const imgs = (Array.isArray(imgsRaw) ? imgsRaw : [])
                 .map(i => typeof i === 'string' ? i : (i.url || i.src || i.href || i.image || ''))
@@ -3594,7 +3597,14 @@ async function loadProductQc(p) {
                 imgs,
             };
         }).filter(b => b.imgs.length);
-    } catch (_) { return []; }
+
+        // Product-level meta — Picksly shapes vary; check the likely fields.
+        const prod = data.product || data.item || (data.data && data.data.product) || {};
+        const pick = (...vals) => { for (const v of vals) { if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim(); } return ''; };
+        const weight = pick(data.weight, prod.weight, prod.weight_g, (batches.find(b => b.weight) || {}).weight);
+        const sold = pick(data.sold, data.sales, data.sales_count, prod.sold, prod.sales, prod.sales_count);
+        return { batches, weight, sold };
+    } catch (_) { return empty; }
 }
 
 function pdImagesForColor(color) {
@@ -3622,12 +3632,19 @@ function pdUpdateCount() {
     if (el) el.textContent = pdImagesForColor(_pdState.color).length;
     const toggle = document.getElementById('pd-qc-toggle');
     if (toggle && !_pdState.qcOpen) toggle.textContent = `View QC (${pdImagesForColor(_pdState.color).length})`;
-    // Weight (only if the QC data provides it).
+    const meta = _pdState.meta || {};
+    // Weight (only if Picksly provides it).
     const wEl = document.getElementById('pd-weight');
-    const wb = _pdState.batches.find(b => b.weight);
     if (wEl) {
-        if (wb) { wEl.hidden = false; wEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a4 4 0 0 0-3.8 2.8L5 14h14l-3.2-8.2A4 4 0 0 0 12 3Z"/></svg> ${escapeHtml(wb.weight)} g`; }
+        const w = meta.weight || (_pdState.batches.find(b => b.weight) || {}).weight || '';
+        if (w) { wEl.hidden = false; wEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a4 4 0 0 0-3.8 2.8L5 14h14l-3.2-8.2A4 4 0 0 0 12 3Z"/></svg> ${escapeHtml(String(w).replace(/[^0-9.]/g, '') || w)} g`; }
         else wEl.hidden = true;
+    }
+    // Units sold (only if provided).
+    const sEl = document.getElementById('pd-sold');
+    if (sEl) {
+        if (meta.sold) { sEl.hidden = false; sEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293A1 1 0 0 0 5.414 17H17M17 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-10 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg> ${escapeHtml(meta.sold)} sold`; }
+        else sEl.hidden = true;
     }
 }
 
@@ -3674,12 +3691,13 @@ function initProductDetail() {
         pdRenderGallery();
         if (_pdState.qcOpen) document.getElementById('pd-qc-gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
-    // Fetch QC metadata (count + colors); images stay lazy until toggled.
-    loadProductQc(p).then(batches => {
-        _pdState.batches = batches;
+    // Fetch QC metadata (count + colors + weight/sold); images stay lazy.
+    loadProductQc(p).then(res => {
+        _pdState.batches = res.batches || [];
+        _pdState.meta = { weight: res.weight || '', sold: res.sold || '' };
         // Pre-select color from URL ?color= if valid.
         const urlColor = new URLSearchParams(location.search).get('color') || '';
-        if (urlColor && batches.some(b => (b.color || '').toLowerCase() === urlColor.toLowerCase())) {
+        if (urlColor && _pdState.batches.some(b => (b.color || '').toLowerCase() === urlColor.toLowerCase())) {
             _pdState.color = urlColor;
         }
         pdRenderColors();
