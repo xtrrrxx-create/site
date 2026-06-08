@@ -1884,14 +1884,14 @@ body.light-mode #app-content .tracking-card {
    PRODUCT DETAIL PAGE
 ═══════════════════════════════════════════════════════════ */
 .product-card, .hc-card { cursor: pointer; }
-.pd-wrap { max-width: 1200px; margin: 0 auto; padding: 1.25rem 4% 4rem; }
+.pd-wrap { max-width: 1280px; margin: 0 auto; padding: 1.25rem 4% 4rem; }
 .pd-back {
     display: inline-flex; align-items: center; gap: 6px; margin-bottom: 1.5rem;
     color: var(--text-secondary); font-family: 'Inter Tight', system-ui, sans-serif;
     font-size: 0.9rem; font-weight: 600; text-decoration: none; cursor: pointer;
 }
 .pd-back:hover { color: var(--text-primary); }
-.pd-main { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3rem; align-items: start; justify-content: center; }
+.pd-main { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3rem; align-items: start; justify-content: start; }
 
 /* Gallery: main image + vertical thumbnail rail (picks.ly) */
 .pd-gallery { display: flex; gap: 12px; }
