@@ -1509,13 +1509,6 @@ function getPages() {
         <div style="padding: 1.5rem 4% 3rem;">
             <!-- Filter toolbar lives in the navbar (see #stores-nav-toolbar) -->
             <div id="stores-page">${buildStoresPage()}</div>
-            <div style="max-width:1280px;margin:1rem auto 0;background:linear-gradient(135deg,#ff9f0a,#ff7a00);border-radius:24px;padding:2.4rem 2.6rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;">
-                <div>
-                    <h2 style="color:#fff;font-size:1.6rem;font-weight:700;margin:0 0 .4rem;">Don't Know How To Order?</h2>
-                    <p style="color:rgba(255,255,255,.9);font-size:.95rem;margin:0;max-width:440px;">Follow our simple step-by-step guide to order from any agent.</p>
-                </div>
-                <button data-action="go-tutorials" style="background:#fff;color:#ff7a00;border:none;border-radius:9999px;padding:.9rem 2rem;font-size:.95rem;font-weight:600;cursor:pointer;white-space:nowrap;">Get Started</button>
-            </div>
         </div>
     `,
         products: `
@@ -4307,7 +4300,17 @@ function buildHomeSections() {
         </div>
     </div>` : '';
 
-    return trendingHtml + storesHtml + catSections;
+    const tutorialsBanner = `<div class="hc-section">
+        <div style="background:linear-gradient(135deg,#ff9f0a,#ff7a00);border-radius:24px;padding:2.4rem 2.6rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;">
+            <div>
+                <h2 style="color:#fff;font-size:1.6rem;font-weight:700;margin:0 0 .4rem;">Don't Know How To Order?</h2>
+                <p style="color:rgba(255,255,255,.9);font-size:.95rem;margin:0;max-width:440px;">Follow our simple step-by-step guide to order from any agent.</p>
+            </div>
+            <button data-action="go-tutorials" style="background:#fff;color:#ff7a00;border:none;border-radius:9999px;padding:.9rem 2rem;font-size:.95rem;font-weight:600;cursor:pointer;white-space:nowrap;">Get Started</button>
+        </div>
+    </div>`;
+
+    return trendingHtml + storesHtml + tutorialsBanner + catSections;
 }
 
 // ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────
