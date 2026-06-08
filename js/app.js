@@ -3536,45 +3536,48 @@ function buildProductDetail(p) {
     const seller = catSellerLabel(p);
     const picksly = safeExternalUrl(p.picksly || '#');
     const cat = escapeHtml(p.category || '');
+    const imgIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`;
     return `
     <div class="pd-wrap">
         <a class="pd-back" data-action="go-products"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Back</a>
         <div class="pd-main">
             <div class="pd-gallery">
                 <div class="pd-image">${imgHtml}</div>
+                <div class="pd-thumbs" id="pd-thumbs"></div>
             </div>
             <div class="pd-info">
                 ${cat ? `<div class="pd-crumb">${cat}</div>` : ''}
                 <h1 class="pd-title" id="pd-title">${safeTitle}</h1>
                 <div class="pd-seller">${platformBadge(p.picksly)}<span>${escapeHtml(seller)}</span></div>
                 <div class="pd-price">${formatPrice(p.price)}</div>
-
                 <div class="pd-meta" id="pd-meta">
-                    <span class="pd-meta-item"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg><b id="pd-qc-count">…</b> QC photos</span>
+                    <span class="pd-meta-item">${imgIcon}<b id="pd-qc-count">…</b>&nbsp;QC</span>
                     <span class="pd-meta-item" id="pd-weight" hidden></span>
                     <span class="pd-meta-item" id="pd-sold" hidden></span>
                 </div>
-
                 <div class="pd-colors" id="pd-colors" hidden></div>
-
                 <div class="pd-actions">
                     <button class="card-btn-buy pd-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(p.picksly || ''))}">Buy Now</button>
-                    <button class="pd-btn pd-qc-toggle" id="pd-qc-toggle">View QC</button>
-                    <button class="pd-btn pd-share" id="pd-share">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        Share
+                    <button class="pd-icon-btn pd-share" id="pd-share" title="Share" aria-label="Share">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                     </button>
                 </div>
-                <a class="pd-viewpicksly" href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer">View on picks.ly →</a>
+                <a class="pd-viewpicksly" href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer">View on picks.ly &rarr;</a>
             </div>
         </div>
-        <div class="pd-qc-gallery" id="pd-qc-gallery" hidden></div>
+
+        <div class="pd-tabs">
+            <button class="pd-tab active" data-pdtab="qc">QC Gallery</button>
+            <button class="pd-tab" data-pdtab="reviews">Reviews</button>
+            <button class="pd-tab" data-pdtab="similar">Similar Products</button>
+        </div>
+        <div class="pd-panel" id="pd-panel-qc"><div class="pd-loading"><div class="jf-spinner"></div></div></div>
+        <div class="pd-panel" id="pd-panel-reviews" hidden><p class="pd-empty">No reviews yet.</p></div>
+        <div class="pd-panel" id="pd-panel-similar" hidden></div>
     </div>`;
 }
 
 // Fetch QC batches + product meta (weight / sold) from Picksly.
-// Images render lazily on toggle; weight/sold show only when the API provides
-// them (keys read defensively across common shapes).
 async function loadProductQc(p) {
     const empty = { batches: [], weight: '', sold: '' };
     const src = qcNormalizeSource(p.picksly || p.kakobuy || '');
@@ -3585,7 +3588,7 @@ async function loadProductQc(p) {
         const data = await r.json();
         if (!data.success) return empty;
         const raw = data.groups || data.albums || data.qc || data.results || data.data || [];
-        const batches = (Array.isArray(raw) ? raw : []).map(g => {
+        const batches = (Array.isArray(raw) ? raw : []).map((g, gi) => {
             const imgsRaw = g.images || g.photos || g.pictures || g.imgs || [];
             const imgs = (Array.isArray(imgsRaw) ? imgsRaw : [])
                 .map(i => typeof i === 'string' ? i : (i.url || i.src || i.href || i.image || ''))
@@ -3594,11 +3597,10 @@ async function loadProductQc(p) {
                 color: (g.color || '').toString().trim(),
                 size: (g.size || '').toString().trim(),
                 weight: (g.weight || '').toString().trim(),
+                date: (g.date || g.time || g.created_at || '').toString().slice(0, 10),
                 imgs,
             };
         }).filter(b => b.imgs.length);
-
-        // Product-level meta — Picksly shapes vary; check the likely fields.
         const prod = data.product || data.item || (data.data && data.data.product) || {};
         const pick = (...vals) => { for (const v of vals) { if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim(); } return ''; };
         const weight = pick(data.weight, prod.weight, prod.weight_g, (batches.find(b => b.weight) || {}).weight);
@@ -3612,6 +3614,11 @@ function pdImagesForColor(color) {
     if (!color) return b.flatMap(x => x.imgs);
     return b.filter(x => (x.color || '').toLowerCase() === color.toLowerCase()).flatMap(x => x.imgs);
 }
+function pdBatchesForColor(color) {
+    const b = _pdState.batches;
+    if (!color) return b;
+    return b.filter(x => (x.color || '').toLowerCase() === color.toLowerCase());
+}
 
 function pdRenderColors() {
     const wrap = document.getElementById('pd-colors');
@@ -3622,103 +3629,152 @@ function pdRenderColors() {
     wrap.innerHTML = `<span class="pd-colors-label">Color</span>` + colors.map(c =>
         `<button class="pd-swatch${c.toLowerCase() === _pdState.color.toLowerCase() ? ' active' : ''}" data-color="${escapeHtml(c)}">${escapeHtml(c)}</button>`
     ).join('');
-    wrap.querySelectorAll('.pd-swatch').forEach(btn => {
-        btn.addEventListener('click', () => pdSelectColor(btn.dataset.color));
-    });
+    wrap.querySelectorAll('.pd-swatch').forEach(btn => btn.addEventListener('click', () => pdSelectColor(btn.dataset.color)));
 }
 
 function pdUpdateCount() {
     const el = document.getElementById('pd-qc-count');
     if (el) el.textContent = pdImagesForColor(_pdState.color).length;
-    const toggle = document.getElementById('pd-qc-toggle');
-    if (toggle && !_pdState.qcOpen) toggle.textContent = `View QC (${pdImagesForColor(_pdState.color).length})`;
     const meta = _pdState.meta || {};
-    // Weight (only if Picksly provides it).
     const wEl = document.getElementById('pd-weight');
     if (wEl) {
         const w = meta.weight || (_pdState.batches.find(b => b.weight) || {}).weight || '';
-        if (w) { wEl.hidden = false; wEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a4 4 0 0 0-3.8 2.8L5 14h14l-3.2-8.2A4 4 0 0 0 12 3Z"/></svg> ${escapeHtml(String(w).replace(/[^0-9.]/g, '') || w)} g`; }
+        if (w) { wEl.hidden = false; wEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a4 4 0 0 0-3.8 2.8L5 14h14l-3.2-8.2A4 4 0 0 0 12 3Z"/></svg>${escapeHtml(String(w).replace(/[^0-9.]/g, '') || w)}g`; }
         else wEl.hidden = true;
     }
-    // Units sold (only if provided).
     const sEl = document.getElementById('pd-sold');
     if (sEl) {
-        if (meta.sold) { sEl.hidden = false; sEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293A1 1 0 0 0 5.414 17H17M17 17a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm-10 2a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/></svg> ${escapeHtml(meta.sold)} sold`; }
+        if (meta.sold) { sEl.hidden = false; sEl.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/></svg>${escapeHtml(meta.sold)} sold`; }
         else sEl.hidden = true;
     }
 }
 
-function pdRenderGallery() {
-    const g = document.getElementById('pd-qc-gallery');
-    if (!g) return;
-    if (!_pdState.qcOpen) { g.hidden = true; g.innerHTML = ''; return; }
+function pdRenderThumbs() {
+    const rail = document.getElementById('pd-thumbs');
+    if (!rail) return;
     const imgs = pdImagesForColor(_pdState.color);
-    g.hidden = false;
-    g.innerHTML = imgs.map(u => {
-        const safe = safeExternalUrl(u);
-        return `<div class="pd-qc-tile"><img src="${escapeHtml(safe)}" loading="lazy" decoding="async" alt="QC" data-fallback="hide"/></div>`;
-    }).join('') || `<p style="grid-column:1/-1;text-align:center;color:var(--text-secondary);padding:2rem;">No QC photos for this color yet.</p>`;
+    if (!imgs.length) { rail.hidden = true; return; }
+    rail.hidden = false;
+    const show = imgs.slice(0, 5);
+    const extra = imgs.length - show.length;
+    rail.innerHTML = show.map((u, i) =>
+        `<button class="pd-thumb${i === 0 ? ' active' : ''}" data-img="${escapeHtml(u)}"><img src="${escapeHtml(thumb(u, 160))}" loading="lazy" decoding="async" alt="" data-fallback="hide"/></button>`
+    ).join('') + (extra > 0 ? `<button class="pd-thumb pd-thumb-more" data-pdtab-jump="qc">+${extra}</button>` : '');
+    rail.querySelectorAll('.pd-thumb[data-img]').forEach(b => b.addEventListener('click', () => {
+        const main = document.getElementById('pd-main-img');
+        if (main && main.tagName === 'IMG') { main.src = thumb(b.dataset.img, 900); main.style.objectPosition = '50% 50%'; main.style.transform = ''; }
+        rail.querySelectorAll('.pd-thumb').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+    }));
+    const more = rail.querySelector('.pd-thumb-more');
+    if (more) more.addEventListener('click', () => pdSwitchTab('qc'));
+}
+
+function pdRenderQcPanel() {
+    const panel = document.getElementById('pd-panel-qc');
+    if (!panel) return;
+    const batches = pdBatchesForColor(_pdState.color);
+    if (!batches.length) { panel.innerHTML = `<p class="pd-empty">No QC photos yet.</p>`; return; }
+    panel.innerHTML = `<div class="pd-qc-grid">` + batches.map((b, i) => {
+        const cover = b.imgs[0];
+        const meta = [b.date, b.size].filter(Boolean).join(' · ');
+        return `<button class="pd-qc-card" data-batch="${i}">
+            <div class="pd-qc-cover"><img src="${escapeHtml(thumb(cover, 400))}" loading="lazy" decoding="async" alt="QC" data-fallback="hide"/><span class="pd-qc-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg>${b.imgs.length}</span></div>
+            ${meta ? `<div class="pd-qc-cap">${escapeHtml(meta)}</div>` : ''}
+        </button>`;
+    }).join('') + `</div>`;
+    panel.querySelectorAll('.pd-qc-card').forEach(card => card.addEventListener('click', () => {
+        const b = batches[parseInt(card.dataset.batch, 10)];
+        if (b) pdLightbox(b.imgs, 0);
+    }));
+}
+
+function pdRenderSimilar() {
+    const panel = document.getElementById('pd-panel-similar');
+    if (!panel) return;
+    const p = _pdState.product;
+    const cache = allProductsCache || [];
+    const myId = pickslyIdOf(p);
+    const sim = cache.filter(x => (x.category || '').toLowerCase() === (p.category || '').toLowerCase() && pickslyIdOf(x) !== myId).slice(0, 10);
+    if (!sim.length) { panel.innerHTML = `<p class="pd-empty">No similar products yet.</p>`; return; }
+    panel.innerHTML = `<div class="products-grid pd-similar-grid">` + sim.map((it, i) => buildProductCard(it, i)).join('') + `</div>`;
+}
+
+let _pdLb = null;
+function pdLightbox(images, start) {
+    if (_pdLb) _pdLb.remove();
+    let idx = start || 0;
+    const ov = document.createElement('div');
+    ov.className = 'pd-lightbox';
+    ov.innerHTML = `<button class="pd-lb-close" aria-label="Close">&times;</button>
+        <button class="pd-lb-nav pd-lb-prev" aria-label="Previous">&#8249;</button>
+        <img class="pd-lb-img" alt="QC"/>
+        <button class="pd-lb-nav pd-lb-next" aria-label="Next">&#8250;</button>
+        <div class="pd-lb-count"></div>`;
+    document.body.appendChild(ov);
+    document.body.style.overflow = 'hidden';
+    _pdLb = ov;
+    const imgEl = ov.querySelector('.pd-lb-img');
+    const countEl = ov.querySelector('.pd-lb-count');
+    const show = () => { imgEl.src = safeExternalUrl(images[idx]); countEl.textContent = `${idx + 1} / ${images.length}`; };
+    const close = () => { ov.remove(); _pdLb = null; document.body.style.overflow = ''; };
+    ov.querySelector('.pd-lb-close').addEventListener('click', close);
+    ov.addEventListener('click', e => { if (e.target === ov) close(); });
+    ov.querySelector('.pd-lb-prev').addEventListener('click', () => { idx = (idx - 1 + images.length) % images.length; show(); });
+    ov.querySelector('.pd-lb-next').addEventListener('click', () => { idx = (idx + 1) % images.length; show(); });
+    const onKey = (e) => { if (e.key === 'Escape') close(); else if (e.key === 'ArrowLeft') { idx = (idx - 1 + images.length) % images.length; show(); } else if (e.key === 'ArrowRight') { idx = (idx + 1) % images.length; show(); } };
+    document.addEventListener('keydown', onKey);
+    const obs = new MutationObserver(() => { if (!document.body.contains(ov)) { document.removeEventListener('keydown', onKey); obs.disconnect(); } });
+    obs.observe(document.body, { childList: true });
+    show();
+}
+
+function pdSwitchTab(tab) {
+    document.querySelectorAll('.pd-tab').forEach(b => b.classList.toggle('active', b.dataset.pdtab === tab));
+    document.getElementById('pd-panel-qc').hidden = tab !== 'qc';
+    document.getElementById('pd-panel-reviews').hidden = tab !== 'reviews';
+    document.getElementById('pd-panel-similar').hidden = tab !== 'similar';
+    if (tab === 'similar') pdRenderSimilar();
 }
 
 function pdSelectColor(color) {
     _pdState.color = color || '';
     const p = _pdState.product;
-    // Update URL ?color without reload.
     if (p) history.replaceState({ page: 'product' }, '', productUrl(p, _pdState.color));
-    // Update title to include color.
     const titleEl = document.getElementById('pd-title');
     if (titleEl && p) titleEl.textContent = stripEmojis(p.title || '') + (_pdState.color ? ' ' + _pdState.color : '');
-    document.querySelectorAll('.pd-swatch').forEach(b =>
-        b.classList.toggle('active', (b.dataset.color || '').toLowerCase() === _pdState.color.toLowerCase()));
-    // Update the main image to reflect the selected variant. Falls back to the
-    // product's DB image (which carries admin rotation/position/zoom) when no
-    // colour is selected or the colour has no QC photo.
+    document.querySelectorAll('.pd-swatch').forEach(b => b.classList.toggle('active', (b.dataset.color || '').toLowerCase() === _pdState.color.toLowerCase()));
+    // Main image reflects the selected variant (falls back to DB image).
     const mainImg = document.getElementById('pd-main-img');
     if (mainImg && mainImg.tagName === 'IMG') {
         const colorImgs = _pdState.color ? pdImagesForColor(_pdState.color) : [];
-        if (colorImgs.length) {
-            mainImg.src = thumb(colorImgs[0], 900);
-            mainImg.style.objectPosition = '50% 50%';
-            mainImg.style.transform = '';
-        } else if (p) {
-            mainImg.src = thumb((p.img || '').trim(), 900);
-            mainImg.style.cssText = `width:100%;height:100%;object-fit:cover;${imgFrameStyle((p.img || '').trim())}`;
-        }
+        if (colorImgs.length) { mainImg.src = thumb(colorImgs[0], 900); mainImg.style.objectPosition = '50% 50%'; mainImg.style.transform = ''; }
+        else if (p) { mainImg.src = thumb((p.img || '').trim(), 900); mainImg.style.cssText = `width:100%;height:100%;object-fit:cover;${imgFrameStyle((p.img || '').trim())}`; }
     }
     pdUpdateCount();
-    pdRenderGallery();
+    pdRenderThumbs();
+    pdRenderQcPanel();
 }
 
 function initProductDetail() {
     const p = _pdState.product;
     if (!p) return;
-    // Buy button works via the global delegated card-btn-buy handler.
     const share = document.getElementById('pd-share');
     if (share) share.addEventListener('click', async () => {
         const url = location.origin + productUrl(p, _pdState.color);
-        try { await navigator.clipboard.writeText(url); share.classList.add('copied'); const t0 = share.innerHTML; share.textContent = 'Copied!'; setTimeout(() => { share.innerHTML = t0; share.classList.remove('copied'); }, 1500); }
-        catch (_) {}
+        try { await navigator.clipboard.writeText(url); share.classList.add('copied'); setTimeout(() => share.classList.remove('copied'), 1500); } catch (_) {}
     });
-    const toggle = document.getElementById('pd-qc-toggle');
-    if (toggle) toggle.addEventListener('click', () => {
-        _pdState.qcOpen = !_pdState.qcOpen;
-        toggle.textContent = _pdState.qcOpen ? 'Hide QC' : `View QC (${pdImagesForColor(_pdState.color).length})`;
-        pdRenderGallery();
-        if (_pdState.qcOpen) document.getElementById('pd-qc-gallery').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-    // Fetch QC metadata (count + colors + weight/sold); images stay lazy.
+    document.querySelectorAll('.pd-tab').forEach(btn => btn.addEventListener('click', () => pdSwitchTab(btn.dataset.pdtab)));
+
     loadProductQc(p).then(res => {
         _pdState.batches = res.batches || [];
         _pdState.meta = { weight: res.weight || '', sold: res.sold || '' };
-        // Pre-select color from URL ?color= if valid.
         const urlColor = new URLSearchParams(location.search).get('color') || '';
-        if (urlColor && _pdState.batches.some(b => (b.color || '').toLowerCase() === urlColor.toLowerCase())) {
-            _pdState.color = urlColor;
-        }
+        if (urlColor && _pdState.batches.some(b => (b.color || '').toLowerCase() === urlColor.toLowerCase())) _pdState.color = urlColor;
         pdRenderColors();
         pdUpdateCount();
-        if (_pdState.color) pdSelectColor(_pdState.color);
-        if (_pdState.qcOpen) pdRenderGallery();
+        pdRenderThumbs();
+        pdRenderQcPanel();
     });
 }
 
