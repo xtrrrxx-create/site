@@ -1900,14 +1900,21 @@ body.light-mode #app-content .tracking-card {
     width: 400px; height: 400px; aspect-ratio: 1; border-radius: 18px; overflow: hidden;
     background: #2a2a2a; box-shadow: rgba(0,0,0,0.35) 0 2px 4px, rgba(0,0,0,0.5) 0 8px 24px;
 }
-.pd-thumbs { display: flex; flex-direction: column; gap: 8px; width: 60px; flex-shrink: 0; }
+.pd-thumbs { display: flex; flex-direction: column; gap: 6px; width: 52px; flex-shrink: 0; }
 .pd-thumb {
-    width: 60px; height: 60px; border-radius: 10px; overflow: hidden; padding: 0;
-    border: 2px solid transparent; background: #2a2a2a; cursor: pointer; transition: border-color 0.15s;
+    width: 52px; height: 52px; border-radius: 12px; overflow: hidden; padding: 0; border: none;
+    background: #2a2a2a; cursor: pointer; position: relative;
+    box-shadow: 0 0 0 1px var(--border-color); opacity: 0.6;
+    transition: opacity 0.15s ease, box-shadow 0.15s ease;
 }
+.pd-thumb:hover { opacity: 1; }
 .pd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.pd-thumb.active { border-color: #ff9f0a; }
-.pd-thumb-more { display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-weight: 700; font-size: 0.82rem; background: var(--nav-bg); border-color: var(--border-color); }
+.pd-thumb.active { opacity: 1; box-shadow: 0 0 0 1px var(--bg-color), 0 0 0 3px #ff9f0a; }
+.pd-thumb-more {
+    display: flex; align-items: center; justify-content: center; opacity: 1;
+    color: var(--text-primary); font-weight: 700; font-size: 0.85rem; background: var(--nav-bg);
+}
+.pd-thumb-more:hover { background: var(--border-color); }
 
 .pd-info { display: flex; flex-direction: column; gap: 0.8rem; padding-top: 0.25rem; max-width: 520px; }
 .pd-crumb { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #ff9f0a; }

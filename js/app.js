@@ -3655,21 +3655,44 @@ function pdUpdateCount() {
     }
 }
 
+// Gallery = the product image (DB, with admin framing) first, then the QC
+// photos for the active colour.
+function pdGalleryImgs() {
+    const p = _pdState.product;
+    const base = (p && (p.img || '').trim()) || '';
+    const list = [];
+    if (base.startsWith('http')) list.push(base);
+    pdImagesForColor(_pdState.color).forEach(u => { if (u && u !== base) list.push(u); });
+    return list;
+}
+function pdSetMain(idx, list) {
+    const main = document.getElementById('pd-main-img');
+    if (!main || main.tagName !== 'IMG' || !list[idx]) return;
+    _pdState.mainIdx = idx;
+    main.src = thumb(list[idx], 900);
+    // Index 0 = product image (keep admin rotation/position/zoom); others plain.
+    main.style.cssText = (idx === 0)
+        ? `width:100%;height:100%;object-fit:cover;${imgFrameStyle((_pdState.product.img || '').trim())}`
+        : `width:100%;height:100%;object-fit:cover;object-position:50% 50%;`;
+    const rail = document.getElementById('pd-thumbs');
+    if (rail) rail.querySelectorAll('.pd-thumb[data-idx]').forEach(b => b.classList.toggle('active', parseInt(b.dataset.idx, 10) === idx));
+}
 function pdRenderThumbs() {
     const rail = document.getElementById('pd-thumbs');
     if (!rail) return;
-    const imgs = pdImagesForColor(_pdState.color);
-    if (!imgs.length) { rail.hidden = true; return; }
+    const list = pdGalleryImgs();
+    if (list.length < 2) { rail.hidden = true; return; }
     rail.hidden = false;
-    const show = imgs.slice(0, 5);
-    const extra = imgs.length - show.length;
+    _pdState.mainIdx = 0;
+    const show = list.slice(0, 5);
+    const extra = list.length - show.length;
     rail.innerHTML = show.map((u, i) =>
-        `<button class="pd-thumb" data-idx="${i}"><img src="${escapeHtml(thumb(u, 160))}" loading="lazy" decoding="async" alt="" data-fallback="hide"/></button>`
-    ).join('') + (extra > 0 ? `<button class="pd-thumb pd-thumb-more" data-idx="5">+${extra}</button>` : '');
-    // The rail IS the QC viewer — clicking a thumb opens the lightbox.
-    rail.querySelectorAll('.pd-thumb').forEach(b => b.addEventListener('click', () => {
-        pdLightbox(imgs, parseInt(b.dataset.idx, 10) || 0);
-    }));
+        `<button class="pd-thumb${i === 0 ? ' active' : ''}" data-idx="${i}"><img src="${escapeHtml(thumb(u, 160))}" loading="lazy" decoding="async" alt="" data-fallback="hide"/></button>`
+    ).join('') + (extra > 0 ? `<button class="pd-thumb pd-thumb-more" data-more="1">+${extra}</button>` : '');
+    // Clicking a thumbnail switches the main image (picks.ly carousel).
+    rail.querySelectorAll('.pd-thumb[data-idx]').forEach(b => b.addEventListener('click', () => pdSetMain(parseInt(b.dataset.idx, 10), list)));
+    const more = rail.querySelector('.pd-thumb-more');
+    if (more) more.addEventListener('click', () => pdLightbox(list, 5));
 }
 
 function pdRenderQcPanel() {
@@ -3783,15 +3806,10 @@ function pdSelectColor(color) {
     const titleEl = document.getElementById('pd-title');
     if (titleEl && p) titleEl.textContent = stripEmojis(p.title || '') + (_pdState.color ? ' ' + _pdState.color : '');
     document.querySelectorAll('.pd-swatch').forEach(b => b.classList.toggle('active', (b.dataset.color || '').toLowerCase() === _pdState.color.toLowerCase()));
-    // Main image reflects the selected variant (falls back to DB image).
-    const mainImg = document.getElementById('pd-main-img');
-    if (mainImg && mainImg.tagName === 'IMG') {
-        const colorImgs = _pdState.color ? pdImagesForColor(_pdState.color) : [];
-        if (colorImgs.length) { mainImg.src = thumb(colorImgs[0], 900); mainImg.style.objectPosition = '50% 50%'; mainImg.style.transform = ''; }
-        else if (p) { mainImg.src = thumb((p.img || '').trim(), 900); mainImg.style.cssText = `width:100%;height:100%;object-fit:cover;${imgFrameStyle((p.img || '').trim())}`; }
-    }
-    pdUpdateCount();
+    // Rebuild the gallery (product image + this colour's QC) and reset to first.
     pdRenderThumbs();
+    pdSetMain(0, pdGalleryImgs());
+    pdUpdateCount();
 }
 
 function initProductDetail() {
@@ -3826,11 +3844,11 @@ function initProductDetail() {
         pdShowAgentMenu(chev);
     });
 
-    // Clicking the main image opens the QC lightbox too.
+    // Clicking the main image opens the lightbox at the current photo.
     const mainImg = document.getElementById('pd-main-img');
     if (mainImg) mainImg.addEventListener('click', () => {
-        const imgs = pdImagesForColor(_pdState.color);
-        if (imgs.length) pdLightbox(imgs, 0);
+        const list = pdGalleryImgs();
+        if (list.length) pdLightbox(list, _pdState.mainIdx || 0);
     });
 
     loadProductQc(p).then(res => {
