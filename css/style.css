@@ -1919,6 +1919,7 @@ body.light-mode #app-content .tracking-card {
 .pd-info { display: flex; flex-direction: column; gap: 0.8rem; padding-top: 0.25rem; max-width: 520px; }
 .pd-crumb { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #ff9f0a; }
 .pd-title { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 2rem; font-weight: 700; line-height: 1.15; color: var(--text-primary); }
+.pd-inner > .pd-title { margin-bottom: 1.5rem; max-width: 720px; }
 .pd-seller { display: inline-flex; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 500; }
 .pd-price { font-size: 1.9rem; font-weight: 800; color: #ff9f0a; }
 .pd-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--text-secondary); font-size: 0.88rem; }

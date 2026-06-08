@@ -125,7 +125,7 @@ export default async function handler(req, res) {
         return res.status(502).json({ error: 'Upstream error', cid });
     }
 
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=30');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Vary', 'Origin');
     return res.json(all);

@@ -1509,6 +1509,13 @@ function getPages() {
         <div style="padding: 1.5rem 4% 3rem;">
             <!-- Filter toolbar lives in the navbar (see #stores-nav-toolbar) -->
             <div id="stores-page">${buildStoresPage()}</div>
+            <div style="max-width:1280px;margin:1rem auto 0;background:linear-gradient(135deg,#ff9f0a,#ff7a00);border-radius:24px;padding:2.4rem 2.6rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;">
+                <div>
+                    <h2 style="color:#fff;font-size:1.6rem;font-weight:700;margin:0 0 .4rem;">Don't Know How To Order?</h2>
+                    <p style="color:rgba(255,255,255,.9);font-size:.95rem;margin:0;max-width:440px;">Follow our simple step-by-step guide to order from any agent.</p>
+                </div>
+                <button data-action="go-tutorials" style="background:#fff;color:#ff7a00;border:none;border-radius:9999px;padding:.9rem 2rem;font-size:.95rem;font-weight:600;cursor:pointer;white-space:nowrap;">Get Started</button>
+            </div>
         </div>
     `,
         products: `
@@ -2276,6 +2283,9 @@ function initApp() {
         attachCarouselHandlers(mainContent);
         mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
             el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('tools'); });
+        });
+        mainContent.querySelectorAll('[data-action="go-tutorials"]').forEach(el => {
+            el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('tutorials'); });
         });
 
         navLinks.forEach(link => {
@@ -3548,6 +3558,7 @@ function buildProductDetail(p) {
     <div class="pd-wrap">
       <div class="pd-inner">
         <a class="pd-back" data-action="go-products"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Back</a>
+        <h1 class="pd-title" id="pd-title">${safeTitle}</h1>
         <div class="pd-main">
             <div class="pd-gallery">
                 <div class="pd-image">${imgHtml}</div>
@@ -3555,7 +3566,6 @@ function buildProductDetail(p) {
             </div>
             <div class="pd-info">
                 <div class="pd-seller">${platformBadge(p.picksly)}<span>${escapeHtml(sellerName)}</span></div>
-                <h1 class="pd-title" id="pd-title">${safeTitle}</h1>
                 <div class="pd-price">${formatPrice(p.price)}</div>
                 <div class="pd-colors" id="pd-colors" hidden></div>
                 <div class="pd-actions">
