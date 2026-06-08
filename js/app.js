@@ -3531,8 +3531,8 @@ function buildProductDetail(p) {
     const rawImg = (p.img || '').trim();
     const safeImg = rawImg.startsWith('http') ? rawImg : '';
     const imgHtml = safeImg
-        ? `<img src="${escapeHtml(thumb(safeImg, 900))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" decoding="async" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
-        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);">No image</div>`;
+        ? `<img id="pd-main-img" src="${escapeHtml(thumb(safeImg, 900))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" decoding="async" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
+        : `<div id="pd-main-img" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);">No image</div>`;
     const seller = catSellerLabel(p);
     const picksly = safeExternalUrl(p.picksly || '#');
     const cat = escapeHtml(p.category || '');
@@ -3670,6 +3670,21 @@ function pdSelectColor(color) {
     if (titleEl && p) titleEl.textContent = stripEmojis(p.title || '') + (_pdState.color ? ' ' + _pdState.color : '');
     document.querySelectorAll('.pd-swatch').forEach(b =>
         b.classList.toggle('active', (b.dataset.color || '').toLowerCase() === _pdState.color.toLowerCase()));
+    // Update the main image to reflect the selected variant. Falls back to the
+    // product's DB image (which carries admin rotation/position/zoom) when no
+    // colour is selected or the colour has no QC photo.
+    const mainImg = document.getElementById('pd-main-img');
+    if (mainImg && mainImg.tagName === 'IMG') {
+        const colorImgs = _pdState.color ? pdImagesForColor(_pdState.color) : [];
+        if (colorImgs.length) {
+            mainImg.src = thumb(colorImgs[0], 900);
+            mainImg.style.objectPosition = '50% 50%';
+            mainImg.style.transform = '';
+        } else if (p) {
+            mainImg.src = thumb((p.img || '').trim(), 900);
+            mainImg.style.cssText = `width:100%;height:100%;object-fit:cover;${imgFrameStyle((p.img || '').trim())}`;
+        }
+    }
     pdUpdateCount();
     pdRenderGallery();
 }
