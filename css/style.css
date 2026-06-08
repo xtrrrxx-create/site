@@ -2031,7 +2031,7 @@ body.light-mode #app-content .tracking-card {
 @media (max-width: 880px) {
     .pd-main { grid-template-columns: 1fr; gap: 1.5rem; }
     .pd-gallery { flex-direction: column-reverse; align-items: center; }
-    .pd-image { width: 100%; height: auto; max-width: 420px; }
+    .pd-image { width: 100%; aspect-ratio: 1 / 1; height: auto; max-width: 420px; }
     .pd-thumbs { flex-direction: row; width: 100%; max-width: 420px; overflow-x: auto; }
     .pd-info { max-width: none; }
     .pd-title { font-size: 1.5rem; }
