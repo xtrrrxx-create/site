@@ -1927,22 +1927,53 @@ body.light-mode #app-content .tracking-card {
 }
 .pd-swatch:hover { color: var(--text-primary); border-color: var(--text-primary); }
 .pd-swatch.active { background: #fff; color: #111; border-color: #fff; }
-.pd-actions { display: flex; align-items: center; gap: 10px; margin-top: 0.6rem; }
-.pd-buy {
-    flex: 0 1 240px; height: 50px; border-radius: 9999px;
-    background: #ff9f0a; color: #fff; border: none; font-weight: 700; font-size: 0.98rem; cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
+.pd-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 0.6rem; }
+/* Agent split Buy button (picks.ly style) */
+.pd-buy-split { display: inline-flex; align-items: stretch; border-radius: 9999px; overflow: hidden; }
+.pd-buy-main {
+    display: inline-flex; align-items: center; gap: 9px; border: none; background: transparent;
+    color: #fff; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 700; font-size: 1rem;
+    padding: 0 1.4rem; height: 50px; cursor: pointer; transition: background 0.15s;
 }
-.pd-buy:hover { background: #f59000; } .pd-buy:active { transform: scale(0.98); }
+.pd-buy-main:hover { background: rgba(0,0,0,0.12); }
+.pd-buy-icon { width: 20px; height: 20px; border-radius: 5px; object-fit: cover; flex-shrink: 0; }
+.pd-buy-div { width: 1px; background: rgba(255,255,255,0.25); }
+.pd-buy-chev {
+    display: inline-flex; align-items: center; justify-content: center; border: none; background: transparent;
+    color: rgba(255,255,255,0.7); padding: 0 0.7rem; cursor: pointer; transition: background 0.15s, color 0.15s;
+}
+.pd-buy-chev:hover { background: rgba(0,0,0,0.12); color: #fff; }
 .pd-icon-btn {
-    width: 50px; height: 50px; border-radius: 9999px; cursor: pointer; flex-shrink: 0;
-    background: var(--nav-bg); border: 1px solid var(--border-color); color: var(--text-primary);
-    display: inline-flex; align-items: center; justify-content: center; transition: border-color 0.15s, color 0.15s;
+    width: 46px; height: 46px; border-radius: 9999px; cursor: pointer; flex-shrink: 0;
+    background: transparent; border: none; color: var(--text-secondary);
+    display: inline-flex; align-items: center; justify-content: center; transition: color 0.15s;
 }
-.pd-icon-btn:hover { border-color: var(--text-primary); }
-.pd-share.copied { border-color: #4ade80; color: #4ade80; }
-.pd-viewpicksly { margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.85rem; text-decoration: none; width: fit-content; }
-.pd-viewpicksly:hover { color: var(--text-primary); }
+.pd-icon-btn:hover { color: var(--text-primary); }
+.pd-save.active { color: #ff9f0a; }
+.pd-save.active svg { fill: #ff9f0a; }
+.pd-share.copied { color: #4ade80; }
+.pd-picksly-btn {
+    display: inline-flex; align-items: center; height: 46px; padding: 0 1.1rem; border-radius: 9999px;
+    background: var(--nav-bg); border: 1px solid var(--border-color); color: var(--text-secondary);
+    font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.85rem; font-weight: 600; text-decoration: none;
+    transition: border-color 0.15s, color 0.15s;
+}
+.pd-picksly-btn:hover { color: var(--text-primary); border-color: var(--text-primary); }
+
+/* Change-agent dropdown */
+.pd-agent-menu {
+    position: absolute; z-index: 9999; min-width: 180px; padding: 6px;
+    background: var(--nav-bg); border: 1px solid var(--border-color); border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+}
+.pd-agent-opt {
+    width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px 10px; border: none;
+    background: transparent; border-radius: 8px; cursor: pointer; color: var(--text-primary);
+    font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.88rem; font-weight: 600; text-align: left;
+}
+.pd-agent-opt:hover { background: var(--border-color); }
+.pd-agent-opt.active { background: var(--border-color); }
+.pd-agent-opt img { width: 18px; height: 18px; border-radius: 4px; object-fit: contain; flex-shrink: 0; }
 
 /* Tabs (QC Gallery / Reviews / Similar) — centered pill toggle */
 .pd-tabs {

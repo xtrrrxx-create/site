@@ -213,6 +213,14 @@ function pickslyIdOf(p) {
     const m = String((p && p.picksly) || '').match(/(WD|TB|AL|1688)\d+/i);
     return m ? m[0].toUpperCase() : '';
 }
+// Current Buy agent (icon + brand colour) for the product page split button.
+const PD_AGENT_COLORS = { kakobuy: '#eb6877', oopbuy: '#ff5c8a', acbuy: '#16a34a', mulebuy: '#8b5cf6', superbuy: '#ef4444', joyagoo: '#f59e0b', usfans: '#eab308' };
+function pdAgentInfo() {
+    const id = (localStorage.getItem(PREFERRED_AGENT_KEY) || 'kakobuy').toLowerCase();
+    const a = AGENTS.find(x => x.id === id) || AGENTS[0];
+    return { id: a.id, name: a.name, icon: `https://www.google.com/s2/favicons?domain=${a.domain}&sz=64`, color: PD_AGENT_COLORS[a.id] || '#ff9f0a' };
+}
+
 // Build the SEO product URL: /products/<cat>/<name>-<PICKSLYID>?color=<c>
 function productUrl(p, color) {
     const id = pickslyIdOf(p);
@@ -3533,9 +3541,8 @@ function buildProductDetail(p) {
     const imgHtml = safeImg
         ? `<img id="pd-main-img" src="${escapeHtml(thumb(safeImg, 900))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" decoding="async" data-fallback="no-image-text" data-orig="${escapeHtml(safeExternalUrl(safeImg))}" />`
         : `<div id="pd-main-img" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);">No image</div>`;
-    const seller = catSellerLabel(p);
+    const sellerName = validSeller(p.seller) || platformName(p.picksly) || 'Store';
     const picksly = safeExternalUrl(p.picksly || '#');
-    const cat = escapeHtml(p.category || '');
     const imgIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>`;
     return `
     <div class="pd-wrap">
@@ -3546,9 +3553,8 @@ function buildProductDetail(p) {
                 <div class="pd-thumbs" id="pd-thumbs"></div>
             </div>
             <div class="pd-info">
-                ${cat ? `<div class="pd-crumb">${cat}</div>` : ''}
+                <div class="pd-seller">${platformBadge(p.picksly)}<span>${escapeHtml(sellerName)}</span></div>
                 <h1 class="pd-title" id="pd-title">${safeTitle}</h1>
-                <div class="pd-seller">${platformBadge(p.picksly)}<span>${escapeHtml(seller)}</span></div>
                 <div class="pd-price">${formatPrice(p.price)}</div>
                 <div class="pd-meta" id="pd-meta">
                     <span class="pd-meta-item">${imgIcon}<b id="pd-qc-count">…</b>&nbsp;QC</span>
@@ -3557,12 +3563,24 @@ function buildProductDetail(p) {
                 </div>
                 <div class="pd-colors" id="pd-colors" hidden></div>
                 <div class="pd-actions">
-                    <button class="card-btn-buy pd-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(p.picksly || ''))}">Buy Now</button>
-                    <button class="pd-icon-btn pd-share" id="pd-share" title="Share" aria-label="Share">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    <div class="pd-buy-split" id="pd-buy-split" style="background:${pdAgentInfo().color}">
+                        <button class="card-btn-buy pd-buy-main" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(p.picksly || ''))}">
+                            <img class="pd-buy-icon" id="pd-buy-icon" src="${escapeHtml(pdAgentInfo().icon)}" alt="" data-fallback="hide"/>
+                            <span>Buy</span>
+                        </button>
+                        <span class="pd-buy-div"></span>
+                        <button class="pd-buy-chev" id="pd-change-agent" aria-label="Change agent" title="Change agent">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                        </button>
+                    </div>
+                    <button class="pd-icon-btn pd-save" id="pd-save" title="Save" aria-label="Save to list">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                     </button>
+                    <button class="pd-icon-btn pd-share" id="pd-share" title="Share" aria-label="Share">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </button>
+                    <a class="pd-picksly-btn" href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer">View on picks.ly &rarr;</a>
                 </div>
-                <a class="pd-viewpicksly" href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer">View on picks.ly &rarr;</a>
             </div>
         </div>
 
@@ -3729,6 +3747,43 @@ function pdLightbox(images, start) {
     show();
 }
 
+// Refresh the Buy split button's icon + colour for the active agent.
+function pdRefreshBuy() {
+    const info = pdAgentInfo();
+    const split = document.getElementById('pd-buy-split');
+    const icon = document.getElementById('pd-buy-icon');
+    if (split) split.style.background = info.color;
+    if (icon) { icon.src = info.icon; icon.style.display = ''; }
+}
+
+// Small dropdown to change the preferred Buy agent (no auto-open).
+let _pdAgentMenu = null;
+function pdShowAgentMenu(anchor) {
+    if (_pdAgentMenu) { _pdAgentMenu.remove(); _pdAgentMenu = null; return; }
+    const menu = document.createElement('div');
+    menu.className = 'pd-agent-menu';
+    const cur = (localStorage.getItem(PREFERRED_AGENT_KEY) || 'kakobuy').toLowerCase();
+    menu.innerHTML = AGENTS.map(a =>
+        `<button class="pd-agent-opt${a.id === cur ? ' active' : ''}" data-agent="${a.id}">
+            <img src="https://www.google.com/s2/favicons?domain=${a.domain}&sz=64" alt="" data-fallback="hide"/>${escapeHtml(a.name)}
+        </button>`).join('');
+    document.body.appendChild(menu);
+    _pdAgentMenu = menu;
+    const r = anchor.getBoundingClientRect();
+    menu.style.top = (window.scrollY + r.bottom + 6) + 'px';
+    menu.style.left = (window.scrollX + r.left) + 'px';
+    const close = () => { if (_pdAgentMenu) { _pdAgentMenu.remove(); _pdAgentMenu = null; } document.removeEventListener('click', onDoc); };
+    const onDoc = (e) => { if (_pdAgentMenu && !_pdAgentMenu.contains(e.target) && e.target !== anchor) close(); };
+    setTimeout(() => document.addEventListener('click', onDoc), 0);
+    menu.querySelectorAll('.pd-agent-opt').forEach(opt => opt.addEventListener('click', () => {
+        const id = opt.dataset.agent;
+        localStorage.setItem(PREFERRED_AGENT_KEY, id);
+        localStorage.setItem('jf_agent', id);
+        pdRefreshBuy();
+        close();
+    }));
+}
+
 function pdSwitchTab(tab) {
     document.querySelectorAll('.pd-tab').forEach(b => b.classList.toggle('active', b.dataset.pdtab === tab));
     document.getElementById('pd-panel-qc').hidden = tab !== 'qc';
@@ -3764,6 +3819,30 @@ function initProductDetail() {
         const url = location.origin + productUrl(p, _pdState.color);
         try { await navigator.clipboard.writeText(url); share.classList.add('copied'); setTimeout(() => share.classList.remove('copied'), 1500); } catch (_) {}
     });
+
+    // Save / bookmark (localStorage wishlist).
+    const SAVED_KEY = 'jf_saved';
+    const pid = pickslyIdOf(p);
+    const saveBtn = document.getElementById('pd-save');
+    const getSaved = () => { try { return JSON.parse(localStorage.getItem(SAVED_KEY)) || []; } catch (_) { return []; } };
+    if (saveBtn && pid) {
+        const sync = () => saveBtn.classList.toggle('active', getSaved().includes(pid));
+        sync();
+        saveBtn.addEventListener('click', () => {
+            let s = getSaved();
+            s = s.includes(pid) ? s.filter(x => x !== pid) : s.concat(pid);
+            localStorage.setItem(SAVED_KEY, JSON.stringify(s));
+            sync();
+        });
+    }
+
+    // Change-agent chevron → updates the Buy split button (icon + colour).
+    const chev = document.getElementById('pd-change-agent');
+    if (chev) chev.addEventListener('click', (e) => {
+        e.stopPropagation();
+        pdShowAgentMenu(chev);
+    });
+
     document.querySelectorAll('.pd-tab').forEach(btn => btn.addEventListener('click', () => pdSwitchTab(btn.dataset.pdtab)));
 
     loadProductQc(p).then(res => {
