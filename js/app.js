@@ -187,7 +187,8 @@ function thumb(rawUrl, w) {
 function imgPosY(rawUrl) {
     const m = String(rawUrl || '').match(/[#&]oy=(\d+)/);
     if (!m) return 50;
-    return Math.max(0, Math.min(100, parseInt(m[1], 10) || 50));
+    const v = parseInt(m[1], 10);
+    return Number.isNaN(v) ? 50 : Math.max(0, Math.min(100, v));
 }
 
 // Zoom percentage baked into an image URL ("#...z=<pct>"). 100 = no zoom.
