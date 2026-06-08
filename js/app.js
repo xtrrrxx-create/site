@@ -177,7 +177,7 @@ function thumb(rawUrl, w) {
         clean = clean.slice(0, hashIdx);
     }
     const width = w || 460;
-    let url = `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=85&we&maxage=1d`;
+    let url = `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=85&we&maxage=30d`;
     if (ro) url += `&ro=${ro}`;
     return url;
 }
