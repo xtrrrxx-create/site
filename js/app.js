@@ -4650,6 +4650,20 @@ window.updateTrackerLinks = function (code) {
         img._fallbackBound = true;
         const mode = img.dataset.fallback;
         img.addEventListener('error', function onErr() {
+            // First failure: if this is a wsrv proxy URL, some images (e.g. signed
+            // URLs with a token) can't be fetched by the proxy even though the
+            // original loads fine. Retry once with the un-proxied original before
+            // giving up and showing the placeholder.
+            if (!this._triedOrig) {
+                this._triedOrig = true;
+                const m = String(this.src).match(/[?&]url=([^&]+)/);
+                if (m && /wsrv\.nl/i.test(this.src)) {
+                    try {
+                        const orig = decodeURIComponent(m[1]);
+                        if (orig && orig !== this.src) { this.src = orig; return; }
+                    } catch (_) {}
+                }
+            }
             this.removeEventListener('error', onErr);
             this.style.display = 'none';
             if (mode === 'no-image-text' && this.parentElement) {
