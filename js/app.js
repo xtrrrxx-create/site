@@ -3556,11 +3556,6 @@ function buildProductDetail(p) {
                 <div class="pd-seller">${platformBadge(p.picksly)}<span>${escapeHtml(sellerName)}</span></div>
                 <h1 class="pd-title" id="pd-title">${safeTitle}</h1>
                 <div class="pd-price">${formatPrice(p.price)}</div>
-                <div class="pd-meta" id="pd-meta">
-                    <span class="pd-meta-item">${imgIcon}<b id="pd-qc-count">…</b>&nbsp;QC</span>
-                    <span class="pd-meta-item" id="pd-weight" hidden></span>
-                    <span class="pd-meta-item" id="pd-sold" hidden></span>
-                </div>
                 <div class="pd-colors" id="pd-colors" hidden></div>
                 <div class="pd-actions">
                     <div class="pd-buy-split" id="pd-buy-split" style="background:${pdAgentInfo().color}">
@@ -3583,15 +3578,6 @@ function buildProductDetail(p) {
                 </div>
             </div>
         </div>
-
-        <div class="pd-tabs">
-            <button class="pd-tab active" data-pdtab="qc">QC Gallery</button>
-            <button class="pd-tab" data-pdtab="reviews">Reviews</button>
-            <button class="pd-tab" data-pdtab="similar">Similar Products</button>
-        </div>
-        <div class="pd-panel" id="pd-panel-qc"><div class="pd-loading"><div class="jf-spinner"></div></div></div>
-        <div class="pd-panel" id="pd-panel-reviews" hidden><p class="pd-empty">No reviews yet.</p></div>
-        <div class="pd-panel" id="pd-panel-similar" hidden></div>
     </div>`;
 }
 
@@ -3676,16 +3662,12 @@ function pdRenderThumbs() {
     const show = imgs.slice(0, 5);
     const extra = imgs.length - show.length;
     rail.innerHTML = show.map((u, i) =>
-        `<button class="pd-thumb${i === 0 ? ' active' : ''}" data-img="${escapeHtml(u)}"><img src="${escapeHtml(thumb(u, 160))}" loading="lazy" decoding="async" alt="" data-fallback="hide"/></button>`
-    ).join('') + (extra > 0 ? `<button class="pd-thumb pd-thumb-more" data-pdtab-jump="qc">+${extra}</button>` : '');
-    rail.querySelectorAll('.pd-thumb[data-img]').forEach(b => b.addEventListener('click', () => {
-        const main = document.getElementById('pd-main-img');
-        if (main && main.tagName === 'IMG') { main.src = thumb(b.dataset.img, 900); main.style.objectPosition = '50% 50%'; main.style.transform = ''; }
-        rail.querySelectorAll('.pd-thumb').forEach(x => x.classList.remove('active'));
-        b.classList.add('active');
+        `<button class="pd-thumb" data-idx="${i}"><img src="${escapeHtml(thumb(u, 160))}" loading="lazy" decoding="async" alt="" data-fallback="hide"/></button>`
+    ).join('') + (extra > 0 ? `<button class="pd-thumb pd-thumb-more" data-idx="5">+${extra}</button>` : '');
+    // The rail IS the QC viewer — clicking a thumb opens the lightbox.
+    rail.querySelectorAll('.pd-thumb').forEach(b => b.addEventListener('click', () => {
+        pdLightbox(imgs, parseInt(b.dataset.idx, 10) || 0);
     }));
-    const more = rail.querySelector('.pd-thumb-more');
-    if (more) more.addEventListener('click', () => pdSwitchTab('qc'));
 }
 
 function pdRenderQcPanel() {
@@ -3808,7 +3790,6 @@ function pdSelectColor(color) {
     }
     pdUpdateCount();
     pdRenderThumbs();
-    pdRenderQcPanel();
 }
 
 function initProductDetail() {
@@ -3843,7 +3824,12 @@ function initProductDetail() {
         pdShowAgentMenu(chev);
     });
 
-    document.querySelectorAll('.pd-tab').forEach(btn => btn.addEventListener('click', () => pdSwitchTab(btn.dataset.pdtab)));
+    // Clicking the main image opens the QC lightbox too.
+    const mainImg = document.getElementById('pd-main-img');
+    if (mainImg) mainImg.addEventListener('click', () => {
+        const imgs = pdImagesForColor(_pdState.color);
+        if (imgs.length) pdLightbox(imgs, 0);
+    });
 
     loadProductQc(p).then(res => {
         _pdState.batches = res.batches || [];
@@ -3851,9 +3837,7 @@ function initProductDetail() {
         const urlColor = new URLSearchParams(location.search).get('color') || '';
         if (urlColor && _pdState.batches.some(b => (b.color || '').toLowerCase() === urlColor.toLowerCase())) _pdState.color = urlColor;
         pdRenderColors();
-        pdUpdateCount();
         pdRenderThumbs();
-        pdRenderQcPanel();
     });
 }
 
