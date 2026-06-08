@@ -132,7 +132,7 @@ export default async function handler(req, res) {
         const rows = r.ok ? await r.json() : [];
         const p = Array.isArray(rows) && rows[0];
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=86400');
+        res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
         if (!p) return res.status(200).send(html);
         return res.status(200).send(injectMeta(html, p, color));
     } catch (e) {
