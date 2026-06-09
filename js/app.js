@@ -223,12 +223,12 @@ function pdAgentInfo() {
 }
 
 // Build the SEO product URL: /products/<cat>/<name>-<PICKSLYID>?color=<c>
+// Anti-scraping: products no longer get a unique, shareable, enumerable URL
+// (the old /products/<cat>/<slug>-<PICKSLYID> exposed the source item id and
+// let bots discover the whole catalogue). The detail view now opens from the
+// in-memory product (set on card click), under one generic /product route.
 function productUrl(p, color) {
-    const id = pickslyIdOf(p);
-    if (!id) return '';
-    const cat = jfSlugify(p.category || 'item');
-    const name = jfSlugify(p.title || 'item');
-    let u = `/products/${cat}/${name}-${id}`;
+    let u = '/product';
     if (color) u += '?color=' + encodeURIComponent(color);
     return u;
 }
@@ -2464,7 +2464,9 @@ function initApp() {
         const path = rawPath.toLowerCase();
         if (VALID_PAGES.includes(path)) return path;
         const parts = rawPath.split('/');
-        // Product detail: /products/<cat>/<slug-with-PICKSLYID>
+        // Generic product detail route (opened from an in-memory selection).
+        if (path === 'product') return 'product';
+        // Backward-compat: old /products/<cat>/<slug-with-PICKSLYID> bookmarks.
         if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'product';
         // /products/category listing route
         if (parts[0].toLowerCase() === 'products' && parts[1] && PRODUCT_CATS_ROUTES.includes(parts[1].toLowerCase())) return 'products';
@@ -3348,11 +3350,19 @@ document.addEventListener('click', function(e) {
     }
 
     // Navigate to the product detail page when clicking a card (but not when
-    // clicking an action button/link inside it).
+    // clicking an action button/link inside it). The product has no unique URL
+    // anymore, so we stash the clicked product in memory (resolved from the
+    // catalogue via the card's picks.ly handle) and open the generic /product.
     if (!(e.target.closest('button, a'))) {
         const navCard = e.target.closest && e.target.closest('[data-purl]');
-        const url = navCard && navCard.getAttribute('data-purl');
-        if (url && window.openProduct) { e.preventDefault(); window.openProduct(url); return; }
+        if (navCard && window.openProduct) {
+            const pk = navCard.querySelector('.card-btn-buy')?.getAttribute('data-picksly') || '';
+            const prod = pk && (allProductsCache || []).find(x => safeExternalUrl(x.picksly || '') === pk);
+            window._pdSelected = prod || null;
+            e.preventDefault();
+            window.openProduct('/product');
+            return;
+        }
     }
 
     // Agent popup: intercept Buy Now button clicks
@@ -3521,21 +3531,16 @@ let _pdState = { product: null, batches: [], color: '', qcOpen: false };
 // the in-memory catalog (matched by Picks.ly id). Reads DB state directly so
 // admin transforms (rotation/position/zoom baked into img) always reflect.
 function resolveProductFromUrl() {
+    // Primary path: the product chosen on the previous card click (in memory).
+    if (window._pdSelected) return window._pdSelected;
+    // Backward-compat: an old /products/<cat>/<slug>-<PID> bookmark — resolve it
+    // from the catalogue if still present. We no longer mint such links.
     const parts = (location.pathname || '').replace(/^\/+|\/+$/g, '').split('/');
     const slug = parts[2] || '';
     const m = slug.match(/(WD|TB|AL|1688)\d+/i);
     const pid = m ? m[0].toUpperCase() : '';
     if (!pid) return null;
-    // SSR hydration payload (only present on a cold server-rendered load).
-    try {
-        const el = document.getElementById('jf-product-data');
-        if (el) {
-            const ssr = JSON.parse(el.textContent || 'null');
-            if (ssr && pickslyIdOf(ssr) === pid) return ssr;
-        }
-    } catch (_) {}
-    const cache = (allProductsCache || []);
-    return cache.find(p => pickslyIdOf(p) === pid) || null;
+    return (allProductsCache || []).find(p => pickslyIdOf(p) === pid) || null;
 }
 
 function buildProductDetail(p) {
@@ -3575,9 +3580,6 @@ function buildProductDetail(p) {
                     </div>
                     <button class="pd-icon-btn pd-save" id="pd-save" title="Save" aria-label="Save to list">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                    </button>
-                    <button class="pd-icon-btn pd-share" id="pd-share" title="Share" aria-label="Share">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                     </button>
                 </div>
                 <a class="pd-picksly-btn" href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer">View on picks.ly</a>
@@ -3819,11 +3821,6 @@ function pdSelectColor(color) {
 function initProductDetail() {
     const p = _pdState.product;
     if (!p) return;
-    const share = document.getElementById('pd-share');
-    if (share) share.addEventListener('click', async () => {
-        const url = location.origin + productUrl(p, _pdState.color);
-        try { await navigator.clipboard.writeText(url); share.classList.add('copied'); setTimeout(() => share.classList.remove('copied'), 1500); } catch (_) {}
-    });
 
     // Save / bookmark (localStorage wishlist).
     const SAVED_KEY = 'jf_saved';

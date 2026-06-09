@@ -1,7 +1,4 @@
 {
-  "functions": {
-    "api/item.js": { "includeFiles": "index.html" }
-  },
   "redirects": [
     {
       "source": "/kakobuy",
@@ -10,7 +7,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/products/:cat/:slug", "destination": "/api/item?cat=:cat&path=:slug" },
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ],
