@@ -487,10 +487,10 @@ const langMap = {
     nav_qc: { EN: "QC Check", PLN: "QC Check", RON: "Verificare QC", CNY: "QC 检查" },
     nav_tools: { EN: "Tools", PLN: "Narzędzia", RON: "Unelte", CNY: "工具" },
     hero_desc: {
-        EN: "The best items finder site. Find top tier items<br>and order with confidence.",
-        PLN: "Najlepsza wyszukiwarka przedmiotów. Znajdź najlepsze rzeczy<br>i zamawiaj bez obaw.",
-        RON: "Cel mai bun site de find-uri. Găsește articole premium<br>și comandă cu încredere.",
-        CNY: "最好的商品发现网站。寻找顶级商品<br>并放心订购。"
+        EN: "Find It. Check It. Buy It Through Your Favorite Agent.",
+        PLN: "Znajdź. Sprawdź. Kup przez swojego ulubionego agenta.",
+        RON: "Găsește. Verifică. Cumpără prin agentul tău preferat.",
+        CNY: "找到它。检查它。通过你喜欢的代理购买。"
     },
     btn_explore: { EN: "Explore Products", PLN: "Przeglądaj Produkty", RON: "Explorează Produsele", CNY: "浏览产品" },
     title_products: { EN: "Products", PLN: "Produkty", RON: "Produse", CNY: "产品" },
@@ -1456,7 +1456,7 @@ function getPages() {
             <div class="pl-hero">
                 <!-- Fixed 1394x375 hero container: header + subtext -->
                 <div class="pl-hero-fixed">
-                    <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
+                    <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">QC Checker</span></h1>
                     <p class="pl-hero-sub">${t('hero_desc')}</p>
                 </div>
                 <!-- Search bar -->
@@ -1519,7 +1519,7 @@ function getPages() {
         <div style="max-width:1400px;margin:0 auto;padding:0 4% 3rem;">
             <!-- Hero search (same as home) -->
             <div class="pl-hero" style="padding-top:2.5rem;padding-bottom:1rem;">
-                <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
+                <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">QC Checker</span></h1>
                 <p class="pl-hero-sub">${t('hero_desc')}</p>
                 <div class="pl-search-wrap">
                     <svg class="pl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -4561,7 +4561,7 @@ function buildHomeSections() {
         </div>
     </div>`;
 
-    return trendingHtml + storesHtml + tutorialsBanner + catSections;
+    return trendingHtml + storesHtml + catSections + tutorialsBanner;
 }
 
 // ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────
