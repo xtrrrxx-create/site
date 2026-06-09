@@ -4485,13 +4485,79 @@ function buildHomeSections() {
         </div>
     </div>` : '';
 
-    const tutorialsBanner = `<div class="hc-section">
-        <div style="background:linear-gradient(135deg,#ff9f0a,#ff7a00);border-radius:24px;padding:2.4rem 2.6rem;display:flex;align-items:center;justify-content:space-between;gap:2rem;flex-wrap:wrap;">
-            <div>
-                <h2 style="color:#fff;font-size:1.6rem;font-weight:700;margin:0 0 .4rem;">Don't Know How To Order?</h2>
-                <p style="color:rgba(255,255,255,.9);font-size:.95rem;margin:0;max-width:440px;">Follow our simple step-by-step guide to order from any agent.</p>
+    // ── "Don't Know How To Order?" CTA (picks.ly style — overlapping mock cards) ──
+    const htoImgs = getPopularInCategory('Shoes', 8).map(storeGoodImg).filter(Boolean);
+    const htoImg = (i) => htoImgs[i] || htoImgs[0] || '';
+    const htoThumb = (src, name, count) => `<div class="store-cat">
+        <div class="store-cat-thumb">${src ? `<img src="${escapeHtml(thumb(src, 260))}" alt="" loading="lazy" data-fallback="hide" />` : ''}</div>
+        <div class="store-cat-name">${name}</div>
+        <div class="store-cat-count">${count} items</div>
+    </div>`;
+    const htoStoreCard = `<div class="store-card">
+        <div class="store-header">
+            ${storeAvatar('weidian')}
+            <div class="store-meta">
+                <span class="store-name">WWTOP</span>
+                <span class="store-sub">Most popular shoe seller</span>
             </div>
-            <button data-action="go-tutorials" style="background:#fff;color:#ff7a00;border:none;border-radius:9999px;padding:.9rem 2rem;font-size:.95rem;font-weight:600;cursor:pointer;white-space:nowrap;">Get Started</button>
+        </div>
+        <div class="store-card-divider"></div>
+        <div class="store-cats">
+            ${htoThumb(htoImg(0), 'Sneakers', 1200)}
+            ${htoThumb(htoImg(1), 'Slippers', 340)}
+            ${htoThumb(htoImg(2), 'Boots', 580)}
+        </div>
+        <button class="store-view-btn" data-action="go-products" data-cat="Shoes">View Store</button>
+    </div>`;
+    const htoProductCard = `<div class="hc-card product-card">
+        <div class="product-image" style="overflow:hidden;">${htoImg(3) ? `<img src="${escapeHtml(thumb(htoImg(3), 600))}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" data-fallback="hide" />` : ''}</div>
+        <div class="product-info">
+            <div class="product-batch-row">${platformBadge('/item/WD0')}<span class="product-store-name">WWTOP</span></div>
+            <h3 class="product-title">Margiela GATS Training Shoes</h3>
+            <div class="product-price">$56.63</div>
+            <div class="product-actions">
+                <button class="card-btn-buy">Buy Now</button>
+                <a class="card-btn-qc">View QC</a>
+            </div>
+        </div>
+    </div>`;
+    const tutorialsBanner = `<div class="hc-section">
+        <style>
+            .hto-card { position:relative; background:#ff9f0a; border-radius:30px; overflow:hidden; min-height:500px; box-shadow:0 24px 60px rgba(15,23,42,.28); display:flex; flex-direction:column; }
+            .hto-card .hto-accent { position:absolute; left:50%; top:0; transform:translateX(-50%); width:65%; height:4px; border-top-left-radius:30px; border-top-right-radius:30px; background:linear-gradient(to right, transparent, #faa951, transparent); opacity:.9; }
+            .hto-left { padding:40px 24px; position:relative; z-index:2; display:flex; flex-direction:column; gap:18px; }
+            .hto-left h2 { color:#fff; font-family:'Inter Tight',system-ui,sans-serif; font-size:30px; font-weight:700; line-height:1.1; letter-spacing:-.02em; margin:0; max-width:300px; }
+            .hto-left p { color:rgba(255,255,255,.95); font-size:15px; line-height:1.45; margin:0; max-width:280px; }
+            .hto-btn { display:inline-flex; align-items:center; justify-content:center; width:fit-content; background:#fff; color:#ff9f0a; font-weight:600; font-size:16px; border:none; border-radius:9999px; padding:14px 32px; cursor:pointer; text-decoration:none; transition:background .2s; }
+            .hto-btn:hover { background:#e8e8e8; }
+            .hto-right { flex:1; display:flex; justify-content:center; align-items:flex-end; padding:0 16px 32px; }
+            .hto-stage { position:relative; width:300px; height:240px; }
+            .hto-stage .store-card { position:absolute; right:8px; bottom:50px; transform:translateX(40%) scale(1.15); transform-origin:bottom right; z-index:1; width:210px; }
+            .hto-stage .product-card { position:absolute; left:30px; bottom:-50px; transform:rotate(8deg) scale(.9); transform-origin:bottom left; z-index:2; width:210px; pointer-events:none; }
+            @media (min-width:1024px) {
+                .hto-card { flex-direction:row; min-height:380px; align-items:stretch; }
+                .hto-left { flex:1; padding:60px 4px 60px 48px; justify-content:center; }
+                .hto-left h2 { font-size:46px; }
+                .hto-left p { font-size:17px; }
+                .hto-right { align-items:center; justify-content:flex-end; padding:0 40px 0 0; }
+                .hto-stage { width:560px; height:320px; }
+                .hto-stage .store-card { right:0; bottom:0; transform:scale(1.45); }
+                .hto-stage .product-card { left:0; bottom:-90px; transform:rotate(10deg) scale(.95); }
+            }
+        </style>
+        <div class="hto-card">
+            <div class="hto-accent"></div>
+            <div class="hto-left">
+                <h2>Don't Know<br>How To Order?</h2>
+                <p>Follow our simple step-by-step guide to order from any agent.</p>
+                <button class="hto-btn" data-action="go-tutorials">Get Started</button>
+            </div>
+            <div class="hto-right">
+                <div class="hto-stage">
+                    ${htoStoreCard}
+                    ${htoProductCard}
+                </div>
+            </div>
         </div>
     </div>`;
 
