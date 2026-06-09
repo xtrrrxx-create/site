@@ -2,8 +2,6 @@
 
 // ─── 0a. ANTI-POACHING (disable right-click / drag / copy of links & images) ──
 (function initCopyProtection() {
-    // Block the context menu site-wide.
-    document.addEventListener('contextmenu', e => e.preventDefault());
     // Block dragging images / links (which would expose the URL).
     document.addEventListener('dragstart', e => {
         const tag = e.target && e.target.tagName;
