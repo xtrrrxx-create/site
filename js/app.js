@@ -4648,14 +4648,15 @@ window.updateTrackerLinks = function (code) {
         img._fallbackBound = true;
         const mode = img.dataset.fallback;
         img.addEventListener('error', function onErr() {
-            // First failure: if this is a wsrv proxy URL, some images (e.g. signed
-            // URLs with a token) can't be fetched by the proxy even though the
-            // original loads fine. Retry once with the un-proxied original before
-            // giving up and showing the placeholder.
+            // First failure: if this is our /api/img (or legacy wsrv) proxy URL,
+            // some images (e.g. signed URLs with a token) can't be fetched by the
+            // proxy even though the original loads fine. Retry once with the
+            // un-proxied original (no watermark, but better than a broken image)
+            // before giving up and showing the placeholder.
             if (!this._triedOrig) {
                 this._triedOrig = true;
                 const m = String(this.src).match(/[?&]url=([^&]+)/);
-                if (m && /wsrv\.nl/i.test(this.src)) {
+                if (m && (/\/api\/img\?/i.test(this.src) || /wsrv\.nl/i.test(this.src))) {
                     try {
                         const orig = decodeURIComponent(m[1]);
                         if (orig && orig !== this.src) { this.src = orig; return; }
