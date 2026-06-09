@@ -160,15 +160,16 @@ function safeExternalUrl(rawUrl) {
     }
 }
 
-// Route product images through wsrv.nl: an edge-cached image proxy that
-// resizes and re-encodes to webp. Thumbnails are a fraction of the original
-// size so the grid paints almost instantly and repeat visits hit the cache.
+// Route product images through our own /api/img proxy: resizes, rotates and
+// re-encodes to webp like before, but also bakes a tiled "jarvis-finder.com"
+// watermark into the pixels — so a copied/scraped image carries the brand.
+// Edge-cached, so each variant is processed at most once.
 function thumb(rawUrl, w) {
     let clean = safeExternalUrl(rawUrl);
     if (clean === "#") return "#";
     // Honour admin-set framing baked into the URL fragment ("#ro=<deg>&oy=<pct>").
-    // Rotation is applied via wsrv's &ro=; the vertical offset is a CSS concern
-    // (see imgPosY) so we just strip the whole fragment before proxying.
+    // Rotation is applied server-side; the vertical offset/zoom are a CSS concern
+    // (see imgFrameStyle) so we strip the whole fragment before proxying.
     let ro = 0;
     const hashIdx = clean.indexOf('#');
     if (hashIdx >= 0) {
@@ -177,7 +178,7 @@ function thumb(rawUrl, w) {
         clean = clean.slice(0, hashIdx);
     }
     const width = w || 460;
-    let url = `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=85&we&maxage=30d`;
+    let url = `/api/img?url=${encodeURIComponent(clean)}&w=${width}`;
     if (ro) url += `&ro=${ro}`;
     return url;
 }
