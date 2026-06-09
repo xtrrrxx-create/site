@@ -1848,6 +1848,65 @@ main {
 .tut-card-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
 .tut-card-text { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; }
 body.light-mode .tut-card { background: #fff; }
+
+/* ── Agent Tutorial: vertical step-by-step guide ── */
+.agt-hero {
+    background: linear-gradient(135deg, #1f1f22, #2a2a2e);
+    border: 1px solid var(--border-color); border-radius: 20px;
+    padding: 2.2rem; margin-bottom: 1.75rem; text-align: center;
+}
+body.light-mode .agt-hero { background: linear-gradient(135deg, #fafafa, #f0f0f0); }
+.agt-hero-title { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 28px; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem; }
+.agt-hero-sub { color: var(--text-secondary); font-size: 14px; max-width: 580px; margin: 0 auto 1.4rem; line-height: 1.55; }
+.agt-start {
+    background: #ff9f0a; color: #111; border: none; border-radius: 9999px;
+    padding: 0.85rem 2.4rem; font-size: 1rem; font-weight: 800; cursor: pointer;
+    transition: transform 0.1s ease, opacity 0.15s ease;
+}
+.agt-start:hover { opacity: 0.9; }
+.agt-start:active { transform: scale(0.97); }
+.agt-steps { display: flex; flex-direction: column; gap: 18px; }
+.agt-step {
+    display: flex; gap: 16px; background: #2a2a2a;
+    border: 1px solid var(--border-color); border-radius: 16px; padding: 18px;
+}
+body.light-mode .agt-step { background: #fff; }
+.agt-step-num {
+    flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
+    background: #ff9f0a; color: #111; font-weight: 800; font-size: 1.05rem;
+    display: flex; align-items: center; justify-content: center;
+}
+.agt-step-main { display: flex; gap: 18px; flex: 1; min-width: 0; }
+.agt-step-img {
+    flex-shrink: 0; width: 220px; aspect-ratio: 1; border-radius: 12px;
+    background: #1f1f1f; display: flex; align-items: center; justify-content: center;
+    color: var(--text-secondary); font-size: 0.8rem; text-align: center; overflow: hidden;
+}
+body.light-mode .agt-step-img { background: #f0f0f0; }
+.agt-step-img img { width: 100%; height: 100%; object-fit: cover; }
+.agt-step-content { flex: 1; min-width: 0; }
+.agt-step-content p { color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0 0 0.7rem; }
+.agt-step-content p:last-child { margin-bottom: 0; }
+.agt-step-content strong { color: var(--text-primary); font-weight: 700; }
+.agt-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.8rem; }
+.agt-btn {
+    display: inline-flex; align-items: center; gap: 0.4rem; border-radius: 9999px;
+    padding: 0.55rem 1.1rem; font-size: 0.85rem; font-weight: 700;
+    text-decoration: none; cursor: pointer; border: 1px solid transparent;
+    transition: transform 0.1s ease, opacity 0.15s ease, border-color 0.15s ease;
+}
+.agt-btn:active { transform: scale(0.97); }
+.agt-btn-kako { background: #eb6877; color: #fff; }
+.agt-btn-kako:hover { opacity: 0.9; }
+.agt-btn-picksly { background: #ff9f0a; color: #111; }
+.agt-btn-picksly:hover { opacity: 0.9; }
+.agt-btn-ghost { background: transparent; border-color: var(--border-color); color: #ff9f0a; }
+.agt-btn-ghost:hover { border-color: #ff9f0a; }
+@media (max-width: 768px) {
+    .agt-step-main { flex-direction: column; }
+    .agt-step-img { width: 100%; }
+}
+
 @media (max-width: 768px) {
     .navbar-inner { gap: 0.5rem; justify-content: space-between; }
     /* Text links hidden on mobile — navigation handled by the bottom nav.
