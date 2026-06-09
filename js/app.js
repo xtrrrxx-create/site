@@ -1555,233 +1555,7 @@ function getPages() {
             </div>
 
             <div class="tut-panel" data-tut-panel="agent">
-                <div class="agt-hero">
-                    <h2 class="agt-hero-title">Agent Tutorial</h2>
-                    <p class="agt-hero-sub">A complete step-by-step guide — from picking an agent to tracking your parcel all the way home.</p>
-                    <button class="agt-start" data-agt-start>Start Now</button>
-                </div>
-
-                <div class="agt-steps" id="agt-steps">
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">1</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>Pick an Agent to use. I recommend going with <strong>Kakobuy</strong>.</p>
-                                <div class="agt-actions">
-                                    <a class="agt-btn agt-btn-kako" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener noreferrer sponsored">Sign up on Kakobuy</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">2</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>Find your items by searching through the <strong>Products</strong> category or using <strong>Picks.ly</strong>.</p>
-                                <div class="agt-actions">
-                                    <a class="agt-btn agt-btn-picksly" href="https://picks.ly/" target="_blank" rel="noopener noreferrer">Open Picks.ly</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">3</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>When you find an item you like through Jarvis-Finder, click on it and select your Agent — which in my case is <strong>Kakobuy</strong>.</p>
-                                <div class="agt-actions">
-                                    <a class="agt-btn agt-btn-kako" href="https://ikako.vip/r/keviinn" target="_blank" rel="noopener noreferrer sponsored">Sign up on Kakobuy</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">4</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>Once you are on the product's page, you can select the <strong>Color</strong>, <strong>Size</strong>, and view <strong>QC photos</strong> (if there are any).</p>
-                                <p>If you want to find EXTRA QC photos, you can do so by pasting your product link into the Picks.ly search-bar.</p>
-                                <div class="agt-actions">
-                                    <a class="agt-btn agt-btn-picksly" href="https://picks.ly/" target="_blank" rel="noopener noreferrer">Open Picks.ly</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">5</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>On shirts, hoodies and pants <strong>ALWAYS look at the size chart!</strong> You can usually find it by scrolling down the product's description, or check the product's measurements from the QC photos.</p>
-                                <p>If the size chart is in Chinese, you can click on it to translate automatically, or use an Image Translator.</p>
-                                <div class="agt-actions">
-                                    <a class="agt-btn agt-btn-ghost" href="https://translate.yandex.com/ocr" target="_blank" rel="noopener noreferrer">Image Translator</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">6</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>Once you are happy with the items in your cart, select the ones you want to buy and click <strong>Submit</strong>.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">7</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>Before checking out, you can request additional pictures of the item — including the waist, length, shoulder, width, sleeve, and more.</p>
-                                <p>I recommend this — it's just <strong>$0.15 per photo</strong>, and you can be 100% sure the measurements are accurate and the item will fit you. You can still buy extra photos even after you purchase the item, so don't worry about this too much!</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">8</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>At checkout, choose a payment method. I personally like to use <strong>Credit Card</strong>, but any option works — it's all 100% safe!</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">9</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>After paying for your items, you'll need to wait for them to arrive at the warehouse. Once they're in, you'll receive pictures of the item. Here's how the tracking process works:</p>
-                                <p>
-                                    <strong>1) Paid</strong> – Your payment is being processed.<br>
-                                    <strong>2) Purchased</strong> – Your Agent has bought the item.<br>
-                                    <strong>3) Seller Sent</strong> – The seller shipped your item to the Agent's warehouse.<br>
-                                    <strong>4) Stored</strong> – Your item is stored in the warehouse, and you'll also get pictures of it.
-                                </p>
-                                <p>If you're not happy with the item's quality or size, you can click the <strong>Return goods</strong> button.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">10</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>Once your items arrive at the warehouse, you'll be able to submit your parcel. Before doing that, you'll see two options:</p>
-                                <p><strong>Rehearsal Packing</strong> — The Agent will measure the actual weight and dimensions of your parcel and charge shipping based on that. You can also request to fold boxes or remove packaging (like shoe boxes) to reduce the volumetric weight and save money. This service costs a few dollars and usually takes 0–2 days, but it's highly recommended if you're in the 🇺🇸 US, where shipping fees add up fast.</p>
-                                <p><strong>Submit</strong> — The standard shipping method, can be submitted immediately. You're initially charged based on an estimated weight. After payment, the actual weight is confirmed and if you were overcharged, your Agent refunds the difference to your account balance.</p>
-                                <p><strong>So which one should you pick?</strong> Rehearsal Packing can reduce your shipping cost if you remove or fold packaging like shoeboxes — both methods end up costing the same based on actual weight, but Rehearsal lets you lower that weight before paying, making it cheaper upfront. Pick Submit if you want to ship now without waiting for weight checking.</p>
-                                <div class="agt-actions">
-                                    <button class="agt-btn agt-btn-ghost" data-tut-goto="rehearsal">More info — Rehearsal Help</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">11</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>On the shipping page, you can choose to:</p>
-                                <p>
-                                    <strong>Remove Tag</strong> – Takes off clothing tags.<br>
-                                    <strong>Remove Packaging</strong> – Removes bags/boxes (recommended for shoes).<br>
-                                    <strong>Fold Outer Package</strong> – Folds boxes (only if you want to keep them).
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">12</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>The BEST add-ons are <strong>Shoe Trees</strong> (if the box is folded/removed) and <strong>Stretch Film</strong> for extra support.</p>
-                                <p>If you have volatile goods, use <strong>Bubble Wrap</strong> or <strong>Corner Protection</strong>.</p>
-                                <div class="agt-actions">
-                                    <button class="agt-btn agt-btn-ghost" data-tut-goto="rehearsal">More info — Rehearsal Help</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">13</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>For the BEST Delivery Route to your country and what to Declare on your parcel, check the Shipping Declare guide.</p>
-                                <div class="agt-actions">
-                                    <button class="agt-btn agt-btn-ghost" data-tut-goto="declare">Shipping Declare</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">14</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>After setting your Delivery Route and Declaration, it's finally time to purchase your parcel. Before submitting, make sure to apply a <strong>Coupon</strong> to save money!</p>
-                                <p>If you need extra coupons, check the Coupons page.</p>
-                                <div class="agt-actions">
-                                    <button class="agt-btn agt-btn-ghost" data-tut-goto="coupons">Coupons</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">15</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>After paying for your parcel, you can track it through the Agent's website.</p>
-                                <p>
-                                    <strong>PC:</strong> Parcel &gt; Parcel Details &gt; Express No: (click)<br>
-                                    <strong>Mobile App:</strong> Mine &gt; Parcel &gt; Tracking Number (click)
-                                </p>
-                                <p>Note: Tracking doesn't update in real time, and you'll need to wait for your Agent to pack your parcel before tracking becomes available!</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="agt-step">
-                        <div class="agt-step-num">16</div>
-                        <div class="agt-step-main">
-                            <div class="agt-step-img">Image coming soon</div>
-                            <div class="agt-step-content">
-                                <p>If you want more accurate tracking updates, you can use universal package trackers like <strong>17Track</strong>. To find your tracking number, go back to the same page shown in Step 15 — copy it and paste it into your preferred tracking website.</p>
-                                <p>You can also try your Delivery Route's own tracking website (if they have one). For example, EMS, UPS, or Royal Mail often provide the most accurate, up-to-date tracking info.</p>
-                                <div class="agt-actions">
-                                    <a class="agt-btn agt-btn-ghost" href="https://www.ems.post/en/global-network/tracking" target="_blank" rel="noopener noreferrer">EMS</a>
-                                    <a class="agt-btn agt-btn-ghost" href="https://www.ups.com/track?loc=en_US&requester=ST/" target="_blank" rel="noopener noreferrer">UPS</a>
-                                    <a class="agt-btn agt-btn-ghost" href="https://www.royalmail.com/track-your-item" target="_blank" rel="noopener noreferrer">Royal Mail</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+                <div id="agt-wizard" class="wz-wrap"></div>
             </div>
 
             <div class="tut-panel" data-tut-panel="xianyu" style="display:none;">
@@ -2694,6 +2468,8 @@ function initApp() {
         // /products/<cat>/<slug-PICKSLYID> routes now just show the grid.
         if (path === 'product') return 'products';
         if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'products';
+        // /tutorials/<slug> (agent-tutorial, xianyu-tutorial, …) → tutorials page
+        if (parts[0].toLowerCase() === 'tutorials' && parts[1]) return 'tutorials';
         // /products/category listing route
         if (parts[0].toLowerCase() === 'products' && parts[1] && PRODUCT_CATS_ROUTES.includes(parts[1].toLowerCase())) return 'products';
         return 'home';
@@ -3127,40 +2903,222 @@ function initSettingsModal() {
 }
 
 // ─── TUTORIALS TABS ─────────────────────────────────────────────────────────
+// Map between tutorial tab keys and their URL slugs (/tutorials/<slug>).
+const TUT_SLUGS = {
+    agent: 'agent-tutorial',
+    xianyu: 'xianyu-tutorial',
+    yupoo: 'yupoo-tutorial',
+    rehearsal: 'rehearsal-help',
+    declare: 'shipping-declare',
+    coupons: 'coupons',
+};
+const TUT_KEY_BY_SLUG = Object.fromEntries(Object.entries(TUT_SLUGS).map(([k, v]) => [v, k]));
+
+// Kakobuy affiliate + Picks.ly links reused across steps.
+const KAKO_AFF = 'https://ikako.vip/r/keviinn';
+
+// The Agent Tutorial as data — rendered as a step-by-step wizard.
+const AGENT_STEPS = [
+    {
+        title: 'Pick Your Agent', sub: 'Choose who buys & ships for you',
+        body: `<p>Pick an Agent to use. I recommend going with <strong>Kakobuy</strong> — great prices, reliable shipping and fast support.</p>`,
+        bullets: ['Sign-up bonus coupons on your new account', 'Discount on your first order', 'Access to exclusive promotions'],
+        actions: [{ label: 'Sign Up on Kakobuy', href: KAKO_AFF, cls: 'agt-btn-kako' }],
+    },
+    {
+        title: 'Find Your Items', sub: 'Search Products or use Picks.ly',
+        body: `<p>Find your items by searching through the <strong>Products</strong> category here, or using <strong>Picks.ly</strong>.</p>`,
+        actions: [{ label: 'Open Picks.ly', href: 'https://picks.ly/', cls: 'agt-btn-picksly' }],
+    },
+    {
+        title: 'Select Your Agent', sub: 'Open the item with your agent',
+        body: `<p>When you find an item you like through Jarvis-Finder, click on it and select your Agent — which in my case is <strong>Kakobuy</strong>.</p>`,
+        actions: [{ label: 'Sign Up on Kakobuy', href: KAKO_AFF, cls: 'agt-btn-kako' }],
+    },
+    {
+        title: 'Color, Size & QC Photos', sub: 'Pick options and inspect quality',
+        body: `<p>On the product's page you can select the <strong>Color</strong>, <strong>Size</strong>, and view <strong>QC photos</strong> (if there are any).</p>
+               <p>Want EXTRA QC photos? Paste your product link into the Picks.ly search-bar.</p>`,
+        actions: [{ label: 'Open Picks.ly', href: 'https://picks.ly/', cls: 'agt-btn-picksly' }],
+    },
+    {
+        title: 'Check the Size Chart', sub: 'Always confirm measurements',
+        body: `<p>On shirts, hoodies and pants <strong>ALWAYS look at the size chart!</strong> Find it by scrolling down the description, or check measurements from the QC photos.</p>
+               <p>If the size chart is in Chinese, click it to translate automatically — or use an Image Translator.</p>`,
+        actions: [{ label: 'Image Translator', href: 'https://translate.yandex.com/ocr', cls: 'agt-btn-ghost' }],
+    },
+    {
+        title: 'Submit Your Cart', sub: 'Send your order to the agent',
+        body: `<p>Once you are happy with the items in your cart, select the ones you want to buy and click <strong>Submit</strong>.</p>`,
+    },
+    {
+        title: 'Request Extra Photos', sub: 'Confirm fit before you pay',
+        body: `<p>Before checking out, you can request additional pictures — waist, length, shoulder, width, sleeve, and more.</p>
+               <p>I recommend it — just <strong>$0.15 per photo</strong> and you can be 100% sure the measurements are accurate. You can still buy extra photos even after purchasing, so don't worry too much!</p>`,
+    },
+    {
+        title: 'Choose Payment', sub: 'Every option is 100% safe',
+        body: `<p>At checkout, choose a payment method. I personally use <strong>Credit Card</strong>, but any option works — it's all 100% safe!</p>`,
+    },
+    {
+        title: 'To the Warehouse', sub: 'How the tracking flow works',
+        body: `<p>After paying, wait for your items to arrive at the warehouse. Once in, you'll get pictures. The flow:</p>
+               <p><strong>1) Paid</strong> – Payment is being processed.<br>
+               <strong>2) Purchased</strong> – Your Agent bought the item.<br>
+               <strong>3) Seller Sent</strong> – Seller shipped it to the warehouse.<br>
+               <strong>4) Stored</strong> – Item is stored and you get pictures of it.</p>
+               <p>Not happy with quality or size? Click the <strong>Return goods</strong> button.</p>`,
+    },
+    {
+        title: 'Submit Your Parcel', sub: 'Rehearsal Packing vs Submit',
+        body: `<p>When your items arrive you can submit your parcel. You'll see two options:</p>
+               <p><strong>Rehearsal Packing</strong> — the Agent measures real weight & dimensions and charges based on that. You can fold boxes or remove packaging (like shoe boxes) to cut volumetric weight and save. Costs a few dollars, takes 0–2 days, highly recommended for 🇺🇸 US.</p>
+               <p><strong>Submit</strong> — standard method, submit immediately. Charged on estimated weight; after payment the actual weight is confirmed and any overcharge is refunded to your balance.</p>
+               <p><strong>Which to pick?</strong> Rehearsal can lower your weight (and cost) before paying. Pick Submit if you want to ship now without waiting.</p>`,
+        actions: [{ label: 'More info — Rehearsal Help', goto: 'rehearsal', cls: 'agt-btn-ghost' }],
+    },
+    {
+        title: 'Shipping Options', sub: 'Tags, packaging & folding',
+        body: `<p>On the shipping page you can choose to:</p>
+               <p><strong>Remove Tag</strong> – takes off clothing tags.<br>
+               <strong>Remove Packaging</strong> – removes bags/boxes (recommended for shoes).<br>
+               <strong>Fold Outer Package</strong> – folds boxes (only if you want to keep them).</p>`,
+    },
+    {
+        title: 'Best Add-ons', sub: 'Protect your items',
+        body: `<p>The BEST add-ons are <strong>Shoe Trees</strong> (if the box is folded/removed) and <strong>Stretch Film</strong> for extra support.</p>
+               <p>Got volatile goods? Use <strong>Bubble Wrap</strong> or <strong>Corner Protection</strong>.</p>`,
+        actions: [{ label: 'More info — Rehearsal Help', goto: 'rehearsal', cls: 'agt-btn-ghost' }],
+    },
+    {
+        title: 'Delivery Route & Declare', sub: 'Best route & what to declare',
+        body: `<p>For the BEST delivery route to your country and what to declare on your parcel, check the Shipping Declare guide.</p>`,
+        actions: [{ label: 'Shipping Declare', goto: 'declare', cls: 'agt-btn-ghost' }],
+    },
+    {
+        title: 'Apply a Coupon', sub: 'Save before you pay',
+        body: `<p>After setting your route and declaration, it's time to buy your parcel. Before submitting, apply a <strong>Coupon</strong> to save money!</p>
+               <p>Need extra coupons? Check the Coupons page.</p>`,
+        actions: [{ label: 'Coupons', goto: 'coupons', cls: 'agt-btn-ghost' }],
+    },
+    {
+        title: 'Track Your Parcel', sub: 'On the agent website',
+        body: `<p>After paying for your parcel you can track it on the Agent's website.</p>
+               <p><strong>PC:</strong> Parcel &gt; Parcel Details &gt; Express No: (click)<br>
+               <strong>Mobile App:</strong> Mine &gt; Parcel &gt; Tracking Number (click)</p>
+               <p>Note: tracking isn't real-time — wait for your Agent to pack the parcel before tracking becomes available.</p>`,
+    },
+    {
+        title: 'Universal Trackers', sub: 'More accurate updates',
+        body: `<p>For more accurate updates use universal trackers like <strong>17Track</strong>. Grab your tracking number from Step 15, then paste it in.</p>
+               <p>You can also use your Delivery Route's own site — EMS, UPS or Royal Mail often give the most accurate info.</p>`,
+        actions: [
+            { label: 'EMS', href: 'https://www.ems.post/en/global-network/tracking', cls: 'agt-btn-ghost' },
+            { label: 'UPS', href: 'https://www.ups.com/track?loc=en_US&requester=ST/', cls: 'agt-btn-ghost' },
+            { label: 'Royal Mail', href: 'https://www.royalmail.com/track-your-item', cls: 'agt-btn-ghost' },
+        ],
+    },
+];
+
+function agtBtnHtml(a) {
+    if (a.href) {
+        const rel = a.cls === 'agt-btn-kako' ? 'noopener noreferrer sponsored' : 'noopener noreferrer';
+        return `<a class="agt-btn ${a.cls}" href="${a.href}" target="_blank" rel="${rel}">${escapeHtml(a.label)}</a>`;
+    }
+    return `<button class="agt-btn ${a.cls}" data-tut-goto="${a.goto}">${escapeHtml(a.label)}</button>`;
+}
+
+// Renders the Agent Tutorial wizard into #agt-wizard. onGoto(key) jumps tabs.
+function renderAgentWizard(onGoto) {
+    const mount = document.getElementById('agt-wizard');
+    if (!mount) return;
+    const total = AGENT_STEPS.length;
+    let cur = 0;
+
+    function draw() {
+        const s = AGENT_STEPS[cur];
+        const pct = Math.round(((cur + 1) / total) * 100);
+        const dots = AGENT_STEPS.map((st, i) =>
+            `<button class="wz-dot ${i === cur ? 'active' : ''} ${i < cur ? 'done' : ''}" data-i="${i}" title="${escapeHtml(st.title)}">${i + 1}</button>`
+        ).join('');
+        const bullets = (s.bullets && s.bullets.length)
+            ? `<ul class="wz-bullets">${s.bullets.map((b, i) => `<li><span class="wz-bn">${i + 1}</span>${escapeHtml(b)}</li>`).join('')}</ul>`
+            : '';
+        const actions = (s.actions && s.actions.length)
+            ? `<div class="agt-actions">${s.actions.map(agtBtnHtml).join('')}</div>`
+            : '';
+        mount.innerHTML = `
+            <div class="wz-top">
+                <div class="wz-top-row"><span>Step ${cur + 1} of ${total}</span><span>${pct}% Complete</span></div>
+                <div class="wz-bar"><div class="wz-bar-fill" style="width:${pct}%"></div></div>
+            </div>
+            <div class="wz-dots">${dots}</div>
+            <div class="wz-card">
+                <span class="wz-step">STEP ${cur + 1}</span>
+                <h2 class="wz-title">${escapeHtml(s.title)}</h2>
+                <p class="wz-sub">${escapeHtml(s.sub || '')}</p>
+                <div class="wz-img">${s.img ? `<img src="${escapeHtml(s.img)}" alt="${escapeHtml(s.title)}" loading="lazy" decoding="async">` : 'Image coming soon'}</div>
+                <div class="wz-body">${s.body || ''}</div>
+                ${bullets}
+                ${actions}
+            </div>
+            <div class="wz-nav">
+                <button class="wz-prev" data-prev ${cur === 0 ? 'disabled' : ''}>‹ Previous</button>
+                <button class="wz-next" data-next>${cur === total - 1 ? 'Finish' : 'Next Step ›'}</button>
+            </div>`;
+        const activeDot = mount.querySelector('.wz-dot.active');
+        if (activeDot) activeDot.scrollIntoView({ inline: 'center', block: 'nearest' });
+    }
+
+    if (!mount._wzBound) {
+        mount._wzBound = true;
+        mount.addEventListener('click', (e) => {
+            const goto = e.target.closest('[data-tut-goto]');
+            if (goto) { onGoto && onGoto(goto.dataset.tutGoto); return; }
+            if (e.target.closest('[data-prev]')) { if (cur > 0) { cur--; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); } return; }
+            if (e.target.closest('[data-next]')) {
+                if (cur < total - 1) { cur++; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                return;
+            }
+            const dot = e.target.closest('.wz-dot');
+            if (dot) { cur = parseInt(dot.dataset.i, 10) || 0; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        });
+    }
+    draw();
+}
+
 window.initTutorials = function () {
     const tabs = document.getElementById('tut-tabs');
     if (!tabs) return;
     const panels = document.querySelectorAll('.tut-panel');
-    const saved = localStorage.getItem('jf_tut_tab') || 'agent';
-    const show = (key) => {
+
+    const show = (key, updateUrl = true) => {
+        if (!TUT_SLUGS[key]) key = 'agent';
         tabs.querySelectorAll('.tut-tab').forEach(b =>
             b.classList.toggle('active', b.dataset.tutTab === key));
         panels.forEach(p => { p.style.display = (p.dataset.tutPanel === key) ? '' : 'none'; });
         localStorage.setItem('jf_tut_tab', key);
+        if (updateUrl) {
+            const path = '/tutorials/' + TUT_SLUGS[key];
+            if (location.pathname !== path) history.replaceState({ page: 'tutorials' }, '', path);
+        }
     };
+
     tabs.querySelectorAll('.tut-tab').forEach(btn => {
         btn.addEventListener('click', () => show(btn.dataset.tutTab));
     });
 
-    // "Start Now" scrolls to the first step.
-    const startBtn = document.querySelector('[data-agt-start]');
-    if (startBtn) {
-        startBtn.addEventListener('click', () => {
-            const steps = document.getElementById('agt-steps');
-            if (steps) steps.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-    }
-
-    // In-tutorial buttons that jump to another tab (Rehearsal / Declare / Coupons).
-    document.querySelectorAll('[data-tut-goto]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            show(btn.dataset.tutGoto);
-            const wrap = document.querySelector('.tut-wrap');
-            if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
+    // Render the wizard; its internal goto buttons jump tabs via show().
+    renderAgentWizard((key) => {
+        show(key);
+        const wrap = document.querySelector('.tut-wrap');
+        if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
-    show(saved);
+    // Initial tab: URL slug wins, else last-used, else agent.
+    const slug = (location.pathname.split('/')[2] || '').toLowerCase();
+    const initialKey = TUT_KEY_BY_SLUG[slug] || localStorage.getItem('jf_tut_tab') || 'agent';
+    show(initialKey);
 };
 
 // ─── STORES TOOLBAR (lives in the navbar container, shown only on /stores) ──
