@@ -1519,7 +1519,7 @@ function getPages() {
         <div style="max-width:1400px;margin:0 auto;padding:0 4% 3rem;">
             <!-- Hero search (same as home) -->
             <div class="pl-hero" style="padding-top:2.5rem;padding-bottom:1rem;">
-                <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">QC Checker</span></h1>
+                <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
                 <p class="pl-hero-sub">${t('hero_desc')}</p>
                 <div class="pl-search-wrap">
                     <svg class="pl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
