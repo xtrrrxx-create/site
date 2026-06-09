@@ -3075,13 +3075,10 @@ function renderAgentWizard(onGoto) {
         mount.addEventListener('click', (e) => {
             const goto = e.target.closest('[data-tut-goto]');
             if (goto) { onGoto && onGoto(goto.dataset.tutGoto); return; }
-            if (e.target.closest('[data-prev]')) { if (cur > 0) { cur--; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); } return; }
-            if (e.target.closest('[data-next]')) {
-                if (cur < total - 1) { cur++; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-                return;
-            }
+            if (e.target.closest('[data-prev]')) { if (cur > 0) { cur--; draw(); } return; }
+            if (e.target.closest('[data-next]')) { if (cur < total - 1) { cur++; draw(); } return; }
             const dot = e.target.closest('.wz-dot');
-            if (dot) { cur = parseInt(dot.dataset.i, 10) || 0; draw(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            if (dot) { cur = parseInt(dot.dataset.i, 10) || 0; draw(); }
         });
     }
     draw();
