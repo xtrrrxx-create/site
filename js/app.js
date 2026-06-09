@@ -2467,10 +2467,10 @@ function initApp() {
         const path = rawPath.toLowerCase();
         if (VALID_PAGES.includes(path)) return path;
         const parts = rawPath.split('/');
-        // Generic product detail route (opened from an in-memory selection).
-        if (path === 'product') return 'product';
-        // Backward-compat: old /products/<cat>/<slug-with-PICKSLYID> bookmarks.
-        if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'product';
+        // Product detail pages were removed — the old /product and
+        // /products/<cat>/<slug-PICKSLYID> routes now just show the grid.
+        if (path === 'product') return 'products';
+        if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'products';
         // /products/category listing route
         if (parts[0].toLowerCase() === 'products' && parts[1] && PRODUCT_CATS_ROUTES.includes(parts[1].toLowerCase())) return 'products';
         return 'home';
@@ -3352,21 +3352,8 @@ document.addEventListener('click', function(e) {
         if (raw) window.trackRecentlyViewed(raw);
     }
 
-    // Navigate to the product detail page when clicking a card (but not when
-    // clicking an action button/link inside it). The product has no unique URL
-    // anymore, so we stash the clicked product in memory (resolved from the
-    // catalogue via the card's picks.ly handle) and open the generic /product.
-    if (!(e.target.closest('button, a'))) {
-        const navCard = e.target.closest && e.target.closest('[data-purl]');
-        if (navCard && window.openProduct) {
-            const pk = navCard.querySelector('.card-btn-buy')?.getAttribute('data-picksly') || '';
-            const prod = pk && (allProductsCache || []).find(x => safeExternalUrl(x.picksly || '') === pk);
-            window._pdSelected = prod || null;
-            e.preventDefault();
-            window.openProduct('/product');
-            return;
-        }
-    }
+    // Product detail pages were removed: clicking a card no longer navigates
+    // anywhere. Only the action buttons (Buy / View QC) below do anything.
 
     // Agent popup: intercept Buy Now button clicks
     const buyBtn = e.target.closest && e.target.closest('button.card-btn-buy[data-kakobuy]');
