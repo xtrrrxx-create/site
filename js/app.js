@@ -178,7 +178,9 @@ function thumb(rawUrl, w) {
         clean = clean.slice(0, hashIdx);
     }
     const width = w || 460;
-    let url = `/api/img?url=${encodeURIComponent(clean)}&w=${width}`;
+    // wmv = watermark version; bump it whenever the watermark rendering changes
+    // so the immutably edge-cached old variants get regenerated.
+    let url = `/api/img?url=${encodeURIComponent(clean)}&w=${width}&wmv=2`;
     if (ro) url += `&ro=${ro}`;
     return url;
 }
