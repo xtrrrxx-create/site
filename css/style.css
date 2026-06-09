@@ -1851,11 +1851,11 @@ body.light-mode .tut-card { background: #fff; }
 
 /* ── Agent Tutorial: vertical step-by-step guide ── */
 .agt-hero {
-    background: linear-gradient(135deg, #1f1f22, #2a2a2e);
-    border: 1px solid var(--border-color); border-radius: 20px;
+    background: #2a2a2a; border: none; border-radius: 20px;
     padding: 2.2rem; margin-bottom: 1.75rem; text-align: center;
+    box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 24px 0;
 }
-body.light-mode .agt-hero { background: linear-gradient(135deg, #fafafa, #f0f0f0); }
+body.light-mode .agt-hero { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px 8px 0, rgba(0,0,0,0.12) 0 4px 16px 0; }
 .agt-hero-title { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 28px; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem; }
 .agt-hero-sub { color: var(--text-secondary); font-size: 14px; max-width: 580px; margin: 0 auto 1.4rem; line-height: 1.55; }
 .agt-start {
@@ -1868,10 +1868,11 @@ body.light-mode .agt-hero { background: linear-gradient(135deg, #fafafa, #f0f0f0
 .agt-start:active { opacity: 0.7; }
 .agt-steps { display: flex; flex-direction: column; gap: 18px; }
 .agt-step {
-    display: flex; gap: 16px; background: #2a2a2a;
-    border: 1px solid var(--border-color); border-radius: 16px; padding: 18px;
+    display: flex; gap: 16px; background: #2a2a2a; border: none;
+    border-radius: 16px; padding: 18px;
+    box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 24px 0;
 }
-body.light-mode .agt-step { background: #fff; }
+body.light-mode .agt-step { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px 8px 0, rgba(0,0,0,0.12) 0 4px 16px 0; }
 .agt-step-num {
     flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
     background: #ff9f0a; color: #111; font-weight: 800; font-size: 1.05rem;
@@ -1925,10 +1926,11 @@ body.light-mode .agt-step-img { background: #f0f0f0; }
 .wz-dot.done { background: #ff9f0a; border-color: #ff9f0a; color: #111; }
 .wz-dot.active { border-color: #ff9f0a; color: #ff9f0a; box-shadow: 0 0 0 3px rgba(255,159,10,0.18); }
 .wz-card {
-    background: var(--nav-bg); border: 1px solid var(--border-color);
+    background: #2a2a2a; border: none;
     border-radius: 18px; padding: 1.8rem 2rem; margin-bottom: 1.2rem;
+    box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 24px 0;
 }
-body.light-mode .wz-card { background: #fff; }
+body.light-mode .wz-card { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px 8px 0, rgba(0,0,0,0.12) 0 4px 16px 0; }
 .wz-step { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; color: #ff9f0a; }
 .wz-title { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 1.7rem; font-weight: 800; color: var(--text-primary); margin: 0.35rem 0 0.25rem; line-height: 1.15; }
 .wz-sub { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 1.2rem; }
