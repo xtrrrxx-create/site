@@ -61,7 +61,7 @@ function watermarkSvg(width, height) {
                 </filter>
                 <pattern id="wm" width="${tileW}" height="${tileH}" patternUnits="userSpaceOnUse"
                          patternTransform="rotate(-30)">
-                    <g fill="#ffffff" fill-opacity="0.20" filter="url(#sh)">
+                    <g fill="#ffffff" fill-opacity="0.10" filter="url(#sh)">
                         ${word(0, y1)}
                         ${word(half, y2)}
                         ${word(half - tileW, y2)}
