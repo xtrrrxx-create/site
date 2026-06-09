@@ -12,5 +12,8 @@ Allow: /og-image.png
 Disallow: /api/
 Disallow: /*.json$
 Disallow: /*.py$
+# Anti-scraping: block crawling of individual product detail pages
+# (/products/<category>/<slug>); the /products grid above stays allowed.
+Disallow: /products/
 
 Sitemap: https://www.jarvis-finder.com/sitemap.xml

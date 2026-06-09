@@ -12,7 +12,10 @@ const ALLOWED_ORIGINS = new Set([
 // Anything that bypasses the cache (cache-buster query, no-cache header)
 // counts toward this budget. In-memory; per warm instance only.
 const RL_WINDOW_MS = 60 * 1000;
-const RL_MAX = 30; // 30 origin hits / IP / minute is plenty for a real user
+// Aggressive: the full catalogue is one response, so a real user needs this
+// endpoint only a handful of times per minute (initial load + auto-refresh).
+// Anything beyond that is a scraper bypassing the edge cache.
+const RL_MAX = 8;
 const rlMap = new Map();
 
 // Block obvious scrapers/automation by UA. We do NOT rely on this for
@@ -56,8 +59,18 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Require proof the request came from our own site: a valid Origin, or
+    // (when the browser omits Origin on same-origin GETs) a Referer on our
+    // domain. A bare request with neither is rejected. Both headers are
+    // spoofable, so this is a friction layer, not a guarantee.
     const origin = req.headers.origin;
-    if (origin && !ALLOWED_ORIGINS.has(origin)) {
+    const referer = req.headers.referer || '';
+    const refererOk =
+        referer.startsWith('https://jarvis-finder.com/') ||
+        referer.startsWith('https://www.jarvis-finder.com/');
+    if (origin) {
+        if (!ALLOWED_ORIGINS.has(origin)) return res.status(403).json({ error: 'Forbidden' });
+    } else if (!refererOk) {
         return res.status(403).json({ error: 'Forbidden' });
     }
 

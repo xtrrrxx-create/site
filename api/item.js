@@ -88,6 +88,15 @@ function injectMeta(html, p, color) {
     };
 
     let out = html;
+    // Anti-scraping: keep rich per-product meta for direct shares (Discord/
+    // Twitter previews still work) but tell search engines NOT to index or
+    // follow individual product pages, so the catalogue can't be bulk-
+    // discovered through Google. Drops already-indexed product pages too.
+    if (/<meta\s+name="robots"/i.test(out)) {
+        out = out.replace(/<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/i, `<meta name="robots" content="noindex,nofollow" />`);
+    } else {
+        out = out.replace(/<\/head>/i, `<meta name="robots" content="noindex,nofollow" /></head>`);
+    }
     out = out.replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc(pageTitle)}</title>`);
     out = out.replace(/<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i, `<meta name="description" content="${esc(desc)}" />`);
     out = out.replace(/<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i, `<link rel="canonical" href="${esc(url)}" />`);
