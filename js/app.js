@@ -1456,7 +1456,7 @@ function getPages() {
             <div class="pl-hero">
                 <!-- Fixed 1394x375 hero container: header + subtext -->
                 <div class="pl-hero-fixed">
-                    <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">QC Checker</span></h1>
+                    <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
                     <p class="pl-hero-sub">${t('hero_desc')}</p>
                 </div>
                 <!-- Search bar -->
