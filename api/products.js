@@ -12,10 +12,11 @@ const ALLOWED_ORIGINS = new Set([
 // Anything that bypasses the cache (cache-buster query, no-cache header)
 // counts toward this budget. In-memory; per warm instance only.
 const RL_WINDOW_MS = 60 * 1000;
-// Aggressive: the full catalogue is one response, so a real user needs this
-// endpoint only a handful of times per minute (initial load + auto-refresh).
-// Anything beyond that is a scraper bypassing the edge cache.
-const RL_MAX = 8;
+// The catalogue is edge-cached (s-maxage), so real users rarely reach this
+// function. 20 leaves headroom for refreshes / multiple tabs while still
+// throttling a scraper that busts the cache. (8 was too low — tripped 429s
+// during normal use.)
+const RL_MAX = 20;
 const rlMap = new Map();
 
 // Block obvious scrapers/automation by UA. We do NOT rely on this for
