@@ -59,7 +59,8 @@ function watermarkSvg(width, height) {
                     <feDropShadow dx="0" dy="3" stdDeviation="2.2"
                                   flood-color="black" flood-opacity="0.55"/>
                 </filter>
-                <pattern id="wm" width="${tileW}" height="${tileH}" patternUnits="userSpaceOnUse">
+                <pattern id="wm" width="${tileW}" height="${tileH}" patternUnits="userSpaceOnUse"
+                         patternTransform="rotate(-30)">
                     <g fill="#ffffff" fill-opacity="0.20" filter="url(#sh)">
                         ${word(0, y1)}
                         ${word(half, y2)}
