@@ -59,18 +59,12 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Require proof the request came from our own site: a valid Origin, or
-    // (when the browser omits Origin on same-origin GETs) a Referer on our
-    // domain. A bare request with neither is rejected. Both headers are
-    // spoofable, so this is a friction layer, not a guarantee.
+    // Browsers omit Origin on same-origin GETs, so we can only reject a
+    // *present* Origin that isn't ours. Missing Origin is allowed (real users
+    // on the SPA, plus preview deployments). UA filter + rate limit below do
+    // the heavier lifting.
     const origin = req.headers.origin;
-    const referer = req.headers.referer || '';
-    const refererOk =
-        referer.startsWith('https://jarvis-finder.com/') ||
-        referer.startsWith('https://www.jarvis-finder.com/');
-    if (origin) {
-        if (!ALLOWED_ORIGINS.has(origin)) return res.status(403).json({ error: 'Forbidden' });
-    } else if (!refererOk) {
+    if (origin && !ALLOWED_ORIGINS.has(origin)) {
         return res.status(403).json({ error: 'Forbidden' });
     }
 
