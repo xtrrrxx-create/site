@@ -180,7 +180,7 @@ function thumb(rawUrl, w) {
     const width = w || 460;
     // wmv = watermark version; bump it whenever the watermark rendering changes
     // so the immutably edge-cached old variants get regenerated.
-    let url = `/api/img?url=${encodeURIComponent(clean)}&w=${width}&wmv=2`;
+    let url = `/api/img?url=${encodeURIComponent(clean)}&w=${width}&wmv=3`;
     if (ro) url += `&ro=${ro}`;
     return url;
 }
