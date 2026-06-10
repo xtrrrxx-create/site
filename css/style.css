@@ -1941,6 +1941,7 @@ body.light-mode .wz-card { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px 
 }
 body.light-mode .wz-img { background: #f0f0f0; }
 .wz-img img { width: 100%; height: 100%; object-fit: cover; }
+.wz-img--contain img { object-fit: contain; }
 .wz-body p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.65; margin: 0 0 0.8rem; }
 .wz-body p:last-child { margin-bottom: 0; }
 .wz-body strong { color: var(--text-primary); font-weight: 700; }
