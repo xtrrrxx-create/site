@@ -128,8 +128,9 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    /* Solid background, same as the site — no translucent/blur effect. */
+    /* picks.ly: bg-canvas + backdrop-blur-sm */
     background: var(--bg-color);
+    backdrop-filter: blur(4px);
     border: none;
 }
 
@@ -315,10 +316,10 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 
 .pl-hero-title {
     font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: clamp(2rem, 5vw, 42px);
+    font-size: clamp(32px, 5vw, 42px);
     font-weight: 600;
     letter-spacing: -0.025em;
-    line-height: 1.3;
+    line-height: 1.5; /* 63px @ 42px, like picks.ly md:leading-[63px] */
     color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
@@ -330,7 +331,7 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 
 .pl-hero-sub {
     color: var(--text-secondary);
-    font-size: 15px;
+    font-size: clamp(14px, 1.5vw, 16px);
     margin-bottom: 1.75rem;
 }
 
@@ -341,16 +342,17 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
     position: relative;
     display: flex;
     align-items: center;
-    background: var(--nav-bg);
-    border: 1px solid var(--border-color);
+    gap: 0.2rem;
+    background: var(--surface);
+    border: none;
     border-radius: 9999px;
-    padding: 0 1.1rem;
-    height: 64px;
-    transition: border-color 0.2s ease;
+    padding: 18px 20px; /* picks.ly: rounded-full px-5 py-[18px] */
+    height: auto;
+    transition: background 0.3s ease;
 }
 
 .pl-search-wrap:focus-within {
-    border-color: var(--text-secondary);
+    background: var(--muted);
 }
 
 .pl-search-icon {
@@ -400,19 +402,19 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 .pl-cat {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     background: transparent;
     border: none;
     outline: none;
     -webkit-tap-highlight-color: transparent;
     color: var(--text-secondary);
     font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    padding: 0.5rem 0.85rem;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 10px 12px;
     cursor: pointer;
-    border-radius: 8px;
-    transition: color 0.2s, background 0.2s;
+    border-radius: 44px;
+    transition: color 0.2s;
 }
 .pl-cat:focus, .pl-cat:focus-visible { outline: none; box-shadow: none; }
 
@@ -420,7 +422,7 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 
 .pl-cat:hover {
     color: var(--text-primary);
-    background: rgba(255,255,255,0.05);
+    background: transparent; /* picks.ly chips only change text color on hover */
 }
 
 .pl-cat.active,
@@ -431,7 +433,7 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 .pl-cat.active svg,
 .pl-cat-home svg { color: var(--text-primary); }
 .pl-cat-home { text-decoration: none; }
-.pl-cat-home:hover { background: rgba(255,255,255,0.05); color: var(--text-primary); }
+.pl-cat-home:hover { background: transparent; color: var(--text-primary); }
 
 body.light-mode .pl-cat:hover {
     background: rgba(0,0,0,0.04);
@@ -1675,13 +1677,17 @@ main {
 /* All navbar links share the same plain-text look */
 .nav-left .nav-link, .nav-right .nav-link {
     font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 0.92rem; font-weight: 500; color: var(--text-secondary);
-    text-decoration: none; transition: color 0.2s ease; white-space: nowrap;
+    font-size: 14px; font-weight: 400; color: var(--text-secondary);
+    text-decoration: none; transition: color 0.15s ease, background 0.15s ease;
+    white-space: nowrap;
+    padding: 4px 8px; border-radius: 6px; /* picks.ly: px-2 py-1 rounded hover:bg-muted-hover */
 }
 .nav-left .nav-link:hover, .nav-left .nav-link.active,
 .nav-right .nav-link:hover, .nav-right .nav-link.active { color: var(--text-primary); }
+.nav-left .nav-link:hover, .nav-right .nav-link:hover { background: var(--muted-hover); }
 
-.nav-gear-btn { width: 34px; height: 34px; border: 1px solid var(--border-color); flex-shrink: 0; }
+.nav-gear-btn { width: 36px; height: 36px; border: none; flex-shrink: 0; transition: background 0.15s ease, color 0.15s ease; }
+.nav-gear-btn:hover { background: var(--muted-hover); color: var(--text-primary); }
 .nav-gear-btn .gear-icon { transition: transform 0.4s ease; }
 .nav-gear-btn:hover .gear-icon { transform: rotate(90deg); }
 
