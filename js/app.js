@@ -2142,7 +2142,6 @@ function getPages() {
 
         <div class="tools-wrap">
             <div class="tool-card">
-                <div class="tool-eyebrow">${t('tool_eyebrow')}</div>
                 <h2 class="tool-title">${t('link_converter')}</h2>
                 <p class="tool-subtitle">${t('link_converter_subtitle')}</p>
                 <div class="converter-row">
@@ -2166,7 +2165,6 @@ function getPages() {
             </div>
 
             <div class="tool-card" id="weight-estimator-card">
-                <div class="tool-eyebrow">SHIPPING</div>
                 <h2 class="tool-title">Weight Estimator</h2>
                 <p class="tool-subtitle">Select your items to estimate parcel weight before shipping.</p>
                 <div class="weight-categories" id="weight-cats"></div>
@@ -4577,7 +4575,7 @@ function buildHomeSections() {
         </div>
     </div>`;
 
-    return trendingHtml + storesHtml + catSections + tutorialsBanner;
+    return trendingHtml + storesHtml + tutorialsBanner + catSections;
 }
 
 // ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────

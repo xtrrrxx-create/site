@@ -1845,7 +1845,7 @@ main {
 .tut-card-img img { width: 100%; height: 100%; object-fit: cover; }
 .tut-card-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
 .tut-card-step { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #ff9f0a; }
-.tut-card-title { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+.tut-card-title { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 1rem; font-weight: 700; color: var(--text-primary); }
 .tut-card-text { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; }
 body.light-mode .tut-card { background: #fff; }
 
