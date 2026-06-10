@@ -7,6 +7,19 @@
     --accent-color: #ff9f0a;
     --glow-color: rgba(255, 255, 255, 0.1);
 
+    /* picks.ly design tokens (dark) */
+    --surface: #2a2a2a;
+    --surface-hover: #323232;
+    --muted: #363636;
+    --muted-hover: #3e3e3e;
+    --line: #424242;
+    --fg-muted: #a0a0a0;
+    --fg-faint: #686868;
+    --radius-card: 16px;
+    --radius-pill: 9999px;
+    --shadow-soft: 0 26px 55px #00000080;
+    --shadow-soft-subtle: 0 18px 40px #0000004d;
+
     --ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
@@ -14,11 +27,22 @@
 body.light-mode {
     --bg-color: #f5f5f5;
     --nav-bg: #ffffff;
-    --border-color: #e5e5e5;
+    --border-color: #e0e0e0;
     --text-primary: #171717;
-    --text-secondary: #525252;
+    --text-secondary: #737373;
     --accent-color: #ff9f0a;
     --glow-color: rgba(0, 0, 0, 0.1);
+
+    /* picks.ly design tokens (light) */
+    --surface: #ffffff;
+    --surface-hover: #ededed;
+    --muted: #ededed;
+    --muted-hover: #e3e3e3;
+    --line: #e0e0e0;
+    --fg-muted: #737373;
+    --fg-faint: #a1a1a1;
+    --shadow-soft: 0 26px 55px #0f172a14;
+    --shadow-soft-subtle: 0 18px 40px #0f172a0a;
 }
 
 body.light-mode .product-card {
