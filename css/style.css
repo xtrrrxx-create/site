@@ -309,7 +309,8 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 /* ===== PICKS.LY-STYLE HERO ===== */
 .pl-hero {
     text-align: center;
-    padding: 2.25rem 24px 1rem;
+    /* picks.ly: py-8 md:py-12 lg:py-16, pb-4 md:pb-6 */
+    padding: clamp(2rem, 5vw, 4rem) 24px 1.5rem;
     max-width: 1280px;
     margin: 0 auto;
 }

@@ -1372,9 +1372,12 @@ function getPages() {
             /* ── Category carousel sections (picks.ly clone) ── */
             .hc-section {
                 max-width: 1280px;
-                margin: 0 auto 2rem;
-                padding: 0;
+                /* picks.ly: section py-3 → 24px between sections */
+                margin: 0 auto;
+                padding: 12px 0;
             }
+            /* picks.ly: How-To-Order banner has my-12 md:my-24 */
+            .hc-section:has(.hto-card) { margin: clamp(3rem, 6vw, 6rem) auto; padding: 0; }
             .hc-header {
                 display: flex;
                 align-items: center;
