@@ -1689,8 +1689,8 @@ function getPages() {
                 width: 100%; box-sizing: border-box; }
             .qc-card { background: var(--nav-bg); border: 1px solid var(--border-color);
                 border-radius: 16px; padding: 2rem; width: 100%; box-sizing: border-box; }
-            .qc-title { font-family:'Inter Tight',system-ui,sans-serif; font-size: 26px; font-weight: 600; letter-spacing: -0.025em;
-                color: var(--text-primary); margin-bottom: 0.4rem; line-height: 31px; text-align: left; }
+            .qc-title { font-family:'Inter Tight',system-ui,sans-serif; font-size: 32px; font-weight: 400;
+                color: var(--text-primary); margin-bottom: 0.4rem; line-height: 48px; text-align: left; }
             .qc-subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 1.5rem; text-align: left; }
             .qc-row { display: flex; gap: 0.75rem; align-items: stretch; }
             .qc-input { flex: 1; background: var(--bg-color); border: 1px solid var(--border-color);
@@ -1843,12 +1843,12 @@ function getPages() {
                 margin-bottom: 0.5rem;
             }
             .tool-title {
-                font-size: 2.6rem;
-                font-weight: 900;
-                letter-spacing: -1.5px;
+                font-family: 'Inter Tight', system-ui, sans-serif;
+                font-size: 32px;
+                font-weight: 400;
+                line-height: 48px;
                 color: var(--text-primary);
                 margin-bottom: 0.4rem;
-                line-height: 1;
             }
             .tool-subtitle {
                 color: var(--text-secondary);

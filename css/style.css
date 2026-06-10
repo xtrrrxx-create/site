@@ -1818,7 +1818,7 @@ main {
 ═══════════════════════════════════════════════════════════ */
 .tut-wrap { max-width: 1280px; margin: 0 auto; padding: 1.75rem 4% 3rem; }
 .tut-head { margin-bottom: 1.25rem; }
-.tut-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); margin-bottom: 0.4rem; }
+.tut-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 400; line-height: 48px; color: var(--text-primary); margin-bottom: 0.4rem; }
 .tut-head p { color: var(--text-secondary); font-size: 14px; }
 .tut-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.75rem; }
 .tut-tab {
