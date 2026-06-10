@@ -2921,56 +2921,56 @@ const KAKO_AFF = 'https://ikako.vip/r/keviinn';
 const AGENT_STEPS = [
     {
         title: 'Pick Your Agent', sub: 'Choose who buys & ships for you',
-        img: '/images/agent-tutorial/step1.png',
+        img: '/images/agent-tutorial/step1.png?v=2',
         body: `<p>Pick an Agent to use. I recommend going with <strong>Kakobuy</strong> — great prices, reliable shipping and fast support.</p>`,
         bullets: ['Sign-up bonus coupons on your new account', 'Discount on your first order', 'Access to exclusive promotions'],
         actions: [{ label: 'Sign Up on Kakobuy', href: KAKO_AFF, cls: 'agt-btn-kako' }],
     },
     {
         title: 'Find Your Items', sub: 'Search Products or use Picks.ly',
-        img: '/images/agent-tutorial/step2.png',
+        img: '/images/agent-tutorial/step2.png?v=2',
         body: `<p>Find your items by searching through the <strong>Products</strong> category here, or using <strong>Picks.ly</strong>.</p>`,
         actions: [{ label: 'Open Picks.ly', href: 'https://picks.ly/', cls: 'agt-btn-picksly' }],
     },
     {
         title: 'Select Your Agent', sub: 'Open the item with your agent',
-        img: '/images/agent-tutorial/step3.png', fit: 'contain',
+        img: '/images/agent-tutorial/step3.png?v=2', fit: 'contain',
         body: `<p>When you find an item you like through Jarvis-Finder, click on it and select your Agent — which in my case is <strong>Kakobuy</strong>.</p>`,
         actions: [{ label: 'Sign Up on Kakobuy', href: KAKO_AFF, cls: 'agt-btn-kako' }],
     },
     {
         title: 'Color, Size & QC Photos', sub: 'Pick options and inspect quality',
-        img: '/images/agent-tutorial/step4.png', fit: 'contain',
+        img: '/images/agent-tutorial/step4.png?v=2', fit: 'contain',
         body: `<p>On the product's page you can select the <strong>Color</strong>, <strong>Size</strong>, and view <strong>QC photos</strong> (if there are any).</p>
                <p>Want EXTRA QC photos? Paste your product link into the Picks.ly search-bar.</p>`,
         actions: [{ label: 'Open Picks.ly', href: 'https://picks.ly/', cls: 'agt-btn-picksly' }],
     },
     {
         title: 'Check the Size Chart', sub: 'Always confirm measurements',
-        img: '/images/agent-tutorial/step5.png', fit: 'contain',
+        img: '/images/agent-tutorial/step5.png?v=2', fit: 'contain',
         body: `<p>On shirts, hoodies and pants <strong>ALWAYS look at the size chart!</strong> Find it by scrolling down the description, or check measurements from the QC photos.</p>
                <p>If the size chart is in Chinese, click it to translate automatically — or use an Image Translator.</p>`,
         actions: [{ label: 'Image Translator', href: 'https://translate.yandex.com/ocr', cls: 'agt-btn-ghost' }],
     },
     {
         title: 'Submit Your Cart', sub: 'Send your order to the agent',
-        img: '/images/agent-tutorial/step6.png', fit: 'contain',
+        img: '/images/agent-tutorial/step6.png?v=2', fit: 'contain',
         body: `<p>Once you are happy with the items in your cart, select the ones you want to buy and click <strong>Submit</strong>.</p>`,
     },
     {
         title: 'Request Extra Photos', sub: 'Confirm fit before you pay',
-        img: '/images/agent-tutorial/step7.png', fit: 'contain',
+        img: '/images/agent-tutorial/step7.png?v=2', fit: 'contain',
         body: `<p>Before checking out, you can request additional pictures — waist, length, shoulder, width, sleeve, and more.</p>
                <p>I recommend it — just <strong>$0.15 per photo</strong> and you can be 100% sure the measurements are accurate. You can still buy extra photos even after purchasing, so don't worry too much!</p>`,
     },
     {
         title: 'Choose Payment', sub: 'Every option is 100% safe',
-        img: '/images/agent-tutorial/step8.png', fit: 'contain',
+        img: '/images/agent-tutorial/step8.png?v=2', fit: 'contain',
         body: `<p>At checkout, choose a payment method. I personally use <strong>Credit Card</strong>, but any option works — it's all 100% safe!</p>`,
     },
     {
         title: 'To the Warehouse', sub: 'How the tracking flow works',
-        img: '/images/agent-tutorial/step9.png', fit: 'contain',
+        img: '/images/agent-tutorial/step9.png?v=2', fit: 'contain',
         body: `<p>After paying, wait for your items to arrive at the warehouse. Once in, you'll get pictures. The flow:</p>
                <p><strong>1) Paid</strong> – Payment is being processed.<br>
                <strong>2) Purchased</strong> – Your Agent bought the item.<br>
@@ -2980,7 +2980,7 @@ const AGENT_STEPS = [
     },
     {
         title: 'Submit Your Parcel', sub: 'Rehearsal Packing vs Submit',
-        img: '/images/agent-tutorial/step10.png', fit: 'contain',
+        img: '/images/agent-tutorial/step10.png?v=2', fit: 'contain',
         body: `<p>When your items arrive you can submit your parcel. You'll see two options:</p>
                <p><strong>Rehearsal Packing</strong> — the Agent measures real weight & dimensions and charges based on that. You can fold boxes or remove packaging (like shoe boxes) to cut volumetric weight and save. Costs a few dollars, takes 0–2 days, highly recommended for 🇺🇸 US.</p>
                <p><strong>Submit</strong> — standard method, submit immediately. Charged on estimated weight; after payment the actual weight is confirmed and any overcharge is refunded to your balance.</p>
@@ -2989,7 +2989,7 @@ const AGENT_STEPS = [
     },
     {
         title: 'Shipping Options', sub: 'Tags, packaging & folding',
-        img: '/images/agent-tutorial/step11.png', fit: 'contain',
+        img: '/images/agent-tutorial/step11.png?v=2', fit: 'contain',
         body: `<p>On the shipping page you can choose to:</p>
                <p><strong>Remove Tag</strong> – takes off clothing tags.<br>
                <strong>Remove Packaging</strong> – removes bags/boxes (recommended for shoes).<br>
@@ -2997,27 +2997,27 @@ const AGENT_STEPS = [
     },
     {
         title: 'Best Add-ons', sub: 'Protect your items',
-        img: '/images/agent-tutorial/step12.png', fit: 'contain',
+        img: '/images/agent-tutorial/step12.png?v=2', fit: 'contain',
         body: `<p>The BEST add-ons are <strong>Shoe Trees</strong> (if the box is folded/removed) and <strong>Stretch Film</strong> for extra support.</p>
                <p>Got volatile goods? Use <strong>Bubble Wrap</strong> or <strong>Corner Protection</strong>.</p>`,
         actions: [{ label: 'More info — Rehearsal Help', goto: 'rehearsal', cls: 'agt-btn-ghost' }],
     },
     {
         title: 'Delivery Route & Declare', sub: 'Best route & what to declare',
-        img: '/images/agent-tutorial/step13.png', fit: 'contain',
+        img: '/images/agent-tutorial/step13.png?v=2', fit: 'contain',
         body: `<p>For the BEST delivery route to your country and what to declare on your parcel, check the Shipping Declare guide.</p>`,
         actions: [{ label: 'Shipping Declare', goto: 'declare', cls: 'agt-btn-ghost' }],
     },
     {
         title: 'Apply a Coupon', sub: 'Save before you pay',
-        img: '/images/agent-tutorial/step14.png', fit: 'contain',
+        img: '/images/agent-tutorial/step14.png?v=2', fit: 'contain',
         body: `<p>After setting your route and declaration, it's time to buy your parcel. Before submitting, apply a <strong>Coupon</strong> to save money!</p>
                <p>Need extra coupons? Check the Coupons page.</p>`,
         actions: [{ label: 'Coupons', goto: 'coupons', cls: 'agt-btn-ghost' }],
     },
     {
         title: 'Track Your Parcel', sub: 'On the agent website',
-        img: '/images/agent-tutorial/step15.png', fit: 'contain',
+        img: '/images/agent-tutorial/step15.png?v=2', fit: 'contain',
         body: `<p>After paying for your parcel you can track it on the Agent's website.</p>
                <p><strong>PC:</strong> Parcel &gt; Parcel Details &gt; Express No: (click)<br>
                <strong>Mobile App:</strong> Mine &gt; Parcel &gt; Tracking Number (click)</p>
@@ -3025,7 +3025,7 @@ const AGENT_STEPS = [
     },
     {
         title: 'Universal Trackers', sub: 'More accurate updates',
-        img: '/images/agent-tutorial/step16.png', fit: 'contain',
+        img: '/images/agent-tutorial/step16.png?v=2', fit: 'contain',
         body: `<p>For more accurate updates use universal trackers like <strong>17Track</strong>. Grab your tracking number from Step 15, then paste it in.</p>
                <p>You can also use your Delivery Route's own site — EMS, UPS or Royal Mail often give the most accurate info.</p>`,
         actions: [
