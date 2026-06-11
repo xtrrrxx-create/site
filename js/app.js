@@ -1515,6 +1515,8 @@ function getPages() {
                 .faq-item summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; list-style: none;
                     color: var(--text-primary); font-size: 1rem; font-weight: 500; }
                 .faq-item summary::-webkit-details-marker { display: none; }
+                .faq-q { flex: 1; min-width: 0; }
+                .faq-q strong { font-weight: 700; }
                 .faq-item summary svg { flex-shrink: 0; color: var(--text-secondary); transition: transform 0.3s; }
                 .faq-item[open] summary svg { transform: rotate(45deg); }
                 .faq-item p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-top: 0.75rem; }
@@ -1522,10 +1524,10 @@ function getPages() {
             <section class="faq-section">
                 <h2>FAQS</h2>
                 <div class="faq-list">
-                    <details class="faq-item"><summary>Why did we create <strong>&nbsp;Jarvis Finder</strong>&nbsp;?<svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>We built Jarvis Finder to make it easy to find quality Taobao &amp; Weidian items, check QC photos and buy through your favorite agent — all in one place, so you save time and buy with confidence.</p></details>
-                    <details class="faq-item"><summary>Which agents does <strong>&nbsp;Jarvis Finder</strong>&nbsp;support ?<svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>We support the popular agents used by the community — Kakobuy, Oopbuy, ACBuy, Mulebuy, Superbuy, Joyagoo, USFans and more. Pick your agent in Settings and every link converts automatically.</p></details>
-                    <details class="faq-item"><summary>How does the QC checker work ?<svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>Paste a Taobao, Weidian or 1688 link into the QC Checker and we fetch the available QC photos and metadata so you can inspect the item before you buy.</p></details>
-                    <details class="faq-item"><summary>Is <strong>&nbsp;Jarvis Finder</strong>&nbsp;free to use ?<svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>Yes — everything is 100% free: the product spreadsheet, link converter, QC checker and package tracker.</p></details>
+                    <details class="faq-item"><summary><span class="faq-q">Why did we create <strong>Jarvis Finder</strong> ?</span><svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>We built Jarvis Finder to make it easy to find quality Taobao &amp; Weidian items, check QC photos and buy through your favorite agent — all in one place, so you save time and buy with confidence.</p></details>
+                    <details class="faq-item"><summary><span class="faq-q">Which agents does <strong>Jarvis Finder</strong> support ?</span><svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>We support the popular agents used by the community — Kakobuy, Oopbuy, ACBuy, Mulebuy, Superbuy, Joyagoo, USFans and more. Pick your agent in Settings and every link converts automatically.</p></details>
+                    <details class="faq-item"><summary><span class="faq-q">How does the QC checker work ?</span><svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>Paste a Taobao, Weidian or 1688 link into the QC Checker and we fetch the available QC photos and metadata so you can inspect the item before you buy.</p></details>
+                    <details class="faq-item"><summary><span class="faq-q">Is <strong>Jarvis Finder</strong> free to use ?</span><svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>Yes — everything is 100% free: the product spreadsheet, link converter, QC checker and package tracker.</p></details>
                 </div>
             </section>
             <div style="padding-bottom:3rem;"></div>
@@ -4591,79 +4593,30 @@ function buildHomeSections() {
         </div>
     </div>` : '';
 
-    // ── "Don't Know How To Order?" CTA (picks.ly style — overlapping mock cards) ──
-    const htoImgs = getPopularInCategory('Shoes', 8).map(storeGoodImg).filter(Boolean);
-    const htoImg = (i) => htoImgs[i] || htoImgs[0] || '';
-    const htoThumb = (src, name, count) => `<div class="store-cat">
-        <div class="store-cat-thumb">${src ? `<img src="${escapeHtml(thumb(src, 260))}" alt="" loading="lazy" data-fallback="hide" />` : ''}</div>
-        <div class="store-cat-name">${name}</div>
-        <div class="store-cat-count">${count} items</div>
-    </div>`;
-    const htoStoreCard = `<div class="store-card">
-        <div class="store-header">
-            ${storeAvatar('weidian')}
-            <div class="store-meta">
-                <span class="store-name">WWTOP</span>
-                <span class="store-sub">Most popular shoe seller</span>
-            </div>
-        </div>
-        <div class="store-card-divider"></div>
-        <div class="store-cats">
-            ${htoThumb(htoImg(0), 'Sneakers', 1200)}
-            ${htoThumb(htoImg(1), 'Slippers', 340)}
-            ${htoThumb(htoImg(2), 'Boots', 580)}
-        </div>
-        <button class="store-view-btn" data-action="go-products" data-cat="Shoes">View Store</button>
-    </div>`;
-    const htoProductCard = `<div class="hc-card product-card">
-        <div class="product-image" style="overflow:hidden;">${htoImg(3) ? `<img src="${escapeHtml(thumb(htoImg(3), 600))}" alt="" style="width:100%;height:100%;object-fit:cover;" loading="lazy" decoding="async" data-fallback="hide" />` : ''}</div>
-        <div class="product-info">
-            <div class="product-batch-row">${platformBadge('/item/WD0')}<span class="product-store-name">WWTOP</span></div>
-            <h3 class="product-title">Margiela GATS Training Shoes</h3>
-            <div class="product-price">$56.63</div>
-            <div class="product-actions">
-                <button class="card-btn-buy">Buy Now</button>
-                <a class="card-btn-qc">View QC</a>
-            </div>
-        </div>
-    </div>`;
+    // ── "Don't Know How To Order?" CTA (slim banner, no mock cards) ──
     const tutorialsBanner = `<div class="hc-section">
         <style>
-            .hto-card { position:relative; background:#ff9f0a; border-radius:30px; overflow:hidden; min-height:500px; box-shadow:0 24px 60px rgba(15,23,42,.28); display:flex; flex-direction:column; }
+            .hto-card { position:relative; background:#ff9f0a; border-radius:30px; overflow:hidden; box-shadow:0 24px 60px rgba(15,23,42,.28);
+                display:flex; flex-direction:column; align-items:flex-start; gap:14px; padding:32px 24px; }
             .hto-card .hto-accent { position:absolute; left:50%; top:0; transform:translateX(-50%); width:65%; height:4px; border-top-left-radius:30px; border-top-right-radius:30px; background:linear-gradient(to right, transparent, #faa951, transparent); opacity:.9; }
-            .hto-left { padding:40px 24px; position:relative; z-index:2; display:flex; flex-direction:column; gap:18px; }
-            .hto-left h2 { color:#fff; font-family:'Inter Tight',system-ui,sans-serif; font-size:30px; font-weight:700; line-height:1.1; letter-spacing:-.02em; margin:0; max-width:300px; }
-            .hto-left p { color:rgba(255,255,255,.95); font-size:15px; line-height:1.45; margin:0; max-width:280px; }
-            .hto-btn { display:inline-flex; align-items:center; justify-content:center; width:fit-content; background:#fff; color:#ff9f0a; font-weight:600; font-size:16px; border:none; border-radius:9999px; padding:14px 32px; cursor:pointer; text-decoration:none; transition:background .2s; }
+            .hto-card h2 { color:#fff; font-family:'Inter Tight',system-ui,sans-serif; font-size:28px; font-weight:700; line-height:1.15; letter-spacing:-.02em; margin:0; }
+            .hto-card p { color:rgba(255,255,255,.95); font-size:15px; line-height:1.45; margin:0; }
+            .hto-btn { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; background:#fff; color:#ff9f0a; font-weight:600; font-size:16px; border:none; border-radius:9999px; padding:12px 28px; cursor:pointer; text-decoration:none; transition:background .2s; }
             .hto-btn:hover { background:#e8e8e8; }
-            .hto-right { flex:1; display:flex; justify-content:center; align-items:flex-end; padding:0 16px 32px; }
-            .hto-stage { position:relative; width:300px; height:240px; }
-            .hto-stage .store-card { position:absolute; right:8px; bottom:50px; transform:translateX(40%) scale(1.15); transform-origin:bottom right; z-index:1; width:210px; }
-            .hto-stage .product-card { position:absolute; left:30px; bottom:-50px; transform:rotate(8deg) scale(.9); transform-origin:bottom left; z-index:2; width:210px; pointer-events:none; }
             @media (min-width:1024px) {
-                .hto-card { flex-direction:row; min-height:380px; align-items:stretch; }
-                .hto-left { flex:1; padding:60px 4px 60px 48px; justify-content:center; }
-                .hto-left h2 { font-size:46px; }
-                .hto-left p { font-size:17px; }
-                .hto-right { align-items:center; justify-content:flex-end; padding:0 40px 0 0; }
-                .hto-stage { width:560px; height:320px; }
-                .hto-stage .store-card { right:0; bottom:0; transform:scale(1.45); }
-                .hto-stage .product-card { left:0; bottom:-90px; transform:rotate(10deg) scale(.95); }
+                .hto-card { flex-direction:row; align-items:center; padding:40px 48px; gap:24px; }
+                .hto-text { flex:1; display:flex; flex-direction:column; gap:8px; }
+                .hto-card h2 { font-size:34px; }
+                .hto-card p { font-size:16px; }
             }
         </style>
         <div class="hto-card">
             <div class="hto-accent"></div>
-            <div class="hto-left">
-                <h2>Don't Know<br>How To Order?</h2>
+            <div class="hto-text">
+                <h2>Don't Know How To Order?</h2>
                 <p>Follow our simple step-by-step guide to order from any agent.</p>
-                <button class="hto-btn" data-action="go-tutorials">Get Started</button>
             </div>
-            <div class="hto-right">
-                <div class="hto-stage">
-                    ${htoStoreCard}
-                    ${htoProductCard}
-                </div>
-            </div>
+            <button class="hto-btn" data-action="go-tutorials">Get Started</button>
         </div>
     </div>`;
 
