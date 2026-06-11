@@ -356,6 +356,25 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
     background: var(--muted);
 }
 
+/* picks.ly .search-shell: top highlight line (no bottom border) + soft shadow */
+.pl-search-wrap { box-shadow: 0 2px 4px #18181b1a, 0 8px 16px #18181b29; }
+.pl-search-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border-top: 1px solid #525252;
+    border-left: 1px solid #525252;
+    border-right: 1px solid #525252;
+    border-bottom: 0;
+    pointer-events: none;
+}
+body.light-mode .pl-search-wrap::before {
+    border-top-color: var(--line);
+    border-left-color: var(--line);
+    border-right-color: var(--line);
+}
+
 .pl-search-icon {
     color: var(--text-secondary);
     flex-shrink: 0;
