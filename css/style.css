@@ -339,7 +339,7 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 /* Search bar */
 .pl-search-wrap {
     max-width: 541px;
-    margin: 0 auto 1.5rem;
+    margin: 0 auto 1rem; /* picks.ly: gap-4 between search and chips */
     position: relative;
     display: flex;
     align-items: center;
@@ -391,14 +391,23 @@ body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
     color: var(--text-primary);
 }
 
-/* Category tabs */
+/* Category tabs — picks.ly: single scrollable row, gap-1, edge fade mask */
 .pl-cats {
     display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 1rem;
+    justify-content: safe center;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 16px;
+    margin-bottom: 0;
+    mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
 }
+.pl-cats::-webkit-scrollbar { display: none; }
+.pl-cat { flex-shrink: 0; white-space: nowrap; }
 
 .pl-cat {
     display: inline-flex;
