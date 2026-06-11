@@ -375,6 +375,20 @@ body.light-mode .pl-search-wrap::before {
     border-right-color: var(--line);
 }
 
+/* picks.ly animated placeholder: "Enter <word>" with blur swap */
+.pl-ph {
+    position: absolute;
+    top: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+    color: var(--fg-faint);
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+.pl-ph-word { transition: opacity 0.3s ease, filter 0.3s ease; opacity: 1; filter: blur(0px); }
+
 .pl-search-icon {
     color: var(--text-secondary);
     flex-shrink: 0;

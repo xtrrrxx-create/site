@@ -1477,6 +1477,57 @@ function getPages() {
                 </div>
             </div>
             <div id="home-sections">${buildHomeSections()}</div>
+
+            <!-- Trusted-by agents marquee (picks.ly) -->
+            <style>
+                .agents-marquee-section { padding: 2rem 4%; overflow: hidden; }
+                .agents-marquee-section p { color: var(--text-secondary); text-align: center; font-size: 0.95rem; margin-bottom: 1.5rem; }
+                .agents-marquee { position: relative; overflow: hidden;
+                    mask-image: linear-gradient(to right, transparent, black 120px, black calc(100% - 120px), transparent);
+                    -webkit-mask-image: linear-gradient(to right, transparent, black 120px, black calc(100% - 120px), transparent); }
+                .agents-track { display: flex; align-items: center; width: max-content; animation: agentsScroll 40s linear infinite; }
+                .agents-marquee:hover .agents-track { animation-play-state: paused; }
+                .agent-logo { display: inline-flex; align-items: center; gap: 10px; margin-right: 4rem; flex-shrink: 0;
+                    color: var(--text-primary); font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 600; font-size: 1.05rem;
+                    transition: transform 0.15s ease; cursor: pointer; }
+                .agent-logo:hover { transform: scale(1.15); }
+                .agent-logo img { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; }
+                @keyframes agentsScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+            </style>
+            <section class="agents-marquee-section">
+                <p>Trusted by many agents and their customers</p>
+                <div class="agents-marquee">
+                    <div class="agents-track">
+                        ${[0, 1].map(() => AGENTS.map(a => `<span class="agent-logo"><img src="https://www.google.com/s2/favicons?domain=${a.domain}&sz=64" alt="${escapeHtml(a.name)}" loading="lazy" />${escapeHtml(a.name)}</span>`).join('')).join('')}
+                    </div>
+                </div>
+            </section>
+
+            <!-- FAQ (picks.ly) -->
+            <style>
+                .faq-section { padding: 1.5rem 4% 3rem; }
+                .faq-section h2 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: clamp(28px, 3vw, 32px); font-weight: 600;
+                    letter-spacing: -0.02em; color: var(--text-primary); text-align: center; margin-bottom: clamp(2rem, 4vw, 3rem); }
+                .faq-list { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem; }
+                .faq-item { background: var(--surface); border-radius: 16px; padding: 1.25rem;
+                    box-shadow: rgba(0,0,0,0.3) 0 1px 3px 0, rgba(0,0,0,0.4) 0 5px 14px 0; cursor: pointer; }
+                body.light-mode .faq-item { box-shadow: rgba(0,0,0,0.08) 0 2px 8px 0; }
+                .faq-item summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; list-style: none;
+                    color: var(--text-primary); font-size: 1rem; font-weight: 500; }
+                .faq-item summary::-webkit-details-marker { display: none; }
+                .faq-item summary svg { flex-shrink: 0; color: var(--text-secondary); transition: transform 0.3s; }
+                .faq-item[open] summary svg { transform: rotate(45deg); }
+                .faq-item p { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-top: 0.75rem; }
+            </style>
+            <section class="faq-section">
+                <h2>FAQS</h2>
+                <div class="faq-list">
+                    <details class="faq-item"><summary>Why did we create <strong>&nbsp;Jarvis Finder</strong>&nbsp;?<svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>We built Jarvis Finder to make it easy to find quality Taobao &amp; Weidian items, check QC photos and buy through your favorite agent — all in one place, so you save time and buy with confidence.</p></details>
+                    <details class="faq-item"><summary>Which agents does <strong>&nbsp;Jarvis Finder</strong>&nbsp;support ?<svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>We support the popular agents used by the community — Kakobuy, Oopbuy, ACBuy, Mulebuy, Superbuy, Joyagoo, USFans and more. Pick your agent in Settings and every link converts automatically.</p></details>
+                    <details class="faq-item"><summary>How does the QC checker work ?<svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>Paste a Taobao, Weidian or 1688 link into the QC Checker and we fetch the available QC photos and metadata so you can inspect the item before you buy.</p></details>
+                    <details class="faq-item"><summary>Is <strong>&nbsp;Jarvis Finder</strong>&nbsp;free to use ?<svg width="23" height="25" viewBox="0 0 23 25" fill="none"><rect x="2.4" y="11.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="12.4" y="3.5" width="18" height="2" rx="1" transform="rotate(90 12.4 3.5)" fill="currentColor"/></svg></summary><p>Yes — everything is 100% free: the product spreadsheet, link converter, QC checker and package tracker.</p></details>
+                </div>
+            </section>
             <div style="padding-bottom:3rem;"></div>
         </div>
     `,
@@ -2276,6 +2327,8 @@ function initApp() {
         });
         // Carousel handlers (arrows + drag scroll)
         attachCarouselHandlers(mainContent);
+        // picks.ly-style animated blur placeholder on search pills
+        initBlurPlaceholders(mainContent);
         mainContent.querySelectorAll('[data-action="go-tools"]').forEach(el => {
             el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('tools'); });
         });
@@ -3212,6 +3265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateThemeIcon(true);
     }
     updateNavbarLanguage();
+    initBlurPlaceholders(document); // navbar search pill
     initApp();
     initSettingsModal();
     bindStoresNavToolbar();
@@ -4132,6 +4186,41 @@ function initDragScroll(el) {
     el.addEventListener('mousemove', e => {
         if (!isDown) return; e.preventDefault();
         el.scrollLeft = scrollL - (e.pageX - el.offsetLeft - startX) * 1.2;
+    });
+}
+
+// ─── picks.ly-style animated blur placeholder ("Enter product name… / link…") ──
+const BLUR_PH_WORDS = ['product name...', 'product link...'];
+function initBlurPlaceholders(root) {
+    (root || document).querySelectorAll('.pl-search-input').forEach(input => {
+        const wrap = input.closest('.pl-search-wrap');
+        if (!wrap || input._bp) return;
+        input._bp = true;
+        input.setAttribute('placeholder', '');
+        const span = document.createElement('span');
+        span.className = 'pl-ph';
+        span.innerHTML = `<span>Enter&nbsp;</span><span class="pl-ph-word">${BLUR_PH_WORDS[0]}</span>`;
+        wrap.appendChild(span);
+        const word = span.querySelector('.pl-ph-word');
+        const pos = () => {
+            const pad = parseFloat(getComputedStyle(input).paddingLeft) || 0;
+            span.style.left = (input.offsetLeft + pad) + 'px';
+        };
+        pos();
+        window.addEventListener('resize', pos);
+        let i = 0;
+        setInterval(() => {
+            if (!document.body.contains(span)) return;
+            word.style.opacity = '0';
+            word.style.filter = 'blur(4px)';
+            setTimeout(() => {
+                i = (i + 1) % BLUR_PH_WORDS.length;
+                word.textContent = BLUR_PH_WORDS[i];
+                word.style.opacity = '1';
+                word.style.filter = 'blur(0px)';
+            }, 300);
+        }, 3000);
+        input.addEventListener('input', () => { span.style.display = input.value ? 'none' : 'flex'; });
     });
 }
 
