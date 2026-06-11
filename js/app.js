@@ -4222,7 +4222,14 @@ function initBlurPlaceholders(root) {
                 word.style.filter = 'blur(0px)';
             }, 300);
         }, 3000);
-        input.addEventListener('input', () => { span.style.display = input.value ? 'none' : 'flex'; });
+        // Hide overlay as soon as the input has any text — delegated on the wrap
+        // (survives input replacement) plus a poll as safety net.
+        const updVis = () => {
+            const inp = wrap.querySelector('.pl-search-input');
+            span.style.display = (inp && inp.value) ? 'none' : 'flex';
+        };
+        ['input', 'keyup', 'change', 'paste'].forEach(ev => wrap.addEventListener(ev, updVis, true));
+        setInterval(updVis, 500);
     });
 }
 
