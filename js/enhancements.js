@@ -521,30 +521,8 @@ window.applyTilt = applyTilt;
 })();
 
 
-// ─── 4c. ANIMATED SEARCH PLACEHOLDER (typewriter) ──────────────────────────
-(function initPlaceholderTypewriter() {
-    const phrases = ['Enter product name...', 'Check QCs...', 'Buy the item...'];
-    let pi = 0, ci = 0, deleting = false;
-    function apply(txt) {
-        document.querySelectorAll('.pl-search-input').forEach(el => {
-            if (!el.value) el.placeholder = txt;
-        });
-    }
-    function tick() {
-        const full = phrases[pi];
-        if (!deleting) {
-            ci++;
-            apply(full.slice(0, ci));
-            if (ci >= full.length) { deleting = true; return setTimeout(tick, 1600); }
-            return setTimeout(tick, 70);
-        }
-        ci--;
-        apply(full.slice(0, ci));
-        if (ci <= 0) { deleting = false; pi = (pi + 1) % phrases.length; return setTimeout(tick, 350); }
-        return setTimeout(tick, 38);
-    }
-    tick();
-})();
+// ─── 4c. ANIMATED SEARCH PLACEHOLDER ────────────────────────────────────────
+// Replaced by the picks.ly-style blur placeholder in app.js (initBlurPlaceholders).
 
 
 // ─── 5. SKELETON LOADING ───────────────────────────────────────────────────

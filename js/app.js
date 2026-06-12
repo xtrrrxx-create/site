@@ -1465,7 +1465,7 @@ function getPages() {
                 <!-- Search bar -->
                 <div class="pl-search-wrap">
                     <svg class="pl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" class="pl-search-input" id="home-search" placeholder="Enter product name..." autocomplete="off" spellcheck="false">
+                    <input type="text" class="pl-search-input" id="home-search" placeholder="" autocomplete="off" spellcheck="false">
                     <button class="pl-search-paste" id="home-paste-btn" aria-label="Paste">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     </button>
@@ -1579,7 +1579,7 @@ function getPages() {
                 <p class="pl-hero-sub">${t('hero_desc')}</p>
                 <div class="pl-search-wrap">
                     <svg class="pl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                    <input type="text" class="pl-search-input" id="kf-search" placeholder="Enter product name..." autocomplete="off" spellcheck="false">
+                    <input type="text" class="pl-search-input" id="kf-search" placeholder="" autocomplete="off" spellcheck="false">
                     <button class="pl-search-paste" id="products-paste-btn" aria-label="Paste">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     </button>
@@ -2335,7 +2335,14 @@ function initApp() {
             el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('tools'); });
         });
         mainContent.querySelectorAll('[data-action="go-tutorials"]').forEach(el => {
-            el.addEventListener('click', e => { e.preventDefault(); (window.navigateTo||renderPage)('tutorials'); });
+            el.addEventListener('click', e => {
+                e.preventDefault();
+                if (location.pathname !== '/tutorials/agent-tutorial') {
+                    history.pushState({ page: 'tutorials' }, '', '/tutorials/agent-tutorial');
+                }
+                mainContent.classList.add('page-exit');
+                setTimeout(() => { renderPage('tutorials'); mainContent.classList.remove('page-exit'); window.scrollTo(0, 0); }, 120);
+            });
         });
 
         navLinks.forEach(link => {
@@ -3234,9 +3241,15 @@ window.setStoresToolbar = function (pageId) {
         if (navSearch) {
             navSearch.value = storesFilter.query || '';
             navSearch.placeholder = 'Search sellers & products...';
+            // Native placeholder takes over on /stores — hide the blur overlay.
+            const ph = navSearch.closest('.pl-search-wrap')?.querySelector('.pl-ph');
+            if (ph) ph.style.visibility = 'hidden';
         }
     } else if (navSearch) {
-        navSearch.placeholder = 'Enter product name...';
+        // Blur overlay (initBlurPlaceholders) renders the placeholder here.
+        navSearch.placeholder = '';
+        const ph = navSearch.closest('.pl-search-wrap')?.querySelector('.pl-ph');
+        if (ph) ph.style.visibility = '';
     }
 };
 
@@ -4192,7 +4205,7 @@ function initDragScroll(el) {
 }
 
 // ─── picks.ly-style animated blur placeholder ("Enter product name… / link…") ──
-const BLUR_PH_WORDS = ['product name...', 'product link...'];
+const BLUR_PH_WORDS = ['Check QCs...', 'Enter product link...'];
 function initBlurPlaceholders(root) {
     (root || document).querySelectorAll('.pl-search-input').forEach(input => {
         const wrap = input.closest('.pl-search-wrap');
@@ -4201,7 +4214,7 @@ function initBlurPlaceholders(root) {
         input.setAttribute('placeholder', '');
         const span = document.createElement('span');
         span.className = 'pl-ph';
-        span.innerHTML = `<span>Enter&nbsp;</span><span class="pl-ph-word">${BLUR_PH_WORDS[0]}</span>`;
+        span.innerHTML = `<span class="pl-ph-word">${BLUR_PH_WORDS[0]}</span>`;
         wrap.appendChild(span);
         const word = span.querySelector('.pl-ph-word');
         const pos = () => {
@@ -4623,7 +4636,7 @@ function buildHomeSections() {
                 <h2>Don't Know How To Order?</h2>
                 <p>Follow our simple step-by-step guide to order from any agent.</p>
             </div>
-            <button class="hto-btn" data-action="go-tutorials">Get Started</button>
+            <a class="hto-btn" href="/tutorials/agent-tutorial" data-action="go-tutorials">Get Started</a>
         </div>
     </div>`;
 
