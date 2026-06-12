@@ -2260,7 +2260,22 @@ body.light-mode #app-content .tracking-card {
 @media (hover: none) { .fav-heart { opacity: 1; transform: scale(1); } }
 
 /* ── Navbar auth control ── */
-.nav-auth { display: flex; align-items: center; }
+.nav-auth { display: flex; align-items: center; gap: 0.5rem; }
+
+/* Favourites button (always visible, opens the My Favorites modal) */
+.nav-fav-btn {
+    position: relative; width: 36px; height: 36px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border-color); border-radius: 50%; cursor: pointer;
+    background: var(--nav-bg); color: var(--text-primary);
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.nav-fav-btn:hover { border-color: #ff4d6d; color: #ff4d6d; }
+.nav-fav-count {
+    position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px;
+    padding: 0 4px; border-radius: 9px; background: #ff4d6d; color: #fff;
+    font-size: 0.65rem; font-weight: 700; line-height: 16px; text-align: center;
+}
 .nav-login-btn {
     display: inline-flex; align-items: center; gap: 0.5rem;
     background: #5865F2; color: #fff; border: none; cursor: pointer;
