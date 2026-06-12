@@ -82,11 +82,7 @@ export default async function handler(req, res) {
     }
 
     const SUPABASE_URL = process.env.SUPABASE_URL;
-    // Service-role key: the `products` table's SELECT grant is revoked from the
-    // anon/authenticated roles (db/favorites.sql) so the publicly-exposed anon
-    // key cannot scrape the catalogue. This proxy uses service-role to bypass
-    // that lock-down. Falls back to anon for envs not yet migrated.
-    const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
     if (!SUPABASE_URL || !SUPABASE_KEY) {
         console.error(`[api/products ${cid}] missing supabase env`);
