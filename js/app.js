@@ -4205,7 +4205,7 @@ function initDragScroll(el) {
 }
 
 // ─── picks.ly-style animated blur placeholder ("Enter product name… / link…") ──
-const BLUR_PH_WORDS = ['Check QCs...', 'Enter product link...'];
+const BLUR_PH_WORDS = ['Enter product name...', 'Check QCs...', 'Buy the product...'];
 function initBlurPlaceholders(root) {
     (root || document).querySelectorAll('.pl-search-input').forEach(input => {
         const wrap = input.closest('.pl-search-wrap');
