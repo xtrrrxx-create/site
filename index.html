@@ -26,7 +26,7 @@
     <meta name="twitter:title" content="Jarvis Finder – Best Taobao & Weidian Finds" />
     <meta name="twitter:description" content="Discover the best Taobao and Weidian products curated for agent shopping. Convert links for Kakobuy, Mulebuy and Acbuy and track your packages." />
     <meta name="twitter:image" content="https://www.jarvis-finder.com/og-image.png" />
-    <link rel="stylesheet" href="/css/style.css?v=71">
+    <link rel="stylesheet" href="/css/style.css?v=72">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@400;500;600;700;800;900&display=swap"
@@ -65,7 +65,6 @@
                 <a href="/qccheck" data-page="qccheck" class="nav-link">QC Checker</a>
                 <a href="/tutorials" data-page="tutorials" class="nav-link">Tutorials</a>
                 <a href="/tools" data-page="tools" class="nav-link">Tools</a>
-                <div class="nav-auth" id="nav-auth"></div>
                 <div class="settings-wrap">
                     <button class="btn-icon nav-gear-btn" id="nav-settings-btn" aria-label="Settings" aria-haspopup="true" aria-expanded="false">
                         <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -93,6 +92,13 @@
                                     <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
                                 </span>
                             </button>
+                            <button class="settings-row" id="set-row-favs" role="menuitem">
+                                <span class="settings-row-label">My Favorites</span>
+                                <span class="settings-row-val"><span id="set-favs-count"></span>
+                                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                                </span>
+                            </button>
+                            <div class="settings-auth" id="set-auth-mount"></div>
                         </div>
                         <div class="settings-submenu" id="settings-sub" hidden>
                             <button class="settings-back" id="settings-back">
@@ -169,6 +175,15 @@
             </svg>
             <span>Tools</span>
         </a>
+        <button class="bottom-nav-item" id="bottom-fav-btn" type="button">
+            <span class="bottom-fav-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                <span class="bottom-fav-count" id="bottom-fav-count" hidden></span>
+            </span>
+            <span>Favorites</span>
+        </button>
     </nav>
 
     <!-- Discord floating button -->
@@ -181,7 +196,7 @@
 
     <script src="/js/app.js?v=85"></script>
     <script src="/js/enhancements.js?v=9"></script>
-    <script src="/js/auth.js?v=3"></script>
+    <script src="/js/auth.js?v=4"></script>
 </body>
 
 </html>

@@ -2259,67 +2259,50 @@ body.light-mode #app-content .tracking-card {
 .fav-heart.is-fav:hover { background: rgba(0, 0, 0, 0.55); }
 @media (hover: none) { .fav-heart { opacity: 1; transform: scale(1); } }
 
-/* ── Navbar auth control ── */
-.nav-auth { display: flex; align-items: center; gap: 0.5rem; }
+/* ── Favourites count badge in the Preferences "My Favorites" row ── */
+#set-favs-count:not(:empty) {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px; padding: 0 5px; margin-right: 2px;
+    border-radius: 9px; background: #ff4d6d; color: #fff;
+    font-size: 0.68rem; font-weight: 700; line-height: 18px;
+}
 
-/* Favourites button (always visible, opens the My Favorites modal) */
-.nav-fav-btn {
-    position: relative; width: 36px; height: 36px; padding: 0;
-    display: flex; align-items: center; justify-content: center;
-    border: 1px solid var(--border-color); border-radius: 50%; cursor: pointer;
-    background: var(--nav-bg); color: var(--text-primary);
-    transition: border-color .15s ease, color .15s ease, background .15s ease;
-}
-.nav-fav-btn:hover { border-color: #ff4d6d; color: #ff4d6d; }
-.nav-fav-count {
-    position: absolute; top: -4px; right: -4px; min-width: 16px; height: 16px;
-    padding: 0 4px; border-radius: 9px; background: #ff4d6d; color: #fff;
-    font-size: 0.65rem; font-weight: 700; line-height: 16px; text-align: center;
-}
-.nav-login-btn {
-    display: inline-flex; align-items: center; gap: 0.5rem;
+/* ── Discord login block inside the Preferences menu ── */
+.settings-auth { margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border-color); }
+.set-discord-btn {
+    width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
     background: #5865F2; color: #fff; border: none; cursor: pointer;
-    font-weight: 600; font-size: 0.85rem; font-family: inherit;
-    padding: 0.45rem 0.85rem; border-radius: 9999px;
-    transition: background .15s ease, transform .1s ease;
+    font-weight: 600; font-size: 0.88rem; font-family: inherit;
+    padding: 0.6rem 0.85rem; border-radius: 10px;
+    transition: background .15s ease;
 }
-.nav-login-btn:hover { background: #4752c4; }
-.nav-login-btn:active { transform: scale(0.97); }
-.nav-login-btn svg { flex-shrink: 0; }
-
-.nav-user-wrap { position: relative; }
-.nav-user-btn {
-    width: 34px; height: 34px; padding: 0; border-radius: 50%; cursor: pointer;
-    border: 2px solid var(--border-color); background: var(--nav-bg);
-    display: flex; align-items: center; justify-content: center; overflow: hidden;
-    transition: border-color .15s ease;
-}
-.nav-user-btn:hover { border-color: #5865F2; }
-.nav-user-av { width: 100%; height: 100%; object-fit: cover; display: block; }
-.nav-user-av-fallback {
+.set-discord-btn:hover { background: #4752c4; }
+.set-discord-btn svg { flex-shrink: 0; }
+.set-user { display: flex; align-items: center; gap: 10px; padding: 4px 2px; }
+.set-user-av {
+    width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
-    background: #5865F2; color: #fff; font-weight: 700; font-size: 0.9rem;
 }
-.nav-user-menu {
-    position: absolute; top: calc(100% + 10px); right: 0; z-index: 1200;
-    min-width: 190px; padding: 6px;
-    background: var(--nav-bg); border: 1px solid var(--border-color);
-    border-radius: 14px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+.set-user-av-fallback { background: #5865F2; color: #fff; font-weight: 700; font-size: 0.9rem; }
+.set-user-name {
+    flex: 1; min-width: 0; font-size: 0.9rem; font-weight: 600; color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.nav-user-name {
-    padding: 8px 10px 6px; font-size: 0.8rem; color: var(--text-secondary);
-    font-weight: 600; border-bottom: 1px solid var(--border-color); margin-bottom: 4px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;
+.set-logout-btn {
+    flex-shrink: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer;
+    background: transparent; color: var(--text-secondary); transition: background .12s ease, color .12s ease;
 }
-.nav-user-item {
-    width: 100%; display: flex; align-items: center; gap: 9px;
-    padding: 9px 10px; border: none; border-radius: 9px; cursor: pointer;
-    background: transparent; color: var(--text-primary);
-    font-size: 0.88rem; font-family: inherit; text-align: left;
-    transition: background .12s ease;
+.set-logout-btn:hover { background: var(--muted-hover); color: var(--text-primary); }
+
+/* ── Bottom-nav favourites button ── */
+#bottom-fav-btn { background: none; border: none; font-family: inherit; cursor: pointer; }
+.bottom-fav-icon { position: relative; display: inline-flex; }
+.bottom-fav-count {
+    position: absolute; top: -6px; right: -8px; min-width: 15px; height: 15px;
+    padding: 0 4px; border-radius: 8px; background: #ff4d6d; color: #fff;
+    font-size: 0.6rem; font-weight: 700; line-height: 15px; text-align: center;
 }
-.nav-user-item:hover { background: var(--muted-hover); }
-.nav-user-item svg { flex-shrink: 0; color: var(--text-secondary); }
 
 /* ── Favourites modal ── */
 .fav-overlay {
