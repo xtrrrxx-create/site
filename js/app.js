@@ -4414,7 +4414,7 @@ function buildProductCard(item, idx) {
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
     const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
     return `<div class="hc-card product-card" data-purl="${escapeHtml(productUrl(item))}">
-        <div class="product-image" style="overflow:hidden;">${img}</div>
+        <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(item.id)}${img}</div>
         <div class="product-info">
             <div class="product-batch-row">${platformBadge(item.picksly)}<span class="product-store-name">${escapeHtml(catSellerLabel(item))}</span></div>
             <h3 class="product-title">${safeTitle}</h3>
@@ -4564,8 +4564,11 @@ function buildHomeSections() {
                 ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" />`
                 : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
             const sellerName = catSellerLabel(item);
+            // Recently-viewed payloads carry no id — resolve it from the catalogue
+            // by title so the favourite heart works on trending cards too.
+            const pid = item.id !== undefined ? item.id : cache.find(p => stripEmojis(p.title || '') === (item.title || ''))?.id;
             return `<div class="hc-card product-card" data-purl="${escapeHtml(productUrl(item))}">
-                <div class="product-image" style="overflow:hidden;">${img}</div>
+                <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(pid)}${img}</div>
                 <div class="product-info">
                     <div class="product-batch-row">${platformBadge(item.picksly)}<span class="product-store-name">${escapeHtml(sellerName)}</span></div>
                     <h3 class="product-title">${safeTitle}</h3>
@@ -4613,7 +4616,7 @@ function buildHomeSections() {
             const picksly = escapeHtml(safeExternalUrl(item.picksly || '#'));
             const sellerName = catSellerLabel(item);
             return `<div class="hc-card product-card" data-purl="${escapeHtml(productUrl(item))}">
-                <div class="product-image" style="overflow:hidden;">${img}</div>
+                <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(item.id)}${img}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
                         ${platformBadge(item.picksly)}
