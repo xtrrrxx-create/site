@@ -4219,7 +4219,12 @@ function initBlurPlaceholders(root) {
         const word = span.querySelector('.pl-ph-word');
         const pos = () => {
             const pad = parseFloat(getComputedStyle(input).paddingLeft) || 0;
-            span.style.left = (input.offsetLeft + pad) + 'px';
+            // Navbar search: center the placeholder in the pill (picks.ly style).
+            if (input.id === 'nav-search') {
+                span.style.left = (input.offsetLeft + input.offsetWidth / 2 - span.offsetWidth / 2) + 'px';
+            } else {
+                span.style.left = (input.offsetLeft + pad) + 'px';
+            }
         };
         pos();
         window.addEventListener('resize', pos);
