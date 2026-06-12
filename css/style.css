@@ -1765,6 +1765,8 @@ main {
 }
 .stores-nav-toolbar .stores-pill:hover { color: var(--text-primary); }
 .stores-nav-toolbar .stores-pill.active { background: #fff; color: #111; border-color: #fff; }
+.stores-pill-fav { display: inline-flex; align-items: center; gap: 6px; }
+.stores-pill-fav:hover { color: #ff4d6d !important; border-color: #ff4d6d; }
 .stores-nav-toolbar .stores-search {
     display: flex; align-items: center; gap: 8px;
     background: var(--nav-bg); border: 1px solid var(--border-color);

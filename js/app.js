@@ -3280,13 +3280,16 @@ function bindStoresNavToolbar() {
             if (main && typeof attachCarouselHandlers === 'function') attachCarouselHandlers(main);
         }
     };
-    toolbar.querySelectorAll('.stores-pill').forEach(btn => {
+    toolbar.querySelectorAll('.stores-pill[data-plat]').forEach(btn => {
         btn.addEventListener('click', () => {
             storesFilter.platform = btn.dataset.plat;
-            toolbar.querySelectorAll('.stores-pill').forEach(b => b.classList.toggle('active', b === btn));
+            toolbar.querySelectorAll('.stores-pill[data-plat]').forEach(b => b.classList.toggle('active', b === btn));
             reRenderStores();
         });
     });
+    // "Favorites" pill → favourite stores page (not a platform filter).
+    const favPill = document.getElementById('stores-fav-pill');
+    if (favPill) favPill.addEventListener('click', () => (window.navigateTo)('storesfav'));
     const ss = document.getElementById('stores-search-input');
     if (ss) {
         let tmr;
@@ -3305,7 +3308,7 @@ window.setStoresToolbar = function (pageId) {
     document.body.classList.toggle('on-stores', pageId === 'stores');
     if (toolbar) toolbar.style.display = (pageId === 'stores') ? 'flex' : 'none';
     if (pageId === 'stores') {
-        if (toolbar) toolbar.querySelectorAll('.stores-pill').forEach(b =>
+        if (toolbar) toolbar.querySelectorAll('.stores-pill[data-plat]').forEach(b =>
             b.classList.toggle('active', b.dataset.plat === storesFilter.platform));
         // Navbar search now drives the stores filter.
         if (navSearch) {
