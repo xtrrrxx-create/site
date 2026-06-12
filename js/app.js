@@ -4240,6 +4240,9 @@ function initBlurPlaceholders(root) {
         const updVis = () => {
             const inp = wrap.querySelector('.pl-search-input');
             span.style.display = (inp && inp.value) ? 'none' : 'flex';
+            // Recompute left each poll: the navbar bar is hidden at init (offsetLeft
+            // wrong) and only revealed on scroll, so reposition once it has layout.
+            if (span.style.display !== 'none' && input.offsetParent) pos();
         };
         ['input', 'keyup', 'change', 'paste'].forEach(ev => wrap.addEventListener(ev, updVis, true));
         setInterval(updVis, 500);
