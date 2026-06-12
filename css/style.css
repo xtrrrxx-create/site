@@ -1707,15 +1707,17 @@ main {
 ═══════════════════════════════════════════════════════════ */
 .navbar { gap: 1.5rem; }
 
-/* Left: Stores / QC Checker — plain text links */
-.nav-left { display: flex; align-items: center; gap: 1.4rem; flex-shrink: 0; }
+/* Left: Stores / QC Checker — plain text links.
+   flex:1 1 0 with the right side identical → the center column lands in the
+   true middle of the navbar regardless of how wide each side's links are. */
+.nav-left { display: flex; align-items: center; gap: 1.4rem; flex: 1 1 0; min-width: 0; }
 
 /* Center: search bar (revealed on scroll, same as before) */
-.nav-center { display: flex; align-items: center; justify-content: center; flex: 1 1 auto; min-width: 0; }
+.nav-center { display: flex; align-items: center; justify-content: center; flex: 0 0 auto; min-width: 0; }
 .navbar .nav-center .nav-search-wrap { flex: 0 1 520px; width: 520px; max-width: 100%; margin: 0 auto; }
 
 /* Right: Products / Tutorials / Tools + settings gear */
-.nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 1.4rem; flex-shrink: 0; }
+.nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 1.4rem; flex: 1 1 0; min-width: 0; }
 
 /* All navbar links share the same plain-text look */
 .nav-left .nav-link, .nav-right .nav-link {
