@@ -1099,6 +1099,15 @@ function resetVisibleProductsLimit() {
     visibleProductsLimit = PRODUCTS_RENDER_STEP;
 }
 
+// Favourite heart overlay for a product card. Filled state reflects the current
+// auth session; updated live via the 'jf-favorites-change' event listener.
+const FAV_HEART_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+function favHeartHtml(id) {
+    if (id === undefined || id === null) return '';
+    const fav = !!(window.jfAuth && window.jfAuth.isFavorite(id));
+    return `<button class="fav-heart${fav ? ' is-fav' : ''}" data-fav-id="${escapeHtml(String(id))}" type="button" aria-label="Save to favorites" aria-pressed="${fav}" title="Save to favorites">${FAV_HEART_SVG}</button>`;
+}
+
 function renderFilteredProducts() {
     const container = document.getElementById('products-container');
     const info = document.getElementById('kf-results-info');
@@ -1156,7 +1165,7 @@ function renderFilteredProducts() {
         }));
         return `
             <div class="product-card" data-rv="${rvItem}" data-purl="${escapeHtml(productUrl(p))}">
-                <div class="product-image" style="overflow:hidden;">${renderImg}</div>
+                <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(p.id)}${renderImg}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
                         ${platformBadge(p.picksly)}
@@ -3629,6 +3638,16 @@ window.jfRecentlyViewedRaw = function() {
 // HTML-escaped JSON from data-rv. Inline onclick removed to harden against
 // stored XSS via product fields.
 document.addEventListener('click', function(e) {
+    // Favourite heart — toggle (and prompt Discord login if signed out). Handled
+    // first + stopPropagation so it doesn't also count as a card view.
+    const heart = e.target.closest && e.target.closest('.fav-heart[data-fav-id]');
+    if (heart) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.jfAuth) window.jfAuth.toggleFavorite(heart.getAttribute('data-fav-id'));
+        return;
+    }
+
     const card = e.target.closest && e.target.closest('.product-card[data-rv]');
     if (card) {
         const raw = card.getAttribute('data-rv');
@@ -3674,6 +3693,85 @@ document.addEventListener('click', function(e) {
         }
     }
 });
+
+// Repaint every heart on the page when the favourites set changes (login,
+// logout, or a toggle anywhere). Cheap: only touches .fav-heart nodes.
+document.addEventListener('jf-favorites-change', function () {
+    document.querySelectorAll('.fav-heart[data-fav-id]').forEach(h => {
+        const fav = !!(window.jfAuth && window.jfAuth.isFavorite(h.getAttribute('data-fav-id')));
+        h.classList.toggle('is-fav', fav);
+        h.setAttribute('aria-pressed', String(fav));
+    });
+    // Keep an open favourites modal in sync (e.g. unfavouriting from inside it).
+    if (document.getElementById('fav-modal')) renderFavModalBody();
+});
+
+// ── "My Favorites" modal ────────────────────────────────────────────────────
+function renderFavModalBody() {
+    const body = document.getElementById('fav-modal-body');
+    if (!body) return;
+    const ids = new Set((window.jfAuth ? window.jfAuth.favorites() : []).map(String));
+    const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+    const items = cache.filter(p => ids.has(String(p.id)));
+    if (!items.length) {
+        const loading = window.jfAuth && !window.jfAuth.favoritesLoaded();
+        body.innerHTML = `<div class="fav-empty">${loading
+            ? '<div class="jf-spinner"></div>'
+            : `<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg><p>No favorites yet. Tap the heart on any product to save it here.</p>`}</div>`;
+        return;
+    }
+    body.innerHTML = `<div class="fav-grid">${items.map(p => {
+        const safeTitle = escapeHtml(stripEmojis(p.title || 'Untitled'));
+        const rawImg = (p.img || '').trim();
+        const isHttp = rawImg.startsWith('http');
+        const safeImg = isHttp ? rawImg : '';
+        const renderImg = safeImg
+            ? `<img src="${escapeHtml(thumb(safeImg, 400))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="lazy" decoding="async" data-fallback="no-image-text" />`
+            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.75rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
+        const picksly = safeExternalUrl(p.picksly || '#');
+        return `
+            <div class="product-card">
+                <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(p.id)}${renderImg}</div>
+                <div class="product-info">
+                    <h3 class="product-title">${safeTitle}</h3>
+                    <div class="product-price">${formatPrice(p.price)}</div>
+                    <div class="product-actions">
+                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(p.picksly || ''))}">${t('btn_buy')}</button>
+                        <a href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                    </div>
+                </div>
+            </div>`;
+    }).join('')}</div>`;
+}
+
+window.openFavorites = function () {
+    if (document.getElementById('fav-modal')) return;
+    const overlay = document.createElement('div');
+    overlay.id = 'fav-modal';
+    overlay.className = 'fav-overlay';
+    overlay.innerHTML = `
+        <div class="fav-box" role="dialog" aria-modal="true" aria-label="My Favorites">
+            <div class="fav-head">
+                <h2>My Favorites</h2>
+                <button class="fav-close" id="fav-close" aria-label="Close" type="button">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="fav-body" id="fav-modal-body"></div>
+        </div>`;
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    const close = () => {
+        overlay.remove();
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', onKey);
+    };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    overlay.querySelector('#fav-close').addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    renderFavModalBody();
+};
 
 window.trackRecentlyViewed = function(jsonStr) {
     try {
