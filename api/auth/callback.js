@@ -3,7 +3,7 @@
 
 import {
     parseCookies, signJWT, setSessionCookie, clearStateCookie, COOKIES,
-} from '../../lib/session.js';
+} from '../_session.js';
 
 function originOf(req) {
     const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();

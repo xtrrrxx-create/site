@@ -1603,6 +1603,17 @@ function getPages() {
             </div>
         </div>
     `,
+        favorites: `
+        <div style="max-width:1400px;margin:0 auto;padding:0 4% 3rem;">
+            <div class="pl-hero" style="padding-top:2.5rem;padding-bottom:1rem;">
+                <h1 class="pl-hero-title">My <span class="pl-accent">Favorites</span></h1>
+                <p class="pl-hero-sub">Products you saved. Tap the heart to remove.</p>
+            </div>
+            <div class="products-grid" id="favorites-container" style="margin-top:0.75rem;">
+                <p style="color:var(--text-primary);font-weight:600;">${t('loading')}</p>
+            </div>
+        </div>
+    `,
         tutorials: `
         <div class="tut-wrap">
             <div class="tut-head">
@@ -2450,6 +2461,10 @@ function initApp() {
             if (window.initTutorials) window.initTutorials();
         }
 
+        if (pageId === 'favorites') {
+            renderFavoritesContainer();
+        }
+
         if (pageId === 'product' && _pdState.product) {
             initProductDetail();
         }
@@ -2528,7 +2543,7 @@ function initApp() {
         }
     }
 
-    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores'];
+    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites'];
     // Product sub-routes: /products/shoes, /products/hoodies etc.
     const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
     function pageFromPath() {
@@ -2539,6 +2554,8 @@ function initApp() {
         // Product detail pages were removed — the old /product and
         // /products/<cat>/<slug-PICKSLYID> routes now just show the grid.
         if (path === 'product') return 'products';
+        // /products/favorites → favourites page (check before the category route)
+        if (parts[0].toLowerCase() === 'products' && parts[1] && parts[1].toLowerCase() === 'favorites') return 'favorites';
         if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'products';
         // /tutorials/<slug> (agent-tutorial, xianyu-tutorial, …) → tutorials page
         if (parts[0].toLowerCase() === 'tutorials' && parts[1]) return 'tutorials';
@@ -2573,6 +2590,8 @@ function initApp() {
         if (pageId === 'products') {
             const cat = (filterState.category || 'All');
             path = cat && cat !== 'All' ? '/products/' + cat.toLowerCase() : '/products';
+        } else if (pageId === 'favorites') {
+            path = '/products/favorites';
         } else {
             path = pageId === 'home' ? '/' : '/' + pageId;
         }
@@ -3702,76 +3721,75 @@ document.addEventListener('jf-favorites-change', function () {
         h.classList.toggle('is-fav', fav);
         h.setAttribute('aria-pressed', String(fav));
     });
-    // Keep an open favourites modal in sync (e.g. unfavouriting from inside it).
-    if (document.getElementById('fav-modal')) renderFavModalBody();
+    // Keep the favourites page in sync (e.g. unfavouriting an item from it).
+    if (document.getElementById('favorites-container')) renderFavoritesContainer();
 });
 
-// ── "My Favorites" modal ────────────────────────────────────────────────────
-function renderFavModalBody() {
-    const body = document.getElementById('fav-modal-body');
-    if (!body) return;
+// ── "My Favorites" page (/products/favorites) ───────────────────────────────
+function renderFavoritesContainer() {
+    const c = document.getElementById('favorites-container');
+    if (!c) return;
+
     const ids = new Set((window.jfAuth ? window.jfAuth.favorites() : []).map(String));
-    const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
-    const items = cache.filter(p => ids.has(String(p.id)));
-    if (!items.length) {
-        const loading = window.jfAuth && !window.jfAuth.favoritesLoaded();
-        body.innerHTML = `<div class="fav-empty">${loading
-            ? '<div class="jf-spinner"></div>'
-            : `<svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg><p>No favorites yet. Tap the heart on any product to save it here.</p>`}</div>`;
+    // No favourites → empty state immediately (no catalogue fetch needed).
+    if (!ids.size) {
+        c.innerHTML = `<div class="fav-empty" style="grid-column:1/-1;">
+            <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            <p>No favorites yet. Tap the heart on any product to save it here.</p>
+            <button class="btn-secondary" data-action="go-products" style="padding:0.7rem 1.3rem;border-radius:10px;border:none;cursor:pointer;">Browse products</button>
+        </div>`;
+        c.querySelector('[data-action="go-products"]')?.addEventListener('click', () => (window.navigateTo || renderPage)('products'));
         return;
     }
-    body.innerHTML = `<div class="fav-grid">${items.map(p => {
-        const safeTitle = escapeHtml(stripEmojis(p.title || 'Untitled'));
-        const rawImg = (p.img || '').trim();
-        const isHttp = rawImg.startsWith('http');
-        const safeImg = isHttp ? rawImg : '';
-        const renderImg = safeImg
-            ? `<img src="${escapeHtml(thumb(safeImg, 400))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="lazy" decoding="async" data-fallback="no-image-text" />`
-            : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.75rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
-        const picksly = safeExternalUrl(p.picksly || '#');
-        return `
-            <div class="product-card">
-                <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(p.id)}${renderImg}</div>
-                <div class="product-info">
-                    <h3 class="product-title">${safeTitle}</h3>
-                    <div class="product-price">${formatPrice(p.price)}</div>
-                    <div class="product-actions">
-                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(p.picksly || ''))}">${t('btn_buy')}</button>
-                        <a href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+
+    const fill = () => {
+        const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+        const items = cache.filter(p => ids.has(String(p.id)));
+        if (!items.length) {
+            // Have favourite ids but the catalogue hasn't loaded their details yet.
+            c.innerHTML = `<p style="grid-column:1/-1;color:var(--text-secondary);">${t('loading')}</p>`;
+            return;
+        }
+        c.innerHTML = items.map(p => {
+            const safeTitle = escapeHtml(stripEmojis(p.title || 'Untitled'));
+            const rawImg = (p.img || '').trim();
+            const isHttp = rawImg.startsWith('http');
+            const safeImg = isHttp ? rawImg : '';
+            const renderImg = safeImg
+                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="lazy" decoding="async" data-fallback="no-image-text" />`
+                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
+            const picksly = safeExternalUrl(p.picksly || '#');
+            return `
+                <div class="product-card">
+                    <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(p.id)}${renderImg}</div>
+                    <div class="product-info">
+                        <div class="product-batch-row">
+                            ${platformBadge(p.picksly)}
+                            <span class="product-store-name">${escapeHtml(catSellerLabel(p))}</span>
+                        </div>
+                        <h3 class="product-title">${safeTitle}</h3>
+                        <div class="product-price">${formatPrice(p.price)}</div>
+                        <div class="product-actions">
+                            <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(p.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(p.picksly || ''))}">${t('btn_buy')}</button>
+                            <a href="${escapeHtml(withRef(picksly))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                        </div>
                     </div>
-                </div>
-            </div>`;
-    }).join('')}</div>`;
+                </div>`;
+        }).join('');
+    };
+
+    if ((typeof allProductsCache !== 'undefined' ? allProductsCache : []).length > 0) {
+        fill();
+    } else {
+        (window._prefetchPromise || fetchFromSupabase()).then(data => {
+            if (Array.isArray(data) && !allProductsCache.length) { allProductsCache = data; window.allProductsCache = data; }
+            if (pageFromPath() === 'favorites') fill();
+        }).catch(() => fill());
+    }
 }
 
-window.openFavorites = function () {
-    if (document.getElementById('fav-modal')) return;
-    const overlay = document.createElement('div');
-    overlay.id = 'fav-modal';
-    overlay.className = 'fav-overlay';
-    overlay.innerHTML = `
-        <div class="fav-box" role="dialog" aria-modal="true" aria-label="My Favorites">
-            <div class="fav-head">
-                <h2>My Favorites</h2>
-                <button class="fav-close" id="fav-close" aria-label="Close" type="button">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-            <div class="fav-body" id="fav-modal-body"></div>
-        </div>`;
-    document.body.appendChild(overlay);
-    document.body.style.overflow = 'hidden';
-    const close = () => {
-        overlay.remove();
-        document.body.style.overflow = '';
-        document.removeEventListener('keydown', onKey);
-    };
-    const onKey = (e) => { if (e.key === 'Escape') close(); };
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-    overlay.querySelector('#fav-close').addEventListener('click', close);
-    document.addEventListener('keydown', onKey);
-    renderFavModalBody();
-};
+// Entry points (bottom-nav button, Preferences row) navigate to the route.
+window.openFavorites = function () { (window.navigateTo || renderPage)('favorites'); };
 
 window.trackRecentlyViewed = function(jsonStr) {
     try {

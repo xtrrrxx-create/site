@@ -2,7 +2,7 @@
 // browser to Discord's authorize page.
 
 import crypto from 'crypto';
-import { setStateCookie } from '../../lib/session.js';
+import { setStateCookie } from '../_session.js';
 
 function originOf(req) {
     const proto = (req.headers['x-forwarded-proto'] || 'https').split(',')[0].trim();

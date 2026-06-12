@@ -1,6 +1,6 @@
 // Return the current logged-in Discord user (from the session cookie), or null.
 
-import { getSession } from '../../lib/session.js';
+import { getSession } from '../_session.js';
 
 export default function handler(req, res) {
     const s = getSession(req);
