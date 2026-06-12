@@ -12,8 +12,10 @@
     'use strict';
 
     const FAV_KEY = 'jf_favorites';
+    const FAV_SELLERS_KEY = 'jf_fav_sellers';
     let user = null;               // { uid, username, name, avatar } or null
     const favSet = new Set();      // product_ids (as strings)
+    const favSellerSet = new Set();// seller names (as stored in products.seller)
 
     function emit(name) { document.dispatchEvent(new CustomEvent(name)); }
     function escapeAttr(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -34,6 +36,22 @@
         if (favSet.has(id)) favSet.delete(id); else favSet.add(id);
         persistFavorites();
         emit('jf-favorites-change');
+    }
+
+    // ── Favourite sellers (localStorage) ───────────────────────────────────
+    function loadFavSellers() {
+        favSellerSet.clear();
+        try {
+            const arr = JSON.parse(localStorage.getItem(FAV_SELLERS_KEY) || '[]');
+            if (Array.isArray(arr)) arr.forEach(s => favSellerSet.add(String(s)));
+        } catch (e) { /* ignore corrupt value */ }
+    }
+    function toggleFavSeller(name) {
+        name = String(name || '').trim();
+        if (!name) return;
+        if (favSellerSet.has(name)) favSellerSet.delete(name); else favSellerSet.add(name);
+        try { localStorage.setItem(FAV_SELLERS_KEY, JSON.stringify(Array.from(favSellerSet))); } catch (e) { /* quota */ }
+        emit('jf-favsellers-change');
     }
 
     function openFavs() { if (window.openFavorites) window.openFavorites(); }
@@ -91,6 +109,7 @@
 
     async function init() {
         loadFavorites();
+        loadFavSellers();
 
         // Clean ?login=ok|error out of the URL after the OAuth round-trip.
         try {
@@ -136,6 +155,9 @@
         favorites: () => Array.from(favSet),
         favoritesLoaded: () => true,   // localStorage is synchronous
         toggleFavorite,
+        isFavSeller: (name) => favSellerSet.has(String(name || '').trim()),
+        favSellers: () => Array.from(favSellerSet),
+        toggleFavSeller,
     };
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

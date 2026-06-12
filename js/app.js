@@ -1108,6 +1108,13 @@ function favHeartHtml(id) {
     return `<button class="fav-heart${fav ? ' is-fav' : ''}" data-fav-id="${escapeHtml(String(id))}" type="button" aria-label="Save to favorites" aria-pressed="${fav}" title="Save to favorites">${FAV_HEART_SVG}</button>`;
 }
 
+// Favourite-seller heart shown next to "View Store" on /stores sections.
+function storeFavBtnHtml(seller) {
+    if (!seller) return '';
+    const fav = !!(window.jfAuth && window.jfAuth.isFavSeller(seller));
+    return `<button class="store-fav-btn${fav ? ' is-fav' : ''}" data-fav-seller="${escapeHtml(seller)}" type="button" aria-label="Save store to favorites" aria-pressed="${fav}" title="Save store to favorites">${FAV_HEART_SVG}</button>`;
+}
+
 function renderFilteredProducts() {
     const container = document.getElementById('products-container');
     const info = document.getElementById('kf-results-info');
@@ -1370,6 +1377,40 @@ function injectHomeStyles() {
 
 // ─── PAGES ─────────────────────────────────────────────────────────────────
 function getPages() {
+    // Shared by the `stores` and `storesfav` page templates.
+    const storesCss = `
+        <style>
+            .hc-section { max-width: 1280px; margin: 0 auto 2rem; padding: 0; }
+            .hc-carousel-wrap { position: relative; }
+            .hc-carousel { display: flex; gap: 16px; padding: 24px 0; margin: -24px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; cursor: grab; }
+            .hc-carousel:active { cursor: grabbing; }
+            .hc-carousel::-webkit-scrollbar { display: none; }
+            .hc-card { flex-shrink: 0; width: 243.2px; display: flex; flex-direction: column; }
+            .hc-card .product-image { height: auto; aspect-ratio: 1; }
+            .hc-arrow { position: absolute; top: 45%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(20,20,20,0.9); border: 1px solid #363636; color: #f0f0f0; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 5; transition: background 0.15s; backdrop-filter: blur(4px); }
+            .hc-carousel-wrap:hover .hc-arrow { display: flex; }
+            .hc-arrow:hover { background: rgba(50,50,50,0.95); }
+            .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
+            .stores-page-head { max-width: 1280px; margin: 2.5rem auto 1.2rem; padding: 0; }
+            .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem; }
+            .stores-filter-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+            .stores-pills { display: flex; gap: 8px; }
+            .stores-pill { padding: 7px 16px; background: #2a2a2a; border: 1px solid #333; border-radius: 9999px; color: var(--text-secondary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; }
+            .stores-pill:hover { color: var(--text-primary); }
+            .stores-pill.active { background: #fff; color: #111; border-color: #fff; }
+            .stores-search { display: flex; align-items: center; gap: 8px; background: #2a2a2a; border: 1px solid #333; border-radius: 9999px; padding: 0 1rem; height: 42px; width: 340px; max-width: 100%; }
+            .stores-search input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.95rem; }
+            .stores-search input::placeholder { color: var(--text-secondary); }
+            .stores-search svg { color: var(--text-secondary); flex-shrink: 0; }
+            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #2a2a2a; border: none; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0; }
+            .store-page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0; }
+            .store-section-card .store-icon { width: 48px; height: 48px; font-size: 1.2rem; border: 3px solid var(--bg-color); }
+            .store-section-divider { height: 1px; background: #333; margin: 16px 20px 0; }
+            .store-section-card .hc-carousel { padding: 16px 20px 14px; margin: 0; }
+            .store-section-card .hc-arrow-left { left: 8px; }
+            .store-section-card .hc-arrow-right { right: 8px; }
+            .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.4rem; height: 36px; }
+        </style>`;
     return {
         home: `
         <style>
@@ -1543,41 +1584,20 @@ function getPages() {
         </div>
     `,
         stores: `
-        <style>
-            .hc-section { max-width: 1280px; margin: 0 auto 2rem; padding: 0; }
-            .hc-carousel-wrap { position: relative; }
-            .hc-carousel { display: flex; gap: 16px; padding: 24px 0; margin: -24px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; cursor: grab; }
-            .hc-carousel:active { cursor: grabbing; }
-            .hc-carousel::-webkit-scrollbar { display: none; }
-            .hc-card { flex-shrink: 0; width: 243.2px; display: flex; flex-direction: column; }
-            .hc-card .product-image { height: auto; aspect-ratio: 1; }
-            .hc-arrow { position: absolute; top: 45%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(20,20,20,0.9); border: 1px solid #363636; color: #f0f0f0; display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 5; transition: background 0.15s; backdrop-filter: blur(4px); }
-            .hc-carousel-wrap:hover .hc-arrow { display: flex; }
-            .hc-arrow:hover { background: rgba(50,50,50,0.95); }
-            .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
-            .stores-page-head { max-width: 1280px; margin: 2.5rem auto 1.2rem; padding: 0; }
-            .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--text-primary); margin-bottom: 1rem; }
-            .stores-filter-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-            .stores-pills { display: flex; gap: 8px; }
-            .stores-pill { padding: 7px 16px; background: #2a2a2a; border: 1px solid #333; border-radius: 9999px; color: var(--text-secondary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; }
-            .stores-pill:hover { color: var(--text-primary); }
-            .stores-pill.active { background: #fff; color: #111; border-color: #fff; }
-            .stores-search { display: flex; align-items: center; gap: 8px; background: #2a2a2a; border: 1px solid #333; border-radius: 9999px; padding: 0 1rem; height: 42px; width: 340px; max-width: 100%; }
-            .stores-search input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.95rem; }
-            .stores-search input::placeholder { color: var(--text-secondary); }
-            .stores-search svg { color: var(--text-secondary); flex-shrink: 0; }
-            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #2a2a2a; border: none; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0; }
-            .store-page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0; }
-            .store-section-card .store-icon { width: 48px; height: 48px; font-size: 1.2rem; border: 3px solid var(--bg-color); }
-            .store-section-divider { height: 1px; background: #333; margin: 16px 20px 0; }
-            .store-section-card .hc-carousel { padding: 16px 20px 14px; margin: 0; }
-            .store-section-card .hc-arrow-left { left: 8px; }
-            .store-section-card .hc-arrow-right { right: 8px; }
-            .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.4rem; height: 36px; }
-        </style>
+        ${storesCss}
         <div style="padding: 1.5rem 4% 3rem;">
             <!-- Filter toolbar lives in the navbar (see #stores-nav-toolbar) -->
             <div id="stores-page">${buildStoresPage()}</div>
+        </div>
+    `,
+        storesfav: `
+        ${storesCss}
+        <div style="padding: 1.5rem 4% 3rem;">
+            <div class="pl-hero" style="padding-top:1rem;padding-bottom:1rem;">
+                <h1 class="pl-hero-title">Favorite <span class="pl-accent">Stores</span></h1>
+                <p class="pl-hero-sub">Stores you saved. Tap the heart to remove.</p>
+            </div>
+            <div id="stores-fav-page">${buildStoresPage(true)}</div>
         </div>
     `,
         products: `
@@ -2465,6 +2485,24 @@ function initApp() {
             renderFavoritesContainer();
         }
 
+        if (pageId === 'storesfav') {
+            const reRender = () => {
+                const el = document.getElementById('stores-fav-page');
+                if (!el) return;
+                el.innerHTML = buildStoresPage(true);
+                attachCarouselHandlers(mainContent);
+                el.querySelector('[data-action="go-stores"]')?.addEventListener('click', () => (window.navigateTo || renderPage)('stores'));
+            };
+            if (allProductsCache.length === 0) {
+                (window._prefetchPromise || fetchFromSupabase()).then(data => {
+                    if (Array.isArray(data) && !allProductsCache.length) { allProductsCache = data; window.allProductsCache = data; }
+                    if (pageFromPath() === 'storesfav') reRender();
+                }).catch(() => {});
+            } else {
+                reRender();
+            }
+        }
+
         if (pageId === 'product' && _pdState.product) {
             initProductDetail();
         }
@@ -2543,7 +2581,7 @@ function initApp() {
         }
     }
 
-    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites'];
+    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites', 'storesfav'];
     // Product sub-routes: /products/shoes, /products/hoodies etc.
     const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
     function pageFromPath() {
@@ -2556,6 +2594,8 @@ function initApp() {
         if (path === 'product') return 'products';
         // /products/favorites → favourites page (check before the category route)
         if (parts[0].toLowerCase() === 'products' && parts[1] && parts[1].toLowerCase() === 'favorites') return 'favorites';
+        // /stores/favorites → favourite stores page
+        if (parts[0].toLowerCase() === 'stores' && parts[1] && parts[1].toLowerCase() === 'favorites') return 'storesfav';
         if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'products';
         // /tutorials/<slug> (agent-tutorial, xianyu-tutorial, …) → tutorials page
         if (parts[0].toLowerCase() === 'tutorials' && parts[1]) return 'tutorials';
@@ -2592,6 +2632,8 @@ function initApp() {
             path = cat && cat !== 'All' ? '/products/' + cat.toLowerCase() : '/products';
         } else if (pageId === 'favorites') {
             path = '/products/favorites';
+        } else if (pageId === 'storesfav') {
+            path = '/stores/favorites';
         } else {
             path = pageId === 'home' ? '/' : '/' + pageId;
         }
@@ -3667,6 +3709,15 @@ document.addEventListener('click', function(e) {
         return;
     }
 
+    // Favourite-store heart (next to "View Store" on /stores sections).
+    const storeHeart = e.target.closest && e.target.closest('.store-fav-btn[data-fav-seller]');
+    if (storeHeart) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.jfAuth && window.jfAuth.toggleFavSeller) window.jfAuth.toggleFavSeller(storeHeart.getAttribute('data-fav-seller'));
+        return;
+    }
+
     const card = e.target.closest && e.target.closest('.product-card[data-rv]');
     if (card) {
         const raw = card.getAttribute('data-rv');
@@ -3723,6 +3774,22 @@ document.addEventListener('jf-favorites-change', function () {
     });
     // Keep the favourites page in sync (e.g. unfavouriting an item from it).
     if (document.getElementById('favorites-container')) renderFavoritesContainer();
+});
+
+// Repaint store hearts when the favourite-sellers set changes; the favourite
+// stores page re-renders so removed stores disappear live.
+document.addEventListener('jf-favsellers-change', function () {
+    document.querySelectorAll('.store-fav-btn[data-fav-seller]').forEach(b => {
+        const fav = !!(window.jfAuth && window.jfAuth.isFavSeller(b.getAttribute('data-fav-seller')));
+        b.classList.toggle('is-fav', fav);
+        b.setAttribute('aria-pressed', String(fav));
+    });
+    const favPage = document.getElementById('stores-fav-page');
+    if (favPage) {
+        favPage.innerHTML = buildStoresPage(true);
+        if (typeof attachCarouselHandlers === 'function') attachCarouselHandlers(favPage);
+        favPage.querySelector('[data-action="go-stores"]')?.addEventListener('click', () => (window.navigateTo)('stores'));
+    }
 });
 
 // ── "My Favorites" page (/products/favorites) ───────────────────────────────
@@ -4457,7 +4524,7 @@ function buildStoresSkeleton(sections) {
     return Array.from({ length: sections || 3 }, () => section).join('');
 }
 
-function buildStoresPage() {
+function buildStoresPage(favOnly) {
     const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
     // Cold deep-link / refresh: catalog not fetched yet. Show skeleton store
     // sections (picks.ly style) instead of the "No stores yet" message.
@@ -4473,7 +4540,10 @@ function buildStoresPage() {
         if (!sellerMap.has(s)) sellerMap.set(s, []);
         sellerMap.get(s).push(p);
     });
-    let sellers = [...sellerMap.entries()].filter(([, it]) => it.length >= 3);
+    // Favourites view: only saved sellers, and don't drop small stores (a
+    // favourited seller with 1-2 items should still show up).
+    let sellers = [...sellerMap.entries()].filter(([s, it]) =>
+        favOnly ? (window.jfAuth && window.jfAuth.isFavSeller(s)) : it.length >= 3);
     // Platform filter (All / Weidian / 1688 / Taobao)
     const plat = (typeof storesFilter !== 'undefined' && storesFilter.platform) || 'all';
     if (plat !== 'all') {
@@ -4491,6 +4561,13 @@ function buildStoresPage() {
     }
     sellers.sort((a, b) => b[1].length - a[1].length);
     if (!sellers.length) {
+        if (favOnly) {
+            return `<div class="fav-empty" style="padding:4rem 1rem;">
+                <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                <p>No favorite stores yet. Tap the heart next to "View Store" to save one.</p>
+                <button class="btn-secondary" data-action="go-stores" style="padding:0.7rem 1.3rem;border-radius:10px;border:none;cursor:pointer;">Browse stores</button>
+            </div>`;
+        }
         const msg = q || plat !== 'all' ? 'No stores match your filter.' : 'No stores yet — sellers are still being indexed.';
         return `<p style="text-align:center;color:var(--text-secondary);padding:4rem 1rem;">${msg}</p>`;
     }
@@ -4507,7 +4584,10 @@ function buildStoresPage() {
                         <span class="store-sub">${escapeHtml(platform)}</span>
                     </div>
                 </div>
-                <button class="store-view-btn store-view-btn-sm" data-action="go-products" data-seller="${escapeHtml(seller)}">View Store</button>
+                <div class="store-head-actions">
+                    ${storeFavBtnHtml(seller)}
+                    <button class="store-view-btn store-view-btn-sm" data-action="go-products" data-seller="${escapeHtml(seller)}">View Store</button>
+                </div>
             </div>
             <div class="store-section-divider"></div>
             <div class="hc-carousel-wrap">

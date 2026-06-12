@@ -2259,6 +2259,20 @@ body.light-mode #app-content .tracking-card {
 .fav-heart.is-fav:hover { background: rgba(0, 0, 0, 0.55); }
 @media (hover: none) { .fav-heart { opacity: 1; transform: scale(1); } }
 
+/* ── Favourite-store heart (next to "View Store" on /stores) ── */
+.store-head-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.store-fav-btn {
+    width: 36px; height: 36px; padding: 0; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid #3a3a3a; border-radius: 50%; cursor: pointer;
+    background: transparent; color: var(--text-secondary);
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.store-fav-btn svg { fill: none; stroke: currentColor; stroke-width: 2; }
+.store-fav-btn:hover { border-color: #ff4d6d; color: #ff4d6d; }
+.store-fav-btn.is-fav { color: #ff4d6d; border-color: #ff4d6d; }
+.store-fav-btn.is-fav svg { fill: #ff4d6d; stroke: #ff4d6d; }
+
 /* ── Favourites count badge in the Preferences "My Favorites" row ── */
 #set-favs-count:not(:empty) {
     display: inline-flex; align-items: center; justify-content: center;
