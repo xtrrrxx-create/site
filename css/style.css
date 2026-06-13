@@ -1766,7 +1766,7 @@ main {
 .stores-nav-toolbar .stores-pill:hover { color: var(--text-primary); }
 .stores-nav-toolbar .stores-pill.active { background: #fff; color: #111; border-color: #fff; }
 .stores-pill-fav { display: inline-flex; align-items: center; gap: 6px; }
-.stores-pill-fav:hover { color: #ff4d6d !important; border-color: #ff4d6d; }
+.stores-pill-fav:hover { color: #ff9f0a !important; border-color: #ff9f0a; }
 .stores-nav-toolbar .stores-search {
     display: flex; align-items: center; gap: 8px;
     background: var(--nav-bg); border: 1px solid var(--border-color);
@@ -2256,8 +2256,8 @@ body.light-mode #app-content .tracking-card {
 .fav-heart svg { fill: none; stroke: currentColor; stroke-width: 2; }
 .product-card:hover .fav-heart, .fav-heart:focus-visible { opacity: 1; transform: scale(1); }
 .fav-heart:hover { background: rgba(0, 0, 0, 0.65); }
-.fav-heart.is-fav { opacity: 1; transform: scale(1); color: #ff4d6d; }
-.fav-heart.is-fav svg { fill: #ff4d6d; stroke: #ff4d6d; }
+.fav-heart.is-fav { opacity: 1; transform: scale(1); color: #ff9f0a; }
+.fav-heart.is-fav svg { fill: #ff9f0a; stroke: #ff9f0a; }
 .fav-heart.is-fav:hover { background: rgba(0, 0, 0, 0.55); }
 @media (hover: none) { .fav-heart { opacity: 1; transform: scale(1); } }
 
@@ -2271,15 +2271,15 @@ body.light-mode #app-content .tracking-card {
     transition: border-color .15s ease, color .15s ease, background .15s ease;
 }
 .store-fav-btn svg { fill: none; stroke: currentColor; stroke-width: 2; }
-.store-fav-btn:hover { border-color: #ff4d6d; color: #ff4d6d; }
-.store-fav-btn.is-fav { color: #ff4d6d; border-color: #ff4d6d; }
-.store-fav-btn.is-fav svg { fill: #ff4d6d; stroke: #ff4d6d; }
+.store-fav-btn:hover { border-color: #ff9f0a; color: #ff9f0a; }
+.store-fav-btn.is-fav { color: #ff9f0a; border-color: #ff9f0a; }
+.store-fav-btn.is-fav svg { fill: #ff9f0a; stroke: #ff9f0a; }
 
 /* ── Favourites count badge in the Preferences "My Favorites" row ── */
 #set-favs-count:not(:empty) {
     display: inline-flex; align-items: center; justify-content: center;
     min-width: 18px; height: 18px; padding: 0 5px; margin-right: 2px;
-    border-radius: 9px; background: #ff4d6d; color: #fff;
+    border-radius: 9px; background: #ff9f0a; color: #fff;
     font-size: 0.68rem; font-weight: 700; line-height: 18px;
 }
 
@@ -2316,7 +2316,7 @@ body.light-mode #app-content .tracking-card {
 .bottom-fav-icon { position: relative; display: inline-flex; }
 .bottom-fav-count {
     position: absolute; top: -6px; right: -8px; min-width: 15px; height: 15px;
-    padding: 0 4px; border-radius: 8px; background: #ff4d6d; color: #fff;
+    padding: 0 4px; border-radius: 8px; background: #ff9f0a; color: #fff;
     font-size: 0.6rem; font-weight: 700; line-height: 15px; text-align: center;
 }
 
