@@ -693,7 +693,9 @@ const INPUT_MAX_LEN = 35;
 /** Link converter field max length (paste / lag guard). */
 const LINK_INPUT_MAX_LEN = 100;
 const PRODUCTS_RENDER_STEP = 30;
-const PRODUCTS_AUTO_REFRESH_MS = 90 * 1000;
+// 10 min: the catalogue is edge-cached for hours, so polling it more often just
+// re-downloads identical data. Keeps client + Vercel bandwidth low.
+const PRODUCTS_AUTO_REFRESH_MS = 10 * 60 * 1000;
 
 async function fetchFromSupabase() {
     const res = await fetch('/api/products');
@@ -2461,7 +2463,8 @@ function initApp() {
                 });
             }, 12000);
 
-            // Auto-refresh Trending Items every 60s without a page reload.
+            // Refresh Trending Items every 5 min without a page reload (was 60s —
+            // too chatty now that the catalogue is cached for hours).
             if (window._trendingTimer) clearInterval(window._trendingTimer);
             window._trendingTimer = setInterval(() => {
                 if (pageFromPath() !== 'home') { clearInterval(window._trendingTimer); window._trendingTimer = null; return; }
@@ -2471,7 +2474,7 @@ function initApp() {
                 ]).then(() => {
                     if (pageFromPath() === 'home') refreshHomeMarquee();
                 }).catch(() => {});
-            }, 60000);
+            }, 5 * 60 * 1000);
         }
 
         if (pageId === 'stores') {

@@ -133,7 +133,13 @@ export default async function handler(req, res) {
         return res.status(502).json({ error: 'Upstream error', cid });
     }
 
-    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=30');
+    // Long edge cache: the catalogue (~1.5 MB) changes only when the admin adds
+    // products, so re-fetching it from Supabase every few seconds was burning
+    // the whole bandwidth quota. 6 h fresh + 24 h stale-while-revalidate means
+    // Supabase is hit a handful of times a day per edge region instead of
+    // thousands. New products appear within 6 h, or instantly on a redeploy
+    // (a new deployment busts the CDN cache).
+    res.setHeader('Cache-Control', 's-maxage=21600, stale-while-revalidate=86400');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Vary', 'Origin');
     return res.json(all);
