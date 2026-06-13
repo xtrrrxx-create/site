@@ -1377,7 +1377,7 @@ function injectHomeStyles() {
 
 // ─── PAGES ─────────────────────────────────────────────────────────────────
 function getPages() {
-    // Shared by the `stores` and `storesfav` page templates.
+    // Shared by the `stores` page template.
     const storesCss = `
         <style>
             .hc-section { max-width: 1280px; margin: 0 auto 2rem; padding: 0; }
@@ -1588,16 +1588,6 @@ function getPages() {
         <div style="padding: 1.5rem 4% 3rem;">
             <!-- Filter toolbar lives in the navbar (see #stores-nav-toolbar) -->
             <div id="stores-page">${buildStoresPage()}</div>
-        </div>
-    `,
-        storesfav: `
-        ${storesCss}
-        <div style="padding: 1.5rem 4% 3rem;">
-            <div class="pl-hero" style="padding-top:1rem;padding-bottom:1rem;">
-                <h1 class="pl-hero-title">Favorite <span class="pl-accent">Stores</span></h1>
-                <p class="pl-hero-sub">Stores you saved. Tap the heart to remove.</p>
-            </div>
-            <div id="stores-fav-page">${buildStoresPage(true)}</div>
         </div>
     `,
         products: `
@@ -2485,23 +2475,6 @@ function initApp() {
             renderFavoritesContainer();
         }
 
-        if (pageId === 'storesfav') {
-            const reRender = () => {
-                const el = document.getElementById('stores-fav-page');
-                if (!el) return;
-                el.innerHTML = buildStoresPage(true);
-                attachCarouselHandlers(mainContent);
-                el.querySelector('[data-action="go-stores"]')?.addEventListener('click', () => (window.navigateTo || renderPage)('stores'));
-            };
-            if (allProductsCache.length === 0) {
-                (window._prefetchPromise || fetchFromSupabase()).then(data => {
-                    if (Array.isArray(data) && !allProductsCache.length) { allProductsCache = data; window.allProductsCache = data; }
-                    if (pageFromPath() === 'storesfav') reRender();
-                }).catch(() => {});
-            } else {
-                reRender();
-            }
-        }
 
         if (pageId === 'product' && _pdState.product) {
             initProductDetail();
@@ -2581,7 +2554,7 @@ function initApp() {
         }
     }
 
-    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites', 'storesfav'];
+    const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites'];
     // Product sub-routes: /products/shoes, /products/hoodies etc.
     const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
     function pageFromPath() {
@@ -2594,9 +2567,10 @@ function initApp() {
         if (path === 'product') return 'products';
         // /products/favorites → favourites page (check before the category route)
         if (parts[0].toLowerCase() === 'products' && parts[1] && parts[1].toLowerCase() === 'favorites') return 'favorites';
-        // /stores/favorites → favourite stores page
-        if (parts[0].toLowerCase() === 'stores' && parts[1] && parts[1].toLowerCase() === 'favorites') return 'storesfav';
         if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'products';
+        // Legacy /stores/favorites bookmark → the Stores page (Favorites is now a
+        // filter pill there, not a separate page).
+        if (parts[0].toLowerCase() === 'stores' && parts[1]) return 'stores';
         // /tutorials/<slug> (agent-tutorial, xianyu-tutorial, …) → tutorials page
         if (parts[0].toLowerCase() === 'tutorials' && parts[1]) return 'tutorials';
         // /products/category listing route
@@ -2632,8 +2606,6 @@ function initApp() {
             path = cat && cat !== 'All' ? '/products/' + cat.toLowerCase() : '/products';
         } else if (pageId === 'favorites') {
             path = '/products/favorites';
-        } else if (pageId === 'storesfav') {
-            path = '/stores/favorites';
         } else {
             path = pageId === 'home' ? '/' : '/' + pageId;
         }
@@ -3287,9 +3259,6 @@ function bindStoresNavToolbar() {
             reRenderStores();
         });
     });
-    // "Favorites" pill → favourite stores page (not a platform filter).
-    const favPill = document.getElementById('stores-fav-pill');
-    if (favPill) favPill.addEventListener('click', () => (window.navigateTo)('storesfav'));
     const ss = document.getElementById('stores-search-input');
     if (ss) {
         let tmr;
@@ -3787,11 +3756,21 @@ document.addEventListener('jf-favsellers-change', function () {
         b.classList.toggle('is-fav', fav);
         b.setAttribute('aria-pressed', String(fav));
     });
-    const favPage = document.getElementById('stores-fav-page');
-    if (favPage) {
-        favPage.innerHTML = buildStoresPage(true);
-        if (typeof attachCarouselHandlers === 'function') attachCarouselHandlers(favPage);
-        favPage.querySelector('[data-action="go-stores"]')?.addEventListener('click', () => (window.navigateTo)('stores'));
+    // When the Favorites filter is active on /stores, re-render so an
+    // unfavourited store disappears live.
+    const storesEl = document.getElementById('stores-page');
+    if (storesEl && typeof storesFilter !== 'undefined' && storesFilter.platform === 'favorites') {
+        storesEl.innerHTML = buildStoresPage();
+        if (typeof attachCarouselHandlers === 'function') attachCarouselHandlers(storesEl);
+    }
+});
+
+// Empty-state "Browse all stores" → reset the Favorites filter to All.
+document.addEventListener('click', function (e) {
+    const b = e.target.closest && e.target.closest('[data-action="stores-show-all"]');
+    if (b) {
+        e.preventDefault();
+        document.querySelector('#stores-nav-pills .stores-pill[data-plat="all"]')?.click();
     }
 });
 
@@ -4543,13 +4522,15 @@ function buildStoresPage(favOnly) {
         if (!sellerMap.has(s)) sellerMap.set(s, []);
         sellerMap.get(s).push(p);
     });
-    // Favourites view: only saved sellers, and don't drop small stores (a
-    // favourited seller with 1-2 items should still show up).
+    // "Favorites" is a platform-filter value, not a separate page. When active,
+    // show only saved sellers and don't drop small stores (a favourited seller
+    // with 1-2 items should still show up).
+    const plat = favOnly ? 'favorites' : ((typeof storesFilter !== 'undefined' && storesFilter.platform) || 'all');
+    favOnly = plat === 'favorites';
     let sellers = [...sellerMap.entries()].filter(([s, it]) =>
         favOnly ? (window.jfAuth && window.jfAuth.isFavSeller(s)) : it.length >= 3);
-    // Platform filter (All / Weidian / 1688 / Taobao)
-    const plat = (typeof storesFilter !== 'undefined' && storesFilter.platform) || 'all';
-    if (plat !== 'all') {
+    // Platform filter (Weidian / 1688 / Taobao). Skipped for All and Favorites.
+    if (plat !== 'all' && !favOnly) {
         sellers = sellers.filter(([, items]) => platformName((items.find(p => p.picksly) || {}).picksly) === plat);
     }
     // Search: match seller name (show all its products) or product titles (show
@@ -4568,7 +4549,7 @@ function buildStoresPage(favOnly) {
             return `<div class="fav-empty" style="padding:4rem 1rem;">
                 <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 <p>No favorite stores yet. Tap the heart next to "View Store" to save one.</p>
-                <button class="btn-secondary" data-action="go-stores" style="padding:0.7rem 1.3rem;border-radius:10px;border:none;cursor:pointer;">Browse stores</button>
+                <button class="btn-secondary" data-action="stores-show-all" style="padding:0.7rem 1.3rem;border-radius:10px;border:none;cursor:pointer;">Browse all stores</button>
             </div>`;
         }
         const msg = q || plat !== 'all' ? 'No stores match your filter.' : 'No stores yet — sellers are still being indexed.';
