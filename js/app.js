@@ -1795,7 +1795,8 @@ function getPages() {
             .qc-wrap { max-width: 1400px; margin: 0 auto; padding: 1.5rem 4% 3rem;
                 display: flex; flex-direction: column; gap: 1.5rem;
                 width: 100%; box-sizing: border-box; }
-            .qc-card { background: var(--nav-bg); border: 1px solid var(--border-color);
+            .qc-card { background: #2a2a2a; border: none;
+                box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0;
                 border-radius: 16px; padding: 2rem; width: 100%; box-sizing: border-box; }
             .qc-title { font-family:'Inter Tight',system-ui,sans-serif; font-size: 32px; font-weight: 400;
                 color: var(--text-primary); margin-bottom: 0.4rem; line-height: 48px; text-align: left; }
@@ -1930,8 +1931,9 @@ function getPages() {
                 box-sizing: border-box;
             }
             .tool-card {
-                background: var(--nav-bg);
-                border: 1px solid var(--border-color);
+                background: #2a2a2a;
+                border: none;
+                box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0;
                 border-radius: 16px;
                 padding: 2rem;
                 width: 100%;
