@@ -26,7 +26,7 @@
     <meta name="twitter:title" content="Jarvis Finder – Best Taobao & Weidian Finds" />
     <meta name="twitter:description" content="Discover the best Taobao and Weidian products curated for agent shopping. Convert links for Kakobuy, Mulebuy and Acbuy and track your packages." />
     <meta name="twitter:image" content="https://www.jarvis-finder.com/og-image.png" />
-    <link rel="stylesheet" href="/css/style.css?v=75">
+    <link rel="stylesheet" href="/css/style.css?v=77">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@400;500;600;700;800;900&display=swap"
@@ -62,9 +62,18 @@
                 </div>
             </div>
             <div class="nav-right">
-                <a href="/qccheck" data-page="qccheck" class="nav-link">QC Checker</a>
-                <a href="/tutorials" data-page="tutorials" class="nav-link">Tutorials</a>
-                <a href="/tools" data-page="tools" class="nav-link">Tools</a>
+                <div class="nav-more-wrap" id="nav-more-wrap">
+                    <button class="nav-more-btn" id="nav-more-btn" type="button" aria-expanded="false" aria-haspopup="true">
+                        <span>More</span>
+                        <svg class="nav-more-chev" width="16" height="16" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                    <div class="nav-more-menu" id="nav-more-menu" role="menu" aria-hidden="true">
+                        <a href="/qccheck" data-page="qccheck" class="nav-more-item" role="menuitem">QC Checker</a>
+                        <a href="/tutorials" data-page="tutorials" class="nav-more-item" role="menuitem">Tutorials</a>
+                        <a href="/tools" data-page="tools" class="nav-more-item" role="menuitem">Tools</a>
+                        <a href="/products/favorites" data-page="favorites" class="nav-more-item" role="menuitem">Favorites</a>
+                    </div>
+                </div>
                 <div class="settings-wrap">
                     <button class="btn-icon nav-gear-btn" id="nav-settings-btn" aria-label="Settings" aria-haspopup="true" aria-expanded="false">
                         <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -198,7 +207,7 @@
         <span class="discord-text">Join us</span>
     </a>
 
-    <script src="/js/app.js?v=90"></script>
+    <script src="/js/app.js?v=91"></script>
     <script src="/js/enhancements.js?v=9"></script>
     <script src="/js/auth.js?v=5"></script>
 </body>

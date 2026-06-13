@@ -2909,6 +2909,37 @@ const CURRENCY_SHORT = {
     SGD: 'S$ SGD', HKD: 'HK$ HKD', RON: 'lei RON'
 };
 
+// "More" navbar dropdown (QC Checker / Tutorials / Tools / Favorites).
+function initMoreMenu() {
+    const wrap = document.getElementById('nav-more-wrap');
+    const btn = document.getElementById('nav-more-btn');
+    const menu = document.getElementById('nav-more-menu');
+    if (!wrap || !btn || !menu) return;
+    const onDoc = (e) => { if (!wrap.contains(e.target)) close(); };
+    function open() {
+        menu.classList.add('open'); menu.setAttribute('aria-hidden', 'false');
+        btn.setAttribute('aria-expanded', 'true');
+        document.addEventListener('click', onDoc, true);
+    }
+    function close() {
+        menu.classList.remove('open'); menu.setAttribute('aria-hidden', 'true');
+        btn.setAttribute('aria-expanded', 'false');
+        document.removeEventListener('click', onDoc, true);
+    }
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.classList.contains('open') ? close() : open();
+    });
+    menu.querySelectorAll('a[data-page]').forEach(a => {
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            close();
+            (window.navigateTo || renderPage)(a.getAttribute('data-page'));
+        });
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+}
+
 function initSettingsModal() {
     const wrap   = document.querySelector('.settings-wrap');
     const btn    = document.getElementById('nav-settings-btn');
@@ -3325,6 +3356,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initBlurPlaceholders(document); // navbar search pill
     initApp();
     initSettingsModal();
+    initMoreMenu();
     bindStoresNavToolbar();
     document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === currentCurrency);

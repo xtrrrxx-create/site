@@ -1733,6 +1733,38 @@ main {
 
 .nav-gear-btn { width: 36px; height: 36px; border: none; flex-shrink: 0; transition: background 0.15s ease, color 0.15s ease; }
 .nav-gear-btn:hover { background: var(--muted-hover); color: var(--text-primary); }
+
+/* "More" navbar dropdown */
+.nav-more-wrap { position: relative; }
+.nav-more-btn {
+    display: flex; align-items: center; gap: 4px; cursor: pointer;
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 14px; font-weight: 400; color: var(--text-secondary);
+    background: transparent; border: none; white-space: nowrap;
+    padding: 4px 8px; border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+.nav-more-btn:hover { color: var(--text-primary); background: var(--muted-hover); }
+.nav-more-btn[aria-expanded="true"] { color: var(--text-primary); background: var(--muted-hover); }
+.nav-more-chev { transition: transform 0.2s ease; }
+.nav-more-btn[aria-expanded="true"] .nav-more-chev { transform: rotate(180deg); }
+
+.nav-more-menu {
+    position: absolute; right: 0; top: calc(100% + 8px); z-index: 1200;
+    min-width: 176px; padding: 6px;
+    background: var(--nav-bg); border: 1px solid var(--border-color);
+    border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    transform-origin: top right; transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0; transform: scale(0.97) translateY(-6px); pointer-events: none;
+}
+.nav-more-menu.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+.nav-more-item {
+    display: block; padding: 9px 12px; border-radius: 8px;
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 14px; color: var(--text-primary); text-decoration: none;
+    white-space: nowrap; transition: background 0.15s ease;
+}
+.nav-more-item:hover { background: var(--muted-hover); }
 .nav-gear-btn .gear-icon { transition: transform 0.4s ease; }
 .nav-gear-btn:hover .gear-icon { transform: rotate(90deg); }
 
