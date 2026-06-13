@@ -20,37 +20,51 @@
     function emit(name) { document.dispatchEvent(new CustomEvent(name)); }
     function escapeAttr(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-    // ── Favourites (localStorage) ──────────────────────────────────────────
+    // Favourites belong to the logged-in Discord account, scoped per user id so
+    // they aren't shared across accounts on the same device. Logged out → empty.
+    function favKey() { return user ? `${FAV_KEY}_${user.uid}` : null; }
+    function favSellersKey() { return user ? `${FAV_SELLERS_KEY}_${user.uid}` : null; }
+
+    // ── Favourites (per-account, localStorage) ─────────────────────────────
     function loadFavorites() {
         favSet.clear();
+        const key = favKey();
+        if (!key) return;
         try {
-            const arr = JSON.parse(localStorage.getItem(FAV_KEY) || '[]');
+            const arr = JSON.parse(localStorage.getItem(key) || '[]');
             if (Array.isArray(arr)) arr.forEach(id => favSet.add(String(id)));
         } catch (e) { /* ignore corrupt value */ }
     }
     function persistFavorites() {
-        try { localStorage.setItem(FAV_KEY, JSON.stringify(Array.from(favSet))); } catch (e) { /* quota / private mode */ }
+        const key = favKey();
+        if (!key) return;
+        try { localStorage.setItem(key, JSON.stringify(Array.from(favSet))); } catch (e) { /* quota / private mode */ }
     }
     function toggleFavorite(id) {
+        if (!user) { signIn(); return; }          // must be logged in to save
         id = String(id);
         if (favSet.has(id)) favSet.delete(id); else favSet.add(id);
         persistFavorites();
         emit('jf-favorites-change');
     }
 
-    // ── Favourite sellers (localStorage) ───────────────────────────────────
+    // ── Favourite sellers (per-account, localStorage) ──────────────────────
     function loadFavSellers() {
         favSellerSet.clear();
+        const key = favSellersKey();
+        if (!key) return;
         try {
-            const arr = JSON.parse(localStorage.getItem(FAV_SELLERS_KEY) || '[]');
+            const arr = JSON.parse(localStorage.getItem(key) || '[]');
             if (Array.isArray(arr)) arr.forEach(s => favSellerSet.add(String(s)));
         } catch (e) { /* ignore corrupt value */ }
     }
     function toggleFavSeller(name) {
+        if (!user) { signIn(); return; }          // must be logged in to save
         name = String(name || '').trim();
         if (!name) return;
         if (favSellerSet.has(name)) favSellerSet.delete(name); else favSellerSet.add(name);
-        try { localStorage.setItem(FAV_SELLERS_KEY, JSON.stringify(Array.from(favSellerSet))); } catch (e) { /* quota */ }
+        const key = favSellersKey();
+        try { localStorage.setItem(key, JSON.stringify(Array.from(favSellerSet))); } catch (e) { /* quota */ }
         emit('jf-favsellers-change');
     }
 
@@ -103,8 +117,14 @@
 
     function setUser(u) {
         user = u || null;
+        // Favourites are account-scoped: load this user's (or clear on logout),
+        // then repaint hearts, counts and any open favourites page.
+        loadFavorites();
+        loadFavSellers();
         renderAuth();
         emit('jf-auth-change');
+        emit('jf-favorites-change');
+        emit('jf-favsellers-change');
     }
 
     async function init() {
