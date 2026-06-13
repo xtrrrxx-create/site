@@ -1099,6 +1099,26 @@ function resetVisibleProductsLimit() {
     visibleProductsLimit = PRODUCTS_RENDER_STEP;
 }
 
+// Mirror the product-search term across every search bar (navbar + home/products
+// hero) so the last thing typed shows up in both. `exceptEl` is the input the
+// user is currently typing in (left untouched to keep the caret stable). The
+// navbar bar is skipped on /stores, where it drives the store filter instead.
+function syncProductSearch(value, exceptEl) {
+    filterState.search = value;
+    const ids = ['home-search', 'kf-search'];
+    if (!document.body.classList.contains('on-stores')) ids.push('nav-search');
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el !== exceptEl && el.value !== value) el.value = value;
+    });
+    // On the products page, reflect the term in the grid + URL immediately.
+    if (document.getElementById('products-container')) {
+        renderFilteredProducts();
+        if (window.syncSearchUrl) window.syncSearchUrl();
+    }
+}
+window.syncProductSearch = syncProductSearch;
+
 // Favourite heart overlay for a product card. Filled state reflects the current
 // auth session; updated live via the 'jf-favorites-change' event listener.
 const FAV_HEART_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
@@ -2399,6 +2419,8 @@ function initApp() {
             // Home search bar
             const homeSearch = document.getElementById('home-search');
             if (homeSearch) {
+                if (filterState.search) homeSearch.value = filterState.search;
+                homeSearch.addEventListener('input', () => syncProductSearch(homeSearch.value, homeSearch));
                 homeSearch.addEventListener('keydown', (e) => {
                     if (e.key === 'Enter' && homeSearch.value.trim()) {
                         filterState.search = homeSearch.value.trim();
@@ -2502,11 +2524,7 @@ function initApp() {
             const plSearch = document.getElementById('kf-search');
             if (plSearch) {
                 if (filterState.search) plSearch.value = filterState.search;
-                plSearch.addEventListener('input', () => {
-                    filterState.search = plSearch.value.trim();
-                    if (window.syncSearchUrl) window.syncSearchUrl();
-                    renderFilteredProducts();
-                });
+                plSearch.addEventListener('input', () => syncProductSearch(plSearch.value, plSearch));
             }
 
             // Paste button
@@ -2675,7 +2693,11 @@ function initApp() {
         // it searches products (Enter jumps to /products).
         let navStoresTmr;
         navSearch.addEventListener('input', () => {
-            if (pageFromPath() !== 'stores') return;
+            if (pageFromPath() !== 'stores') {
+                // Elsewhere the navbar bar mirrors the product search.
+                syncProductSearch(navSearch.value, navSearch);
+                return;
+            }
             clearTimeout(navStoresTmr);
             navStoresTmr = setTimeout(() => {
                 storesFilter.query = navSearch.value;
@@ -3319,6 +3341,8 @@ window.setStoresToolbar = function (pageId) {
             if (ph) ph.style.visibility = 'hidden';
         }
     } else if (navSearch) {
+        // Off /stores the navbar bar mirrors the product search — show the last term.
+        navSearch.value = filterState.search || '';
         // Blur overlay (initBlurPlaceholders) renders the placeholder here.
         navSearch.placeholder = '';
         const ph = navSearch.closest('.pl-search-wrap')?.querySelector('.pl-ph');
