@@ -262,9 +262,11 @@ body {
 
 /* Revealed on scroll (home/products) … */
 .navbar .nav-search-wrap.show { opacity: 1; visibility: visible; }
-/* … and ALWAYS visible on the Stores + product detail pages. */
+/* … and ALWAYS visible on the Stores + product detail pages, plus the
+   "More" pages (QC Checker / Tutorials / Tools / Favorites). */
 body.on-stores .navbar .nav-search-wrap,
-body.on-product .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
+body.on-product .navbar .nav-search-wrap,
+body.on-more .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 
 .logo {
     font-family: 'Inter Tight', system-ui, sans-serif;

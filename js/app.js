@@ -1640,6 +1640,10 @@ function getPages() {
             <div class="pl-hero" style="padding-top:2.5rem;padding-bottom:1rem;">
                 <h1 class="pl-hero-title">My <span class="pl-accent">Favorites</span></h1>
                 <p class="pl-hero-sub">Products you saved. Tap the heart to remove.</p>
+                <div class="pl-cats">
+                    <a class="pl-cat pl-cat-home" href="https://www.jarvis-finder.com/" data-action="home-nav"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><span>Home</span></a>
+                    ${CATEGORIES.map(cat => `<button class="pl-cat" data-home-cat="${cat}">${catIcon(cat)}<span>${cat}</span></button>`).join('')}
+                </div>
             </div>
             <div class="products-grid" id="favorites-container" style="margin-top:0.75rem;">
                 <p style="color:var(--text-primary);font-weight:600;">${t('loading')}</p>
@@ -2500,6 +2504,15 @@ function initApp() {
 
         if (pageId === 'favorites') {
             renderFavoritesContainer();
+            // Category chips (same as home): jump to /products filtered by category.
+            document.querySelectorAll('.pl-cat[data-home-cat]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const cat = btn.getAttribute('data-home-cat');
+                    filterState.seller = '';
+                    filterState.category = (cat === 'All') ? 'All' : cat;
+                    navigateTo('products');
+                });
+            });
         }
 
 
@@ -3333,6 +3346,8 @@ window.setStoresToolbar = function (pageId) {
     // Body flag keeps the navbar search permanently visible on /stores
     // (elsewhere it only appears on scroll).
     document.body.classList.toggle('on-stores', pageId === 'stores');
+    // Same for the "More" pages, which have no hero search bar of their own.
+    document.body.classList.toggle('on-more', ['qccheck', 'tutorials', 'tools', 'favorites'].includes(pageId));
     if (toolbar) toolbar.style.display = (pageId === 'stores') ? 'flex' : 'none';
     if (pageId === 'stores') {
         if (toolbar) toolbar.querySelectorAll('.stores-pill[data-plat]').forEach(b =>
