@@ -1812,6 +1812,9 @@ main {
     background: var(--nav-bg); border: 1px solid var(--border-color);
     border-radius: 9999px; padding: 0 1rem; height: 40px; width: 340px; max-width: 100%;
 }
+/* The toolbar search is mobile-only (desktop filters via the navbar bar).
+   Needs the same specificity as `.stores-nav-toolbar .stores-search` to win. */
+.stores-nav-toolbar .stores-search-mobile { display: none; }
 .stores-nav-toolbar .stores-search input {
     flex: 1; min-width: 0; background: transparent; border: none; outline: none;
     color: var(--text-primary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.92rem;
@@ -2086,13 +2089,18 @@ body.light-mode .wz-img { background: #f0f0f0; }
 @media (max-width: 768px) {
     .navbar-inner { gap: 0.5rem; justify-content: space-between; }
     /* Text links hidden on mobile — navigation handled by the bottom nav.
-       Keep only the Stores/QC on the left and the settings gear on the right. */
+       Keep only the left links + the settings gear on the right. */
     .nav-right .nav-link { display: none; }
     .nav-left { gap: 1rem; }
     .nav-left .nav-link { display: inline; font-size: 0.85rem; }
     .nav-right { gap: 0.5rem; }
+    /* Hide the navbar search (the hero has its own) and the More dropdown
+       (its pages all live in the bottom nav) — they overflowed the bar. */
+    .nav-center { display: none; }
+    .nav-more-wrap { display: none; }
     .stores-nav-toolbar { padding: 0.4rem 4% 0.7rem; }
-    .stores-nav-toolbar .stores-search { width: 100%; }
+    .stores-nav-inner { flex-direction: column; align-items: stretch; gap: 10px; }
+    .stores-nav-toolbar .stores-search-mobile { display: flex; width: 100%; }
     .tut-grid { grid-template-columns: 1fr; }
     .tut-card { width: 100%; }
 }
