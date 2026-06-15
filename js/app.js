@@ -1827,7 +1827,6 @@ function getPages() {
                 color: var(--text-primary); font-size: 0.9rem; display: none; }
             .qc-status.err { border-color: #c04040; color: #ff8a8a; }
             .qc-actions { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
-            .qc-actions .card-btn-buy, .qc-actions .card-btn-qc { height: 64px; font-size: 17px; font-weight: 600; }
             .qc-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
                 gap: 1rem; margin-top: 2rem; }
             .qc-batch-card { background: var(--bg-color); border: 1px solid var(--border-color);
