@@ -3656,11 +3656,17 @@ window.runQcCheck = async function () {
         statusEl.style.display = 'block';
 
         // "View on picks.ly" button — original link if it was picks.ly, otherwise derive from source.
-        const pickslyUrl = /picks\.ly\/item\//i.test(raw) ? raw : qcSourceToPicksly(src);
+        // Short/agent links (e.g. ikako.vip) are resolved server-side; use the URL
+        // the API actually forwarded (data.resolvedUrl) to derive the picks.ly id.
+        let effSrc = src;
+        if (!/picks\.ly\/item\//i.test(raw) && !qcSourceToPicksly(effSrc) && data.resolvedUrl) {
+            effSrc = qcNormalizeSource(data.resolvedUrl) || data.resolvedUrl;
+        }
+        const pickslyUrl = /picks\.ly\/item\//i.test(raw) ? raw : qcSourceToPicksly(effSrc);
         if (actionsEl) {
             actionsEl.style.display = 'flex';
             // Build Buy Now button — derive marketplace URL from source
-            const buyUrl = safeExternalUrl(src);
+            const buyUrl = safeExternalUrl(effSrc);
             const buyBtnHtml = (buyUrl && buyUrl !== '#')
                 ? `<button class="card-btn-buy" data-kakobuy="${escapeHtml(buyUrl)}" data-picksly="${escapeHtml(safeExternalUrl(pickslyUrl || ''))}">Buy Now</button>`
                 : '';

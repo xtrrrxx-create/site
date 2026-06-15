@@ -222,6 +222,9 @@ export default async function handler(req, res) {
         // Picksly's payloads are public-product data, safe to expose. We do not
         // forward any of our own headers or env data.
         const data = await pickslyRes.json().catch(() => ({ success: false, error: 'Upstream error' }));
+        // Echo back the URL we actually forwarded (after short-link resolution) so
+        // the client can derive the picks.ly / Buy Now links for short/agent links.
+        if (data && typeof data === 'object') data.resolvedUrl = cleanUrl;
         res.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=1800');
         res.setHeader('X-Content-Type-Options', 'nosniff');
         res.setHeader('Vary', 'Origin');
