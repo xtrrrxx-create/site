@@ -2513,6 +2513,26 @@ function initApp() {
         }
 
 
+        if (pageId === 'qccheck') {
+            // Shareable deep-link: /qccheck/<item-id or pasted link> auto-runs the check.
+            const rawSeg = (window.location.pathname || '').replace(/^\/+qccheck\/?/i, '');
+            if (rawSeg) {
+                let pasted = decodeURIComponent(rawSeg);
+                if (/^(WD|TB|AL|1688)\d+$/i.test(pasted)) {
+                    // Clean item id (e.g. WD7774014334) → picks.ly item link.
+                    pasted = `https://picks.ly/item/${pasted.toUpperCase()}`;
+                } else if (/^https?:/i.test(pasted) && window.location.search) {
+                    // A full source URL was placed in the path; restore its query string.
+                    pasted += window.location.search;
+                }
+                const qcInput = document.getElementById('qc-input');
+                if (qcInput && window.runQcCheck) {
+                    qcInput.value = pasted.slice(0, 200);
+                    window.runQcCheck();
+                }
+            }
+        }
+
         if (pageId === 'product' && _pdState.product) {
             initProductDetail();
         }
@@ -2598,6 +2618,8 @@ function initApp() {
         // Product detail pages were removed — the old /product and
         // /products/<cat>/<slug-PICKSLYID> routes now just show the grid.
         if (path === 'product') return 'products';
+        // /qccheck/<item-id or pasted link> → QC checker, auto-runs on load
+        if (parts[0].toLowerCase() === 'qccheck' && parts[1]) return 'qccheck';
         // /products/favorites → favourites page (check before the category route)
         if (parts[0].toLowerCase() === 'products' && parts[1] && parts[1].toLowerCase() === 'favorites') return 'favorites';
         if (parts[0].toLowerCase() === 'products' && parts[2] && /(WD|TB|AL|1688)\d+/i.test(parts[2])) return 'products';
@@ -3650,6 +3672,16 @@ window.runQcCheck = async function () {
                 : '';
             actionsEl.innerHTML = buyBtnHtml + pickslyBtnHtml;
         }
+
+        // Reflect the checked item in the URL so it can be shared / bookmarked.
+        try {
+            const pid = (String(pickslyUrl || '').match(/item\/((?:WD|TB|AL|1688)\d+)/i) || [])[1];
+            const slug = pid ? pid.toUpperCase() : encodeURIComponent(src);
+            const newPath = '/qccheck/' + slug;
+            if (window.location.pathname !== newPath) {
+                history.replaceState({ page: 'qccheck' }, '', newPath);
+            }
+        } catch (_) { /* URL update is best-effort */ }
     } catch (err) {
         statusEl.textContent = t('qc_failed', { e: err.message });
         statusEl.classList.add('err');
