@@ -39,8 +39,8 @@ function watermarkSvg(width, height) {
     const s = (width * 0.30) / WM_W;
     const textW = WM_W * s;
     const textH = WM_H * s;
-    const gapX = Math.round(width * 0.05);
-    const gapY = Math.round(textH * 0.9);
+    const gapX = Math.round(width * 0.16);
+    const gapY = Math.round(textH * 1.8);
     const tileW = Math.round(textW + gapX);
     const rowH = Math.round(textH + gapY);
     const tileH = rowH * 2; // two rows so we can stagger (brick) the second one

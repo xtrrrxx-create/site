@@ -1112,6 +1112,10 @@ function syncProductSearch(value, exceptEl) {
     ids.forEach(id => {
         const el = document.getElementById(id);
         if (el && el !== exceptEl && el.value !== value) el.value = value;
+        // Programmatic value change fires no 'input' event — refresh the ghost
+        // placeholder overlay immediately so it doesn't stack under the text.
+        const w = el && el.closest && el.closest('.pl-search-wrap');
+        if (w && w._updPh) w._updPh();
     });
     // On the products page, reflect the term in the grid + URL immediately.
     if (document.getElementById('products-container')) {
@@ -4496,12 +4500,16 @@ function initBlurPlaceholders(root) {
         // (survives input replacement) plus a poll as safety net.
         const updVis = () => {
             const inp = wrap.querySelector('.pl-search-input');
-            span.style.display = (inp && inp.value) ? 'none' : 'flex';
+            // Hide the ghost whenever there's text OR the field is focused — avoids
+            // the placeholder stacking under text set programmatically (search sync).
+            const hide = !!(inp && (inp.value || document.activeElement === inp));
+            span.style.display = hide ? 'none' : 'flex';
             // Recompute left each poll: the navbar bar is hidden at init (offsetLeft
             // wrong) and only revealed on scroll, so reposition once it has layout.
-            if (span.style.display !== 'none' && input.offsetParent) pos();
+            if (!hide && input.offsetParent) pos();
         };
-        ['input', 'keyup', 'change', 'paste'].forEach(ev => wrap.addEventListener(ev, updVis, true));
+        ['input', 'keyup', 'change', 'paste', 'focusin', 'focusout'].forEach(ev => wrap.addEventListener(ev, updVis, true));
+        wrap._updPh = updVis; // let syncProductSearch refresh this instantly
         setInterval(updVis, 500);
     });
 }
