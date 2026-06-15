@@ -36,6 +36,30 @@ function hostAllowed(hostname) {
     return ALLOWED_HOST_SUFFIXES.some(s => h === s || h.endsWith('.' + s));
 }
 
+// Kakobuy short-link domains (e.g. https://ikako.vip/xtdn3). These 30x-redirect
+// to a full kakobuy.com product URL. We follow the redirect server-side (the
+// browser can't — CORS) and forward the resolved URL instead.
+const SHORTENER_HOSTS = new Set(['ikako.vip']);
+
+function isShortener(hostname) {
+    const h = String(hostname || '').toLowerCase().replace(/^www\./, '');
+    return SHORTENER_HOSTS.has(h);
+}
+
+// Resolve a short link to its final destination by following redirects, then
+// return the final URL. Returns null on failure.
+async function resolveShortLink(u) {
+    try {
+        const r = await fetch(u, {
+            redirect: 'follow',
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; jarvis-finder/1.0)' },
+        });
+        return r.url || null;
+    } catch {
+        return null;
+    }
+}
+
 // In-memory rate limiter. Vercel reuses warm function instances so the Map
 // persists across invocations on the same instance. NOT shared across regions
 // or cold starts — that means a determined attacker can scale past it by
@@ -153,6 +177,18 @@ export default async function handler(req, res) {
     if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
         return res.status(400).json({ success: false, error: 'Invalid URL' });
     }
+
+    // Kakobuy short link (ikako.vip/…) → follow the redirect to the real URL.
+    if (isShortener(parsed.hostname)) {
+        const resolved = await resolveShortLink(parsed.toString());
+        let rp;
+        try { rp = resolved ? new URL(resolved) : null; } catch { rp = null; }
+        if (!rp || (rp.protocol !== 'http:' && rp.protocol !== 'https:') || isShortener(rp.hostname)) {
+            return res.status(400).json({ success: false, error: 'Could not resolve short link' });
+        }
+        parsed = rp;
+    }
+
     if (!hostAllowed(parsed.hostname)) {
         return res.status(400).json({ success: false, error: 'Unsupported host' });
     }
