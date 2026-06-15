@@ -2137,119 +2137,6 @@ function getPages() {
             .tracker-card:hover .tracker-open-btn {
                 background: var(--border-color);
             }
-            .weight-categories {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-                gap: 0.6rem;
-                margin-bottom: 1.5rem;
-            }
-            .weight-cat-btn {
-                background: var(--bg-color);
-                border: 1px solid var(--border-color);
-                border-radius: 12px;
-                padding: 0.75rem 0.5rem;
-                color: var(--text-primary);
-                font-family: 'Inter', sans-serif;
-                font-size: 0.85rem;
-                font-weight: 600;
-                cursor: pointer;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 0.4rem;
-                transition: border-color 0.15s, background 0.15s;
-                user-select: none;
-            }
-            .weight-cat-btn:hover { border-color: var(--text-secondary); }
-            .weight-cat-btn.selected {
-                border-color: var(--text-primary);
-                background: rgba(255,255,255,0.06);
-            }
-            .weight-cat-count {
-                font-size: 0.72rem;
-                color: var(--text-secondary);
-                font-weight: 500;
-            }
-            .weight-cat-qty {
-                display: flex;
-                align-items: center;
-                gap: 0.4rem;
-                margin-top: 0.3rem;
-            }
-            .weight-qty-btn {
-                width: 24px; height: 24px;
-                background: var(--border-color);
-                border: none;
-                border-radius: 6px;
-                color: var(--text-primary);
-                font-size: 1rem;
-                font-weight: 700;
-                cursor: pointer;
-                display: flex; align-items: center; justify-content: center;
-                transition: background 0.1s;
-                flex-shrink: 0;
-            }
-            .weight-qty-btn:hover { background: var(--text-secondary); }
-            .weight-qty-val {
-                font-size: 0.85rem;
-                font-weight: 700;
-                min-width: 18px;
-                text-align: center;
-            }
-            .weight-result-box {
-                background: var(--bg-color);
-                border: 1px solid var(--border-color);
-                border-radius: 16px;
-                padding: 1.25rem 1.5rem;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-            .weight-result-total {
-                font-size: 2rem;
-                font-weight: 900;
-                letter-spacing: -1px;
-                color: var(--text-primary);
-            }
-            .weight-result-units {
-                display: flex;
-                gap: 1.5rem;
-            }
-            .weight-unit-block {
-                text-align: center;
-            }
-            .weight-unit-val {
-                font-size: 1.1rem;
-                font-weight: 800;
-                color: var(--text-primary);
-            }
-            .weight-unit-label {
-                font-size: 0.7rem;
-                font-weight: 600;
-                color: var(--text-secondary);
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-            }
-            .weight-disclaimer {
-                font-size: 0.75rem;
-                color: var(--text-secondary);
-                margin-top: 0.75rem;
-            }
-            .weight-reset-btn {
-                background: none;
-                border: 1px solid var(--border-color);
-                border-radius: 10px;
-                color: var(--text-secondary);
-                font-family: 'Inter', sans-serif;
-                font-size: 0.8rem;
-                font-weight: 600;
-                padding: 0.4rem 0.9rem;
-                cursor: pointer;
-                transition: border-color 0.15s, color 0.15s;
-            }
-            .weight-reset-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
         </style>
 
         <div class="tools-wrap">
@@ -2274,34 +2161,6 @@ function getPages() {
                     <button class="convert-btn" data-action="convertLink">${t('convert_link')}</button>
                 </div>
                 <div class="converter-result-new" id="converter-result"></div>
-            </div>
-
-            <div class="tool-card" id="weight-estimator-card">
-                <h2 class="tool-title">Weight Estimator</h2>
-                <p class="tool-subtitle">Select your items to estimate parcel weight before shipping.</p>
-                <div class="weight-categories" id="weight-cats"></div>
-                <div class="weight-result-box" id="weight-result-box">
-                    <div>
-                        <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-secondary);margin-bottom:0.3rem;">Total Weight</div>
-                        <div class="weight-result-total" id="weight-total-g">0 g</div>
-                    </div>
-                    <div class="weight-result-units">
-                        <div class="weight-unit-block">
-                            <div class="weight-unit-val" id="weight-kg">0.00</div>
-                            <div class="weight-unit-label">kg</div>
-                        </div>
-                        <div class="weight-unit-block">
-                            <div class="weight-unit-val" id="weight-lbs">0.00</div>
-                            <div class="weight-unit-label">lbs</div>
-                        </div>
-                        <div class="weight-unit-block">
-                            <div class="weight-unit-val" id="weight-pkg">50</div>
-                            <div class="weight-unit-label">pkg (g)</div>
-                        </div>
-                    </div>
-                    <button class="weight-reset-btn" data-action="weightReset">Reset</button>
-                </div>
-                <p class="weight-disclaimer">Weights are approximate averages. Actual weights may vary by ±10-15% depending on brand and materials.</p>
             </div>
 
             <div class="tracking-card">
@@ -2413,10 +2272,6 @@ function initApp() {
         // Show/hide the navbar search depending on scroll past the hero search.
         if (window.requestAnimationFrame) requestAnimationFrame(setupNavSearchReveal);
         else setupNavSearchReveal();
-
-        if (pageId === 'tools') {
-            if (window.initWeightEstimator) window.initWeightEstimator();
-        }
 
         // Re-attach hover-pause listeners every time home is rendered.
         // The home DOM (including #rv-track) is rebuilt on each navigation,
@@ -4961,71 +4816,6 @@ function buildHomeSections() {
     return trendingHtml + storesHtml + tutorialsBanner + catSections;
 }
 
-// ─── WEIGHT ESTIMATOR ──────────────────────────────────────────────────────
-const WEIGHT_CATS = [
-    { id: 'footwear',     label: 'Shoes',         weight: 2000 },
-    { id: 'tops',         label: 'Tops & T-shirts', weight: 300 },
-    { id: 'bottoms',      label: 'Bottoms',       weight: 500 },
-    { id: 'hoodies',      label: 'Hoodies',       weight: 750 },
-    { id: 'bags',         label: 'Bags',           weight: 1000 },
-    { id: 'accessories',  label: 'Accessories',   weight: 300 },
-    { id: 'electronics',  label: 'Electronics',   weight: 300 },
-    { id: 'socks',        label: 'Socks',         weight: 100 },
-    { id: 'hats',         label: 'Hats / Caps',   weight: 200 },
-];
-const PKG_WEIGHT = 50;
-let weightQty = {};
-
-function weightRender() {
-    const container = document.getElementById('weight-cats');
-    if (!container) return;
-    container.innerHTML = WEIGHT_CATS.map(cat => {
-        const qty = weightQty[cat.id] || 0;
-        return `
-        <div class="weight-cat-btn${qty > 0 ? ' selected' : ''}" id="wcat-${cat.id}">
-            <span>${cat.label}</span>
-            <span class="weight-cat-count">~${cat.weight}g each</span>
-            <div class="weight-cat-qty">
-                <button class="weight-qty-btn" data-action="weightChange" data-arg="${escapeHtml(cat.id)}" data-arg2="-1">-</button>
-                <span class="weight-qty-val">${qty}</span>
-                <button class="weight-qty-btn" data-action="weightChange" data-arg="${escapeHtml(cat.id)}" data-arg2="1">+</button>
-            </div>
-        </div>`;
-    }).join('');
-    weightUpdateResult();
-}
-
-window.weightChange = function(id, delta) {
-    weightQty[id] = Math.max(0, (weightQty[id] || 0) + delta);
-    weightRender();
-};
-
-window.weightReset = function() {
-    weightQty = {};
-    weightRender();
-};
-
-function weightUpdateResult() {
-    let total = PKG_WEIGHT;
-    WEIGHT_CATS.forEach(cat => {
-        total += (weightQty[cat.id] || 0) * cat.weight;
-    });
-    const gEl  = document.getElementById('weight-total-g');
-    const kgEl = document.getElementById('weight-kg');
-    const lbsEl= document.getElementById('weight-lbs');
-    const pkgEl= document.getElementById('weight-pkg');
-    if (!gEl) return;
-    gEl.textContent  = total + ' g';
-    kgEl.textContent = (total / 1000).toFixed(3);
-    lbsEl.textContent= (total / 453.592).toFixed(2);
-    pkgEl.textContent= PKG_WEIGHT;
-}
-
-window.initWeightEstimator = function() {
-    weightQty = {};
-    weightRender();
-};
-
 window.convertLink = function () {
     const input = document.getElementById('link-input').value.trim().slice(0, LINK_INPUT_MAX_LEN);
     const agentValue = selectedAgent;
@@ -5216,8 +5006,6 @@ window.updateTrackerLinks = function (code) {
             case 'toggleAgentDropdown': call(window.toggleAgentDropdown); break;
             case 'selectAgent':         call(window.selectAgent, a1, a2, a3); break;
             case 'convertLink':         call(window.convertLink); break;
-            case 'weightReset':         call(window.weightReset); break;
-            case 'weightChange':        call(window.weightChange, a1, parseInt(a2 || '0', 10)); break;
             case 'jfWelDone':           call(window.jfWelDone); break;
             case 'jfWelSelLang':        call(window.jfWelSelLang, a1); break;
             case 'jfWelSelCur':         call(window.jfWelSelCur, a1); break;
