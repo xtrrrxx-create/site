@@ -1827,13 +1827,6 @@ function getPages() {
                 color: var(--text-primary); font-size: 0.9rem; display: none; }
             .qc-status.err { border-color: #c04040; color: #ff8a8a; }
             .qc-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; flex-wrap: wrap; }
-            .qc-picksly-btn { display: inline-flex; align-items: center; gap: 0.45rem;
-                background: var(--bg-color); color: var(--text-primary);
-                border: 1px solid var(--border-color); border-radius: 999px;
-                padding: 0.55rem 1rem; font-weight: 700; font-size: 0.85rem;
-                text-decoration: none; cursor: pointer;
-                transition: border-color 0.15s, background 0.15s; }
-            .qc-picksly-btn:hover { border-color: var(--text-primary); background: var(--nav-bg); }
             .qc-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
                 gap: 1rem; margin-top: 2rem; }
             .qc-batch-card { background: var(--bg-color); border: 1px solid var(--border-color);
@@ -3647,10 +3640,10 @@ window.runQcCheck = async function () {
             // Build Buy Now button — derive marketplace URL from source
             const buyUrl = safeExternalUrl(src);
             const buyBtnHtml = (buyUrl && buyUrl !== '#')
-                ? `<button class="card-btn-buy" data-kakobuy="${escapeHtml(buyUrl)}" data-picksly="${escapeHtml(safeExternalUrl(pickslyUrl || ''))}" style="padding:0.55rem 1.2rem;font-size:0.85rem;">Buy Now</button>`
+                ? `<button class="card-btn-buy" data-kakobuy="${escapeHtml(buyUrl)}" data-picksly="${escapeHtml(safeExternalUrl(pickslyUrl || ''))}">Buy Now</button>`
                 : '';
             const pickslyBtnHtml = pickslyUrl
-                ? `<a class="qc-picksly-btn" href="${escapeHtml(withRef(pickslyUrl))}" target="_blank" rel="noopener noreferrer">
+                ? `<a class="card-btn-qc" href="${escapeHtml(withRef(pickslyUrl))}" target="_blank" rel="noopener noreferrer" style="gap:6px;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                     ${t('qc_view_picksly')}
                 </a>`

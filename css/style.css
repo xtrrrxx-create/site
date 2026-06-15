@@ -1276,7 +1276,6 @@ main {
     .qc-batch-modal-title { font-size: 1.1rem !important; }
     .qc-images { grid-template-columns: repeat(2, 1fr) !important; gap: 0.5rem !important; }
     .qc-img-wrap { border-radius: 10px !important; }
-    .qc-picksly-btn { font-size: 0.8rem !important; padding: 0.45rem 0.85rem !important; }
     .qc-status { font-size: 0.85rem !important; }
 
     /* Bottom nav QC label fix */
