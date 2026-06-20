@@ -1308,8 +1308,10 @@ main {
     /* Home carousels: show exactly 2 cards per screen (Picksly style) */
     .hc-carousel .hc-card { width: calc(50% - 8px); }
 
-    /* Hide nav center search on mobile (hero has its own) */
-    .nav-center { display: none; }
+    /* Navbar search reveals on scroll (like desktop). nav-center is shown so
+       the reveal mechanism can work; the search itself stays invisible until
+       the hero search scrolls out of view. Sizing is set in the block below. */
+    .nav-center { display: flex; flex: 1 1 auto; min-width: 0; justify-content: center; }
     .nav-search { display: none; }
     .navbar { padding: 0.8rem 4%; }
     .online-pill .online-label { display: none; }
@@ -2199,9 +2201,22 @@ body.light-mode .wz-img { background: #f0f0f0; }
     /* Text links replaced by the hamburger drawer on mobile */
     .nav-left .nav-link { display: none; }
     .nav-right { gap: 0.5rem; }
-    /* Hide the navbar search (the hero has its own) and the More dropdown
-       (its pages all live in the bottom nav) — they overflowed the bar. */
-    .nav-center { display: none; }
+    /* Navbar search shows on scroll-reveal only (home/products). Keep it
+       hidden on stores/product/more pages where another search UI exists
+       or where it wasn't present before — only .show reveals it. */
+    body.on-stores .navbar .nav-search-wrap,
+    body.on-product .navbar .nav-search-wrap,
+    body.on-more .navbar .nav-search-wrap { opacity: 0; visibility: hidden; }
+    body.on-stores .navbar .nav-search-wrap.show,
+    body.on-product .navbar .nav-search-wrap.show,
+    body.on-more .navbar .nav-search-wrap.show { opacity: 1; visibility: visible; }
+    /* Burger + gear hug their content so nav-center owns the middle space;
+       the search then fills it without overlapping the icons. Overrides the
+       desktop 520px fixed width declared later in the file. */
+    .navbar-inner .nav-left, .navbar-inner .nav-right { flex: 0 0 auto; }
+    .navbar .nav-center { flex: 1 1 auto; min-width: 0; }
+    .navbar .nav-center .nav-search-wrap { flex: 1 1 auto; width: auto; max-width: 100%; min-width: 0; height: 42px; margin: 0; }
+    .navbar .nav-center .nav-search-wrap .pl-search-input { min-width: 0; }
     .nav-more-wrap { display: none; }
     .stores-nav-toolbar { padding: 0.4rem 4% 0.7rem; }
     .stores-nav-inner { flex-direction: column; align-items: stretch; gap: 10px; }
