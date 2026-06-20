@@ -455,30 +455,32 @@ body.light-mode .pl-search-wrap::before {
     color: var(--text-secondary);
     font-family: 'Inter Tight', system-ui, sans-serif;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 600;
     padding: 10px 12px;
     cursor: pointer;
-    border-radius: 44px;
-    transition: color 0.2s;
+    border-radius: 8px;
+    transition: color 0.15s ease, background 0.15s ease;
 }
 .pl-cat:focus, .pl-cat:focus-visible { outline: none; box-shadow: none; }
 
 .pl-cat-icon { flex-shrink: 0; opacity: 0.9; }
 
+/* Match the Settings dropdown rows: bold gray text, subtle rounded
+   background on hover / on the selected tab. */
 .pl-cat:hover {
     color: var(--text-primary);
-    background: transparent; /* picks.ly chips only change text color on hover */
+    background: var(--border-color);
 }
 
 .pl-cat.active,
 .pl-cat-home {
-    background: transparent;
+    background: var(--border-color);
     color: var(--text-primary);
 }
 .pl-cat.active svg,
 .pl-cat-home svg { color: var(--text-primary); }
 .pl-cat-home { text-decoration: none; }
-.pl-cat-home:hover { background: transparent; color: var(--text-primary); }
+.pl-cat-home:hover { background: var(--border-color); color: var(--text-primary); }
 
 body.light-mode .pl-cat:hover {
     background: rgba(0,0,0,0.04);
