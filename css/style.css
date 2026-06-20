@@ -486,6 +486,72 @@ body.light-mode .pl-cat:hover {
     background: rgba(0,0,0,0.04);
 }
 
+/* ===== CATEGORY DROPDOWN (mobile) — Preferences-style panel ===== */
+.pl-cats-wrap { position: relative; }
+.pl-cat-dd { display: none; } /* desktop keeps the horizontal tab row */
+
+.pl-cat-dd-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 11px 14px;
+    background: var(--nav-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.pl-cat-dd-label { color: var(--text-secondary); }
+.pl-cat-dd-val { display: inline-flex; align-items: center; gap: 4px; color: var(--text-primary); }
+.pl-cat-dd-chev { width: 16px; height: 16px; color: var(--text-secondary); transition: transform 0.2s ease; }
+.pl-cat-dd.open .pl-cat-dd-chev { transform: rotate(180deg); }
+
+.pl-cat-dd-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    z-index: 60;
+    background: var(--nav-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+    max-height: 60vh;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+}
+.pl-cat-dd.open .pl-cat-dd-menu { opacity: 1; visibility: visible; transform: translateY(0); }
+.pl-cat-dd-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 11px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+.pl-cat-dd-item:hover, .pl-cat-dd-item:active,
+.pl-cat-dd-item.active { background: var(--border-color); color: var(--text-primary); }
+
+@media (max-width: 768px) {
+    .pl-cats { display: none; }
+    .pl-cat-dd { display: block; position: relative; padding: 0 16px; }
+}
+
 /* Right-edge fade on horizontal carousels — hints that more content scrolls. */
 .hc-carousel-wrap::after {
     content: '';

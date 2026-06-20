@@ -2465,6 +2465,9 @@ function initApp() {
                     });
             }
         }
+
+        // Mobile: present the category tab row as a Preferences-style dropdown.
+        enhanceCatRows(mainContent);
     }
 
     const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites'];
@@ -3951,6 +3954,79 @@ function setupNavSearchReveal() {
         })();
     }
     _updateNavSearchReveal();
+}
+
+// Mobile: turn each horizontal .pl-cats tab row into a Preferences-style
+// dropdown (a trigger showing the current category + a vertical panel of
+// rows). The dropdown items just forward clicks to the original (now hidden)
+// tabs, so every existing filter/navigation handler is reused untouched.
+let _catDdOutsideBound = false;
+function enhanceCatRows(root) {
+    if (!_catDdOutsideBound) {
+        _catDdOutsideBound = true;
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('.pl-cat-dd.open').forEach(dd => {
+                if (!dd.contains(e.target)) {
+                    dd.classList.remove('open');
+                    const b = dd.querySelector('.pl-cat-dd-btn');
+                    if (b) b.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }, true);
+    }
+    (root || document).querySelectorAll('.pl-cats').forEach(row => {
+        if (row.closest('.pl-cats-wrap')) return; // already enhanced
+        const tabs = [...row.querySelectorAll('.pl-cat')];
+        if (!tabs.length) return;
+
+        const wrap = document.createElement('div');
+        wrap.className = 'pl-cats-wrap';
+        row.parentNode.insertBefore(wrap, row);
+        wrap.appendChild(row);
+
+        const curTab = tabs.find(t => t.classList.contains('active'))
+            || tabs.find(t => t.classList.contains('pl-cat-home'))
+            || tabs[0];
+
+        const dd = document.createElement('div');
+        dd.className = 'pl-cat-dd';
+        dd.innerHTML =
+            '<button class="pl-cat-dd-btn" type="button" aria-expanded="false" aria-haspopup="true">' +
+                '<span class="pl-cat-dd-label">Category</span>' +
+                '<span class="pl-cat-dd-val"><span class="pl-cat-dd-current"></span>' +
+                    '<svg class="pl-cat-dd-chev" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.17l3.71-3.94a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>' +
+                '</span>' +
+            '</button>' +
+            '<div class="pl-cat-dd-menu" role="menu"></div>';
+        const menu = dd.querySelector('.pl-cat-dd-menu');
+        const currentEl = dd.querySelector('.pl-cat-dd-current');
+        currentEl.textContent = curTab ? curTab.textContent.trim() : '';
+
+        tabs.forEach(tab => {
+            const it = document.createElement('button');
+            it.type = 'button';
+            it.className = 'pl-cat-dd-item' + (tab === curTab ? ' active' : '');
+            it.setAttribute('role', 'menuitem');
+            it.textContent = tab.textContent.trim();
+            it.addEventListener('click', () => {
+                close();
+                currentEl.textContent = it.textContent;
+                menu.querySelectorAll('.pl-cat-dd-item').forEach(x => x.classList.toggle('active', x === it));
+                tab.click(); // reuse the original tab's filter/nav logic
+            });
+            menu.appendChild(it);
+        });
+
+        const btn = dd.querySelector('.pl-cat-dd-btn');
+        function close() { dd.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); }
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = dd.classList.toggle('open');
+            btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        });
+
+        wrap.appendChild(dd);
+    });
 }
 
 // Top-N most-clicked products within a single category (global click data),
