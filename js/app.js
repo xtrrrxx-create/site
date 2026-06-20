@@ -2269,6 +2269,10 @@ function initApp() {
             item.classList.toggle('active', item.getAttribute('data-page') === pageId);
         });
 
+        document.querySelectorAll('.md-link[data-page]').forEach(item => {
+            item.classList.toggle('active', item.getAttribute('data-page') === pageId);
+        });
+
         // Show/hide the navbar search depending on scroll past the hero search.
         if (window.requestAnimationFrame) requestAnimationFrame(setupNavSearchReveal);
         else setupNavSearchReveal();
@@ -2855,6 +2859,41 @@ function initMoreMenu() {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
 }
 
+// Mobile hamburger drawer — slides in from the left with all pages.
+function initMobileDrawer() {
+    const burger = document.getElementById('nav-burger');
+    const drawer = document.getElementById('mobile-drawer');
+    if (!burger || !drawer) return;
+    function open() {
+        drawer.classList.add('open');
+        drawer.setAttribute('aria-hidden', 'false');
+        burger.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    }
+    function close() {
+        drawer.classList.remove('open');
+        drawer.setAttribute('aria-hidden', 'true');
+        burger.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    }
+    burger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        drawer.classList.contains('open') ? close() : open();
+    });
+    drawer.querySelectorAll('[data-drawer-close]').forEach(el =>
+        el.addEventListener('click', close));
+    drawer.querySelectorAll('a[data-page]').forEach(a => {
+        a.addEventListener('click', (e) => {
+            e.preventDefault();
+            close();
+            (window.navigateTo || renderPage)(a.getAttribute('data-page'));
+        });
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && drawer.classList.contains('open')) close();
+    });
+}
+
 function initSettingsModal() {
     const wrap   = document.querySelector('.settings-wrap');
     const btn    = document.getElementById('nav-settings-btn');
@@ -3276,6 +3315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initApp();
     initSettingsModal();
     initMoreMenu();
+    initMobileDrawer();
     bindStoresNavToolbar();
     document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === currentCurrency);

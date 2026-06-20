@@ -1147,6 +1147,95 @@ main {
 
 
 /* ===== BOTTOM NAV ===== */
+/* ===== HAMBURGER + MOBILE DRAWER (mobile only) ===== */
+.nav-burger {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-left: -8px;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    border-radius: 10px;
+    flex: 0 0 auto;
+}
+.nav-burger:active { background: var(--muted-hover); }
+
+.mobile-drawer {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+.mobile-drawer.open { display: block; }
+.mobile-drawer-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+.mobile-drawer.open .mobile-drawer-backdrop { opacity: 1; }
+.mobile-drawer-panel {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 78%;
+    max-width: 320px;
+    background: var(--nav-bg);
+    border-right: 1px solid var(--border-color);
+    box-shadow: 2px 0 24px rgba(0,0,0,0.4);
+    padding: calc(env(safe-area-inset-top) + 1rem) 0 1.5rem;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+.mobile-drawer.open .mobile-drawer-panel { transform: translateX(0); }
+.mobile-drawer-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.25rem 1rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.mobile-drawer-brand {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+}
+.mobile-drawer-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    border-radius: 10px;
+}
+.mobile-drawer-links { display: flex; flex-direction: column; padding: 0.5rem 0.75rem; gap: 2px; }
+.md-link {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0.85rem 0.9rem;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.md-link svg { flex: 0 0 auto; }
+.md-link:active { background: var(--muted-hover); }
+.md-link.active { color: var(--text-primary); background: var(--muted-hover); }
+
 .bottom-nav {
     display: none;
     position: fixed;
@@ -1194,16 +1283,23 @@ main {
 /* ===== MOBILE (≤ 768px) ===== */
 @media (max-width: 768px) {
 
-    /* Show bottom nav on mobile */
-    .bottom-nav { display: flex; }
+    /* Bottom nav removed — navigation lives in the hamburger drawer */
+    .bottom-nav { display: none !important; }
+
+    /* Show the hamburger, hide the inline text links */
+    .nav-burger { display: inline-flex; }
+    .nav-left .nav-link { display: none; }
 
     /* Disable canvas animation on mobile */
     #bg-canvas { display: none; }
 
-    /* Main gets padding for bottom nav on mobile */
-    main { padding-bottom: calc(72px + env(safe-area-inset-bottom)); padding-top: 0; }
+    /* No bottom nav, so only a little breathing room at the bottom */
+    main { padding-bottom: 2rem; padding-top: 0; }
 
-    /* Hide nav links on mobile (use bottom nav instead) */
+    /* Home carousels: show exactly 2 cards per screen (Picksly style) */
+    .hc-carousel .hc-card { width: calc(50% - 8px); }
+
+    /* Hide nav center search on mobile (hero has its own) */
     .nav-center { display: none; }
     .nav-search { display: none; }
     .navbar { padding: 0.8rem 4%; }
@@ -2091,7 +2187,8 @@ body.light-mode .wz-img { background: #f0f0f0; }
        Keep only the left links + the settings gear on the right. */
     .nav-right .nav-link { display: none; }
     .nav-left { gap: 1rem; }
-    .nav-left .nav-link { display: inline; font-size: 0.85rem; }
+    /* Text links replaced by the hamburger drawer on mobile */
+    .nav-left .nav-link { display: none; }
     .nav-right { gap: 0.5rem; }
     /* Hide the navbar search (the hero has its own) and the More dropdown
        (its pages all live in the bottom nav) — they overflowed the bar. */
