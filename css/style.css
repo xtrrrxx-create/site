@@ -455,101 +455,33 @@ body.light-mode .pl-search-wrap::before {
     color: var(--text-secondary);
     font-family: 'Inter Tight', system-ui, sans-serif;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 400;
     padding: 10px 12px;
     cursor: pointer;
-    border-radius: 8px;
-    transition: color 0.15s ease, background 0.15s ease;
+    border-radius: 44px;
+    transition: color 0.2s;
 }
 .pl-cat:focus, .pl-cat:focus-visible { outline: none; box-shadow: none; }
 
 .pl-cat-icon { flex-shrink: 0; opacity: 0.9; }
 
-/* Match the Settings dropdown rows: bold gray text, subtle rounded
-   background on hover / on the selected tab. */
 .pl-cat:hover {
     color: var(--text-primary);
-    background: var(--border-color);
+    background: transparent; /* picks.ly chips only change text color on hover */
 }
 
 .pl-cat.active,
 .pl-cat-home {
-    background: var(--border-color);
+    background: transparent;
     color: var(--text-primary);
 }
 .pl-cat.active svg,
 .pl-cat-home svg { color: var(--text-primary); }
 .pl-cat-home { text-decoration: none; }
-.pl-cat-home:hover { background: var(--border-color); color: var(--text-primary); }
+.pl-cat-home:hover { background: transparent; color: var(--text-primary); }
 
 body.light-mode .pl-cat:hover {
     background: rgba(0,0,0,0.04);
-}
-
-/* ===== CATEGORY DROPDOWN (mobile) — Preferences-style panel ===== */
-.pl-cats-wrap { position: relative; }
-.pl-cat-dd { display: none; } /* desktop keeps the horizontal tab row */
-
-.pl-cat-dd-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    padding: 11px 14px;
-    background: var(--nav-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    color: var(--text-secondary);
-    font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-}
-.pl-cat-dd-label { color: var(--text-secondary); }
-.pl-cat-dd-val { display: inline-flex; align-items: center; gap: 4px; color: var(--text-primary); }
-.pl-cat-dd-chev { width: 16px; height: 16px; color: var(--text-secondary); transition: transform 0.2s ease; }
-.pl-cat-dd.open .pl-cat-dd-chev { transform: rotate(180deg); }
-
-.pl-cat-dd-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0; right: 0;
-    z-index: 60;
-    background: var(--nav-bg);
-    border: 1px solid var(--border-color);
-    border-radius: 14px;
-    padding: 6px;
-    box-shadow: 0 12px 32px rgba(0,0,0,0.45);
-    max-height: 60vh;
-    overflow-y: auto;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-6px);
-    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
-}
-.pl-cat-dd.open .pl-cat-dd-menu { opacity: 1; visibility: visible; transform: translateY(0); }
-.pl-cat-dd-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    padding: 11px 12px;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    color: var(--text-secondary);
-    font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-align: left;
-    cursor: pointer;
-}
-.pl-cat-dd-item:hover, .pl-cat-dd-item:active,
-.pl-cat-dd-item.active { background: var(--border-color); color: var(--text-primary); }
-
-@media (max-width: 768px) {
-    .pl-cats { display: none; }
-    .pl-cat-dd { display: block; position: relative; padding: 0 16px; }
 }
 
 /* Right-edge fade on horizontal carousels — hints that more content scrolls. */
@@ -1238,6 +1170,8 @@ main {
 }
 .nav-burger:active { background: var(--muted-hover); }
 
+/* The hamburger menu is a compact dropdown styled like the Preferences
+   (settings) menu, anchored to the burger at the top-left. */
 .mobile-drawer {
     display: none;
     position: fixed;
@@ -1245,68 +1179,52 @@ main {
     z-index: 1000;
 }
 .mobile-drawer.open { display: block; }
+/* Transparent backdrop — just catches outside taps to close (no dimming,
+   matching the Preferences dropdown). */
 .mobile-drawer-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.55);
-    opacity: 0;
-    transition: opacity 0.25s ease;
+    background: transparent;
 }
-.mobile-drawer.open .mobile-drawer-backdrop { opacity: 1; }
 .mobile-drawer-panel {
     position: absolute;
-    top: 0; left: 0; bottom: 0;
-    width: 78%;
-    max-width: 320px;
+    top: calc(env(safe-area-inset-top) + 58px);
+    left: 12px;
+    width: 240px;
+    max-width: calc(100vw - 24px);
     background: var(--nav-bg);
-    border-right: 1px solid var(--border-color);
-    box-shadow: 2px 0 24px rgba(0,0,0,0.4);
-    padding: calc(env(safe-area-inset-top) + 1rem) 0 1.5rem;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+    overflow: hidden;
+    transform-origin: top left;
+    opacity: 0;
+    transform: scale(0.97) translateY(-6px);
+    pointer-events: none;
+    transition: opacity 0.18s cubic-bezier(0.16,1,0.3,1), transform 0.18s cubic-bezier(0.16,1,0.3,1);
 }
-.mobile-drawer.open .mobile-drawer-panel { transform: translateX(0); }
-.mobile-drawer-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.25rem 1rem;
-    margin-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color);
-}
-.mobile-drawer-brand {
-    font-size: 1.15rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    color: var(--text-primary);
-}
-.mobile-drawer-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    border-radius: 10px;
-}
-.mobile-drawer-links { display: flex; flex-direction: column; padding: 0.5rem 0; }
+.mobile-drawer.open .mobile-drawer-panel { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+.mobile-drawer-head { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+.mobile-drawer-head h3 { font-size: 0.82rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+.mobile-drawer-links { display: flex; flex-direction: column; padding: 6px; }
 .md-link {
     display: flex;
     align-items: center;
-    padding: 0.9rem 1.25rem;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 8px;
     text-decoration: none;
     color: var(--text-secondary);
-    font-size: 1rem;
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 0.85rem;
     font-weight: 600;
-    transition: color 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease;
 }
-.md-link:active { color: var(--text-primary); }
-.md-link.active { color: var(--text-primary); }
+.md-link .md-chev { width: 14px; height: 14px; color: var(--text-secondary); flex-shrink: 0; }
+.md-link:hover, .md-link:active,
+.md-link.active { background: var(--border-color); color: var(--text-primary); }
+.md-link.active .md-chev { color: var(--text-primary); }
 
 /* Safety: never let the mobile drawer show on desktop widths */
 @media (min-width: 769px) {
