@@ -1226,22 +1226,19 @@ main {
     color: var(--text-secondary);
     border-radius: 10px;
 }
-.mobile-drawer-links { display: flex; flex-direction: column; padding: 0.5rem 0.75rem; gap: 2px; }
+.mobile-drawer-links { display: flex; flex-direction: column; padding: 0.5rem 0; }
 .md-link {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 0.85rem 0.9rem;
-    border-radius: 12px;
+    padding: 0.9rem 1.25rem;
     text-decoration: none;
     color: var(--text-secondary);
     font-size: 1rem;
     font-weight: 600;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: color 0.15s ease;
 }
-.md-link svg { flex: 0 0 auto; }
-.md-link:active { background: var(--muted-hover); }
-.md-link.active { color: var(--text-primary); background: var(--muted-hover); }
+.md-link:active { color: var(--text-primary); }
+.md-link.active { color: var(--text-primary); }
 
 /* Safety: never let the mobile drawer show on desktop widths */
 @media (min-width: 769px) {
