@@ -754,6 +754,13 @@ main {
     width: 100%;
 }
 
+/* main is a column flexbox, so its page-wrapper children are flex items.
+   A wrapper with max-width but no explicit width sizes to its max-content
+   and overflows on mobile (the products/favorites grids were rendered ~800px
+   wide on a 375px screen). Forcing width:100% makes them fill the viewport;
+   the inline max-width still caps + centers them on desktop. */
+#app-content > * { width: 100%; min-width: 0; }
+
 .hero-center {
     flex: 1;
     display: flex;
@@ -1235,6 +1242,11 @@ main {
 .md-link svg { flex: 0 0 auto; }
 .md-link:active { background: var(--muted-hover); }
 .md-link.active { color: var(--text-primary); background: var(--muted-hover); }
+
+/* Safety: never let the mobile drawer show on desktop widths */
+@media (min-width: 769px) {
+    .mobile-drawer, .nav-burger { display: none !important; }
+}
 
 .bottom-nav {
     display: none;
