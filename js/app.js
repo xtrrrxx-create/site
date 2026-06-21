@@ -728,11 +728,18 @@ function rerenderStoresPage() {
 function selectProductCategory(cat) {
     filterState.category = cat;
     filterState.seller = '';
-    const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
-    const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
-    history.pushState({ page: 'products' }, '', path + qs);
     syncProductCatDropdowns(cat);
-    renderFilteredProducts();
+    // From the products page, filter in place; from anywhere else (home, stores,
+    // tools…) redirect to the products page for that category, like the More menu.
+    const onProducts = /^\/products(\/(?!favorites))?/.test(window.location.pathname);
+    if (onProducts) {
+        const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
+        const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
+        history.pushState({ page: 'products' }, '', path + qs);
+        renderFilteredProducts();
+    } else if (window.navigateTo) {
+        window.navigateTo('products');
+    }
 }
 function syncProductCatDropdowns(cat) {
     document.querySelectorAll('[data-pl-cat]').forEach(b =>
@@ -748,7 +755,12 @@ function selectStorePlatform(plat) {
         b.classList.toggle('active', b.dataset.plat === plat));
     document.querySelectorAll('#stores-plat-dd .jf-dd-label').forEach(l =>
         l.textContent = storePlatLabel(plat));
-    rerenderStoresPage();
+    // On /stores filter in place; elsewhere redirect to the stores page.
+    if (/^\/stores(\/|$)/.test(window.location.pathname)) {
+        rerenderStoresPage();
+    } else if (window.navigateTo) {
+        window.navigateTo('stores');
+    }
 }
 
 // Generic dropdowns (.jf-dd): toolbar dropdowns toggle on trigger click; navbar
@@ -1513,7 +1525,7 @@ function getPages() {
             .stores-search input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.95rem; }
             .stores-search input::placeholder { color: var(--text-secondary); }
             .stores-search svg { color: var(--text-secondary); flex-shrink: 0; }
-            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: #2a2a2a; border: none; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0; }
+            .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: var(--surface); border: none; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 2px 7px rgba(0,0,0,0.07); }
             .store-page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0; }
             .store-section-card .store-icon { width: 48px; height: 48px; font-size: 1.2rem; border: 3px solid var(--bg-color); }
             .store-section-divider { height: 1px; background: #333; margin: 16px 20px 0; }
@@ -1885,14 +1897,14 @@ function getPages() {
             .qc-wrap { max-width: 1400px; margin: 0 auto; padding: 1.5rem 4% 3rem;
                 display: flex; flex-direction: column; gap: 1.5rem;
                 width: 100%; box-sizing: border-box; }
-            .qc-card { background: #2a2a2a; border: none;
-                box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0;
+            .qc-card { background: var(--surface); border: none;
+                box-shadow: 0 2px 7px rgba(0,0,0,0.07);
                 border-radius: 16px; padding: 2rem; width: 100%; box-sizing: border-box; }
             .qc-title { font-family:'Inter Tight',system-ui,sans-serif; font-size: 32px; font-weight: 400;
                 color: var(--text-primary); margin-bottom: 0.4rem; line-height: 48px; text-align: left; }
             .qc-subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 1.5rem; text-align: left; }
             .qc-row { display: flex; gap: 0.75rem; align-items: stretch; }
-            .qc-input { flex: 1; background: var(--bg-color); border: 1px solid var(--border-color);
+            .qc-input { flex: 1; background: #ffffff; border: 1px solid var(--border-color);
                 border-radius: 14px; padding: 0 1.1rem; height: 52px; color: var(--text-primary);
                 font-family: 'Inter', sans-serif; font-size: 0.92rem; outline: none;
                 transition: border-color 0.2s; box-sizing: border-box; }
@@ -2015,9 +2027,9 @@ function getPages() {
                 box-sizing: border-box;
             }
             .tool-card {
-                background: #2a2a2a;
+                background: var(--surface);
                 border: none;
-                box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 20px 0;
+                box-shadow: 0 2px 7px rgba(0,0,0,0.07);
                 border-radius: 16px;
                 padding: 2rem;
                 width: 100%;
@@ -2056,7 +2068,7 @@ function getPages() {
             }
             .converter-input {
                 flex: 1;
-                background: var(--bg-color);
+                background: #ffffff;
                 border: 1px solid var(--border-color);
                 border-radius: 14px;
                 padding: 0 1.1rem;
@@ -2158,7 +2170,7 @@ function getPages() {
             }
             .tracking-input {
                 width: 100%;
-                background: var(--bg-color);
+                background: #ffffff;
                 border: 1px solid var(--border-color);
                 border-radius: 14px;
                 padding: 0.9rem 1.2rem;
