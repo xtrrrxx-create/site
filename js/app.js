@@ -1740,6 +1740,10 @@ function getPages() {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     </button>
                 </div>
+                <!-- Category switcher (same as home); data-pl-cat items filter in place. -->
+                <div class="pl-cats" id="pl-product-cats">
+                    ${CATEGORIES.map(cat => `<button class="pl-cat ${filterState.category === cat ? 'active' : ''}" data-pl-cat="${cat}"><span>${cat === 'All' ? 'All' : cat}</span></button>`).join('')}
+                </div>
             </div>
 
             <div class="products-grid" id="products-container" style="margin-top:0.75rem;">
