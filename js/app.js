@@ -705,6 +705,36 @@ async function fetchFromSupabase() {
 
 let filterState = { search: '', category: 'All', batch: 'All Tags', seller: '' };
 let storesFilter = { platform: 'all', query: '' };
+
+// Human label for a stores platform filter value (used by the .jf-dd dropdown).
+function storePlatLabel(p) {
+    if (p === 'all') return 'All Stores';
+    if (p === 'favorites') return 'Favorites';
+    if (p === '1688') return '1688';
+    return p ? p.charAt(0).toUpperCase() + p.slice(1) : 'All Stores';
+}
+
+// Generic picks.ly-style dropdowns (.jf-dd): toggle on trigger click, close on
+// outside-click or Esc. Delegated so it covers dynamically-rendered dropdowns.
+document.addEventListener('click', (e) => {
+    const trigger = e.target.closest('.jf-dd-trigger');
+    if (trigger) {
+        const dd = trigger.closest('.jf-dd');
+        const willOpen = !dd.classList.contains('open');
+        document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
+        dd.classList.toggle('open', willOpen);
+        trigger.setAttribute('aria-expanded', String(willOpen));
+        return;
+    }
+    // Click anywhere outside an open menu closes all (item clicks close via their
+    // own handlers, which also update the trigger label).
+    if (!e.target.closest('.jf-dd-menu')) {
+        document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
+    }
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
+});
 let allProductsCache = [];
 let productsRefreshTimer = null;
 let searchInputTimer = null;
@@ -1630,7 +1660,15 @@ function getPages() {
                     </button>
                 </div>
                 <div class="pl-cats" id="pl-product-cats">
-                    ${CATEGORIES.map(cat => `<button class="pl-cat ${filterState.category === cat ? 'active' : ''}" data-pl-cat="${cat}"><span>${cat}</span></button>`).join('')}
+                    <div class="jf-dd" id="pl-cat-dd">
+                        <button class="jf-dd-trigger" type="button" aria-haspopup="true" aria-expanded="false">
+                            <span class="jf-dd-label">${filterState.category && filterState.category !== 'All' ? escapeHtml(filterState.category) : 'All Categories'}</span>
+                            <svg class="jf-dd-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="jf-dd-menu" role="menu">
+                            ${CATEGORIES.map(cat => `<button class="jf-dd-item ${filterState.category === cat ? 'active' : ''}" role="menuitem" data-pl-cat="${cat}">${cat === 'All' ? 'All Categories' : cat}</button>`).join('')}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2400,8 +2438,8 @@ function initApp() {
         if (pageId === 'products') {
             filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags', seller: filterState.seller || '' };
 
-            // Bind pl-cat tabs on products page — each updates URL
-            document.querySelectorAll('.pl-cat[data-pl-cat]').forEach(btn => {
+            // Bind category dropdown items on products page — each updates URL
+            document.querySelectorAll('#pl-cat-dd [data-pl-cat]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const cat = btn.getAttribute('data-pl-cat');
                     filterState.category = cat;
@@ -2410,7 +2448,13 @@ function initApp() {
                     const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
                     const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
                     history.pushState({ page: 'products' }, '', path + qs);
-                    document.querySelectorAll('.pl-cat[data-pl-cat]').forEach(b => b.classList.toggle('active', b.getAttribute('data-pl-cat') === cat));
+                    document.querySelectorAll('#pl-cat-dd [data-pl-cat]').forEach(b => b.classList.toggle('active', b === btn));
+                    const dd = document.getElementById('pl-cat-dd');
+                    if (dd) {
+                        dd.classList.remove('open');
+                        const lbl = dd.querySelector('.jf-dd-label');
+                        if (lbl) lbl.textContent = cat === 'All' ? 'All Categories' : cat;
+                    }
                     renderFilteredProducts();
                 });
             });
@@ -3254,10 +3298,16 @@ function bindStoresNavToolbar() {
             if (main && typeof attachCarouselHandlers === 'function') attachCarouselHandlers(main);
         }
     };
-    toolbar.querySelectorAll('.stores-pill[data-plat]').forEach(btn => {
+    toolbar.querySelectorAll('[data-plat]').forEach(btn => {
         btn.addEventListener('click', () => {
             storesFilter.platform = btn.dataset.plat;
-            toolbar.querySelectorAll('.stores-pill[data-plat]').forEach(b => b.classList.toggle('active', b === btn));
+            toolbar.querySelectorAll('[data-plat]').forEach(b => b.classList.toggle('active', b === btn));
+            const dd = toolbar.querySelector('#stores-plat-dd');
+            if (dd) {
+                dd.classList.remove('open');
+                const lbl = dd.querySelector('.jf-dd-label');
+                if (lbl) lbl.textContent = storePlatLabel(btn.dataset.plat);
+            }
             reRenderStores();
         });
     });
@@ -3281,8 +3331,15 @@ window.setStoresToolbar = function (pageId) {
     document.body.classList.toggle('on-more', ['qccheck', 'tutorials', 'tools', 'favorites'].includes(pageId));
     if (toolbar) toolbar.style.display = (pageId === 'stores') ? 'flex' : 'none';
     if (pageId === 'stores') {
-        if (toolbar) toolbar.querySelectorAll('.stores-pill[data-plat]').forEach(b =>
-            b.classList.toggle('active', b.dataset.plat === storesFilter.platform));
+        if (toolbar) {
+            toolbar.querySelectorAll('[data-plat]').forEach(b =>
+                b.classList.toggle('active', b.dataset.plat === storesFilter.platform));
+            const dd = toolbar.querySelector('#stores-plat-dd');
+            if (dd) {
+                const lbl = dd.querySelector('.jf-dd-label');
+                if (lbl) lbl.textContent = storePlatLabel(storesFilter.platform);
+            }
+        }
         // Navbar search now drives the stores filter.
         if (navSearch) {
             navSearch.value = storesFilter.query || '';
