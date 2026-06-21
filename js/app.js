@@ -1742,6 +1742,7 @@ function getPages() {
                 </div>
                 <!-- Category switcher (same as home); data-pl-cat items filter in place. -->
                 <div class="pl-cats" id="pl-product-cats">
+                    <a class="pl-cat pl-cat-home" href="https://www.jarvis-finder.com/" data-action="home-nav"><span>Home</span></a>
                     ${CATEGORIES.map(cat => `<button class="pl-cat ${filterState.category === cat ? 'active' : ''}" data-pl-cat="${cat}"><span>${cat === 'All' ? 'All' : cat}</span></button>`).join('')}
                 </div>
             </div>
