@@ -222,7 +222,7 @@ const PD_AGENT_COLORS = { kakobuy: '#eb6877', oopbuy: '#ff5c8a', acbuy: '#16a34a
 function pdAgentInfo() {
     const id = (localStorage.getItem(PREFERRED_AGENT_KEY) || 'kakobuy').toLowerCase();
     const a = AGENTS.find(x => x.id === id) || AGENTS[0];
-    return { id: a.id, name: a.name, icon: `https://www.google.com/s2/favicons?domain=${a.domain}&sz=64`, color: PD_AGENT_COLORS[a.id] || '#ff9f0a' };
+    return { id: a.id, name: a.name, icon: `https://www.google.com/s2/favicons?domain=${a.domain}&sz=64`, color: PD_AGENT_COLORS[a.id] || '#DE37A6' };
 }
 
 // Build the SEO product URL: /products/<cat>/<name>-<PICKSLYID>?color=<c>
@@ -409,7 +409,7 @@ function showAgentPopup(pickslyRaw, kakobuyRaw) {
             .ap-sub { font-size:13px;color:#a0a0a0;margin-bottom:1.25rem; }
             .ap-grid { display:grid;grid-template-columns:1fr 1fr;gap:0.5rem; }
             .ap-btn { display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid #363636;background:#1e1e1e;color:#f0f0f0;font-family:'Inter Tight',system-ui,sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:border-color .15s,background .15s;text-decoration:none; }
-            .ap-btn:hover { border-color:#ff9f0a;background:#2a2a2a; }
+            .ap-btn:hover { border-color:var(--accent-color);background:#2a2a2a; }
             .ap-btn img { width:20px;height:20px;border-radius:4px;background:#333;object-fit:contain; }
             .ap-close { position:absolute;top:12px;right:14px;background:none;border:none;color:#a0a0a0;font-size:20px;cursor:pointer;line-height:1; }
             .ap-close:hover { color:#f0f0f0; }
@@ -1356,7 +1356,7 @@ function injectHomeStyles() {
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            border: 1px solid rgba(255,159,10,0.3);
+            border: 1px solid rgba(222,55,166,0.3);
             border-radius: 9999px;
             padding: 0.35rem 0.9rem;
             font-family: 'Inter Tight', system-ui, sans-serif;
@@ -1370,7 +1370,7 @@ function injectHomeStyles() {
         }
         .jf-eyebrow-dot {
             width: 5px; height: 5px;
-            background: #ff9f0a;
+            background: var(--accent-color);
             border-radius: 50%;
         }
 
@@ -1382,7 +1382,7 @@ function injectHomeStyles() {
             display: inline-flex;
             align-items: center;
             gap: 9px;
-            background: #ff9f0a;
+            background: var(--accent-color);
             color: #fff;
             font-family: 'Inter', sans-serif;
             font-weight: 700;
@@ -1557,7 +1557,7 @@ function getPages() {
                 cursor: pointer;
                 text-decoration: none;
             }
-            .hc-title:hover { color: #ff9f0a; }
+            .hc-title:hover { color: var(--accent-color); }
             .hc-title svg { transition: transform 0.15s; }
             .hc-title:hover svg { transform: translateX(3px); }
             .hc-viewmore {
@@ -2770,7 +2770,7 @@ function showWelcomeModal() {
     let selCur   = currentCurrency;
 
     const S = {
-        pill: (on) => `padding:.5rem 1.1rem;border-radius:999px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;border:1.5px solid ${on?'#ff9f0a':'#404040'};background:${on?'#ff9f0a':'transparent'};color:${on?'#fff':'#888'};`,
+        pill: (on) => `padding:.5rem 1.1rem;border-radius:999px;font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;border:1.5px solid ${on?'var(--accent-color)':'#404040'};background:${on?'var(--accent-color)':'transparent'};color:${on?'#fff':'#888'};`,
     };
 
     const overlay = document.createElement('div');
@@ -2780,8 +2780,8 @@ function showWelcomeModal() {
     overlay.innerHTML = `
     <style>
         .jf-wel-cta:hover { opacity: 0.85; }
-        .jf-wel-signup { display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:999px;background:transparent;color:#ff9f0a;font-weight:600;font-size:.85rem;text-decoration:none;border:1.5px solid #ff9f0a;transition:all .15s;white-space:nowrap; }
-        .jf-wel-signup:hover { background:#ff9f0a;color:#fff; }
+        .jf-wel-signup { display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border-radius:999px;background:transparent;color:var(--accent-color);font-weight:600;font-size:.85rem;text-decoration:none;border:1.5px solid var(--accent-color);transition:all .15s;white-space:nowrap; }
+        .jf-wel-signup:hover { background:var(--accent-color);color:#fff; }
     </style>
     <div style="background:#242424;border-radius:24px;width:100%;max-width:960px;overflow:hidden;box-shadow:0 40px 120px rgba(0,0,0,.8);animation:jfFadeUp .35s cubic-bezier(.16,1,.3,1);">
 
@@ -2790,7 +2790,7 @@ function showWelcomeModal() {
             <div style="display:flex;justify-content:space-between;align-items:flex-start;">
                 <div>
                     <div style="font-size:1.8rem;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:.4rem;">
-                        <span style="color:#fff;">jarvis</span> <span style="color:#ff9f0a;">finder</span>
+                        <span style="color:#fff;">jarvis</span> <span style="color:var(--accent-color);">finder</span>
                     </div>
                     <p style="color:#666;font-size:.9rem;margin:0;">Customize your experience before you start.</p>
                 </div>
@@ -2822,7 +2822,7 @@ function showWelcomeModal() {
             <div style="display:flex;align-items:center;justify-content:space-between;gap:1.2rem;flex-wrap:wrap;">
                 <div style="flex:1;min-width:240px;">
                     <p style="color:#fff;font-size:.95rem;font-weight:600;margin:0 0 .25rem;line-height:1.3;">
-                        $450 sign-up bonus on <span style="color:#ff9f0a;">KakoBuy</span>
+                        $450 sign-up bonus on <span style="color:var(--accent-color);">KakoBuy</span>
                     </p>
                     <p style="color:#666;font-size:.78rem;margin:0;line-height:1.4;">
                         Optional. Costs you nothing &middot; keeps this site free.
@@ -2838,7 +2838,7 @@ function showWelcomeModal() {
 
         <!-- CTA -->
         <div style="padding:1.2rem 2.2rem;">
-            <button data-action="jfWelDone" class="jf-wel-cta" style="width:100%;padding:.85rem;border-radius:999px;border:none;background:#ff9f0a;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;">
+            <button data-action="jfWelDone" class="jf-wel-cta" style="width:100%;padding:.85rem;border-radius:999px;border:none;background:var(--accent-color);color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .15s;">
                 Get Started →
             </button>
             <p style="text-align:center;margin-top:.8rem;">
@@ -2853,8 +2853,8 @@ function showWelcomeModal() {
         selLang = l;
         document.querySelectorAll('[id^="jf-wl-"]').forEach(btn => {
             const on = btn.id === 'jf-wl-' + l;
-            btn.style.background = on ? '#ff9f0a' : 'transparent';
-            btn.style.borderColor = on ? '#ff9f0a' : '#404040';
+            btn.style.background = on ? 'var(--accent-color)' : 'transparent';
+            btn.style.borderColor = on ? 'var(--accent-color)' : '#404040';
             btn.style.color = on ? '#fff' : '#888';
         });
         const map = { EN:'USD', RON:'RON', PLN:'PLN', CNY:'CNY' };
@@ -2865,8 +2865,8 @@ function showWelcomeModal() {
         selCur = c;
         document.querySelectorAll('[id^="jf-wc-"]').forEach(btn => {
             const on = btn.id === 'jf-wc-' + c;
-            btn.style.background = on ? '#ff9f0a' : 'transparent';
-            btn.style.borderColor = on ? '#ff9f0a' : '#404040';
+            btn.style.background = on ? 'var(--accent-color)' : 'transparent';
+            btn.style.borderColor = on ? 'var(--accent-color)' : '#404040';
             btn.style.color = on ? '#fff' : '#888';
         });
     };
@@ -4926,12 +4926,12 @@ function buildHomeSections() {
     // ── "Don't Know How To Order?" CTA (slim banner, no mock cards) ──
     const tutorialsBanner = `<div class="hc-section">
         <style>
-            .hto-card { position:relative; background:#ff9f0a; border-radius:30px; overflow:hidden; box-shadow:0 24px 60px rgba(15,23,42,.28);
+            .hto-card { position:relative; background:var(--accent-color); border-radius:30px; overflow:hidden; box-shadow:0 24px 60px rgba(15,23,42,.28);
                 display:flex; flex-direction:column; align-items:flex-start; gap:14px; padding:32px 24px; }
             .hto-card .hto-accent { position:absolute; left:50%; top:0; transform:translateX(-50%); width:65%; height:4px; border-top-left-radius:30px; border-top-right-radius:30px; background:linear-gradient(to right, transparent, #faa951, transparent); opacity:.9; }
             .hto-card h2 { color:#fff; font-family:'Inter Tight',system-ui,sans-serif; font-size:28px; font-weight:700; line-height:1.15; letter-spacing:-.02em; margin:0; }
             .hto-card p { color:rgba(255,255,255,.95); font-size:15px; line-height:1.45; margin:0; }
-            .hto-btn { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; background:#fff; color:#ff9f0a; font-weight:600; font-size:16px; border:none; border-radius:9999px; padding:12px 28px; cursor:pointer; text-decoration:none; transition:background .2s; }
+            .hto-btn { display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; background:#fff; color:var(--accent-color); font-weight:600; font-size:16px; border:none; border-radius:9999px; padding:12px 28px; cursor:pointer; text-decoration:none; transition:background .2s; }
             .hto-btn:hover { background:#e8e8e8; }
             @media (min-width:1024px) {
                 .hto-card { flex-direction:row; align-items:center; padding:40px 48px; gap:24px; }
