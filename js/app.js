@@ -714,9 +714,61 @@ function storePlatLabel(p) {
     return p ? p.charAt(0).toUpperCase() + p.slice(1) : 'All Stores';
 }
 
-// Generic picks.ly-style dropdowns (.jf-dd): toggle on trigger click, close on
-// outside-click or Esc. Delegated so it covers dynamically-rendered dropdowns.
+// Re-render only the /stores grid in place (used by the platform filter).
+function rerenderStoresPage() {
+    const el = document.getElementById('stores-page');
+    if (!el) return;
+    el.innerHTML = buildStoresPage();
+    const main = document.getElementById('app-content');
+    if (main && typeof attachCarouselHandlers === 'function') attachCarouselHandlers(main);
+}
+
+// Apply a products category selection from any dropdown (navbar or toolbar) and
+// sync every category dropdown on the page so their active rows stay in step.
+function selectProductCategory(cat) {
+    filterState.category = cat;
+    filterState.seller = '';
+    const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
+    const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
+    history.pushState({ page: 'products' }, '', path + qs);
+    syncProductCatDropdowns(cat);
+    renderFilteredProducts();
+}
+function syncProductCatDropdowns(cat) {
+    document.querySelectorAll('[data-pl-cat]').forEach(b =>
+        b.classList.toggle('active', b.getAttribute('data-pl-cat') === cat));
+    // Toolbar (mobile) dropdown shows the selection in its label; navbar trigger
+    // stays "Products".
+    document.querySelectorAll('#pl-cat-dd .jf-dd-label').forEach(l =>
+        l.textContent = cat === 'All' ? 'All Categories' : cat);
+}
+function selectStorePlatform(plat) {
+    storesFilter.platform = plat;
+    document.querySelectorAll('[data-plat]').forEach(b =>
+        b.classList.toggle('active', b.dataset.plat === plat));
+    document.querySelectorAll('#stores-plat-dd .jf-dd-label').forEach(l =>
+        l.textContent = storePlatLabel(plat));
+    rerenderStoresPage();
+}
+
+// Generic dropdowns (.jf-dd): toolbar dropdowns toggle on trigger click; navbar
+// dropdowns open on hover (CSS). Item clicks are delegated below so both kinds
+// work without per-container binding. Outside-click / Esc closes click-menus.
 document.addEventListener('click', (e) => {
+    const catItem = e.target.closest('[data-pl-cat]');
+    if (catItem) {
+        selectProductCategory(catItem.getAttribute('data-pl-cat'));
+        document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
+        catItem.closest('.nav-cat-dd')?.classList.add('jf-dd-justpicked');
+        return;
+    }
+    const platItem = e.target.closest('[data-plat]');
+    if (platItem) {
+        selectStorePlatform(platItem.dataset.plat);
+        document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
+        platItem.closest('.nav-cat-dd')?.classList.add('jf-dd-justpicked');
+        return;
+    }
     const trigger = e.target.closest('.jf-dd-trigger');
     if (trigger) {
         const dd = trigger.closest('.jf-dd');
@@ -726,11 +778,14 @@ document.addEventListener('click', (e) => {
         trigger.setAttribute('aria-expanded', String(willOpen));
         return;
     }
-    // Click anywhere outside an open menu closes all (item clicks close via their
-    // own handlers, which also update the trigger label).
     if (!e.target.closest('.jf-dd-menu')) {
         document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
     }
+});
+// Re-arm hover after the cursor leaves a navbar dropdown the user just picked from.
+document.addEventListener('mouseout', (e) => {
+    const dd = e.target.closest && e.target.closest('.nav-cat-dd.jf-dd-justpicked');
+    if (dd && !dd.contains(e.relatedTarget)) dd.classList.remove('jf-dd-justpicked');
 });
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
@@ -3271,19 +3326,8 @@ function bindStoresNavToolbar() {
             if (main && typeof attachCarouselHandlers === 'function') attachCarouselHandlers(main);
         }
     };
-    toolbar.querySelectorAll('[data-plat]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            storesFilter.platform = btn.dataset.plat;
-            toolbar.querySelectorAll('[data-plat]').forEach(b => b.classList.toggle('active', b === btn));
-            const dd = toolbar.querySelector('#stores-plat-dd');
-            if (dd) {
-                dd.classList.remove('open');
-                const lbl = dd.querySelector('.jf-dd-label');
-                if (lbl) lbl.textContent = storePlatLabel(btn.dataset.plat);
-            }
-            reRenderStores();
-        });
-    });
+    // Platform item clicks are handled by the global [data-plat] delegation; the
+    // toolbar only needs to bind its mobile search input here.
     const ss = document.getElementById('stores-search-input');
     if (ss) {
         let tmr;
@@ -3294,45 +3338,13 @@ function bindStoresNavToolbar() {
     }
 }
 
-// ─── PRODUCTS CATEGORY TOOLBAR (lives in the navbar container, on /products) ──
-function bindProductsNavToolbar() {
-    const toolbar = document.getElementById('products-nav-toolbar');
-    if (!toolbar || toolbar._bound) return;
-    toolbar._bound = true;
-    toolbar.querySelectorAll('[data-pl-cat]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const cat = btn.getAttribute('data-pl-cat');
-            filterState.category = cat;
-            filterState.seller = '';
-            // Update URL (preserve the active ?search=)
-            const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
-            const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
-            history.pushState({ page: 'products' }, '', path + qs);
-            toolbar.querySelectorAll('[data-pl-cat]').forEach(b => b.classList.toggle('active', b === btn));
-            const dd = toolbar.querySelector('#pl-cat-dd');
-            if (dd) {
-                dd.classList.remove('open');
-                const lbl = dd.querySelector('.jf-dd-label');
-                if (lbl) lbl.textContent = cat === 'All' ? 'All Categories' : cat;
-            }
-            renderFilteredProducts();
-        });
-    });
-}
-// Show/hide the products category toolbar and sync it to the active category.
+// Show/hide the mobile products category toolbar and sync every category
+// dropdown (navbar + toolbar) to the active category. Item clicks themselves are
+// handled by the global [data-pl-cat] delegation.
 window.setProductsToolbar = function (pageId) {
     const toolbar = document.getElementById('products-nav-toolbar');
-    if (!toolbar) return;
-    toolbar.style.display = (pageId === 'products') ? 'flex' : 'none';
-    if (pageId !== 'products') return;
-    const cat = filterState.category || 'All';
-    toolbar.querySelectorAll('[data-pl-cat]').forEach(b =>
-        b.classList.toggle('active', b.dataset.plCat === cat));
-    const dd = toolbar.querySelector('#pl-cat-dd');
-    if (dd) {
-        const lbl = dd.querySelector('.jf-dd-label');
-        if (lbl) lbl.textContent = cat === 'All' ? 'All Categories' : cat;
-    }
+    if (toolbar) toolbar.style.display = (pageId === 'products') ? 'flex' : 'none';
+    if (pageId === 'products') syncProductCatDropdowns(filterState.category || 'All');
 };
 
 // Show/hide the stores toolbar for the active page and sync its controls.
@@ -3346,15 +3358,11 @@ window.setStoresToolbar = function (pageId) {
     document.body.classList.toggle('on-more', ['qccheck', 'tutorials', 'tools', 'favorites'].includes(pageId));
     if (toolbar) toolbar.style.display = (pageId === 'stores') ? 'flex' : 'none';
     if (pageId === 'stores') {
-        if (toolbar) {
-            toolbar.querySelectorAll('[data-plat]').forEach(b =>
-                b.classList.toggle('active', b.dataset.plat === storesFilter.platform));
-            const dd = toolbar.querySelector('#stores-plat-dd');
-            if (dd) {
-                const lbl = dd.querySelector('.jf-dd-label');
-                if (lbl) lbl.textContent = storePlatLabel(storesFilter.platform);
-            }
-        }
+        // Sync every platform dropdown (navbar + mobile toolbar) to the filter.
+        document.querySelectorAll('[data-plat]').forEach(b =>
+            b.classList.toggle('active', b.dataset.plat === storesFilter.platform));
+        document.querySelectorAll('#stores-plat-dd .jf-dd-label').forEach(l =>
+            l.textContent = storePlatLabel(storesFilter.platform));
         // Navbar search now drives the stores filter.
         if (navSearch) {
             navSearch.value = storesFilter.query || '';
@@ -3406,7 +3414,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initMoreMenu();
     initMobileDrawer();
     bindStoresNavToolbar();
-    bindProductsNavToolbar();
     document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === currentCurrency);
     });

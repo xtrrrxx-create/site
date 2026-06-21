@@ -1950,6 +1950,23 @@ main {
 }
 .jf-dd-item:hover,
 .jf-dd-item.active { background: var(--muted-hover); }
+
+/* Navbar Stores/Products links double as category dropdowns, opening on hover
+   exactly like the More menu. The trigger keeps the plain nav-link look. */
+.nav-cat-trigger { display: inline-flex; align-items: center; gap: 4px; }
+.nav-cat-trigger .jf-dd-chev { width: 14px; height: 14px; }
+.nav-cat-dd:hover:not(.jf-dd-justpicked) .jf-dd-chev { transform: rotate(180deg); }
+.nav-cat-dd:hover:not(.jf-dd-justpicked) .jf-dd-menu {
+    opacity: 1; transform: scale(1) translateY(0); pointer-events: auto;
+}
+/* Desktop drives the filter from the navbar dropdowns, so the toolbar strips are
+   mobile-only. Mobile hides the navbar links, so the strips take over there. */
+@media (min-width: 769px) {
+    #stores-nav-toolbar, #products-nav-toolbar { display: none !important; }
+}
+@media (max-width: 768px) {
+    .nav-left .nav-cat-dd { display: none; }
+}
 .stores-nav-toolbar .stores-search {
     display: flex; align-items: center; gap: 8px;
     background: var(--nav-bg); border: 1px solid var(--border-color);
