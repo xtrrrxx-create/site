@@ -1,25 +1,25 @@
 :root {
-    --bg-color: #1E1E1E;
-    --nav-bg: #2a2a2a;
-    --border-color: #363636;
-    --text-primary: #f0f0f0;
-    --text-secondary: #a0a0a0;
-    /* Tropical brand palette */
-    --accent-color: #DE37A6; /* deep pink — primary accent */
-    --accent-hover: #c42d8f; /* darker pink for hover/pressed */
-    --accent-2: #FFD34E;     /* sandy yellow */
-    --accent-3: #64C8FF;     /* sky blue */
+    /* Tropical theme — yellow canvas, blue accent, pink/yellow cards */
+    --bg-color: #FFD34E;       /* sandy yellow page background */
+    --nav-bg: #FFF6DA;         /* light cream chrome (search pill, menus) */
+    --border-color: #EAC74A;   /* yellow-tinted borders */
+    --text-primary: #1f2330;   /* near-black for readability on yellow */
+    --text-secondary: #6f6440; /* muted brown-grey */
+    --accent-color: #64C8FF;   /* sky blue — primary accent (buttons, links) */
+    --accent-hover: #2FAEF2;   /* darker blue for hover/pressed */
+    --accent-2: #FFD34E;       /* sandy yellow */
+    --accent-3: #DE37A6;       /* deep pink */
     --brand-gradient: linear-gradient(90deg, #DE37A6 0%, #FFD34E 50%, #64C8FF 100%);
-    --glow-color: rgba(255, 255, 255, 0.1);
+    --glow-color: rgba(0, 0, 0, 0.08);
 
-    /* picks.ly design tokens (dark) */
-    --surface: #2a2a2a;
-    --surface-hover: #323232;
-    --muted: #363636;
-    --muted-hover: #3e3e3e;
-    --line: #424242;
-    --fg-muted: #a0a0a0;
-    --fg-faint: #686868;
+    /* surface tokens */
+    --surface: #FFF6DA;
+    --surface-hover: #FBEFC2;
+    --muted: #FBEFC2;
+    --muted-hover: #F6E4A3;
+    --line: #EAC74A;
+    --fg-muted: #6f6440;
+    --fg-faint: #9a8a55;
     --radius-card: 16px;
     --radius-pill: 9999px;
     --shadow-soft: 0 26px 55px #00000080;
@@ -338,11 +338,7 @@ body.on-more .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
 
 .pl-accent {
     font-weight: 800;
-    background: var(--brand-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
+    color: var(--accent-color);
 }
 
 .pl-hero-sub {
@@ -505,12 +501,12 @@ body.light-mode .pl-cat:hover {
     right: 0;
     bottom: 0;
     width: 64px;
-    background: linear-gradient(to right, rgba(30, 30, 30, 0), var(--bg-color));
+    background: linear-gradient(to right, rgba(255, 211, 78, 0), var(--bg-color));
     pointer-events: none;
     z-index: 3;
 }
 .store-section-card .hc-carousel-wrap::after {
-    background: linear-gradient(to right, rgba(42, 42, 42, 0), #2a2a2a);
+    background: linear-gradient(to right, rgba(255, 246, 218, 0), var(--surface));
 }
 body.light-mode .hc-carousel-wrap::after {
     background: linear-gradient(to right, rgba(245, 245, 245, 0), var(--bg-color));
@@ -521,11 +517,11 @@ body.light-mode .hc-carousel-wrap::after {
     flex-shrink: 0;
     width: 308px;
     height: 300px;
-    background: #2a2a2a;
+    background: linear-gradient(160deg, #FFE39A 0%, #F6A9D6 100%);
     border: none;
     border-radius: 16px;
     padding: 20px;
-    box-shadow: rgba(0,0,0,0.35) 0px 2px 4px 0px, rgba(0,0,0,0.5) 0px 8px 20px 0px;
+    box-shadow: 0 6px 18px rgba(222,55,166,0.18);
     cursor: pointer;
     transition: transform 0.2s ease;
     display: flex;
@@ -659,7 +655,7 @@ body.light-mode .hc-carousel-wrap::after {
     aspect-ratio: 1;
     border-radius: 8px;
     overflow: hidden;
-    background: #222;
+    background: #ffffff;
 }
 
 .store-thumb img {
@@ -859,11 +855,11 @@ main {
 .products-grid .hc-card .product-image img { width: 100%; height: 100%; }
 
 .product-card {
-    background: #2a2a2a;
+    background: linear-gradient(160deg, #FFE39A 0%, #F6A9D6 100%);
     border: none;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: rgba(0,0,0,0.3) 0px 1px 3px 0px, rgba(0,0,0,0.4) 0px 5px 14px 0px;
+    box-shadow: 0 6px 18px rgba(222,55,166,0.18);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -872,7 +868,7 @@ main {
 .product-image {
     width: 100%;
     aspect-ratio: 1;
-    background: #2a2a2a;
+    background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -930,7 +926,7 @@ main {
 
 .product-store-name {
     font-size: 12px;
-    color: #a3a3a3;
+    color: #7a3d63;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -942,7 +938,7 @@ main {
     font-weight: 500;
     margin-bottom: 4px;
     font-size: 15px;
-    color: #f0f0f0;
+    color: #1f2330;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -950,9 +946,9 @@ main {
 }
 
 .product-price {
-    color: #f0f0f0;
+    color: #1f2330;
     font-family: 'Inter Tight', system-ui, sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 16px;
     line-height: 24px;
     margin-bottom: 8px;
@@ -984,12 +980,12 @@ main {
 
 .card-btn-buy {
     background: var(--accent-color);
-    color: #f0f0f0;
+    color: #08324c;
     border: none;
     padding: 0;
     border-radius: 9999px;
     font-family: 'Inter Tight', system-ui, sans-serif;
-    font-weight: 500;
+    font-weight: 700;
     font-size: 12px;
     cursor: pointer;
     text-align: center;
@@ -1000,16 +996,16 @@ main {
     height: 28px;
     flex: 1;
     white-space: nowrap;
-    transition: opacity 160ms ease;
+    transition: background 160ms ease, color 160ms ease;
 }
-.card-btn-buy:hover { opacity: 0.85; }
-.card-btn-buy:active { opacity: 0.7; }
+.card-btn-buy:hover { background: var(--accent-hover); color: #ffffff; }
+.card-btn-buy:active { background: var(--accent-hover); }
 
 .card-btn-qc {
-    background: #363636;
+    background: rgba(255,255,255,0.55);
     border-radius: 9999px;
-    color: #f0f0f0;
-    border: none;
+    color: #08324c;
+    border: 1.5px solid var(--accent-color);
     padding: 0;
     font-family: 'Inter Tight', system-ui, sans-serif;
     font-size: 12px;
@@ -1025,8 +1021,8 @@ main {
     white-space: nowrap;
     transition: opacity 160ms ease;
 }
-.card-btn-qc:hover { opacity: 0.8; }
-.card-btn-qc:active { opacity: 0.7; }
+.card-btn-qc:hover { background: var(--accent-color); color: #ffffff; }
+.card-btn-qc:active { background: var(--accent-hover); }
 
 /* Converter */
 .input-group input, .input-group select {
