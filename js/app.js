@@ -76,13 +76,15 @@ window.changeCurrencyUI = function (curr) {
 
 function updateNavbarLanguage() {
     const navLinks = document.querySelectorAll('.nav-link[data-page]');
+    const NAV_LABELS = { home: 'nav_home', products: 'nav_products', tutorials: 'nav_tutorials', qccheck: 'nav_qc', tools: 'nav_tools' };
     navLinks.forEach(a => {
-        const page = a.getAttribute('data-page');
-        if (page === 'home') a.innerHTML = t('nav_home');
-        if (page === 'products') a.innerHTML = t('nav_products');
-        if (page === 'tutorials') a.innerHTML = t('nav_tutorials');
-        if (page === 'qccheck') a.innerHTML = t('nav_qc');
-        if (page === 'tools') a.innerHTML = t('nav_tools');
+        const key = NAV_LABELS[a.getAttribute('data-page')];
+        if (!key) return;
+        // Preserve the dropdown chevron (.jf-dd-chev) that the static markup adds —
+        // setting textContent/innerHTML alone would strip it.
+        const chev = a.querySelector('.jf-dd-chev');
+        a.textContent = t(key);
+        if (chev) { a.appendChild(document.createTextNode(' ')); a.appendChild(chev); }
     });
     // Bottom nav
     document.querySelectorAll('.bottom-nav-item[data-page]').forEach(item => {
@@ -764,21 +766,19 @@ function selectStorePlatform(plat) {
 }
 
 // Generic dropdowns (.jf-dd): toolbar dropdowns toggle on trigger click; navbar
-// dropdowns open on hover (CSS). Item clicks are delegated below so both kinds
-// work without per-container binding. Outside-click / Esc closes click-menus.
+// dropdowns (.nav-cat-dd) open via hover-intent (see initNavCatDropdowns). Item
+// clicks are delegated below so both kinds work without per-container binding.
 document.addEventListener('click', (e) => {
     const catItem = e.target.closest('[data-pl-cat]');
     if (catItem) {
         selectProductCategory(catItem.getAttribute('data-pl-cat'));
         document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
-        catItem.closest('.nav-cat-dd')?.classList.add('jf-dd-justpicked');
         return;
     }
     const platItem = e.target.closest('[data-plat]');
     if (platItem) {
         selectStorePlatform(platItem.dataset.plat);
         document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
-        platItem.closest('.nav-cat-dd')?.classList.add('jf-dd-justpicked');
         return;
     }
     const trigger = e.target.closest('.jf-dd-trigger');
@@ -794,14 +794,28 @@ document.addEventListener('click', (e) => {
         document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
     }
 });
-// Re-arm hover after the cursor leaves a navbar dropdown the user just picked from.
-document.addEventListener('mouseout', (e) => {
-    const dd = e.target.closest && e.target.closest('.nav-cat-dd.jf-dd-justpicked');
-    if (dd && !dd.contains(e.relatedTarget)) dd.classList.remove('jf-dd-justpicked');
-});
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') document.querySelectorAll('.jf-dd.open').forEach(d => d.classList.remove('open'));
 });
+
+// Navbar category dropdowns open on hover-intent: open on enter, close on leave
+// after a short delay so moving the cursor across the gap into the menu keeps it
+// open (pure CSS :hover drops it in the gap). Bound once on the static navbar.
+function initNavCatDropdowns() {
+    document.querySelectorAll('.nav-cat-dd').forEach(dd => {
+        if (dd._navHoverBound) return;
+        dd._navHoverBound = true;
+        let closeTimer;
+        const open = () => {
+            clearTimeout(closeTimer);
+            document.querySelectorAll('.jf-dd.open').forEach(d => { if (d !== dd) d.classList.remove('open'); });
+            dd.classList.add('open');
+        };
+        const close = () => { closeTimer = setTimeout(() => dd.classList.remove('open'), 180); };
+        dd.addEventListener('mouseenter', open);
+        dd.addEventListener('mouseleave', close);
+    });
+}
 let allProductsCache = [];
 let productsRefreshTimer = null;
 let searchInputTimer = null;
@@ -3414,6 +3428,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initMoreMenu();
     initMobileDrawer();
     bindStoresNavToolbar();
+    initNavCatDropdowns();
     document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === currentCurrency);
     });

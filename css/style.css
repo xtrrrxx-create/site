@@ -1960,14 +1960,14 @@ main {
 .jf-dd-item:hover,
 .jf-dd-item.active { background: var(--muted-hover); }
 
-/* Navbar Stores/Products links double as category dropdowns, opening on hover
-   exactly like the More menu. The trigger keeps the plain nav-link look. */
+/* Navbar Stores/Products links double as category dropdowns. Opening is driven
+   by JS hover-intent (.open class) so crossing the gap to the menu is reliable,
+   exactly like the More menu. The trigger keeps the plain nav-link look. The
+   open menu + chevron rotation come from the shared `.jf-dd.open` rules. */
 .nav-cat-trigger { display: inline-flex; align-items: center; gap: 4px; }
-.nav-cat-trigger .jf-dd-chev { width: 14px; height: 14px; }
-.nav-cat-dd:hover:not(.jf-dd-justpicked) .jf-dd-chev { transform: rotate(180deg); }
-.nav-cat-dd:hover:not(.jf-dd-justpicked) .jf-dd-menu {
-    opacity: 1; transform: scale(1) translateY(0); pointer-events: auto;
-}
+.nav-cat-trigger .jf-dd-chev { width: 14px; height: 14px; opacity: 0.9; flex-shrink: 0; }
+/* Bridge the 8px trigger→menu gap so the pointer never leaves the wrapper. */
+.nav-cat-dd .jf-dd-menu::before { content: ''; position: absolute; left: 0; right: 0; top: -10px; height: 12px; }
 /* Desktop drives the filter from the navbar dropdowns, so the toolbar strips are
    mobile-only. Mobile hides the navbar links, so the strips take over there. */
 @media (min-width: 769px) {
