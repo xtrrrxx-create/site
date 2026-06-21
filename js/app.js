@@ -1728,7 +1728,7 @@ function getPages() {
         </div>
     `,
         products: `
-        <div style="max-width:1400px;margin:0 auto;padding:0 4% 3rem;">
+        <div style="position:relative;padding:0 0 3rem;">
             <!-- Hero search (same as home) -->
             <div class="pl-hero" style="padding-top:2.5rem;padding-bottom:1rem;">
                 <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
