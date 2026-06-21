@@ -1834,7 +1834,7 @@ main {
 /* All navbar links share the same plain-text look */
 .nav-left .nav-link, .nav-right .nav-link {
     font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 14px; font-weight: 400; color: var(--text-secondary);
+    font-size: 14px; font-weight: 400; color: var(--text-primary);
     text-decoration: none; transition: color 0.15s ease, background 0.15s ease;
     white-space: nowrap;
     padding: 4px 8px; border-radius: 6px; /* picks.ly: px-2 py-1 rounded hover:bg-muted-hover */
@@ -1958,9 +1958,8 @@ main {
     white-space: nowrap; transition: background 0.15s ease;
 }
 .jf-dd-item:hover { background: var(--muted-hover); }
-/* Active item is only marked by weight — only the hovered row gets a fill,
-   exactly like the More menu. */
-.jf-dd-item.active { font-weight: 700; }
+/* Every row looks identical; only the hovered one gets a fill, like the More
+   menu (no persistent bold/fill on the active row). */
 
 /* Navbar Stores/Products links double as category dropdowns. Opening is driven
    by JS hover-intent (.open class) so crossing the gap to the menu is reliable,
