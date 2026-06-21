@@ -1957,8 +1957,10 @@ main {
     font-size: 14px; font-weight: 400; color: var(--text-primary);
     white-space: nowrap; transition: background 0.15s ease;
 }
-.jf-dd-item:hover,
-.jf-dd-item.active { background: var(--muted-hover); }
+.jf-dd-item:hover { background: var(--muted-hover); }
+/* Active item is only marked by weight — only the hovered row gets a fill,
+   exactly like the More menu. */
+.jf-dd-item.active { font-weight: 700; }
 
 /* Navbar Stores/Products links double as category dropdowns. Opening is driven
    by JS hover-intent (.open class) so crossing the gap to the menu is reliable,
