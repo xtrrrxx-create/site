@@ -1197,7 +1197,7 @@ function renderFilteredProducts() {
             picksly: safeExternalUrl(p.picksly || '')
         }));
         return `
-            <div class="product-card" data-rv="${rvItem}" data-purl="${escapeHtml(productUrl(p))}">
+            <div class="hc-card product-card" data-rv="${rvItem}" data-purl="${escapeHtml(productUrl(p))}">
                 <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(p.id)}${renderImg}</div>
                 <div class="product-info">
                     <div class="product-batch-row">

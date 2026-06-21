@@ -832,7 +832,8 @@ main {
 /* Products Grid */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fill, 243.19px);
+    justify-content: center;
     gap: 1.1rem;
     margin-top: 1rem;
     align-items: stretch;
