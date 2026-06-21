@@ -1659,17 +1659,6 @@ function getPages() {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     </button>
                 </div>
-                <div class="pl-cats" id="pl-product-cats">
-                    <div class="jf-dd" id="pl-cat-dd">
-                        <button class="jf-dd-trigger" type="button" aria-haspopup="true" aria-expanded="false">
-                            <span class="jf-dd-label">${filterState.category && filterState.category !== 'All' ? escapeHtml(filterState.category) : 'All Categories'}</span>
-                            <svg class="jf-dd-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                        </button>
-                        <div class="jf-dd-menu" role="menu">
-                            ${CATEGORIES.map(cat => `<button class="jf-dd-item ${filterState.category === cat ? 'active' : ''}" role="menuitem" data-pl-cat="${cat}">${cat === 'All' ? 'All Categories' : cat}</button>`).join('')}
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="products-grid" id="products-container" style="margin-top:0.75rem;">
@@ -2243,6 +2232,7 @@ function initApp() {
         if (pageId === 'stores') storesFilter = { platform: 'all', query: '' };
         // Toggle the navbar-integrated stores filter toolbar.
         if (window.setStoresToolbar) window.setStoresToolbar(pageId);
+        if (window.setProductsToolbar) window.setProductsToolbar(pageId);
         // Navbar search stays visible on the product detail page too.
         document.body.classList.toggle('on-product', pageId === 'product');
         // Active state for the center Stores / QC Checker pills.
@@ -2438,26 +2428,9 @@ function initApp() {
         if (pageId === 'products') {
             filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags', seller: filterState.seller || '' };
 
-            // Bind category dropdown items on products page — each updates URL
-            document.querySelectorAll('#pl-cat-dd [data-pl-cat]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const cat = btn.getAttribute('data-pl-cat');
-                    filterState.category = cat;
-                    filterState.seller = '';
-                    // Update URL (preserve the active ?search=)
-                    const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
-                    const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
-                    history.pushState({ page: 'products' }, '', path + qs);
-                    document.querySelectorAll('#pl-cat-dd [data-pl-cat]').forEach(b => b.classList.toggle('active', b === btn));
-                    const dd = document.getElementById('pl-cat-dd');
-                    if (dd) {
-                        dd.classList.remove('open');
-                        const lbl = dd.querySelector('.jf-dd-label');
-                        if (lbl) lbl.textContent = cat === 'All' ? 'All Categories' : cat;
-                    }
-                    renderFilteredProducts();
-                });
-            });
+            // Category dropdown lives in the persistent #products-nav-toolbar and is
+            // bound once via bindProductsNavToolbar(); just sync its state here.
+            if (window.setProductsToolbar) window.setProductsToolbar('products');
 
             // Bind search input
             const plSearch = document.getElementById('kf-search');
@@ -3320,6 +3293,48 @@ function bindStoresNavToolbar() {
         });
     }
 }
+
+// ─── PRODUCTS CATEGORY TOOLBAR (lives in the navbar container, on /products) ──
+function bindProductsNavToolbar() {
+    const toolbar = document.getElementById('products-nav-toolbar');
+    if (!toolbar || toolbar._bound) return;
+    toolbar._bound = true;
+    toolbar.querySelectorAll('[data-pl-cat]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const cat = btn.getAttribute('data-pl-cat');
+            filterState.category = cat;
+            filterState.seller = '';
+            // Update URL (preserve the active ?search=)
+            const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
+            const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
+            history.pushState({ page: 'products' }, '', path + qs);
+            toolbar.querySelectorAll('[data-pl-cat]').forEach(b => b.classList.toggle('active', b === btn));
+            const dd = toolbar.querySelector('#pl-cat-dd');
+            if (dd) {
+                dd.classList.remove('open');
+                const lbl = dd.querySelector('.jf-dd-label');
+                if (lbl) lbl.textContent = cat === 'All' ? 'All Categories' : cat;
+            }
+            renderFilteredProducts();
+        });
+    });
+}
+// Show/hide the products category toolbar and sync it to the active category.
+window.setProductsToolbar = function (pageId) {
+    const toolbar = document.getElementById('products-nav-toolbar');
+    if (!toolbar) return;
+    toolbar.style.display = (pageId === 'products') ? 'flex' : 'none';
+    if (pageId !== 'products') return;
+    const cat = filterState.category || 'All';
+    toolbar.querySelectorAll('[data-pl-cat]').forEach(b =>
+        b.classList.toggle('active', b.dataset.plCat === cat));
+    const dd = toolbar.querySelector('#pl-cat-dd');
+    if (dd) {
+        const lbl = dd.querySelector('.jf-dd-label');
+        if (lbl) lbl.textContent = cat === 'All' ? 'All Categories' : cat;
+    }
+};
+
 // Show/hide the stores toolbar for the active page and sync its controls.
 window.setStoresToolbar = function (pageId) {
     const toolbar = document.getElementById('stores-nav-toolbar');
@@ -3391,6 +3406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initMoreMenu();
     initMobileDrawer();
     bindStoresNavToolbar();
+    bindProductsNavToolbar();
     document.querySelectorAll('.cur-card').forEach(c => {
         c.classList.toggle('active', c.getAttribute('data-cur') === currentCurrency);
     });
