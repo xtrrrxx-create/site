@@ -841,18 +841,14 @@ main {
 /* Products Grid */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    /* Fixed 243.19px columns so each product card is exactly the size of the
+       home/trending cards (.hc-card). auto-fill wraps as many as fit, centered. */
+    grid-template-columns: repeat(auto-fill, 243.19px);
+    justify-content: center;
     gap: 1.1rem;
     margin-top: 1rem;
     align-items: stretch;
 }
-
-/* In the products grid the cards fill their 1fr track (always 5 per row, like
-   home) instead of staying at the carousel's fixed 243px width. Image stays a
-   responsive square so proportions still match the home/trending cards. */
-.products-grid .hc-card { width: 100%; }
-.products-grid .hc-card .product-image { width: 100%; height: auto; aspect-ratio: 1; }
-.products-grid .hc-card .product-image img { width: 100%; height: 100%; }
 
 .product-card {
     background: var(--surface);
