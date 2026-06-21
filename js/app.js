@@ -2865,6 +2865,14 @@ function initMobileDrawer() {
     const drawer = document.getElementById('mobile-drawer');
     if (!burger || !drawer) return;
     function open() {
+        // Mutually exclusive with the Preferences menu — never show both.
+        const sm = document.getElementById('settings-menu');
+        if (sm) {
+            sm.classList.remove('open');
+            sm.setAttribute('aria-hidden', 'true');
+            const sb = document.getElementById('nav-settings-btn');
+            if (sb) sb.setAttribute('aria-expanded', 'false');
+        }
         drawer.classList.add('open');
         drawer.setAttribute('aria-hidden', 'false');
         burger.setAttribute('aria-expanded', 'true');
@@ -2931,6 +2939,15 @@ function initSettingsModal() {
 
     function showMain() { subView.hidden = true; mainView.hidden = false; }
     function openMenu() {
+        // Mutually exclusive with the hamburger menu — never show both.
+        const dr = document.getElementById('mobile-drawer');
+        if (dr && dr.classList.contains('open')) {
+            dr.classList.remove('open');
+            dr.setAttribute('aria-hidden', 'true');
+            const bb = document.getElementById('nav-burger');
+            if (bb) bb.setAttribute('aria-expanded', 'false');
+            document.body.style.overflow = '';
+        }
         menu.classList.add('open'); menu.setAttribute('aria-hidden', 'false');
         btn.setAttribute('aria-expanded', 'true'); showMain(); syncLabels();
     }

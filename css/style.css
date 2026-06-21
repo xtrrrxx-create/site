@@ -1188,9 +1188,11 @@ main {
 }
 .mobile-drawer-panel {
     position: absolute;
-    top: calc(env(safe-area-inset-top) + 58px);
-    left: 12px;
-    width: 240px;
+    /* Mirror the Preferences menu exactly: same width, same vertical offset
+       below the navbar, and a left inset matching its right inset (4%). */
+    top: 71px;
+    left: 4%;
+    width: 256px;
     max-width: calc(100vw - 24px);
     background: var(--nav-bg);
     border: 1px solid var(--border-color);
