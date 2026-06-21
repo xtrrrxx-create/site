@@ -332,7 +332,7 @@ body.on-more .navbar .nav-search-wrap { opacity: 1; visibility: visible; }
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.5; /* 63px @ 42px, like picks.ly md:leading-[63px] */
-    color: var(--text-primary);
+    color: #DE37A6;
     margin-bottom: 0.5rem;
 }
 
@@ -521,7 +521,7 @@ body.light-mode .hc-carousel-wrap::after {
     border: none;
     border-radius: 16px;
     padding: 20px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+    box-shadow: 0 2px 7px rgba(0,0,0,0.07);
     cursor: pointer;
     transition: transform 0.2s ease;
     display: flex;
@@ -813,7 +813,7 @@ main {
 @media (hover: hover) and (pointer: fine) {
     .btn-explore:hover {
         transform: scale(1.04);
-        box-shadow: 0 6px 28px rgba(255,140,0,0.5);
+        box-shadow: 0 4px 12px rgba(100,200,255,0.4);
     }
 }
 
@@ -859,7 +859,7 @@ main {
     border: none;
     border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+    box-shadow: 0 2px 7px rgba(0,0,0,0.07);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -926,7 +926,7 @@ main {
 
 .product-store-name {
     font-size: 12px;
-    color: #C861A8;
+    color: #EE93D2;
     font-weight: 500;
     white-space: nowrap;
     overflow: hidden;
@@ -946,7 +946,7 @@ main {
 }
 
 .product-price {
-    color: #DE37A6;
+    color: #E458B6;
     font-family: 'Inter Tight', system-ui, sans-serif;
     font-weight: 700;
     font-size: 16px;
@@ -2040,11 +2040,11 @@ main {
     height: 48px; padding: 0 1.1rem; border-radius: 9999px;
     background: #5865F2; color: #fff;
     font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.92rem; font-weight: 700;
-    text-decoration: none; box-shadow: 0 8px 28px rgba(88,101,242,0.45);
+    text-decoration: none; box-shadow: 0 3px 10px rgba(88,101,242,0.22);
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 .discord-floating-btn svg { flex-shrink: 0; }
-.discord-floating-btn:hover { transform: translateY(-2px); background: #4752c4; box-shadow: 0 12px 36px rgba(88,101,242,0.6); }
+.discord-floating-btn:hover { transform: translateY(-2px); background: #4752c4; box-shadow: 0 5px 14px rgba(88,101,242,0.3); }
 .discord-floating-btn:active { transform: translateY(0); }
 .discord-text { white-space: nowrap; }
 @media (max-width: 768px) {

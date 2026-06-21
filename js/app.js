@@ -1550,14 +1550,14 @@ function getPages() {
                 font-size: 32px;
                 font-weight: 400;
                 line-height: 48px;
-                color: var(--text-primary);
+                color: #DE37A6;
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
                 cursor: pointer;
                 text-decoration: none;
             }
-            .hc-title:hover { color: var(--accent-color); }
+            .hc-title:hover { color: #E458B6; }
             .hc-title svg { transition: transform 0.15s; }
             .hc-title:hover svg { transform: translateX(3px); }
             .hc-viewmore {
@@ -3004,8 +3004,6 @@ function initSettingsModal() {
         }
         // Currency
         curVal.textContent = CURRENCY_SHORT[currentCurrency] || currentCurrency;
-        // Theme
-        themeVal.textContent = document.body.classList.contains('light-mode') ? 'Light' : 'Dark';
     }
     window._syncSettingsLabels = syncLabels;
 
@@ -3046,12 +3044,6 @@ function initSettingsModal() {
 
     btn.addEventListener('click', e => { e.stopPropagation(); toggleMenu(); });
     document.getElementById('settings-back').addEventListener('click', showMain);
-
-    // Theme row → toggle immediately.
-    document.getElementById('set-row-theme').addEventListener('click', () => {
-        window.toggleTheme();
-        syncLabels();
-    });
 
     // Agent row → submenu.
     document.getElementById('set-row-agent').addEventListener('click', () => {
@@ -3403,10 +3395,6 @@ window.addEventListener('beforeunload', () => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('theme') === 'light') {
-        document.body.classList.add('light-mode');
-        updateThemeIcon(true);
-    }
     updateNavbarLanguage();
     initBlurPlaceholders(document); // navbar search pill
     initApp();
