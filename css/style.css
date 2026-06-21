@@ -1914,35 +1914,42 @@ main {
 ═══════════════════════════════════════════════════════════ */
 .jf-dd { position: relative; display: inline-flex; }
 .jf-dd-trigger {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--nav-bg); border: 1px solid var(--border-color);
-    color: var(--text-primary); font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 14px; font-weight: 500; padding: 9px 16px; border-radius: 12px;
-    cursor: pointer; transition: border-color 0.15s ease, background 0.15s ease;
+    display: flex; align-items: center; gap: 4px; cursor: pointer;
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 14px; font-weight: 400; color: var(--text-secondary);
+    background: transparent; border: none; white-space: nowrap;
+    padding: 4px 8px; border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
     -webkit-tap-highlight-color: transparent;
 }
-.jf-dd-trigger:hover { border-color: var(--text-secondary); }
-.jf-dd-chev { flex-shrink: 0; opacity: 0.8; transition: transform 0.2s ease; }
+.jf-dd-trigger:hover,
+.jf-dd.open .jf-dd-trigger { color: var(--text-primary); background: var(--muted-hover); }
+.jf-dd-chev { transition: transform 0.2s ease; }
 .jf-dd.open .jf-dd-chev { transform: rotate(180deg); }
 .jf-dd-menu {
-    position: absolute; top: calc(100% + 8px); left: 0; z-index: 70;
-    min-width: 220px; background: var(--nav-bg); border: 1px solid var(--border-color);
-    border-radius: 14px; padding: 6px;
-    box-shadow: 0 12px 34px rgba(0,0,0,0.45);
-    display: none; flex-direction: column; gap: 2px;
+    position: absolute; left: 0; top: calc(100% + 8px); z-index: 1200;
+    min-width: 200px; padding: 6px;
+    background: var(--nav-bg); border: 1px solid var(--border-color);
+    border-radius: 12px; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    transform-origin: top left;
+    transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity: 0; transform: scale(0.97) translateY(-6px); pointer-events: none;
+    display: flex; flex-direction: column; gap: 2px;
     max-height: 70vh; overflow-y: auto;
 }
-.jf-dd.open .jf-dd-menu { display: flex; }
-body.light-mode .jf-dd-menu { box-shadow: 0 12px 34px rgba(0,0,0,0.14); }
+/* Invisible bridge across the 8px gap (matches the More menu). */
+.jf-dd-menu::before { content: ''; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
+.jf-dd.open .jf-dd-menu { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
 .jf-dd-item {
     display: flex; align-items: center; justify-content: space-between; gap: 14px;
+    width: 100%; padding: 9px 12px; border-radius: 8px;
     background: transparent; border: none; cursor: pointer; text-align: left;
-    color: var(--text-secondary); font-family: 'Inter Tight', system-ui, sans-serif;
-    font-size: 14px; font-weight: 500; padding: 11px 14px; border-radius: 10px;
-    transition: background 0.12s ease, color 0.12s ease; white-space: nowrap;
+    font-family: 'Inter Tight', system-ui, sans-serif;
+    font-size: 14px; font-weight: 400; color: var(--text-primary);
+    white-space: nowrap; transition: background 0.15s ease;
 }
-.jf-dd-item:hover { background: var(--border-color); color: var(--text-primary); }
-.jf-dd-item.active { color: var(--text-primary); font-weight: 600; }
+.jf-dd-item:hover,
+.jf-dd-item.active { background: var(--muted-hover); }
 .stores-nav-toolbar .stores-search {
     display: flex; align-items: center; gap: 8px;
     background: var(--nav-bg); border: 1px solid var(--border-color);
