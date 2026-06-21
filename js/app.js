@@ -861,8 +861,8 @@ function injectFilterStyles() {
             display: flex;
             align-items: center;
             gap: 0.6rem;
-            background: #2a2a2a;
-            border: 1px solid #3a3a3a;
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
             border-radius: 9999px;
             padding: 0.75rem 1.25rem;
             transition: border-color 0.2s;
@@ -1535,7 +1535,7 @@ function getPages() {
             .stores-pill { padding: 7px 16px; background: #2a2a2a; border: 1px solid #333; border-radius: 9999px; color: var(--text-secondary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.15s ease; }
             .stores-pill:hover { color: var(--text-primary); }
             .stores-pill.active { background: #fff; color: #111; border-color: #fff; }
-            .stores-search { display: flex; align-items: center; gap: 8px; background: #2a2a2a; border: 1px solid #333; border-radius: 9999px; padding: 0 1rem; height: 42px; width: 340px; max-width: 100%; }
+            .stores-search { display: flex; align-items: center; gap: 8px; background: var(--nav-bg); border: 1px solid var(--border-color); border-radius: 9999px; padding: 0 1rem; height: 42px; width: 340px; max-width: 100%; }
             .stores-search input { flex: 1; min-width: 0; background: transparent; border: none; outline: none; color: var(--text-primary); font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.95rem; }
             .stores-search input::placeholder { color: var(--text-secondary); }
             .stores-search svg { color: var(--text-secondary); flex-shrink: 0; }

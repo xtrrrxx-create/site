@@ -610,7 +610,7 @@ body.light-mode .hc-carousel-wrap::after {
     aspect-ratio: 1;
     border-radius: 10px;
     overflow: hidden;
-    background: #1f1f1f;
+    background: #ffffff;
 }
 .store-cat-thumb img {
     width: 100%;
@@ -1767,7 +1767,7 @@ main {
 /* Stores page skeleton: product-card placeholders inside a store section.
    Lighter gray to match picks.ly (was too dark on var(--bg-color)). */
 .skel-store-row { gap: 16px; overflow: hidden; }
-.skel-store-item { flex-shrink: 0; width: 243.19px; border: none; background: #313131; }
+.skel-store-item { flex-shrink: 0; width: 243.19px; border: none; background: var(--surface); }
 .skel-store-item .skeleton-img { width: 243.19px; height: 243.19px; }
 .skel-store-item .skel-anim {
     background: linear-gradient(90deg, var(--border-color) 25%, color-mix(in srgb, var(--border-color) 55%, #fff) 50%, var(--border-color) 75%);
@@ -2136,15 +2136,13 @@ main {
 .tut-card-step { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent-color); }
 .tut-card-title { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 1rem; font-weight: 700; color: var(--text-primary); }
 .tut-card-text { font-size: 0.84rem; color: var(--text-secondary); line-height: 1.45; }
-body.light-mode .tut-card { background: #fff; }
 
 /* ── Agent Tutorial: vertical step-by-step guide ── */
 .agt-hero {
-    background: #2a2a2a; border: none; border-radius: 20px;
+    background: var(--surface); border: none; border-radius: 20px;
     padding: 2.2rem; margin-bottom: 1.75rem; text-align: center;
-    box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 24px 0;
+    box-shadow: 0 2px 7px rgba(0,0,0,0.07);
 }
-body.light-mode .agt-hero { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px 8px 0, rgba(0,0,0,0.12) 0 4px 16px 0; }
 .agt-hero-title { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 28px; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem; }
 .agt-hero-sub { color: var(--text-secondary); font-size: 14px; max-width: 580px; margin: 0 auto 1.4rem; line-height: 1.55; }
 .agt-start {
@@ -2157,11 +2155,10 @@ body.light-mode .agt-hero { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px
 .agt-start:active { opacity: 0.7; }
 .agt-steps { display: flex; flex-direction: column; gap: 18px; }
 .agt-step {
-    display: flex; gap: 16px; background: #2a2a2a; border: none;
+    display: flex; gap: 16px; background: var(--surface); border: none;
     border-radius: 16px; padding: 18px;
-    box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 24px 0;
+    box-shadow: 0 2px 7px rgba(0,0,0,0.07);
 }
-body.light-mode .agt-step { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px 8px 0, rgba(0,0,0,0.12) 0 4px 16px 0; }
 .agt-step-num {
     flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%;
     background: var(--accent-color); color: #111; font-weight: 800; font-size: 1.05rem;
@@ -2170,10 +2167,9 @@ body.light-mode .agt-step { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px
 .agt-step-main { display: flex; gap: 18px; flex: 1; min-width: 0; }
 .agt-step-img {
     flex-shrink: 0; width: 220px; aspect-ratio: 1; border-radius: 12px;
-    background: #1f1f1f; display: flex; align-items: center; justify-content: center;
+    background: #ffffff; display: flex; align-items: center; justify-content: center;
     color: var(--text-secondary); font-size: 0.8rem; text-align: center; overflow: hidden;
 }
-body.light-mode .agt-step-img { background: #f0f0f0; }
 .agt-step-img img { width: 100%; height: 100%; object-fit: cover; }
 .agt-step-content { flex: 1; min-width: 0; }
 .agt-step-content p { color: var(--text-secondary); font-size: 0.92rem; line-height: 1.6; margin: 0 0 0.7rem; }
@@ -2191,7 +2187,7 @@ body.light-mode .agt-step-img { background: #f0f0f0; }
 .agt-btn:active { opacity: 0.7; }
 .agt-btn-kako { background: var(--accent-color); color: #f0f0f0; }
 .agt-btn-picksly { background: var(--accent-color); color: #f0f0f0; }
-.agt-btn-ghost { background: #363636; color: #f0f0f0; }
+.agt-btn-ghost { background: var(--muted); color: var(--text-primary); }
 @media (max-width: 768px) {
     .agt-step-main { flex-direction: column; }
     .agt-step-img { width: 100%; }
@@ -2215,11 +2211,10 @@ body.light-mode .agt-step-img { background: #f0f0f0; }
 .wz-dot.done { background: var(--accent-color); border-color: var(--accent-color); color: #111; }
 .wz-dot.active { border-color: var(--accent-color); color: var(--accent-color); box-shadow: 0 0 0 3px rgba(222,55,166,0.18); }
 .wz-card {
-    background: #2a2a2a; border: none;
+    background: var(--surface); border: none;
     border-radius: 18px; padding: 1.8rem 2rem; margin-bottom: 1.2rem;
-    box-shadow: rgba(0,0,0,0.35) 0 2px 4px 0, rgba(0,0,0,0.5) 0 8px 24px 0;
+    box-shadow: 0 2px 7px rgba(0,0,0,0.07);
 }
-body.light-mode .wz-card { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px 8px 0, rgba(0,0,0,0.12) 0 4px 16px 0; }
 /* Uniform card height so Next/Prev doesn't shift the page (tallest step sets it). */
 @media (min-width: 769px) { .wz-card { min-height: 860px; } }
 .wz-step { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.1em; color: var(--accent-color); }
@@ -2227,10 +2222,9 @@ body.light-mode .wz-card { background: #fff; box-shadow: rgba(0,0,0,0.08) 0 2px 
 .wz-sub { color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 1.2rem; }
 .wz-img {
     width: 100%; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden;
-    background: #1f1f1f; display: flex; align-items: center; justify-content: center;
+    background: #ffffff; display: flex; align-items: center; justify-content: center;
     color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.2rem;
 }
-body.light-mode .wz-img { background: #f0f0f0; }
 .wz-img img { width: 100%; height: 100%; object-fit: cover; }
 .wz-img--contain img { object-fit: contain; }
 .wz-body p { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.65; margin: 0 0 0.8rem; }
@@ -2245,7 +2239,7 @@ body.light-mode .wz-img { background: #f0f0f0; }
     font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 500; font-size: 14px;
     color: #f0f0f0; transition: opacity 160ms ease;
 }
-.wz-prev { background: #363636; padding: 0.7rem 1.5rem; }
+.wz-prev { background: var(--muted); color: var(--text-primary); padding: 0.7rem 1.5rem; }
 .wz-next { background: var(--accent-color); padding: 0.7rem 1.8rem; }
 .wz-prev:hover, .wz-next:hover { opacity: 0.85; }
 .wz-prev:active, .wz-next:active { opacity: 0.7; }
@@ -2319,12 +2313,12 @@ body.light-mode .wz-img { background: #f0f0f0; }
 .pd-gallery { display: flex; gap: 12px; }
 .pd-image {
     width: 400px; height: 400px; aspect-ratio: 1; border-radius: 18px; overflow: hidden;
-    background: #2a2a2a; box-shadow: rgba(0,0,0,0.35) 0 2px 4px, rgba(0,0,0,0.5) 0 8px 24px;
+    background: #ffffff; box-shadow: 0 2px 7px rgba(0,0,0,0.07);
 }
 .pd-thumbs { display: flex; flex-direction: column; gap: 6px; width: 52px; flex-shrink: 0; }
 .pd-thumb {
     width: 52px; height: 52px; border-radius: 12px; overflow: hidden; padding: 0; border: none;
-    background: #2a2a2a; cursor: pointer; position: relative;
+    background: #ffffff; cursor: pointer; position: relative;
     box-shadow: 0 0 0 1px var(--border-color); opacity: 0.6;
     transition: opacity 0.15s ease, box-shadow 0.15s ease;
 }
@@ -2429,7 +2423,7 @@ body.light-mode .wz-img { background: #f0f0f0; }
 /* QC gallery grid (batch tiles with count + date/size) */
 .pd-qc-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
 .pd-qc-card { background: none; border: none; padding: 0; text-align: left; cursor: pointer; }
-.pd-qc-cover { position: relative; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #2a2a2a; transition: transform 0.15s; }
+.pd-qc-cover { position: relative; aspect-ratio: 1; border-radius: 14px; overflow: hidden; background: #ffffff; transition: transform 0.15s; }
 .pd-qc-card:hover .pd-qc-cover { transform: translateY(-2px); }
 .pd-qc-cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pd-qc-badge {
