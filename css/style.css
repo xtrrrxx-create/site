@@ -884,6 +884,36 @@ main {
     object-fit: cover;
 }
 
+/* ── Image loading shimmer (picks.ly style) ──
+   While an image is loading the well shows an animated skeleton, then the
+   image fades in over it. Applies to product cards, the product-detail gallery
+   and QC covers and store thumbnails. Only `.img-loading` wells shimmer, so
+   "no image" placeholders never animate. */
+.product-image.img-loading::before,
+.pd-image.img-loading::before,
+.pd-qc-cover.img-loading::before,
+.store-thumb.img-loading::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(90deg, var(--muted) 25%, var(--surface) 50%, var(--muted) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.4s infinite linear;
+}
+.product-image img[data-fallback],
+.pd-image img[data-fallback],
+.pd-qc-cover img[data-fallback],
+.store-thumb img[data-fallback] {
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+img[data-fallback].img-loaded { opacity: 1; }
+/* The favourite heart must stay above the shimmer. */
+.product-image .fav-heart { z-index: 2; }
+
 .product-info {
     padding: 8px 10px 10px;
     display: flex;

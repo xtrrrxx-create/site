@@ -5252,6 +5252,15 @@ window.updateTrackerLinks = function (code) {
         if (img._fallbackBound) return;
         img._fallbackBound = true;
         const mode = img.dataset.fallback;
+        // Image-loading shimmer (picks.ly style): the well shows an animated
+        // skeleton while the image is loading, then the image fades in.
+        if (img.parentElement) img.parentElement.classList.add('img-loading');
+        const markReady = () => {
+            img.classList.add('img-loaded');
+            if (img.parentElement) img.parentElement.classList.remove('img-loading');
+        };
+        if (img.complete && img.naturalWidth > 0) markReady();
+        else img.addEventListener('load', markReady, { once: true });
         img.addEventListener('error', function onErr() {
             // First failure: if this is our /api/img (or legacy wsrv) proxy URL,
             // some images (e.g. signed URLs with a token) can't be fetched by the
@@ -5270,6 +5279,7 @@ window.updateTrackerLinks = function (code) {
             }
             this.removeEventListener('error', onErr);
             this.style.display = 'none';
+            if (this.parentElement) this.parentElement.classList.remove('img-loading');
             if (mode === 'no-image-text' && this.parentElement) {
                 if (!this.parentElement.querySelector('.img-fallback-text')) {
                     const div = document.createElement('div');
