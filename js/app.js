@@ -2044,8 +2044,6 @@ function getPages() {
                 </div>
             </div>
 
-            ${buildFilterControls()}
-
             <div class="products-grid" id="products-container" style="margin-top:0.75rem;">
                 <p style="color:var(--text-primary);font-weight:600;" id="loading-text">${t('loading')}</p>
             </div>
@@ -2834,10 +2832,6 @@ function initApp() {
                     } catch(e) {}
                 });
             }
-
-            // Wire the Filters button + modal immediately so it works even while
-            // products are still loading (doesn't depend on the catalogue fetch).
-            bindFilterEvents();
 
             const onData = (data) => {
                 lastProductsSignature = JSON.stringify(data);
