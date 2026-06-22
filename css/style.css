@@ -493,7 +493,7 @@ body.light-mode .pl-cat:hover {
     top: 0;
     right: 0;
     bottom: 0;
-    width: 24px;
+    width: 12px;
     background: linear-gradient(to right, rgba(30, 30, 30, 0), var(--bg-color));
     pointer-events: none;
     z-index: 3;
