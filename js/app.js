@@ -224,7 +224,7 @@ const PD_AGENT_COLORS = { kakobuy: '#eb6877', oopbuy: '#ff5c8a', acbuy: '#16a34a
 function pdAgentInfo() {
     const id = (localStorage.getItem(PREFERRED_AGENT_KEY) || 'kakobuy').toLowerCase();
     const a = AGENTS.find(x => x.id === id) || AGENTS[0];
-    return { id: a.id, name: a.name, icon: `https://www.google.com/s2/favicons?domain=${a.domain}&sz=64`, color: PD_AGENT_COLORS[a.id] || '#DE37A6' };
+    return { id: a.id, name: a.name, icon: `https://www.google.com/s2/favicons?domain=${a.domain}&sz=64`, color: PD_AGENT_COLORS[a.id] || '#ff9f0a' };
 }
 
 // Build the SEO product URL: /products/<cat>/<name>-<PICKSLYID>?color=<c>
@@ -1587,14 +1587,14 @@ function getPages() {
                 font-size: 32px;
                 font-weight: 400;
                 line-height: 48px;
-                color: #DE37A6;
+                color: var(--text-primary);
                 display: inline-flex;
                 align-items: center;
                 gap: 6px;
                 cursor: pointer;
                 text-decoration: none;
             }
-            .hc-title:hover { color: #E458B6; }
+            .hc-title:hover { color: var(--accent-color); }
             .hc-title svg { transition: transform 0.15s; }
             .hc-title:hover svg { transform: translateX(3px); }
             .hc-viewmore {
@@ -1934,7 +1934,7 @@ function getPages() {
                 color: var(--text-primary); margin-bottom: 0.4rem; line-height: 48px; text-align: left; }
             .qc-subtitle { color: var(--text-secondary); font-size: 14px; margin-bottom: 1.5rem; text-align: left; }
             .qc-row { display: flex; gap: 0.75rem; align-items: stretch; }
-            .qc-input { flex: 1; background: #ffffff; border: 1px solid var(--border-color);
+            .qc-input { flex: 1; background: var(--bg-color); border: 1px solid var(--border-color);
                 border-radius: 14px; padding: 0 1.1rem; height: 52px; color: var(--text-primary);
                 font-family: 'Inter', sans-serif; font-size: 0.92rem; outline: none;
                 transition: border-color 0.2s; box-sizing: border-box; }
@@ -2098,7 +2098,7 @@ function getPages() {
             }
             .converter-input {
                 flex: 1;
-                background: #ffffff;
+                background: var(--bg-color);
                 border: 1px solid var(--border-color);
                 border-radius: 14px;
                 padding: 0 1.1rem;
@@ -2200,7 +2200,7 @@ function getPages() {
             }
             .tracking-input {
                 width: 100%;
-                background: #ffffff;
+                background: var(--bg-color);
                 border: 1px solid var(--border-color);
                 border-radius: 14px;
                 padding: 0.9rem 1.2rem;
