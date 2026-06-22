@@ -1338,10 +1338,21 @@ function renderFilteredProducts() {
 
     const loadMoreBtn = document.getElementById('kf-load-more');
     if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', () => {
+        const loadMore = () => {
             visibleProductsLimit += PRODUCTS_RENDER_STEP;
             renderFilteredProducts();
-        });
+        };
+        // Manual click still works…
+        loadMoreBtn.addEventListener('click', loadMore);
+        // …but also auto-load 30 more as the button scrolls into view (infinite
+        // scroll). rootMargin pre-loads a bit before it's fully visible.
+        const io = new IntersectionObserver((entries) => {
+            if (entries.some(e => e.isIntersecting)) {
+                io.disconnect();          // re-bound on the next render
+                loadMore();
+            }
+        }, { rootMargin: '400px 0px' });
+        io.observe(loadMoreBtn);
     }
 }
 
