@@ -944,11 +944,13 @@ function injectFilterStyles() {
         .kf-modal-overlay.open { opacity: 1; pointer-events: all; }
         .kf-modal {
             background: var(--nav-bg); border: 1px solid var(--border-color);
-            border-radius: 24px; padding: 1.75rem; width: 100%; max-width: 440px;
+            border-radius: 24px; padding: 1.5rem 1.6rem; width: 100%; max-width: 420px;
             max-height: 85vh; overflow-y: auto;
             transform: translateY(30px);
             transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+            scrollbar-width: none; -ms-overflow-style: none;
         }
+        .kf-modal::-webkit-scrollbar { width: 0; height: 0; display: none; }
         .kf-modal-overlay.open .kf-modal { transform: translateY(0); }
         .kf-modal-header {
             display: flex; align-items: center; justify-content: space-between;
@@ -971,36 +973,30 @@ function injectFilterStyles() {
             text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.75rem;
         }
         .kf-modal-cats {
-            display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1.5rem;
+            display: flex; flex-direction: column; gap: 2px; margin-bottom: 1.5rem;
         }
         .kf-modal-cat-btn {
-            background: var(--border-color); border: 1px solid transparent;
-            border-radius: 12px; padding: 0.7rem 1rem;
+            background: transparent; border: none;
+            border-radius: 8px; padding: 0.7rem 0.85rem;
             color: var(--text-secondary); font-family: 'Inter', sans-serif;
-            font-size: 0.9rem; font-weight: 600; text-align: left; cursor: pointer;
-            transition: all 0.15s;
+            font-size: 0.92rem; font-weight: 600; text-align: left; cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
         }
-        .kf-modal-cat-btn:hover { color: var(--text-primary); }
-        .kf-modal-cat-btn.active {
-            border-color: var(--text-primary);
-            background: transparent; color: var(--text-primary);
-        }
+        .kf-modal-cat-btn:hover { background: var(--muted-hover); color: var(--text-primary); }
+        .kf-modal-cat-btn.active { background: var(--muted-hover); color: var(--text-primary); }
         .kf-batch-grid {
             display: grid; grid-template-columns: 1fr 1fr;
-            gap: 0.5rem; margin-bottom: 1.75rem;
+            gap: 2px; margin-bottom: 1.5rem;
         }
         .kf-batch-btn {
-            background: var(--border-color); border: 1px solid transparent;
-            border-radius: 12px; padding: 0.65rem 0.75rem;
+            background: transparent; border: none;
+            border-radius: 8px; padding: 0.7rem 0.75rem;
             color: var(--text-secondary); font-family: 'Inter', sans-serif;
-            font-size: 0.85rem; font-weight: 600; text-align: center;
-            cursor: pointer; transition: all 0.15s;
+            font-size: 0.88rem; font-weight: 600; text-align: center;
+            cursor: pointer; transition: background 0.15s ease, color 0.15s ease;
         }
-        .kf-batch-btn:hover { color: var(--text-primary); }
-        .kf-batch-btn.active {
-            border-color: var(--text-primary);
-            background: transparent; color: var(--text-primary);
-        }
+        .kf-batch-btn:hover { background: var(--muted-hover); color: var(--text-primary); }
+        .kf-batch-btn.active { background: var(--muted-hover); color: var(--text-primary); }
         .kf-modal-actions { display: flex; gap: 0.65rem; }
         .kf-btn-clear {
             flex: 1; background: var(--border-color);
