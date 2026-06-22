@@ -540,7 +540,15 @@ const langMap = {
     filters: { EN: "Filters", RON: "Filtre", PLN: "Filtry", CNY: "筛选" },
     refresh: { EN: "Refresh", RON: "Reîmprospătează", PLN: "Odśwież", CNY: "刷新" },
     categories: { EN: "Categories", RON: "Categorii", PLN: "Kategorie", CNY: "类别" },
+    subcategory: { EN: "Subcategory", RON: "Subcategorie", PLN: "Podkategoria", CNY: "子类别" },
     tags_quality: { EN: "Tags & Quality", RON: "Etichete și Calitate", PLN: "Tagi i Jakość", CNY: "标签和质量" },
+    sort_by: { EN: "Sort by", RON: "Sortează după", PLN: "Sortuj według", CNY: "排序方式" },
+    sort_trending: { EN: "Trending", RON: "În tendințe", PLN: "Popularne", CNY: "热门" },
+    sort_newest: { EN: "Newest", RON: "Cele mai noi", PLN: "Najnowsze", CNY: "最新" },
+    sort_price_low: { EN: "Price ↑", RON: "Preț ↑", PLN: "Cena ↑", CNY: "价格 ↑" },
+    sort_price_high: { EN: "Price ↓", RON: "Preț ↓", PLN: "Cena ↓", CNY: "价格 ↓" },
+    price_cny: { EN: "Price (CNY)", RON: "Preț (CNY)", PLN: "Cena (CNY)", CNY: "价格 (CNY)" },
+    price_min: { EN: "Min", RON: "Min", PLN: "Min", CNY: "最低" },
     clear_all: { EN: "Clear all", RON: "Șterge tot", PLN: "Wyczyść", CNY: "全部清除" },
     show_results: { EN: "Show results", RON: "Arată rezultate", PLN: "Pokaż wyniki", CNY: "显示结果" },
     showing_of: { EN: "Showing {a} of {b} products", RON: "Se afișează {a} din {b} produse", PLN: "Pokazano {a} z {b} produktów", CNY: "显示 {a} / {b} 个产品" },
@@ -705,7 +713,8 @@ async function fetchFromSupabase() {
     return res.json();
 }
 
-let filterState = { search: '', category: 'All', batch: 'All Tags', seller: '' };
+const PRICE_MAX = 2000; // upper bound for the price-range slider (CNY)
+let filterState = { search: '', category: 'All', batch: 'All Tags', seller: '', sort: 'trending', priceMin: 0, priceMax: PRICE_MAX };
 let storesFilter = { platform: 'all', query: '' };
 
 // Human label for a stores platform filter value (used by the .jf-dd dropdown).
@@ -880,6 +889,10 @@ function injectFilterStyles() {
             border-radius: 50%; transition: color 0.15s;
         }
         .kf-search-clear:hover { color: var(--text-primary); }
+        .kf-filter-row {
+            display: flex; justify-content: flex-end;
+            max-width: 1400px; margin: 0.25rem auto 0; padding: 0 4%;
+        }
         .kf-filter-btn {
             display: flex; align-items: center; gap: 0.4rem;
             background: var(--nav-bg); border: 1px solid var(--border-color);
@@ -888,9 +901,8 @@ function injectFilterStyles() {
             font-size: 0.9rem; font-weight: 600; cursor: pointer;
             white-space: nowrap; transition: border-color 0.2s, background 0.2s;
         }
-        .kf-filter-btn:hover, .kf-filter-btn.active {
-            border-color: var(--text-primary);
-        }
+        .kf-filter-btn:hover { background: var(--muted-hover); border-color: var(--muted-hover); }
+        .kf-filter-btn.active { border-color: var(--text-primary); }
         .kf-refresh-btn {
             display: flex; align-items: center; gap: 0.4rem;
             background: var(--nav-bg); border: 1px solid var(--border-color);
@@ -933,6 +945,7 @@ function injectFilterStyles() {
         .kf-modal {
             background: var(--nav-bg); border: 1px solid var(--border-color);
             border-radius: 24px; padding: 1.75rem; width: 100%; max-width: 440px;
+            max-height: 85vh; overflow-y: auto;
             transform: translateY(30px);
             transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
         }
@@ -1006,6 +1019,79 @@ function injectFilterStyles() {
         }
         .kf-btn-show:hover { opacity: 0.85; }
         .kf-btn-show:active { transform: scale(0.97); }
+        /* Sort By — rows styled like the navbar "More" dropdown items */
+        .kf-sort-list {
+            display: flex; flex-direction: column; gap: 2px; margin-bottom: 1.5rem;
+        }
+        .kf-sort-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: transparent; border: none; border-radius: 8px;
+            padding: 0.7rem 0.85rem; cursor: pointer;
+            color: var(--text-secondary); font-family: 'Inter', sans-serif;
+            font-size: 0.92rem; font-weight: 600; text-align: left;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+        .kf-sort-row:hover { background: var(--muted-hover); color: var(--text-primary); }
+        .kf-sort-row.active { background: var(--muted-hover); color: var(--text-primary); }
+        .kf-radio {
+            width: 16px; height: 16px; border-radius: 50%;
+            border: 2px solid var(--border-color); flex-shrink: 0;
+            position: relative; transition: border-color 0.15s ease;
+        }
+        .kf-sort-row.active .kf-radio { border-color: var(--text-primary); }
+        .kf-sort-row.active .kf-radio::after {
+            content: ''; position: absolute; inset: 2px;
+            border-radius: 50%; background: var(--text-primary);
+        }
+        .kf-price-inputs {
+            display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem;
+        }
+        .kf-price-field {
+            flex: 1; min-width: 0; background: var(--bg-color);
+            border: 1px solid var(--border-color); border-radius: 10px;
+            padding: 0.7rem 0.9rem; color: var(--text-primary);
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none;
+            transition: border-color 0.15s ease;
+            -moz-appearance: textfield;
+        }
+        .kf-price-field::-webkit-outer-spin-button,
+        .kf-price-field::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .kf-price-field:focus { border-color: var(--text-primary); }
+        .kf-price-field::placeholder { color: var(--text-secondary); opacity: 0.6; }
+        .kf-price-to { color: var(--text-secondary); font-size: 0.85rem; }
+        .kf-range-wrap { position: relative; height: 22px; margin: 0.25rem 0.2rem 0; }
+        .kf-range-track {
+            position: absolute; top: 50%; left: 0; right: 0; height: 4px;
+            transform: translateY(-50%); background: var(--border-color);
+            border-radius: 99px; pointer-events: none;
+        }
+        .kf-range-fill {
+            position: absolute; top: 0; bottom: 0; left: 0; right: 0;
+            background: var(--text-primary); border-radius: 99px;
+        }
+        .kf-range {
+            position: absolute; top: 0; left: 0; width: 100%; height: 22px;
+            margin: 0; background: none; pointer-events: none;
+            -webkit-appearance: none; appearance: none;
+        }
+        .kf-range::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; pointer-events: all;
+            width: 16px; height: 16px; border-radius: 50%;
+            background: var(--text-primary); border: 2px solid var(--nav-bg);
+            cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+        .kf-range::-moz-range-thumb {
+            pointer-events: all; width: 16px; height: 16px; border-radius: 50%;
+            background: var(--text-primary); border: 2px solid var(--nav-bg);
+            cursor: pointer;
+        }
+        .kf-range::-webkit-slider-runnable-track { background: none; }
+        .kf-range::-moz-range-track { background: none; }
+        .kf-range-labels {
+            display: flex; justify-content: space-between;
+            font-size: 0.78rem; color: var(--text-secondary);
+            margin: 0.4rem 0.2rem 1.5rem;
+        }
         .kf-no-results {
             grid-column: 1 / -1; text-align: center;
             padding: 4rem 2rem; color: var(--text-secondary);
@@ -1018,7 +1104,7 @@ function injectFilterStyles() {
 
 function buildFilterUI() {
     injectFilterStyles();
-    const active = (filterState.category !== 'All' ? 1 : 0) + (filterState.batch !== 'All Tags' ? 1 : 0);
+    const active = countActiveFilters();
     return `
         <div class="kf-search-wrap">
             <div class="kf-search-box">
@@ -1068,7 +1154,30 @@ function buildFilterUI() {
                         </svg>
                     </button>
                 </div>
-                <div class="kf-section-label">${t('categories')}</div>
+                <div class="kf-section-label">${t('sort_by')}</div>
+                <div class="kf-sort-list">
+                    ${[['trending', t('sort_trending')], ['newest', t('sort_newest')], ['price_low', t('sort_price_low')], ['price_high', t('sort_price_high')]].map(([val, label]) => `
+                        <button class="kf-sort-row ${filterState.sort === val ? 'active' : ''}" data-sort="${val}">
+                            <span>${label}</span>
+                            <span class="kf-radio"></span>
+                        </button>
+                    `).join('')}
+                </div>
+
+                <div class="kf-section-label">${t('price_cny')}</div>
+                <div class="kf-price-inputs">
+                    <input type="number" inputmode="numeric" min="0" max="${PRICE_MAX}" class="kf-price-field" id="kf-price-min" placeholder="${t('price_min')}" value="${filterState.priceMin > 0 ? filterState.priceMin : ''}" />
+                    <span class="kf-price-to">to</span>
+                    <input type="number" inputmode="numeric" min="0" max="${PRICE_MAX}" class="kf-price-field" id="kf-price-max" placeholder="${PRICE_MAX}" value="${filterState.priceMax < PRICE_MAX ? filterState.priceMax : ''}" />
+                </div>
+                <div class="kf-range-wrap">
+                    <input type="range" min="0" max="${PRICE_MAX}" step="10" value="${filterState.priceMin}" class="kf-range kf-range-min" id="kf-range-min" />
+                    <input type="range" min="0" max="${PRICE_MAX}" step="10" value="${filterState.priceMax}" class="kf-range kf-range-max" id="kf-range-max" />
+                    <div class="kf-range-track"><div class="kf-range-fill" id="kf-range-fill"></div></div>
+                </div>
+                <div class="kf-range-labels"><span>¥0</span><span>¥${PRICE_MAX.toLocaleString()}</span></div>
+
+                <div class="kf-section-label">${t('subcategory')}</div>
                 <div class="kf-modal-cats">
                     ${CATEGORIES.map(cat => `
                         <button class="kf-modal-cat-btn ${filterState.category === cat ? 'active' : ''}" data-modal-cat="${cat}">${cat}</button>
@@ -1089,33 +1198,106 @@ function buildFilterUI() {
     `;
 }
 
+// Filter button + slide-up modal injected into the products page hero. Reuses
+// the same kf-* ids/classes (and bindFilterEvents) as the legacy buildFilterUI,
+// but without the duplicate search box / category strip (the page already has
+// pl-search + pl-cats). Styled after the navbar "More" dropdown theme.
+function buildFilterControls() {
+    injectFilterStyles();
+    const active = countActiveFilters();
+    return `
+        <div class="kf-filter-row">
+            <button class="kf-filter-btn ${active > 0 ? 'active' : ''}" id="kf-open-filters" type="button">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/>
+                </svg>
+                ${t('filters')}
+                ${active > 0 ? `<span class="kf-filter-badge">${active}</span>` : ''}
+            </button>
+        </div>
+
+        <div class="kf-modal-overlay" id="kf-modal-overlay">
+            <div class="kf-modal">
+                <div class="kf-modal-header">
+                    <h3>${t('filters')}</h3>
+                    <button class="kf-modal-close" id="kf-modal-close" type="button">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="kf-section-label">${t('sort_by')}</div>
+                <div class="kf-sort-list">
+                    ${[['trending', t('sort_trending')], ['newest', t('sort_newest')], ['price_low', t('sort_price_low')], ['price_high', t('sort_price_high')]].map(([val, label]) => `
+                        <button class="kf-sort-row ${filterState.sort === val ? 'active' : ''}" data-sort="${val}" type="button">
+                            <span>${label}</span>
+                            <span class="kf-radio"></span>
+                        </button>
+                    `).join('')}
+                </div>
+
+                <div class="kf-section-label">${t('price_cny')}</div>
+                <div class="kf-price-inputs">
+                    <input type="number" inputmode="numeric" min="0" max="${PRICE_MAX}" class="kf-price-field" id="kf-price-min" placeholder="${t('price_min')}" value="${filterState.priceMin > 0 ? filterState.priceMin : ''}" />
+                    <span class="kf-price-to">to</span>
+                    <input type="number" inputmode="numeric" min="0" max="${PRICE_MAX}" class="kf-price-field" id="kf-price-max" placeholder="${PRICE_MAX}" value="${filterState.priceMax < PRICE_MAX ? filterState.priceMax : ''}" />
+                </div>
+                <div class="kf-range-wrap">
+                    <input type="range" min="0" max="${PRICE_MAX}" step="10" value="${filterState.priceMin}" class="kf-range kf-range-min" id="kf-range-min" />
+                    <input type="range" min="0" max="${PRICE_MAX}" step="10" value="${filterState.priceMax}" class="kf-range kf-range-max" id="kf-range-max" />
+                    <div class="kf-range-track"><div class="kf-range-fill" id="kf-range-fill"></div></div>
+                </div>
+                <div class="kf-range-labels"><span>¥0</span><span>¥${PRICE_MAX.toLocaleString()}</span></div>
+
+                <div class="kf-section-label">${t('subcategory')}</div>
+                <div class="kf-modal-cats">
+                    ${CATEGORIES.map(cat => `
+                        <button class="kf-modal-cat-btn ${filterState.category === cat ? 'active' : ''}" data-modal-cat="${cat}" type="button">${cat}</button>
+                    `).join('')}
+                </div>
+                <div class="kf-section-label">${t('tags_quality')}</div>
+                <div class="kf-batch-grid">
+                    ${BATCHES.map(b => `
+                        <button class="kf-batch-btn ${filterState.batch === b ? 'active' : ''}" data-batch="${b}" type="button">${b}</button>
+                    `).join('')}
+                </div>
+                <div class="kf-modal-actions">
+                    <button class="kf-btn-clear" id="kf-clear-all" type="button">${t('clear_all')}</button>
+                    <button class="kf-btn-show" id="kf-show-results" type="button">${t('show_results')}</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
 function bindFilterEvents() {
     const input = document.getElementById('kf-search-input');
     const clearBtn = document.getElementById('kf-search-clear');
 
-    if (!input) return;
-
-    input.addEventListener('input', () => {
-        let next = input.value;
-        if (next.length > INPUT_MAX_LEN) {
-            next = next.slice(0, INPUT_MAX_LEN);
-            input.value = next;
-        }
-        clearBtn.style.display = next ? 'flex' : 'none';
-        clearTimeout(searchInputTimer);
-        searchInputTimer = setTimeout(() => {
-            filterState.search = next;
+    // Legacy combined search box (only present in the old buildFilterUI layout).
+    if (input && clearBtn) {
+        input.addEventListener('input', () => {
+            let next = input.value;
+            if (next.length > INPUT_MAX_LEN) {
+                next = next.slice(0, INPUT_MAX_LEN);
+                input.value = next;
+            }
+            clearBtn.style.display = next ? 'flex' : 'none';
+            clearTimeout(searchInputTimer);
+            searchInputTimer = setTimeout(() => {
+                filterState.search = next;
+                resetVisibleProductsLimit();
+                renderFilteredProducts();
+            }, SEARCH_DEBOUNCE_MS);
+        });
+        clearBtn.addEventListener('click', () => {
+            filterState.search = '';
+            input.value = '';
+            clearBtn.style.display = 'none';
             resetVisibleProductsLimit();
             renderFilteredProducts();
-        }, SEARCH_DEBOUNCE_MS);
-    });
-    clearBtn.addEventListener('click', () => {
-        filterState.search = '';
-        input.value = '';
-        clearBtn.style.display = 'none';
-        resetVisibleProductsLimit();
-        renderFilteredProducts();
-    });
+        });
+    }
 
     document.querySelectorAll('.kf-cat-chip').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1128,16 +1310,22 @@ function bindFilterEvents() {
         });
     });
 
-    const openModal = () => document.getElementById('kf-modal-overlay').classList.add('open');
-    const closeModal = () => document.getElementById('kf-modal-overlay').classList.remove('open');
+    const overlay = document.getElementById('kf-modal-overlay');
+    const openBtn = document.getElementById('kf-open-filters');
+    // No filter modal on this page → nothing more to bind.
+    if (!overlay || !openBtn) return;
 
-    document.getElementById('kf-open-filters').addEventListener('click', openModal);
-    document.getElementById('kf-refresh-products').addEventListener('click', async () => {
+    const openModal = () => overlay.classList.add('open');
+    const closeModal = () => overlay.classList.remove('open');
+
+    openBtn.addEventListener('click', openModal);
+    const refreshBtn = document.getElementById('kf-refresh-products');
+    if (refreshBtn) refreshBtn.addEventListener('click', async () => {
         await refreshProductsFromServer(false);
     });
     document.getElementById('kf-modal-close').addEventListener('click', closeModal);
-    document.getElementById('kf-modal-overlay').addEventListener('click', e => {
-        if (e.target === document.getElementById('kf-modal-overlay')) closeModal();
+    overlay.addEventListener('click', e => {
+        if (e.target === overlay) closeModal();
     });
 
     document.querySelectorAll('.kf-modal-cat-btn').forEach(btn => {
@@ -1150,6 +1338,57 @@ function bindFilterEvents() {
             renderFilteredProducts();
         });
     });
+
+    // ── Sort By (radio rows) ──
+    document.querySelectorAll('.kf-sort-row').forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterState.sort = btn.dataset.sort;
+            document.querySelectorAll('.kf-sort-row').forEach(b => b.classList.toggle('active', b.dataset.sort === filterState.sort));
+        });
+    });
+
+    // ── Price range (number fields + dual slider, kept in sync) ──
+    const rMin = document.getElementById('kf-range-min');
+    const rMax = document.getElementById('kf-range-max');
+    const fMin = document.getElementById('kf-price-min');
+    const fMax = document.getElementById('kf-price-max');
+    const fill = document.getElementById('kf-range-fill');
+    const paintFill = () => {
+        if (!fill) return;
+        const lo = (Number(filterState.priceMin) / PRICE_MAX) * 100;
+        const hi = (Number(filterState.priceMax) / PRICE_MAX) * 100;
+        fill.style.left = lo + '%';
+        fill.style.right = (100 - hi) + '%';
+    };
+    const syncFromRanges = () => {
+        // Handlers below already clamp so the thumbs never cross.
+        const lo = Math.min(Number(rMin.value), Number(rMax.value));
+        const hi = Math.max(Number(rMin.value), Number(rMax.value));
+        filterState.priceMin = lo;
+        filterState.priceMax = hi;
+        fMin.value = lo > 0 ? lo : '';
+        fMax.value = hi < PRICE_MAX ? hi : '';
+        paintFill();
+    };
+    if (rMin && rMax) {
+        rMin.addEventListener('input', () => {
+            if (Number(rMin.value) > Number(rMax.value)) rMin.value = rMax.value;
+            syncFromRanges();
+        });
+        rMax.addEventListener('input', () => {
+            if (Number(rMax.value) < Number(rMin.value)) rMax.value = rMin.value;
+            syncFromRanges();
+        });
+        fMin.addEventListener('input', () => {
+            let v = Math.max(0, Math.min(PRICE_MAX, Number(fMin.value) || 0));
+            filterState.priceMin = v; rMin.value = v; paintFill();
+        });
+        fMax.addEventListener('input', () => {
+            let v = fMax.value === '' ? PRICE_MAX : Math.max(0, Math.min(PRICE_MAX, Number(fMax.value) || 0));
+            filterState.priceMax = v; rMax.value = v; paintFill();
+        });
+        paintFill();
+    }
 
     document.querySelectorAll('.kf-batch-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1164,9 +1403,21 @@ function bindFilterEvents() {
     document.getElementById('kf-clear-all').addEventListener('click', () => {
         filterState.category = 'All';
         filterState.batch = 'All Tags';
+        filterState.sort = 'trending';
+        filterState.priceMin = 0;
+        filterState.priceMax = PRICE_MAX;
         document.querySelectorAll('.kf-modal-cat-btn').forEach(b => b.classList.toggle('active', b.dataset.modalCat === 'All'));
         document.querySelectorAll('.kf-batch-btn').forEach(b => b.classList.toggle('active', b.dataset.batch === 'All Tags'));
         document.querySelectorAll('.kf-cat-chip').forEach(b => b.classList.toggle('active', b.dataset.cat === 'All'));
+        document.querySelectorAll('.kf-sort-row').forEach(b => b.classList.toggle('active', b.dataset.sort === 'trending'));
+        const rMin = document.getElementById('kf-range-min'), rMax = document.getElementById('kf-range-max');
+        const fMin = document.getElementById('kf-price-min'), fMax = document.getElementById('kf-price-max');
+        const fill = document.getElementById('kf-range-fill');
+        if (rMin) rMin.value = 0;
+        if (rMax) rMax.value = PRICE_MAX;
+        if (fMin) fMin.value = '';
+        if (fMax) fMax.value = '';
+        if (fill) { fill.style.left = '0%'; fill.style.right = '0%'; }
         updateFilterBadge();
     });
 
@@ -1178,8 +1429,15 @@ function bindFilterEvents() {
     });
 }
 
+function countActiveFilters() {
+    return (filterState.category !== 'All' ? 1 : 0) +
+        (filterState.batch !== 'All Tags' ? 1 : 0) +
+        (filterState.sort !== 'trending' ? 1 : 0) +
+        ((Number(filterState.priceMin) > 0 || Number(filterState.priceMax) < PRICE_MAX) ? 1 : 0);
+}
+
 function updateFilterBadge() {
-    const active = (filterState.category !== 'All' ? 1 : 0) + (filterState.batch !== 'All Tags' ? 1 : 0);
+    const active = countActiveFilters();
     const btn = document.getElementById('kf-open-filters');
     if (!btn) return;
     btn.classList.toggle('active', active > 0);
@@ -1195,7 +1453,9 @@ function updateFilterBadge() {
 
 function getFiltered() {
     if (!allProductsCache || !allProductsCache.length) return [];
-    return allProductsCache.filter(p => {
+    const pMin = Number(filterState.priceMin) || 0;
+    const pMax = (filterState.priceMax === '' || filterState.priceMax == null) ? Infinity : Number(filterState.priceMax);
+    const out = allProductsCache.filter(p => {
         const s = filterState.search.toLowerCase().slice(0, INPUT_MAX_LEN);
         const matchSearch = !s || p.title.toLowerCase().includes(s);
         const matchCategory = filterState.category === 'All' ||
@@ -1204,8 +1464,38 @@ function getFiltered() {
             (p.batch || '').toLowerCase() === filterState.batch.toLowerCase();
         const matchSeller = !filterState.seller ||
             (p.seller || '').toLowerCase() === filterState.seller.toLowerCase();
-        return matchSearch && matchCategory && matchBatch && matchSeller;
+        const price = Number(p.price) || 0;
+        // Treat the slider's top stop as "no upper limit" so pricey items aren't hidden.
+        const matchPrice = price >= pMin && (pMax >= PRICE_MAX ? true : price <= pMax);
+        return matchSearch && matchCategory && matchBatch && matchSeller && matchPrice;
     });
+    return sortProducts(out);
+}
+
+// Sort the filtered list per filterState.sort. "Trending" ranks by global click
+// data (popularTitlesOrder, most-clicked Buy/QC first), padding the rest in
+// newest-first order. Other modes are self-explanatory.
+function sortProducts(list) {
+    const arr = list.slice();
+    switch (filterState.sort) {
+        case 'newest':
+            return arr.reverse(); // cache is oldest-first; newest sits at the tail
+        case 'price_low':
+            return arr.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
+        case 'price_high':
+            return arr.sort((a, b) => (Number(b.price) || 0) - (Number(a.price) || 0));
+        case 'trending':
+        default: {
+            const rank = new Map();
+            (popularTitlesOrder || []).forEach((t, i) => { if (!rank.has(t)) rank.set(t, i); });
+            return arr.sort((a, b) => {
+                const ra = rank.has(String(a.title || '').toLowerCase()) ? rank.get(String(a.title).toLowerCase()) : Infinity;
+                const rb = rank.has(String(b.title || '').toLowerCase()) ? rank.get(String(b.title).toLowerCase()) : Infinity;
+                if (ra !== rb) return ra - rb;
+                return 0; // keep original (newest-ish) order for un-clicked items
+            });
+        }
+    }
 }
 
 function resetVisibleProductsLimit() {
@@ -1757,6 +2047,8 @@ function getPages() {
                     ${CATEGORIES.map(cat => `<button class="pl-cat ${filterState.category === cat ? 'active' : ''}" data-pl-cat="${cat}"><span>${cat === 'All' ? 'All' : cat}</span></button>`).join('')}
                 </div>
             </div>
+
+            ${buildFilterControls()}
 
             <div class="products-grid" id="products-container" style="margin-top:0.75rem;">
                 <p style="color:var(--text-primary);font-weight:600;" id="loading-text">${t('loading')}</p>
@@ -2523,7 +2815,7 @@ function initApp() {
         }
 
         if (pageId === 'products') {
-            filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags', seller: filterState.seller || '' };
+            filterState = { search: filterState.search || '', category: filterState.category || 'All', batch: 'All Tags', seller: filterState.seller || '', sort: filterState.sort || 'trending', priceMin: filterState.priceMin || 0, priceMax: (filterState.priceMax == null ? PRICE_MAX : filterState.priceMax) };
 
             // Category dropdown lives in the persistent #products-nav-toolbar and is
             // bound once via bindProductsNavToolbar(); just sync its state here.
@@ -2547,13 +2839,16 @@ function initApp() {
                 });
             }
 
+            // Wire the Filters button + modal immediately so it works even while
+            // products are still loading (doesn't depend on the catalogue fetch).
+            bindFilterEvents();
+
             const onData = (data) => {
                 lastProductsSignature = JSON.stringify(data);
                 allProductsCache = data;
                 window.allProductsCache = data;
                 const loader = document.getElementById('loading-text');
                 if (loader) loader.remove();
-                bindFilterEvents();
                 renderFilteredProducts();
                 requestAnimationFrame(() => {
                     document.querySelectorAll('.product-card:not(.sr-visible)').forEach(card => {
