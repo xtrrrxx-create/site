@@ -1,9 +1,12 @@
 {
-  "devDependencies": {
-    "text-to-svg": "^3.1.5"
-  },
+  "name": "site",
+  "version": "1.0.0",
   "dependencies": {
+    "@vercel/speed-insights": "^2.0.0",
     "pptxgenjs": "^4.0.1",
     "sharp": "^0.34.5"
+  },
+  "devDependencies": {
+    "text-to-svg": "^3.1.5"
   }
 }
