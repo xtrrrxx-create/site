@@ -52,16 +52,24 @@ function watermarkSvg(width, height) {
     const y2 = rowH + y1;
     const half = Math.round(tileW / 2);
 
+    // Shadow is drawn as a cheap offset black copy instead of an SVG
+    // feDropShadow filter. The filter forces librsvg to rasterise a blurred
+    // layer for every tile, which was the single biggest CPU cost of this
+    // function; the manual offset keeps near-identical legibility for free.
+    const shadow = (tx, ty) =>
+        `<g transform="translate(${tx.toFixed(1)} ${(ty + 2).toFixed(1)}) scale(${s.toFixed(4)})"><path d="${WM_PATH}"/></g>`;
+
     return Buffer.from(
         `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
             <defs>
-                <filter id="sh" x="-10%" y="-10%" width="120%" height="130%">
-                    <feDropShadow dx="0" dy="3" stdDeviation="2.2"
-                                  flood-color="black" flood-opacity="0.55"/>
-                </filter>
                 <pattern id="wm" width="${tileW}" height="${tileH}" patternUnits="userSpaceOnUse"
                          patternTransform="rotate(-30)">
-                    <g fill="#ffffff" fill-opacity="0.05" filter="url(#sh)">
+                    <g fill="#000000" fill-opacity="0.06">
+                        ${shadow(0, y1)}
+                        ${shadow(half, y2)}
+                        ${shadow(half - tileW, y2)}
+                    </g>
+                    <g fill="#ffffff" fill-opacity="0.05">
                         ${word(0, y1)}
                         ${word(half, y2)}
                         ${word(half - tileW, y2)}
@@ -106,12 +114,12 @@ export default async function handler(req, res) {
         if (ro) pipeline = pipeline.rotate(ro, { background: { r: 255, g: 255, b: 255, alpha: 1 } });
         pipeline = pipeline.resize({ width, withoutEnlargement: true });
 
-        // Need final dimensions to size the watermark layer.
-        const resized = await pipeline.toBuffer();
-        const meta = await sharp(resized).metadata();
+        // One resize pass that ALSO hands back the final dimensions, so we no
+        // longer decode a second time just to read metadata.
+        const { data: resized, info } = await pipeline.toBuffer({ resolveWithObject: true });
         const out = await sharp(resized)
-            .composite([{ input: watermarkSvg(meta.width, meta.height), blend: 'over' }])
-            .webp({ quality: 82 })
+            .composite([{ input: watermarkSvg(info.width, info.height), blend: 'over' }])
+            .webp({ quality: 80, effort: 3 })
             .toBuffer();
 
         res.setHeader('Content-Type', 'image/webp');
