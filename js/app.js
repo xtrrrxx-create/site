@@ -2294,8 +2294,8 @@ function getPages() {
     `,
         products: `
         <div style="position:relative;padding:0 0 3rem;">
-            <!-- Hero search (same as home) -->
-            <div class="pl-hero" style="padding-top:2.5rem;padding-bottom:1rem;">
+            <!-- Hero search (same spacing as home) -->
+            <div class="pl-hero">
                 <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
                 <p class="pl-hero-sub">${t('hero_desc')}</p>
                 <div class="pl-search-wrap">
@@ -2319,7 +2319,7 @@ function getPages() {
     `,
         favorites: `
         <div style="max-width:1400px;margin:0 auto;padding:0 4% 3rem;">
-            <div class="pl-hero" style="padding-top:2.5rem;padding-bottom:1rem;">
+            <div class="pl-hero">
                 <h1 class="pl-hero-title">My <span class="pl-accent">Favorites</span></h1>
                 <p class="pl-hero-sub">Products you saved. Tap the heart to remove.</p>
                 <div class="pl-cats">
