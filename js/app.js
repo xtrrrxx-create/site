@@ -787,28 +787,67 @@ const BRAND_PATTERNS = [
 // brand exactly as it is written in the title (e.g. a "Bape …" title yields
 // "Bape", not the canonical "A Bathing Ape"), so the label always mirrors the
 // product name. Casing follows the title; an all-lowercase match is title-cased.
+function prettyCase(w) {
+    return /[A-Z]/.test(w) ? w : w.replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// When a title contains two brands we keep the more mainstream / recognisable
+// one (e.g. "Nike Chrome Hearts" → Nike). This is an explicit ranking, most
+// mainstream first; brands not listed rank after all listed ones. Catalogue
+// frequency is a poor proxy here (niche collabs can out-number Nike), so the
+// order is curated, not data-driven.
+const BRAND_PRIORITY = [
+    'Nike', 'Adidas', 'Air Jordan', 'Yeezy', 'New Balance', 'Air Force', 'Asics',
+    'Puma', 'Reebok', 'Converse', 'Vans', 'Salomon', 'Onitsuka Tiger', 'Crocs',
+    'Birkenstock', 'UGG', 'Timberland', 'Nocta',
+    'Supreme', 'A Bathing Ape', 'Stussy', 'Essentials', 'Fear of God', 'Off-White',
+    'Carhartt', 'The North Face', "Arc'teryx", 'Moncler', 'Stone Island', 'CP Company',
+    'Ralph Lauren', 'Lacoste', 'Tommy Hilfiger', 'Calvin Klein', 'Hugo Boss',
+    'Travis Scott', 'Cactus Jack', 'Kith', 'Palm Angels',
+    'Balenciaga', 'Gucci', 'Prada', 'Dior', 'Louis Vuitton', 'Saint Laurent',
+    'Givenchy', 'Versace', 'Burberry', 'Celine', 'Loewe', 'Bottega Veneta',
+    'Alexander McQueen', 'Golden Goose', 'Maison Margiela', 'Louboutin', 'Common Projects',
+    'Corteiz', 'Trapstar', 'Hellstar', 'Syna World', 'Vlone', 'Rhude', 'Amiri',
+    'Represent', 'Rick Owens', 'Sp5der', 'Broken Planet', 'Minus Two', 'Drew House',
+    'Eric Emanuel', 'Aelfric Eden', 'Denim Tears', 'Comme des Garcons',
+    'Chrome Hearts', 'Gallery Dept', 'Anti Social Social Club',
+];
+const _brandRank = new Map(BRAND_PRIORITY.map((n, i) => [n, i]));
+function brandRank(name) {
+    return _brandRank.has(name) ? _brandRank.get(name) : BRAND_PRIORITY.length;
+}
+
+// Memoised brand-per-title so the regex sweep runs once per distinct title
+// instead of on every re-render (keeps the products grid snappy).
+const _brandCache = new Map();
+
+// Brand extracted from a product title, or '' if none recognised. When several
+// known brands appear, the more common one (by catalogue count) wins. The text
+// is returned as written in the title (e.g. "Bape", not "A Bathing Ape").
 function brandFromTitle(title) {
     const s = String(title || '');
-    for (const [, re] of BRAND_PATTERNS) {
+    if (_brandCache.has(s)) return _brandCache.get(s);
+
+    let result = '';
+    const matches = [];
+    for (const [name, re] of BRAND_PATTERNS) {
         const m = re.exec(s);
-        if (m) {
-            const hit = m[0].trim();
-            // If the title wrote it in all lower-case, prettify to Title Case;
-            // otherwise keep the title's own casing (BAPE, Sp5der, Off-White…).
-            return /[A-Z]/.test(hit)
-                ? hit
-                : hit.replace(/\b\w/g, c => c.toUpperCase());
+        if (m) matches.push({ name, hit: m[0].trim() });
+    }
+    if (matches.length) {
+        if (matches.length > 1) {
+            matches.sort((a, b) => brandRank(a.name) - brandRank(b.name));
         }
+        result = prettyCase(matches[0].hit);
+    } else {
+        // Fallback: no known brand → use the FIRST WORD of the title as the brand
+        // (e.g. "Asics Gel Kayano 14" → "Asics"). Titles almost always lead with
+        // the brand, so this groups them sensibly without a map.
+        const fw = s.trim().match(/^[^\p{L}\p{N}]*([\p{L}\p{N}][\p{L}\p{N}.&'+-]*)/u);
+        if (fw && fw[1]) result = prettyCase(fw[1]);
     }
-    // Fallback: no brand in the known list → use the FIRST WORD of the title as
-    // the brand (e.g. "Asics Gel Kayano 14" → "Asics"). Product titles almost
-    // always lead with the brand, so this groups them sensibly without a map.
-    const fw = s.trim().match(/^[^\p{L}\p{N}]*([\p{L}\p{N}][\p{L}\p{N}.&'+-]*)/u);
-    if (fw && fw[1]) {
-        const w = fw[1];
-        return /[A-Z]/.test(w) ? w : w.replace(/\b\w/g, c => c.toUpperCase());
-    }
-    return '';
+    _brandCache.set(s, result);
+    return result;
 }
 
 // ─── SELLER NAME TRANSLATION (Chinese → English, display only) ──────────────
@@ -916,10 +955,13 @@ async function flushSellerTranslations() {
     } catch (_) { /* offline guess stays in place */ }
     if (changed) {
         try { localStorage.setItem(SELLER_TX_KEY, JSON.stringify(_sellerTx)); } catch (_) {}
-        scheduleSellerRerender();
     }
     if (_sellerTxQueue.length && !_sellerTxTimer) {
         _sellerTxTimer = setTimeout(flushSellerTranslations, 350);
+    } else if (changed) {
+        // Re-render only once the whole queue is drained, not after every batch,
+        // so streaming translations don't repeatedly rebuild (and flicker) the grid.
+        scheduleSellerRerender();
     }
 }
 
