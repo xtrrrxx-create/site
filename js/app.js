@@ -762,6 +762,25 @@ const BRAND_PATTERNS = [
     ['Tommy Hilfiger', /\btommy( hilfiger)?\b/i],
     ['Calvin Klein', /\b(calvin klein|ck )\b/i],
     ['Nocta', /\bnocta\b/i],
+    // Multi-word brands that would otherwise truncate to a wrong first word
+    // (e.g. "Maison Margiela" → "Maison") under the first-word fallback.
+    ['Maison Margiela', /\bmaison ?margiela\b|\bmm6\b|\bmargiela\b/i],
+    ['Golden Goose', /\bgolden ?goose\b/i],
+    ['Air Force', /\bair ?force\b|\baf1\b/i],
+    ['Onitsuka Tiger', /\bonitsuka( tiger)?\b/i],
+    ['Common Projects', /\bcommon ?projects\b/i],
+    ['Alexander McQueen', /\balexander ?mcqueen\b|\bmcqueen\b/i],
+    ['Asics', /\basics\b/i],
+    ['Salomon', /\bsalomon\b/i],
+    ['Vans', /\bvans\b/i],
+    ['Puma', /\bpuma\b/i],
+    ['Reebok', /\breebok\b/i],
+    ['Converse', /\bconverse\b/i],
+    ['Timberland', /\btimberland\b/i],
+    ['Crocs', /\bcrocs\b/i],
+    ['Birkenstock', /\bbirkenstock\b/i],
+    ['UGG', /\bugg\b/i],
+    ['Louboutin', /\b(christian )?louboutin\b/i],
 ];
 
 // Brand extracted from a product title, or '' if none recognised. We return the
@@ -780,6 +799,14 @@ function brandFromTitle(title) {
                 ? hit
                 : hit.replace(/\b\w/g, c => c.toUpperCase());
         }
+    }
+    // Fallback: no brand in the known list → use the FIRST WORD of the title as
+    // the brand (e.g. "Asics Gel Kayano 14" → "Asics"). Product titles almost
+    // always lead with the brand, so this groups them sensibly without a map.
+    const fw = s.trim().match(/^[^\p{L}\p{N}]*([\p{L}\p{N}][\p{L}\p{N}.&'+-]*)/u);
+    if (fw && fw[1]) {
+        const w = fw[1];
+        return /[A-Z]/.test(w) ? w : w.replace(/\b\w/g, c => c.toUpperCase());
     }
     return '';
 }
