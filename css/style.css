@@ -1,3 +1,16 @@
+/* Image theft deterrent: block drag-to-save, text/image selection and the
+   mobile long-press "Save image" callout on every <img>. Paired with the
+   context-menu blocker in app.js (protectImages). */
+img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
 :root {
     --bg-color: #1E1E1E;
     --nav-bg: #2a2a2a;

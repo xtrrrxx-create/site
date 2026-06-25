@@ -275,6 +275,21 @@ function metaBadge(p) {
     return pills.length ? `<div class="card-meta">${pills.join('')}</div>` : '';
 }
 
+// ── Image theft deterrent ──────────────────────────────────────────────────
+// Block the casual ways people grab images/links: no context menu on an image
+// (so "Save image as / Copy image / Copy image address" never appear), no
+// drag-to-desktop, no mobile long-press save. This is a deterrent, not true DRM
+// — anyone with DevTools can still read the network URL — but it stops ordinary
+// right-click / save / copy-url theft. Attached at document level, once.
+(function protectImages() {
+    document.addEventListener('contextmenu', (e) => {
+        if (e.target && e.target.tagName === 'IMG') e.preventDefault();
+    });
+    document.addEventListener('dragstart', (e) => {
+        if (e.target && e.target.tagName === 'IMG') e.preventDefault();
+    });
+})();
+
 // Variant for URLs we are about to persist or render in localStorage. Returns
 // "" for invalid/javascript: URLs so we can drop the field instead of writing
 // the literal string "#" into stored data.
