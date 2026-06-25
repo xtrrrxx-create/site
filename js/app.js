@@ -1772,7 +1772,7 @@ function renderFilteredProducts() {
     });
 
     container.innerHTML = groups.map(g => `
-        <div class="kf-brand-head" style="grid-column:1/-1;font-size:1.15rem;font-weight:800;color:var(--text-primary);padding:0.7rem 0 0.1rem;display:flex;align-items:center;gap:0.55rem;">
+        <div class="kf-brand-head" style="grid-column:1/-1;font-family:'Inter Tight',system-ui,sans-serif;font-size:32px;font-weight:400;line-height:48px;color:var(--text-primary);padding:0.5rem 0 0.1rem;display:flex;align-items:center;gap:8px;">
             ${escapeHtml(g.key)}<span style="font-size:0.78rem;font-weight:600;color:var(--text-secondary);">${g.items.length}</span>
         </div>
         ${g.items.map(renderCard).join('')}
