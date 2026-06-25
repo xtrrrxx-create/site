@@ -162,15 +162,16 @@ function safeExternalUrl(rawUrl) {
     }
 }
 
-// Route product images through our own /api/img proxy: resizes, rotates and
-// re-encodes to webp like before, but also bakes a tiled "jarvis-finder.com"
-// watermark into the pixels — so a copied/scraped image carries the brand.
-// Edge-cached, so each variant is processed at most once.
+// Resize product images through wsrv.nl — a free external image CDN — instead
+// of our own serverless proxy. This keeps Vercel CPU (Fluid Active CPU) at ~zero
+// since no sharp processing runs on our functions. The watermark is no longer
+// baked in. If wsrv can't fetch a given URL (e.g. some signed Supabase links)
+// the <img> onerror handler falls back to the direct original URL.
 function thumb(rawUrl, w) {
     let clean = safeExternalUrl(rawUrl);
     if (clean === "#") return "#";
-    // Honour admin-set framing baked into the URL fragment ("#ro=<deg>&oy=<pct>").
-    // Rotation is applied server-side; the vertical offset/zoom are a CSS concern
+    // Honour admin-set rotation baked into the URL fragment ("#ro=<deg>&oy=<pct>").
+    // wsrv applies the rotation; the vertical offset/zoom stay a CSS concern
     // (see imgFrameStyle) so we strip the whole fragment before proxying.
     let ro = 0;
     const hashIdx = clean.indexOf('#');
@@ -180,9 +181,7 @@ function thumb(rawUrl, w) {
         clean = clean.slice(0, hashIdx);
     }
     const width = w || 460;
-    // wmv = watermark version; bump it whenever the watermark rendering changes
-    // so the immutably edge-cached old variants get regenerated.
-    let url = `/api/img?url=${encodeURIComponent(clean)}&w=${width}&wmv=6`;
+    let url = `https://wsrv.nl/?url=${encodeURIComponent(clean)}&w=${width}&output=webp&q=80&we`;
     if (ro) url += `&ro=${ro}`;
     return url;
 }
