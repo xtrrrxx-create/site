@@ -1893,24 +1893,22 @@ function renderFilteredProducts() {
             /picks\.ly\/marketplace-logos\//i.test(rawImg) ||
             /picks\.ly\/agent-logos\//i.test(rawImg) ||
             /picks\.ly\/twitter-image/i.test(rawImg);
-        // NOTE: the `img` column historically holds the QC photo. `ref_img` is
-        // the (optional) clean reference/model photo added later in admin.
-        const safeQc = (isHttp && !isKnownPlaceholder) ? rawImg : '';   // p.img = QC
-        const rawRef = String(p.ref_img || '').trim();
-        const safeRef = /^https?:\/\//i.test(rawRef) ? rawRef : '';     // model photo
+        const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
+        const rawQc = String(p.qc_img || '').trim();
+        const safeQc = /^https?:\/\//i.test(rawQc) ? rawQc : '';
 
         // Card image rules (picks.ly style):
-        //  - both reference + QC → reference is the base, QC fades in on hover
-        //  - only QC (no reference) → QC IS the base photo (no hover swap)
-        //  - only reference → reference
-        const baseImg = safeRef || safeQc;          // reference wins; else QC
-        const hasHover = !!(safeRef && safeQc);     // swap only when both exist
+        //  - both model + QC  → model is the base photo, QC fades in on hover
+        //  - only QC (no model) → QC IS the base photo (no hover swap)
+        //  - only model        → model (as before)
+        const baseImg = safeImg || safeQc;          // model wins; else QC
+        const hasHover = !!(safeImg && safeQc);     // swap only when both exist
         const renderImg = baseImg
             ? `<img src="${escapeHtml(thumb(baseImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(baseImg)}" loading="lazy" decoding="async" fetchpriority="low" data-fallback="no-image-text" />`
             : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.8rem;opacity:.7;">${escapeHtml(t('no_image'))}</div>`;
 
-        // QC overlay only when there's a reference photo to swap FROM. Lazy; sits
-        // on top of the base image and crossfades in on hover.
+        // QC overlay only when there's a model photo to swap FROM. Lazy; sits on
+        // top of the base image and crossfades in on hover.
         const renderQcImg = hasHover
             ? `<img src="${escapeHtml(thumb(safeQc, 600))}" alt="" class="product-qc-img" style="${imgFrameStyle(safeQc)}" loading="lazy" decoding="async" fetchpriority="low" />`
             : '';
