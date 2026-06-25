@@ -975,11 +975,18 @@ function scheduleSellerRerender() {
     }, 300);
 }
 
-// "Brand | Seller" label for product cards. The brand is derived from the
-// product title; if no brand is recognised we fall back to the stored category.
-// The seller name is translated to English for display.
+// Brand for a product: the manual `brand` set in Jarvis Admin wins; otherwise
+// we auto-detect it from the title. Empty string if neither yields anything.
+function productBrand(p) {
+    const manual = String((p && p.brand) || '').trim();
+    return manual || brandFromTitle(p && p.title);
+}
+
+// "Brand | Seller" label for product cards. The brand is the manual/auto brand;
+// if there is none we fall back to the stored category. The seller name is
+// translated to English for display.
 function catSellerLabel(p) {
-    const cat = brandFromTitle(p && p.title) || String((p && p.category) || '').trim();
+    const cat = productBrand(p) || String((p && p.category) || '').trim();
     const seller = translateSeller(validSeller(p && p.seller));
     if (cat && seller) return cat + ' | ' + seller;
     return seller || cat || '';
@@ -1934,7 +1941,7 @@ function renderFilteredProducts() {
     const groups = [];
     const groupIndex = new Map();
     visible.forEach(p => {
-        const key = brandFromTitle(p.title) || String(p.category || '').trim() || 'Other';
+        const key = productBrand(p) || String(p.category || '').trim() || 'Other';
         let g = groupIndex.get(key);
         if (!g) { g = { key, items: [] }; groupIndex.set(key, g); groups.push(g); }
         g.items.push(p);

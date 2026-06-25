@@ -108,13 +108,28 @@ export default async function handler(req, res) {
     let all = [];
     let offset = 0;
 
+    // `brand` is a newer column. If it doesn't exist yet (PostgREST 42703),
+    // we transparently fall back to the column set without it so the catalogue
+    // never breaks during the DB migration window.
+    const COLS_WITH_BRAND = 'id,title,price,img,kakobuy,picksly,category,batch,seller,sales,weight,qc,brand';
+    const COLS_NO_BRAND = 'id,title,price,img,kakobuy,picksly,category,batch,seller,sales,weight,qc';
+    let cols = COLS_WITH_BRAND;
+
     try {
         while (true) {
             const base = `${supabaseBase.protocol}//${supabaseBase.host}`;
-            const r = await fetch(
-                `${base}/rest/v1/products?select=id,title,price,img,kakobuy,picksly,category,batch,seller&order=id.asc&limit=${pageSize}&offset=${offset}`,
+            let r = await fetch(
+                `${base}/rest/v1/products?select=${cols}&order=id.asc&limit=${pageSize}&offset=${offset}`,
                 { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
             );
+            if (!r.ok && cols === COLS_WITH_BRAND) {
+                // Likely the brand column isn't there yet — retry without it.
+                cols = COLS_NO_BRAND;
+                r = await fetch(
+                    `${base}/rest/v1/products?select=${cols}&order=id.asc&limit=${pageSize}&offset=${offset}`,
+                    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+                );
+            }
             if (!r.ok) {
                 // Log details server-side, return generic to client.
                 const body = await r.text().catch(() => '');
