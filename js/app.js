@@ -802,7 +802,12 @@ const SELLER_LOC_RE = /^[一-龥]{2,8}?(省|市|区|县|镇)/;
 // Bare major-city prefixes (no 市 suffix in the string) we also strip.
 const SELLER_CITY_RE = /^(广州|深圳|佛山|莆田|中山|东莞|杭州|义乌|上海|北京|南京|成都|泉州|晋江|常州|常熟|温州|南宁|长沙|珠海|蚌埠|高安|镇平|临朐|邓州|如皋|即墨)/;
 
-function translateSeller(raw) {
+// True if the string contains any Han (Chinese) character.
+function hasChinese(s) { return /[㐀-鿿豈-﫿]/.test(String(s || '')); }
+
+// Offline best-effort translation (commerce vocabulary + admin-prefix strip).
+// Shown instantly as a placeholder until the async translator fills the cache.
+function wordTranslateSeller(raw) {
     let s = String(raw || '').trim();
     if (!s) return '';
     // Drop a leading admin location chunk (e.g. "广州", "佛山市禅城区").
@@ -815,6 +820,76 @@ function translateSeller(raw) {
     // Tidy whitespace and stray Chinese punctuation left behind.
     s = s.replace(/[，。、·\s]+/g, ' ').trim();
     return s || String(raw).trim();
+}
+
+// ── Automatic seller-name translation (runtime, cached) ────────────────────
+// Any seller name containing Chinese is translated for real via a translation
+// service, then cached in localStorage so it never re-fetches. Names with no
+// Chinese characters are left exactly as typed. New sellers added later are
+// picked up automatically — no manual mapping required.
+const SELLER_TX_KEY = 'jf_seller_tx_v1';
+let _sellerTx = {};
+try { _sellerTx = JSON.parse(localStorage.getItem(SELLER_TX_KEY) || '{}') || {}; } catch (_) { _sellerTx = {}; }
+const _sellerTxSeen = new Set();   // queued this session, avoids duplicates
+let _sellerTxQueue = [];
+let _sellerTxTimer = null;
+let _sellerRerenderTimer = null;
+
+function translateSeller(raw) {
+    const s = String(raw || '').trim();
+    if (!s) return '';
+    if (!hasChinese(s)) return s;          // already Latin → leave untouched
+    if (_sellerTx[s]) return _sellerTx[s]; // finished translation (cached)
+    queueSellerTranslation(s);             // translate in the background…
+    return wordTranslateSeller(s);         // …show an offline guess meanwhile
+}
+
+function queueSellerTranslation(name) {
+    if (_sellerTxSeen.has(name)) return;
+    _sellerTxSeen.add(name);
+    _sellerTxQueue.push(name);
+    if (!_sellerTxTimer) _sellerTxTimer = setTimeout(flushSellerTranslations, 150);
+}
+
+async function flushSellerTranslations() {
+    _sellerTxTimer = null;
+    const batch = _sellerTxQueue.splice(0, 40);
+    if (!batch.length) return;
+    let changed = false;
+    try {
+        // Google's public gtx endpoint (CORS-enabled). Names are newline-joined
+        // into one request and split back out by line on the way home.
+        const q = encodeURIComponent(batch.join('\n'));
+        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=en&dt=t&q=${q}`);
+        if (r.ok) {
+            const data = await r.json();
+            const text = (data[0] || []).map(seg => seg[0]).join('');
+            const lines = text.split('\n');
+            // Only trust the result if line counts line up (no segment merge).
+            if (lines.length === batch.length) {
+                batch.forEach((name, i) => {
+                    const tx = (lines[i] || '').trim();
+                    if (tx && tx !== name) { _sellerTx[name] = tx; changed = true; }
+                });
+            }
+        }
+    } catch (_) { /* offline guess stays in place */ }
+    if (changed) {
+        try { localStorage.setItem(SELLER_TX_KEY, JSON.stringify(_sellerTx)); } catch (_) {}
+        scheduleSellerRerender();
+    }
+    if (_sellerTxQueue.length && !_sellerTxTimer) {
+        _sellerTxTimer = setTimeout(flushSellerTranslations, 350);
+    }
+}
+
+function scheduleSellerRerender() {
+    if (_sellerRerenderTimer) return;
+    _sellerRerenderTimer = setTimeout(() => {
+        _sellerRerenderTimer = null;
+        try { if (document.getElementById('products-container')) renderFilteredProducts(); } catch (_) {}
+        try { if (document.getElementById('home-sections')) refreshHomeMarquee(); } catch (_) {}
+    }, 300);
 }
 
 // "Brand | Seller" label for product cards. The brand is derived from the
