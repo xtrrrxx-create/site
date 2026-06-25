@@ -857,14 +857,13 @@ async function flushSellerTranslations() {
     if (!batch.length) return;
     let changed = false;
     try {
-        // Google's public gtx endpoint (CORS-enabled). Names are newline-joined
-        // into one request and split back out by line on the way home.
+        // Our own /api/translate proxy (server-to-server, no CORS, edge-cached).
+        // Names are newline-joined into one request and split back out by line.
         const q = encodeURIComponent(batch.join('\n'));
-        const r = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=zh-CN&tl=en&dt=t&q=${q}`);
+        const r = await fetch(`/api/translate?q=${q}`);
         if (r.ok) {
             const data = await r.json();
-            const text = (data[0] || []).map(seg => seg[0]).join('');
-            const lines = text.split('\n');
+            const lines = data.lines || [];
             // Only trust the result if line counts line up (no segment merge).
             if (lines.length === batch.length) {
                 batch.forEach((name, i) => {
@@ -889,6 +888,7 @@ function scheduleSellerRerender() {
         _sellerRerenderTimer = null;
         try { if (document.getElementById('products-container')) renderFilteredProducts(); } catch (_) {}
         try { if (document.getElementById('home-sections')) refreshHomeMarquee(); } catch (_) {}
+        try { if (document.getElementById('stores-page')) rerenderStoresPage(); } catch (_) {}
     }, 300);
 }
 
