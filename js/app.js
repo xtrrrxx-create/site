@@ -255,6 +255,27 @@ function platformBadge(pickslyRaw) {
     return '<span class="product-store-badge">店</span>';
 }
 
+// Top-left overlay on a product card: QC count + weight, fetched from picks.ly
+// at add-time and stored on the product. Grey pills; hidden when absent.
+function metaBadge(p) {
+    const qc = parseInt(p && p.qc, 10);
+    const weight = parseInt(p && p.weight, 10);
+    const pills = [];
+    if (Number.isFinite(qc) && qc > 0) {
+        // camera icon = QC photos available
+        pills.push(
+            `<span class="cm-pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>${qc}</span>`
+        );
+    }
+    if (Number.isFinite(weight) && weight > 0) {
+        // weight / scale icon
+        pills.push(
+            `<span class="cm-pill"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-2.83 2H6a2 2 0 0 0-1.96 1.6l-2 10A2 2 0 0 0 4 20h16a2 2 0 0 0 1.96-2.4l-2-10A2 2 0 0 0 18 6h-3.17A3 3 0 0 0 12 3z"/></svg>${weight}g</span>`
+        );
+    }
+    return pills.length ? `<div class="card-meta">${pills.join('')}</div>` : '';
+}
+
 // Variant for URLs we are about to persist or render in localStorage. Returns
 // "" for invalid/javascript: URLs so we can drop the field instead of writing
 // the literal string "#" into stored data.
@@ -662,10 +683,135 @@ function validSeller(s) {
     return (s && !/^-?\d+$/.test(s)) ? s : '';
 }
 
-// "Category | Seller" label for product cards. Falls back gracefully.
+// ─── BRAND DETECTION (from product title) ──────────────────────────────────
+// The card's category label is derived from the product *title* so it always
+// matches what the item actually is — change the title, the brand follows.
+// Each entry: canonical label + the regex that recognises it in a title.
+// Order matters: more specific brands first (e.g. "Cactus Jack" before "Nike").
+const BRAND_PATTERNS = [
+    ['Anti Social Social Club', /\b(anti ?social ?social ?club|assc)\b/i],
+    ['A Bathing Ape', /\b(bape|aape|bathing ape)\b/i],
+    ['Gallery Dept', /\bgallery ?dept\b/i],
+    ['Fear of God', /\b(fear of god|fog)\b/i],
+    ['Essentials', /\bessentials?\b/i],
+    ['Chrome Hearts', /\bchrome ?hearts?\b/i],
+    ['Comme des Garcons', /\b(comme des gar[cç]ons|cdg|play)\b/i],
+    ['Off-White', /\boff[- ]?white\b/i],
+    ['Palm Angels', /\bpalm ?angels?\b/i],
+    ['Denim Tears', /\bdenim ?tears?\b/i],
+    ['Cactus Jack', /\bcactus ?jack\b/i],
+    ['Travis Scott', /\btravis ?scott\b/i],
+    ['Stone Island', /\bstone ?island\b/i],
+    ['CP Company', /\b(c\.?p\.? company)\b/i],
+    ['The North Face', /\b(the north face|tnf|north ?face)\b/i],
+    ["Arc'teryx", /\barc.?teryx\b/i],
+    ['Saint Laurent', /\b(saint laurent|ysl)\b/i],
+    ['Bottega Veneta', /\bbottega( veneta)?\b/i],
+    ['Louis Vuitton', /\b(louis vuitton|lv)\b/i],
+    ['Sp5der', /\b(sp5der|spider)\b/i],
+    ['Broken Planet', /\bbroken ?planet\b/i],
+    ['Minus Two', /\bminus ?two\b/i],
+    ['Drew House', /\b(drew house|drew)\b/i],
+    ['Eric Emanuel', /\beric ?emanuel\b|\bee shorts?\b/i],
+    ['Aelfric Eden', /\baelfric( eden)?\b/i],
+    ['Yeezy', /\b(yeezy|yzy)\b/i],
+    ['Air Jordan', /\b(air ?jordan|jordan|aj\d?)\b/i],
+    ['Balenciaga', /\bbalenciaga\b/i],
+    ['Burberry', /\bburberry\b/i],
+    ['Givenchy', /\bgivenchy\b/i],
+    ['Versace', /\bversace\b/i],
+    ['Moncler', /\bmoncler\b/i],
+    ['Corteiz', /\b(corteiz|crtz)\b/i],
+    ['Trapstar', /\btrapstar\b/i],
+    ['Hellstar', /\bhellstar\b/i],
+    ['Syna World', /\bsyna( world)?\b/i],
+    ['Vlone', /\bvlone\b/i],
+    ['Rhude', /\brhude\b/i],
+    ['Amiri', /\bamiri\b/i],
+    ['Represent', /\brepresent\b/i],
+    ['Rick Owens', /\brick ?owens\b/i],
+    ['Carhartt', /\bcarhartt\b/i],
+    ['Stussy', /\bst[uü]ssy\b/i],
+    ['Supreme', /\bsupreme\b/i],
+    ['Nike', /\bnike\b/i],
+    ['Adidas', /\badidas\b/i],
+    ['New Balance', /\b(new balance|\bnb\d{3})\b/i],
+    ['Gucci', /\bgucci\b/i],
+    ['Prada', /\bprada\b/i],
+    ['Dior', /\bdior\b/i],
+    ['Celine', /\bc[eé]line\b/i],
+    ['Loewe', /\bloewe\b/i],
+    ['Kith', /\bkith\b/i],
+    ['Hugo Boss', /\b(hugo ?boss|boss)\b/i],
+    ['Ralph Lauren', /\b(ralph ?lauren|polo)\b/i],
+    ['Lacoste', /\blacoste\b/i],
+    ['Tommy Hilfiger', /\btommy( hilfiger)?\b/i],
+    ['Calvin Klein', /\b(calvin klein|ck )\b/i],
+    ['Nocta', /\bnocta\b/i],
+];
+
+// Brand extracted from a product title, or '' if none recognised.
+function brandFromTitle(title) {
+    const s = String(title || '');
+    for (const [name, re] of BRAND_PATTERNS) {
+        if (re.test(s)) return name;
+    }
+    return '';
+}
+
+// ─── SELLER NAME TRANSLATION (Chinese → English, display only) ──────────────
+// Shop names come from picks.ly mostly in Chinese. We translate the common
+// commerce vocabulary and strip the administrative city/province prefix so the
+// label reads in English. Pure proper-noun names with no known words are left
+// untouched. Raw seller values are still used for filtering/matching — only the
+// displayed text changes.
+const SELLER_WORDS = [
+    // longer phrases first so they win over their substrings
+    ['网上商店', 'Online Store'], ['线上商店', 'Online Store'], ['网上销售', 'Online'],
+    ['电子商务', 'E-commerce'], ['有限公司', 'Co'], ['旗舰店', 'Flagship Store'],
+    ['企业店', 'Store'], ['制帽厂', 'Hat Factory'], ['鞋服配件', 'Footwear'],
+    ['皮具', 'Leather Goods'], ['箱包', 'Bags'], ['女包', "Women's Bags"], ['包包', 'Bags'],
+    ['鞋业', 'Footwear'], ['鞋服', 'Footwear'], ['鞋厂', 'Shoe Factory'], ['鞋城', 'Shoe City'],
+    ['鞋柜', 'Shoe Cabinet'], ['鞋吧', 'Shoe Bar'], ['鞋材', 'Shoe Materials'],
+    ['球鞋', 'Sneakers'], ['潮鞋', 'Sneakers'], ['女鞋', "Women's Shoes"], ['男鞋', "Men's Shoes"],
+    ['童鞋', "Kids Shoes"], ['童装', 'Kids'], ['女装', "Women's Wear"], ['男装', "Men's Wear"],
+    ['内裤', 'Underwear'], ['服装', 'Apparel'], ['服饰', 'Apparel'],
+    ['工作室', 'Studio'], ['潮牌', 'Streetwear'], ['潮品', 'Streetwear'], ['潮货', 'Streetwear'],
+    ['潮流', 'Trend'], ['潮玩', 'Toys'], ['制造', 'Made'], ['出品', 'Made'], ['定制', 'Custom'],
+    ['改造', 'Custom'], ['高端', 'Premium'], ['严选', 'Select'], ['直营', 'Direct'],
+    ['贸易', 'Trading'], ['商行', 'Store'], ['批发', 'Wholesale'], ['工厂', 'Factory'],
+    ['首饰', 'Jewelry'], ['饰品', 'Accessories'], ['眼镜', 'Glasses'], ['帽业', 'Hats'],
+    ['针织', 'Knitwear'], ['纺织', 'Textile'], ['袜子', 'Socks'], ['腰带', 'Belts'],
+    ['领带', 'Ties'], ['数码', 'Digital'], ['体育', 'Sports'], ['运动', 'Sports'],
+    ['中古', 'Vintage'], ['小店', 'Shop'], ['公司', 'Co'], ['工厂店', 'Factory'],
+    ['店铺', 'Shop'], ['店', 'Shop'], ['厂', 'Factory'],
+];
+// Leading administrative location prefix (province/city/district) → stripped.
+const SELLER_LOC_RE = /^[一-龥]{2,8}?(省|市|区|县|镇)/;
+// Bare major-city prefixes (no 市 suffix in the string) we also strip.
+const SELLER_CITY_RE = /^(广州|深圳|佛山|莆田|中山|东莞|杭州|义乌|上海|北京|南京|成都|泉州|晋江|常州|常熟|温州|南宁|长沙|珠海|蚌埠|高安|镇平|临朐|邓州|如皋|即墨)/;
+
+function translateSeller(raw) {
+    let s = String(raw || '').trim();
+    if (!s) return '';
+    // Drop a leading admin location chunk (e.g. "广州", "佛山市禅城区").
+    let prev;
+    do { prev = s; s = s.replace(SELLER_LOC_RE, '').replace(SELLER_CITY_RE, ''); } while (s !== prev && s);
+    if (!s) s = String(raw).trim();
+    for (const [zh, en] of SELLER_WORDS) {
+        if (s.includes(zh)) s = s.split(zh).join(' ' + en + ' ');
+    }
+    // Tidy whitespace and stray Chinese punctuation left behind.
+    s = s.replace(/[，。、·\s]+/g, ' ').trim();
+    return s || String(raw).trim();
+}
+
+// "Brand | Seller" label for product cards. The brand is derived from the
+// product title; if no brand is recognised we fall back to the stored category.
+// The seller name is translated to English for display.
 function catSellerLabel(p) {
-    const cat = String((p && p.category) || '').trim();
-    const seller = validSeller(p && p.seller);
+    const cat = brandFromTitle(p && p.title) || String((p && p.category) || '').trim();
+    const seller = translateSeller(validSeller(p && p.seller));
     if (cat && seller) return cat + ' | ' + seller;
     return seller || cat || '';
 }
@@ -1595,7 +1741,7 @@ function renderFilteredProducts() {
         }));
         return `
             <div class="hc-card product-card" data-rv="${rvItem}" data-purl="${escapeHtml(productUrl(p))}">
-                <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(p.id)}${renderImg}</div>
+                <div class="product-image" style="overflow:hidden;position:relative;">${metaBadge(p)}${favHeartHtml(p.id)}${renderImg}</div>
                 <div class="product-info">
                     <div class="product-batch-row">
                         ${platformBadge(p.picksly)}
@@ -4246,7 +4392,7 @@ function renderFavoritesContainer() {
             const picksly = safeExternalUrl(p.picksly || '#');
             return `
                 <div class="product-card">
-                    <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(p.id)}${renderImg}</div>
+                    <div class="product-image" style="overflow:hidden;position:relative;">${metaBadge(p)}${favHeartHtml(p.id)}${renderImg}</div>
                     <div class="product-info">
                         <div class="product-batch-row">
                             ${platformBadge(p.picksly)}
@@ -5004,7 +5150,7 @@ function buildStoresPage(favOnly) {
                 <div class="store-header">
                     ${storeAvatar(platform)}
                     <div class="store-meta">
-                        <span class="store-name">${escapeHtml(seller)}</span>
+                        <span class="store-name">${escapeHtml(translateSeller(seller))}</span>
                         <span class="store-sub">${escapeHtml(platform)}</span>
                     </div>
                 </div>
@@ -5194,7 +5340,7 @@ function buildHomeSections() {
             <div class="store-header">
                 ${storeAvatar(platform)}
                 <div class="store-meta">
-                    <span class="store-name">${escapeHtml(seller)}</span>
+                    <span class="store-name">${escapeHtml(translateSeller(seller))}</span>
                     <span class="store-sub">${escapeHtml(platform)}</span>
                 </div>
             </div>
