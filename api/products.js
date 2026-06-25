@@ -111,8 +111,8 @@ export default async function handler(req, res) {
     // `brand` is a newer column. If it doesn't exist yet (PostgREST 42703),
     // we transparently fall back to the column set without it so the catalogue
     // never breaks during the DB migration window.
-    const COLS_WITH_BRAND = 'id,title,price,img,kakobuy,picksly,category,batch,seller,sales,weight,qc,brand,qc_img';
-    const COLS_NO_BRAND = 'id,title,price,img,kakobuy,picksly,category,batch,seller,sales,weight,qc,qc_img';
+    const COLS_WITH_BRAND = 'id,title,price,img,kakobuy,picksly,category,batch,seller,sales,weight,qc,brand,ref_img';
+    const COLS_NO_BRAND = 'id,title,price,img,kakobuy,picksly,category,batch,seller,sales,weight,qc,ref_img';
     let cols = COLS_WITH_BRAND;
 
     try {
