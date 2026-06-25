@@ -4544,6 +4544,50 @@ function getPopularInCategory(cat, n) {
     return out;
 }
 
+// Popular products whose title resolves to `brand` (most-clicked first, then
+// newest), de-duplicated by title. Mirrors getPopularInCategory but groups by
+// the brand derived from the title rather than the stored garment category.
+function getPopularByBrand(brand, n) {
+    const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+    const inBrand = cache.filter(p => brandFromTitle(p.title) === brand);
+    if (!inBrand.length) return [];
+
+    const out = [];
+    const seen = new Set();
+    if (popularTitlesOrder.length) {
+        const byTitle = new Map(inBrand.map(p => [String(p.title || '').toLowerCase(), p]));
+        for (const t of popularTitlesOrder) {
+            const p = byTitle.get(t);
+            if (p && !seen.has(p.title)) {
+                out.push(p); seen.add(p.title);
+                if (out.length >= n) return out;
+            }
+        }
+    }
+    for (const p of inBrand.slice().reverse()) {
+        if (!seen.has(p.title)) {
+            out.push(p); seen.add(p.title);
+            if (out.length >= n) break;
+        }
+    }
+    return out;
+}
+
+// Brands present in the catalogue, ordered by number of items (desc). Used to
+// build the per-brand home sections.
+function topBrandsInCatalogue(minItems) {
+    const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
+    const counts = new Map();
+    cache.forEach(p => {
+        const b = brandFromTitle(p.title);
+        if (b) counts.set(b, (counts.get(b) || 0) + 1);
+    });
+    return [...counts.entries()]
+        .filter(([, c]) => c >= (minItems || 3))
+        .sort((a, b) => b[1] - a[1])
+        .map(([b]) => b);
+}
+
 // ─── PRODUCT DETAIL PAGE (SEO route /products/<cat>/<slug>-<id>) ────────────
 let _pdState = { product: null, batches: [], color: '', qcOpen: false };
 
@@ -5017,7 +5061,9 @@ function attachCarouselHandlers(root) {
             e.preventDefault();
             const seller = el.getAttribute('data-seller');
             const cat = el.getAttribute('data-cat');
-            if (seller) { filterState.seller = seller; filterState.category = 'All'; }
+            const search = el.getAttribute('data-search');
+            if (search) { filterState.search = search; filterState.seller = ''; filterState.category = 'All'; }
+            else if (seller) { filterState.seller = seller; filterState.category = 'All'; }
             else if (cat) { filterState.category = cat; filterState.seller = ''; }
             (window.navigateTo||renderPage)('products');
         });
@@ -5294,6 +5340,55 @@ function buildHomeSections() {
         </div>`;
     }).filter(Boolean).join('');
 
+    // ── Brand sections (grouped by the brand derived from the title) ──
+    const brandSections = topBrandsInCatalogue(3).map(brand => {
+        const items = getPopularByBrand(brand, 20);
+        if (items.length < 3) return '';
+        const id = 'hcb-' + brand.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const cards = items.map((item, idx) => {
+            const safeTitle = escapeHtml(stripEmojis(item.title || 'Untitled'));
+            const rawImg = (item.img || '').trim();
+            const isHttp = rawImg.startsWith('http');
+            const isKnownPlaceholder =
+                /nstatic\.kakobuy\.com\/banner\//i.test(rawImg) ||
+                /s\.yupoo\.com\/website\/.*\/logo_/i.test(rawImg) ||
+                /picks\.ly\/marketplace-logos\//i.test(rawImg) ||
+                /picks\.ly\/agent-logos\//i.test(rawImg) ||
+                /picks\.ly\/twitter-image/i.test(rawImg);
+            const safeImg = (isHttp && !isKnownPlaceholder) ? rawImg : '';
+            const img = safeImg
+                ? `<img src="${escapeHtml(thumb(safeImg, 600))}" alt="${safeTitle}" style="width:100%;height:100%;object-fit:cover;${imgFrameStyle(safeImg)}" loading="${idx < 5 ? 'eager' : 'lazy'}" decoding="async" fetchpriority="low" data-fallback="no-image-text" />`
+                : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
+            const sellerName = catSellerLabel(item);
+            return `<div class="hc-card product-card" data-purl="${escapeHtml(productUrl(item))}">
+                <div class="product-image" style="overflow:hidden;position:relative;">${favHeartHtml(item.id)}${img}</div>
+                <div class="product-info">
+                    <div class="product-batch-row">
+                        ${platformBadge(item.picksly)}
+                        <span class="product-store-name">${escapeHtml(sellerName)}</span>
+                    </div>
+                    <h3 class="product-title">${safeTitle}</h3>
+                    <div class="product-price">${formatPrice(item.price)}</div>
+                    <div class="product-actions">
+                        <button class="card-btn-buy" data-kakobuy="${escapeHtml(safeExternalUrl(item.kakobuy || ''))}" data-picksly="${escapeHtml(safeExternalUrl(item.picksly || ''))}">Buy Now</button>
+                        <a href="${escapeHtml(withRef(item.picksly || '#'))}" target="_blank" rel="noopener noreferrer" class="card-btn-qc">View QC</a>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+        return `<div class="hc-section">
+            <div class="hc-header">
+                <a class="hc-title" data-action="go-products" data-search="${escapeHtml(brand)}">${escapeHtml(brand)} ${arrow}</a>
+                <a class="hc-viewmore" data-action="go-products" data-search="${escapeHtml(brand)}">View more</a>
+            </div>
+            <div class="hc-carousel-wrap">
+                <button class="hc-arrow hc-arrow-left" data-carousel="${id}" data-dir="-1">${arrowLeft}</button>
+                <div class="hc-carousel" id="${id}">${cards}</div>
+                <button class="hc-arrow hc-arrow-right" data-carousel="${id}" data-dir="1">${arrowRight}</button>
+            </div>
+        </div>`;
+    }).filter(Boolean).join('');
+
     // ── Stores section (picks.ly style — grouped by seller) ──
     function storeGoodImg(p) {
         const raw = (p.img || '').trim();
@@ -5412,7 +5507,7 @@ function buildHomeSections() {
         </div>
     </div>`;
 
-    return trendingHtml + storesHtml + tutorialsBanner + catSections;
+    return trendingHtml + brandSections + storesHtml + tutorialsBanner + catSections;
 }
 
 window.convertLink = function () {
