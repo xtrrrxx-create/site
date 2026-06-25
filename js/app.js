@@ -2312,7 +2312,7 @@ function getPages() {
                 </div>
             </div>
 
-            <div class="products-grid" id="products-container" style="margin-top:0.75rem;">
+            <div class="products-grid" id="products-container" style="margin-top:clamp(1rem, 6vh, 5rem);">
                 <p style="color:var(--text-primary);font-weight:600;" id="loading-text">${t('loading')}</p>
             </div>
         </div>
@@ -2327,7 +2327,7 @@ function getPages() {
                     ${CATEGORIES.map(cat => `<button class="pl-cat" data-home-cat="${cat}"><span>${cat}</span></button>`).join('')}
                 </div>
             </div>
-            <div class="products-grid" id="favorites-container" style="margin-top:0.75rem;">
+            <div class="products-grid" id="favorites-container" style="margin-top:clamp(1rem, 6vh, 5rem);">
                 <p style="color:var(--text-primary);font-weight:600;">${t('loading')}</p>
             </div>
         </div>
