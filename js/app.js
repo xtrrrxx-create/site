@@ -750,11 +750,22 @@ const BRAND_PATTERNS = [
     ['Nocta', /\bnocta\b/i],
 ];
 
-// Brand extracted from a product title, or '' if none recognised.
+// Brand extracted from a product title, or '' if none recognised. We return the
+// brand exactly as it is written in the title (e.g. a "Bape …" title yields
+// "Bape", not the canonical "A Bathing Ape"), so the label always mirrors the
+// product name. Casing follows the title; an all-lowercase match is title-cased.
 function brandFromTitle(title) {
     const s = String(title || '');
-    for (const [name, re] of BRAND_PATTERNS) {
-        if (re.test(s)) return name;
+    for (const [, re] of BRAND_PATTERNS) {
+        const m = re.exec(s);
+        if (m) {
+            const hit = m[0].trim();
+            // If the title wrote it in all lower-case, prettify to Title Case;
+            // otherwise keep the title's own casing (BAPE, Sp5der, Off-White…).
+            return /[A-Z]/.test(hit)
+                ? hit
+                : hit.replace(/\b\w/g, c => c.toUpperCase());
+        }
     }
     return '';
 }
