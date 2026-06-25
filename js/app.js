@@ -1024,7 +1024,7 @@ const SEARCH_DEBOUNCE_MS = 140;
 const INPUT_MAX_LEN = 35;
 /** Link converter field max length (paste / lag guard). */
 const LINK_INPUT_MAX_LEN = 100;
-const PRODUCTS_RENDER_STEP = 30;
+const PRODUCTS_RENDER_STEP = 1000;
 // 10 min: the catalogue is edge-cached for hours, so polling it more often just
 // re-downloads identical data. Keeps client + Vercel bandwidth low.
 const PRODUCTS_AUTO_REFRESH_MS = 10 * 60 * 1000;
