@@ -472,14 +472,15 @@ body.light-mode .pl-search-wrap::before {
     background: transparent; /* picks.ly chips only change text color on hover */
 }
 
-.pl-cat.active,
-.pl-cat-home {
+.pl-cat.active {
     background: transparent;
     color: var(--text-primary);
 }
-.pl-cat.active svg,
-.pl-cat-home svg { color: var(--text-primary); }
-.pl-cat-home { text-decoration: none; }
+.pl-cat.active svg { color: var(--text-primary); }
+/* Home is a plain link back to the homepage, not the active selection — keep it
+   in the inactive (secondary) colour so only the current category reads white. */
+.pl-cat-home { text-decoration: none; color: var(--text-secondary); }
+.pl-cat-home svg { color: var(--text-secondary); }
 .pl-cat-home:hover { background: transparent; color: var(--text-primary); }
 
 body.light-mode .pl-cat:hover {
@@ -2503,6 +2504,21 @@ main {
 .fav-heart.is-fav { opacity: 1; transform: scale(1); color: var(--accent-color); }
 .fav-heart.is-fav svg { fill: var(--accent-color); stroke: var(--accent-color); }
 .fav-heart.is-fav:hover { background: rgba(0, 0, 0, 0.55); }
+
+/* Sales + weight overlay, top-left of the card image (grey, not black). */
+.product-image .card-meta {
+    position: absolute; top: 8px; left: 8px; z-index: 2;
+    display: flex; gap: 5px; pointer-events: none;
+}
+.card-meta .cm-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 7px; border-radius: 99px;
+    background: rgba(80, 80, 80, 0.78);
+    -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    color: #f0f0f0; font-size: 0.68rem; font-weight: 700; line-height: 1;
+}
+.card-meta .cm-pill svg { opacity: 0.9; }
+body.light-mode .card-meta .cm-pill { background: rgba(70, 70, 70, 0.82); color: #fff; }
 @media (hover: none) { .fav-heart { opacity: 1; transform: scale(1); } }
 
 /* ── Favourite-store heart (next to "View Store" on /stores) ── */
