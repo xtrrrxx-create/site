@@ -891,6 +891,22 @@ main {
     object-fit: cover;
 }
 
+/* ── QC hover swap (picks.ly style) ──
+   When a product has a manual `qc_img`, it's layered on top of the base photo
+   and fades in on hover so the card flips from the reference shot to the QC
+   photo. Badges / fav heart sit above it (they use z-index:2). */
+.product-image.has-qc .product-qc-img {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity .3s ease;
+}
+.product-card:hover .product-image.has-qc .product-qc-img,
+.hc-card:hover .product-image.has-qc .product-qc-img {
+    opacity: 1;
+}
+
 /* ── Image loading shimmer (picks.ly style) ──
    While an image is loading the well shows an animated skeleton, then the
    image fades in over it. Applies to product cards, the product-detail gallery
