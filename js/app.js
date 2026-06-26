@@ -1806,6 +1806,24 @@ function sortProducts(list) {
         default: {
             const rank = new Map();
             (popularTitlesOrder || []).forEach((t, i) => { if (!rank.has(t)) rank.set(t, i); });
+            // When a specific category is active, group by brand (most products first),
+            // then sort within each brand by trending rank.
+            if (filterState.category && filterState.category !== 'All') {
+                const brandCount = new Map();
+                arr.forEach(p => {
+                    const b = productBrand(p);
+                    brandCount.set(b, (brandCount.get(b) || 0) + 1);
+                });
+                return arr.sort((a, b) => {
+                    const ba = productBrand(a), bb = productBrand(b);
+                    const ca = brandCount.get(ba) || 0, cb = brandCount.get(bb) || 0;
+                    if (ca !== cb) return cb - ca; // more products → top
+                    if (ba !== bb) return ba.localeCompare(bb); // same count → alpha
+                    const ra = rank.has(String(a.title || '').toLowerCase()) ? rank.get(String(a.title).toLowerCase()) : Infinity;
+                    const rb = rank.has(String(b.title || '').toLowerCase()) ? rank.get(String(b.title).toLowerCase()) : Infinity;
+                    return ra - rb;
+                });
+            }
             return arr.sort((a, b) => {
                 const ra = rank.has(String(a.title || '').toLowerCase()) ? rank.get(String(a.title).toLowerCase()) : Infinity;
                 const rb = rank.has(String(b.title || '').toLowerCase()) ? rank.get(String(b.title).toLowerCase()) : Infinity;
