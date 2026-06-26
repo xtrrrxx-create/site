@@ -1956,16 +1956,22 @@ function renderFilteredProducts() {
     // is organised under brand headers (Nike, Balenciaga, Supreme…). Group order
     // follows first appearance in the current sort; products with no recognised
     // brand fall back to their garment category.
+    // Brand → total count across the WHOLE filtered set (not just what's loaded),
+    // so the header number is the real total and doesn't grow as you scroll.
+    const brandKey = p => productBrand(p) || String(p.category || '').trim() || 'Other';
+    const brandTotals = new Map();
+    filtered.forEach(p => { const k = brandKey(p); brandTotals.set(k, (brandTotals.get(k) || 0) + 1); });
+
     const groups = [];
     const groupIndex = new Map();
     visible.forEach(p => {
-        const key = productBrand(p) || String(p.category || '').trim() || 'Other';
+        const key = brandKey(p);
         let g = groupIndex.get(key);
-        if (!g) { g = { key, items: [] }; groupIndex.set(key, g); groups.push(g); }
+        if (!g) { g = { key, items: [], total: brandTotals.get(key) || 0 }; groupIndex.set(key, g); groups.push(g); }
         g.items.push(p);
     });
-    // Order brand groups by product count descending (most items first), then alphabetically.
-    groups.sort((a, b) => b.items.length - a.items.length || a.key.localeCompare(b.key));
+    // Order brand groups by TOTAL product count descending (most items first), then alphabetically.
+    groups.sort((a, b) => b.total - a.total || a.key.localeCompare(b.key));
     // Within each group: footwear (shoes/slides) first, then clothing.
     const FOOTWEAR = new Set(['shoes', 'slides']);
     groups.forEach(g => {
@@ -1978,7 +1984,7 @@ function renderFilteredProducts() {
 
     container.innerHTML = groups.map(g => `
         <div class="kf-brand-head" style="grid-column:1/-1;font-family:'Inter Tight',system-ui,sans-serif;font-size:32px;font-weight:400;line-height:48px;color:var(--text-primary);padding:0.5rem 0 0.1rem;display:flex;align-items:center;gap:8px;">
-            ${escapeHtml(g.key)}<span style="font:inherit;color:var(--text-secondary);">${g.items.length}</span>
+            ${escapeHtml(g.key)}<span style="font:inherit;color:var(--text-secondary);">${g.total}</span>
         </div>
         ${g.items.map(renderCard).join('')}
     `).join('') + (
