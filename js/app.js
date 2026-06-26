@@ -1964,8 +1964,8 @@ function renderFilteredProducts() {
         if (!g) { g = { key, items: [] }; groupIndex.set(key, g); groups.push(g); }
         g.items.push(p);
     });
-    // Order the brand groups alphabetically by name (A→Z).
-    groups.sort((a, b) => a.key.localeCompare(b.key));
+    // Order brand groups by product count descending (most items first), then alphabetically.
+    groups.sort((a, b) => b.items.length - a.items.length || a.key.localeCompare(b.key));
 
     container.innerHTML = groups.map(g => `
         <div class="kf-brand-head" style="grid-column:1/-1;font-family:'Inter Tight',system-ui,sans-serif;font-size:32px;font-weight:400;line-height:48px;color:var(--text-primary);padding:0.5rem 0 0.1rem;display:flex;align-items:center;gap:8px;">
