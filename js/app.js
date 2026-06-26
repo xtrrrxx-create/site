@@ -196,10 +196,12 @@ function imgPosY(rawUrl) {
 }
 
 // Zoom percentage baked into an image URL ("#...z=<pct>"). 100 = no zoom.
+// Floored at 100: a sub-100 zoom shrinks the image inside the card and leaves
+// empty gaps, which looks bad — so the image always at least fills the card.
 function imgZoom(rawUrl) {
     const m = String(rawUrl || '').match(/[#&]z=(\d+)/);
     if (!m) return 100;
-    return Math.max(50, Math.min(300, parseInt(m[1], 10) || 100));
+    return Math.max(100, Math.min(300, parseInt(m[1], 10) || 100));
 }
 // Combined inline style for product images (framing + zoom).
 function imgFrameStyle(rawUrl) {
