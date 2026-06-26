@@ -1966,6 +1966,15 @@ function renderFilteredProducts() {
     });
     // Order brand groups by product count descending (most items first), then alphabetically.
     groups.sort((a, b) => b.items.length - a.items.length || a.key.localeCompare(b.key));
+    // Within each group: footwear (shoes/slides) first, then clothing.
+    const FOOTWEAR = new Set(['shoes', 'slides']);
+    groups.forEach(g => {
+        g.items.sort((a, b) => {
+            const af = FOOTWEAR.has(String(a.category || '').toLowerCase()) ? 0 : 1;
+            const bf = FOOTWEAR.has(String(b.category || '').toLowerCase()) ? 0 : 1;
+            return af - bf;
+        });
+    });
 
     container.innerHTML = groups.map(g => `
         <div class="kf-brand-head" style="grid-column:1/-1;font-family:'Inter Tight',system-ui,sans-serif;font-size:32px;font-weight:400;line-height:48px;color:var(--text-primary);padding:0.5rem 0 0.1rem;display:flex;align-items:center;gap:8px;">
