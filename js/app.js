@@ -4756,21 +4756,38 @@ function getPopularInCategory(cat, n) {
     const inCat = cache.filter(p => (p.category || '').toLowerCase() === lc);
     if (!inCat.length) return [];
 
+    // A product only belongs on the home rows if it has a real product image —
+    // this excludes brand-new imports (img empty / placeholder) so the home page
+    // shows established, most-clicked items, never freshly added ones.
+    const hasImg = p => {
+        const s = String(p.img || '').trim();
+        return s.startsWith('http') && !(
+            /nstatic\.kakobuy\.com\/banner\//i.test(s) ||
+            /s\.yupoo\.com\/website\/.*\/logo_/i.test(s) ||
+            /picks\.ly\/(marketplace-logos|agent-logos|twitter-image)/i.test(s)
+        );
+    };
+
     const out = [];
     const seen = new Set();
+    // 1) Most-clicked first (global popularity), image-having only.
     if (popularTitlesOrder.length) {
         const byTitle = new Map(inCat.map(p => [String(p.title || '').toLowerCase(), p]));
         for (const t of popularTitlesOrder) {
             const p = byTitle.get(t);
-            if (p && !seen.has(p.title)) {
+            if (p && hasImg(p) && !seen.has(p.title)) {
                 out.push(p);
                 seen.add(p.title);
                 if (out.length >= n) return out;
             }
         }
     }
-    const newest = inCat.slice().reverse();
-    for (const p of newest) {
+    // 2) Pad with established products by popularity (most sold), NOT the newest —
+    //    so newly imported items never surface here.
+    const pad = inCat
+        .filter(hasImg)
+        .sort((a, b) => (parseInt(b.sales, 10) || 0) - (parseInt(a.sales, 10) || 0));
+    for (const p of pad) {
         if (!seen.has(p.title)) {
             out.push(p);
             seen.add(p.title);
