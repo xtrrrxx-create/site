@@ -876,7 +876,8 @@ main {
 .product-image {
     width: 100%;
     aspect-ratio: 1;
-    background: #2a2a2a;
+    /* QC green so a "fit whole image" (contain) photo blends with its backdrop. */
+    background: #7eb14b;
     display: flex;
     align-items: center;
     justify-content: center;

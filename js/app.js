@@ -196,16 +196,19 @@ function imgPosY(rawUrl) {
 }
 
 // Zoom percentage baked into an image URL ("#...z=<pct>"). 100 = no zoom.
-// Floored at 100: a sub-100 zoom shrinks the image inside the card and leaves
-// empty gaps, which looks bad — so the image always at least fills the card.
+// Below 100 = fit the WHOLE image in the card (object-fit:contain); the green
+// QC backdrop behind it blends with the photo's own green screen.
 function imgZoom(rawUrl) {
     const m = String(rawUrl || '').match(/[#&]z=(\d+)/);
     if (!m) return 100;
-    return Math.max(100, Math.min(300, parseInt(m[1], 10) || 100));
+    return Math.max(40, Math.min(300, parseInt(m[1], 10) || 100));
 }
 // Combined inline style for product images (framing + zoom).
+// z < 100 → fit the WHOLE image in the card (object-fit:contain); the green card
+// backdrop blends with the photo's QC green. z ≥ 100 → fill/crop (cover + scale).
 function imgFrameStyle(rawUrl) {
     const oy = imgPosY(rawUrl), z = imgZoom(rawUrl);
+    if (z < 100) return `object-fit:contain;object-position:50% ${oy}%;`;
     let s = `object-position:50% ${oy}%;`;
     if (z !== 100) s += `transform:scale(${z / 100});transform-origin:50% ${oy}%;`;
     return s;
