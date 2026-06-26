@@ -677,7 +677,7 @@ function updateThemeIcon(isLightMode) {
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
-const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories'];
+const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories', 'Merch'];
 
 // Round store avatar showing the source marketplace logo (Weidian / Taobao /
 // 1688). Falls back to the generic 店 glyph when the platform is unknown.
@@ -1015,11 +1015,13 @@ function catIcon(cat) {
     // puffer jacket with quilting + zip
     const jacket = '<path d="M7 4 4 6l1 7 2-1v9h10v-9l2 1 1-7-3-2-5 1.5L7 4Z"/><path d="M12 5.5V21"/><path d="M8.5 10h2M13.5 10h2M8.5 14h2M13.5 14h2M8.5 18h2M13.5 18h2"/>';
     const watch = '<circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/>';
+    // star — artist / band merch
+    const merch = '<polygon points="12 2 15 9 22 9.3 16.5 13.8 18.5 21 12 16.7 5.5 21 7.5 13.8 2 9.3 9 9"/>';
     const map = {
         'all': grid, 'shoes': footprints, 'slides': footprints,
         'shorts': shorts, 'pants': pants,
         't-shirts': shirt, 'long-sleeve': longSleeve, 'hoodies': hoodie, 'jackets': jacket,
-        'accessories': watch,
+        'accessories': watch, 'merch': merch,
     };
     return s + (map[String(cat).toLowerCase()] || shirt) + '</svg>';
 }
@@ -3250,7 +3252,7 @@ function initApp() {
 
     const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites'];
     // Product sub-routes: /products/shoes, /products/hoodies etc.
-    const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories'];
+    const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories','merch'];
     function pageFromPath() {
         const rawPath = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '');
         const path = rawPath.toLowerCase();
@@ -4686,28 +4688,40 @@ let popularTitlesOrder = []; // ordered list of titles, most-clicked first
 let popularLoaded = false;
 
 function getRecentlyViewed() {
-    // Universal feed: most-clicked products first, padded with newest items
-    // so the marquee always has at least RV_MAX cards (otherwise a single
-    // popular item would just loop alone and look broken).
+    // Trending feed: the most-clicked (Buy Now) products first, padded with
+    // established best-sellers. Brand-new imports (no real product image) are
+    // never shown here — they only appear under /products until given an image.
     const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
     if (!cache.length) return [];
 
+    const hasImg = p => {
+        const s = String(p.img || '').trim();
+        return s.startsWith('http') && !(
+            /nstatic\.kakobuy\.com\/banner\//i.test(s) ||
+            /s\.yupoo\.com\/website\/.*\/logo_/i.test(s) ||
+            /picks\.ly\/(marketplace-logos|agent-logos|twitter-image)/i.test(s)
+        );
+    };
+
     const out = [];
     const seen = new Set();
+    // 1) Most-clicked first (global Buy Now ranking), image-having only.
     if (popularTitlesOrder.length) {
         const byTitle = new Map(cache.map(p => [String(p.title || '').toLowerCase(), p]));
         for (const t of popularTitlesOrder) {
             const p = byTitle.get(t);
-            if (p && !seen.has(p.title)) {
+            if (p && hasImg(p) && !seen.has(p.title)) {
                 out.push(p);
                 seen.add(p.title);
                 if (out.length >= RV_MAX) return out;
             }
         }
     }
-    // Pad with newest catalog items (catalog tail, ordered newest-first).
-    const newest = cache.slice(-RV_MAX * 2).reverse();
-    for (const p of newest) {
+    // 2) Pad with established best-sellers (most sold) — never the newest imports.
+    const pad = cache
+        .filter(hasImg)
+        .sort((a, b) => (parseInt(b.sales, 10) || 0) - (parseInt(a.sales, 10) || 0));
+    for (const p of pad) {
         if (!seen.has(p.title)) {
             out.push(p);
             seen.add(p.title);
@@ -5450,7 +5464,7 @@ function buildHomeSkeleton(sections) {
 function buildHomeSections() {
     const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
     if (!cache.length) return buildHomeSkeleton(3);
-    const HOME_CATS = ['Shoes', 'T-shirts', 'Hoodies', 'Jackets', 'Shorts', 'Pants', 'Long-sleeve', 'Accessories'];
+    const HOME_CATS = ['Shoes', 'T-shirts', 'Hoodies', 'Jackets', 'Shorts', 'Pants', 'Long-sleeve', 'Accessories', 'Merch'];
     const arrow = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
     const arrowLeft = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
     const arrowRight = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
