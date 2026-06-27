@@ -677,7 +677,9 @@ function updateThemeIcon(isLightMode) {
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
-const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories', 'Merch', 'Sets', 'Blanks'];
+const CATEGORIES = ['All', 'Shoes', 'Boots', 'Slides', 'IG Brands', 'Merch', 'Archive Fashion', 'Shirts', 'Tank Tops', 'Polo Shirts', 'Long-sleeve', 'Zip Ups', 'Hoodies', 'Jackets', 'Jeans', 'Sweats', 'Shorts', 'Sets', 'Blanks', 'Electronics', 'Room Decoration', 'Bags', 'Backpacks', 'Socks', 'Underwear', 'Accessories', 'Jewellery', 'Girl'];
+// URL slug for a category: lowercase, spaces -> hyphens ("Tank Tops" -> "tank-tops").
+const catSlug = c => String(c || '').toLowerCase().replace(/\s+/g, '-');
 
 // Round store avatar showing the source marketplace logo (Weidian / Taobao /
 // 1688). Falls back to the generic 店 glyph when the platform is unknown.
@@ -1019,11 +1021,22 @@ function catIcon(cat) {
     const merch = '<polygon points="12 2 15 9 22 9.3 16.5 13.8 18.5 21 12 16.7 5.5 21 7.5 13.8 2 9.3 9 9"/>';
     // stacked layers — full sets / fits
     const sets = '<path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/>';
+    const bag = '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>';
+    const backpack = '<path d="M4 10a8 8 0 0 1 16 0v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M8 10a4 4 0 0 1 8 0"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/>';
+    const gem = '<path d="M6 3h12l4 6-10 12L2 9Z"/><path d="M2 9h20M12 3 8 9l4 12 4-12-4-6"/>';
+    const device = '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>';
+    const box = '<path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="m12 13 0 8"/>';
+    const heart = '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>';
+    const socks = '<path d="M8 2v9l-3 5a4 4 0 0 0 6 4l5-3a3 3 0 0 0-1-5l-1-1V2Z"/>';
+    const camera = '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3Z"/><circle cx="12" cy="13" r="3"/>';
     const map = {
-        'all': grid, 'shoes': footprints, 'slides': footprints,
-        'shorts': shorts, 'pants': pants,
-        't-shirts': shirt, 'long-sleeve': longSleeve, 'hoodies': hoodie, 'jackets': jacket,
-        'accessories': watch, 'merch': merch, 'sets': sets, 'blanks': shirt,
+        'all': grid, 'shoes': footprints, 'boots': footprints, 'slides': footprints,
+        'shorts': shorts, 'pants': pants, 'jeans': pants, 'sweats': pants,
+        't-shirts': shirt, 'shirts': shirt, 'tank tops': shirt, 'polo shirts': shirt,
+        'long-sleeve': longSleeve, 'hoodies': hoodie, 'zip ups': hoodie, 'jackets': jacket,
+        'accessories': watch, 'jewellery': gem, 'merch': merch, 'sets': sets, 'blanks': shirt,
+        'bags': bag, 'backpacks': backpack, 'electronics': device, 'room decoration': box,
+        'socks': socks, 'underwear': shorts, 'girl': heart, 'ig brands': camera, 'archive fashion': jacket,
     };
     return s + (map[String(cat).toLowerCase()] || shirt) + '</svg>';
 }
@@ -1075,7 +1088,7 @@ function selectProductCategory(cat) {
     // tools…) redirect to the products page for that category, like the More menu.
     const onProducts = /^\/products(\/(?!favorites))?/.test(window.location.pathname);
     if (onProducts) {
-        const path = (cat && cat !== 'All') ? '/products/' + cat.toLowerCase() : '/products';
+        const path = (cat && cat !== 'All') ? '/products/' + catSlug(cat) : '/products';
         const qs = filterState.search ? '?search=' + encodeURIComponent(filterState.search) : '';
         history.pushState({ page: 'products' }, '', path + qs);
         renderFilteredProducts();
@@ -3254,7 +3267,7 @@ function initApp() {
 
     const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites'];
     // Product sub-routes: /products/shoes, /products/hoodies etc.
-    const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories','merch','sets','blanks'];
+    const PRODUCT_CATS_ROUTES = ['all'].concat(CATEGORIES.filter(c => c !== 'All').map(catSlug));
     function pageFromPath() {
         const rawPath = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '');
         const path = rawPath.toLowerCase();
@@ -3282,7 +3295,7 @@ function initApp() {
         if (parts[0] === 'products' && parts[1]) {
             if (parts[1] === 'all') return 'All';
             if (PRODUCT_CATS_ROUTES.includes(parts[1])) {
-                return CATEGORIES.find(c => c.toLowerCase() === parts[1]) || 'All';
+                return CATEGORIES.find(c => catSlug(c) === parts[1]) || 'All';
             }
         }
         return null;
@@ -3303,7 +3316,7 @@ function initApp() {
         let path;
         if (pageId === 'products') {
             const cat = (filterState.category || 'All');
-            path = cat && cat !== 'All' ? '/products/' + cat.toLowerCase() : '/products';
+            path = cat && cat !== 'All' ? '/products/' + catSlug(cat) : '/products';
         } else if (pageId === 'favorites') {
             path = '/products/favorites';
         } else {
@@ -3338,7 +3351,7 @@ function initApp() {
         let path;
         if (page === 'products') {
             const cat = (filterState.category || 'All');
-            path = cat && cat !== 'All' ? '/products/' + cat.toLowerCase() : '/products';
+            path = cat && cat !== 'All' ? '/products/' + catSlug(cat) : '/products';
         } else {
             path = '/stores';
         }
