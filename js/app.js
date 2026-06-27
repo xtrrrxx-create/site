@@ -677,7 +677,7 @@ function updateThemeIcon(isLightMode) {
 }
 
 // ─── FILTER STATE ──────────────────────────────────────────────────────────
-const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories', 'Merch'];
+const CATEGORIES = ['All', 'Shoes', 'Slides', 'Shorts', 'Pants', 'T-shirts', 'Long-sleeve', 'Hoodies', 'Jackets', 'Accessories', 'Merch', 'Sets', 'Blanks'];
 
 // Round store avatar showing the source marketplace logo (Weidian / Taobao /
 // 1688). Falls back to the generic 店 glyph when the platform is unknown.
@@ -1017,11 +1017,13 @@ function catIcon(cat) {
     const watch = '<circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.78 4.05"/><path d="m7.88 16.36.8 4a2 2 0 0 0 2 1.61h2.72a2 2 0 0 0 2-1.61l.81-4.05"/>';
     // star — artist / band merch
     const merch = '<polygon points="12 2 15 9 22 9.3 16.5 13.8 18.5 21 12 16.7 5.5 21 7.5 13.8 2 9.3 9 9"/>';
+    // stacked layers — full sets / fits
+    const sets = '<path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="M2 12l10 5 10-5"/><path d="M2 17l10 5 10-5"/>';
     const map = {
         'all': grid, 'shoes': footprints, 'slides': footprints,
         'shorts': shorts, 'pants': pants,
         't-shirts': shirt, 'long-sleeve': longSleeve, 'hoodies': hoodie, 'jackets': jacket,
-        'accessories': watch, 'merch': merch,
+        'accessories': watch, 'merch': merch, 'sets': sets, 'blanks': shirt,
     };
     return s + (map[String(cat).toLowerCase()] || shirt) + '</svg>';
 }
@@ -3252,7 +3254,7 @@ function initApp() {
 
     const VALID_PAGES = ['home', 'products', 'tutorials', 'qccheck', 'tools', 'stores', 'favorites'];
     // Product sub-routes: /products/shoes, /products/hoodies etc.
-    const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories','merch'];
+    const PRODUCT_CATS_ROUTES = ['all','shoes','slides','shorts','pants','t-shirts','long-sleeve','hoodies','jackets','accessories','merch','sets','blanks'];
     function pageFromPath() {
         const rawPath = (window.location.pathname || '/').replace(/^\/+|\/+$/g, '');
         const path = rawPath.toLowerCase();
@@ -5464,7 +5466,7 @@ function buildHomeSkeleton(sections) {
 function buildHomeSections() {
     const cache = (typeof allProductsCache !== 'undefined' ? allProductsCache : []) || [];
     if (!cache.length) return buildHomeSkeleton(3);
-    const HOME_CATS = ['Shoes', 'T-shirts', 'Hoodies', 'Jackets', 'Shorts', 'Pants', 'Long-sleeve', 'Accessories', 'Merch'];
+    const HOME_CATS = ['Shoes', 'T-shirts', 'Hoodies', 'Jackets', 'Shorts', 'Pants', 'Long-sleeve', 'Accessories', 'Merch', 'Sets', 'Blanks'];
     const arrow = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
     const arrowLeft = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
     const arrowRight = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
