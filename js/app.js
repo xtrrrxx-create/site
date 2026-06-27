@@ -1971,16 +1971,30 @@ function renderFilteredProducts() {
     const brandTotals = new Map();
     filtered.forEach(p => { const k = brandKey(p); brandTotals.set(k, (brandTotals.get(k) || 0) + 1); });
 
+    // Every brand that has only ONE product in the current view is folded into a
+    // single "Other Brands" bucket, shown at the very bottom of the page — so the
+    // grid isn't cluttered with hundreds of one-item brand headers. Each product
+    // card still shows its own brand label.
+    const OTHER_BRANDS = 'Other Brands';
+    let otherTotal = 0;
+    brandTotals.forEach(n => { if (n === 1) otherTotal += 1; });
+    const groupKeyFor = p => { const k = brandKey(p); return brandTotals.get(k) === 1 ? OTHER_BRANDS : k; };
+
     const groups = [];
     const groupIndex = new Map();
     visible.forEach(p => {
-        const key = brandKey(p);
+        const key = groupKeyFor(p);
         let g = groupIndex.get(key);
-        if (!g) { g = { key, items: [], total: brandTotals.get(key) || 0 }; groupIndex.set(key, g); groups.push(g); }
+        if (!g) { g = { key, items: [], total: key === OTHER_BRANDS ? otherTotal : (brandTotals.get(key) || 0) }; groupIndex.set(key, g); groups.push(g); }
         g.items.push(p);
     });
-    // Order brand groups by TOTAL product count descending (most items first), then alphabetically.
-    groups.sort((a, b) => b.total - a.total || a.key.localeCompare(b.key));
+    // Order brand groups by TOTAL count desc, then alphabetically — but always
+    // pin the "Other Brands" bucket to the very bottom.
+    groups.sort((a, b) => {
+        if (a.key === OTHER_BRANDS) return 1;
+        if (b.key === OTHER_BRANDS) return -1;
+        return b.total - a.total || a.key.localeCompare(b.key);
+    });
     // Within each group: footwear (shoes/slides) first, then clothing.
     const FOOTWEAR = new Set(['shoes', 'slides']);
     groups.forEach(g => {
