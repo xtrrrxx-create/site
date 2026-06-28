@@ -851,6 +851,9 @@ const BRAND_CANON = {
     'ysl': 'Saint Laurent', 'lv': 'Louis Vuitton', 'tnf': 'The North Face', 'north face': 'The North Face',
     'mm6': 'Maison Margiela', 'margiela': 'Maison Margiela', 'crtz': 'Corteiz',
     'assc': 'Anti Social Social Club', 'spider': 'Sp5der', 'cactus jack': 'Travis Scott',
+    // Fear of God family → one "FOG-Essentials" group (Yeezy stays separate)
+    'essentials': 'FOG-Essentials', 'essential': 'FOG-Essentials', 'fog': 'FOG-Essentials',
+    'fear of god': 'FOG-Essentials', 'yzy': 'Yeezy',
 };
 function brandFromTitle(title) {
     const s = String(title || '');
