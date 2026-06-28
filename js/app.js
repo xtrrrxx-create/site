@@ -831,6 +831,27 @@ const _brandCache = new Map();
 // Brand extracted from a product title, or '' if none recognised. When several
 // known brands appear, the more common one (by catalogue count) wins. The text
 // is returned as written in the title (e.g. "Bape", not "A Bathing Ape").
+// Sub-brands / sneaker models / aliases that should roll up to their parent
+// brand so the grouping isn't split (e.g. "Air Force 1", "Jordan", "Dunk" →
+// Nike; "CDG", "Play" → Comme des Garcons; "YSL" → Saint Laurent).
+const BRAND_CANON = {
+    // Nike
+    'air force': 'Nike', 'air force 1': 'Nike', 'af1': 'Nike', 'air jordan': 'Nike',
+    'jordan': 'Nike', 'dunk': 'Nike', 'air max': 'Nike', 'airmax': 'Nike', 'air': 'Nike',
+    'shox': 'Nike', 'vapormax': 'Nike', 'cortez': 'Nike', 'acg': 'Nike',
+    // Adidas
+    'samba': 'Adidas', 'gazelle': 'Adidas', 'campus': 'Adidas', 'superstar': 'Adidas',
+    'stan smith': 'Adidas', 'spezial': 'Adidas', 'sl72': 'Adidas', 'ultraboost': 'Adidas',
+    'nmd': 'Adidas', 'ozweego': 'Adidas', 'adizero': 'Adidas',
+    // Comme des Garcons
+    'cdg': 'Comme des Garcons', 'play': 'Comme des Garcons', 'junya': 'Comme des Garcons',
+    // Bape
+    'aape': 'Bape', 'bathing ape': 'Bape', 'a bathing ape': 'Bape', 'baby milo': 'Bape',
+    // luxury / streetwear aliases
+    'ysl': 'Saint Laurent', 'lv': 'Louis Vuitton', 'tnf': 'The North Face', 'north face': 'The North Face',
+    'mm6': 'Maison Margiela', 'margiela': 'Maison Margiela', 'crtz': 'Corteiz',
+    'assc': 'Anti Social Social Club', 'spider': 'Sp5der', 'cactus jack': 'Travis Scott',
+};
 function brandFromTitle(title) {
     const s = String(title || '');
     if (_brandCache.has(s)) return _brandCache.get(s);
@@ -853,6 +874,7 @@ function brandFromTitle(title) {
         const fw = s.trim().match(/^[^\p{L}\p{N}]*([\p{L}\p{N}][\p{L}\p{N}.&'+-]*)/u);
         if (fw && fw[1]) result = prettyCase(fw[1]);
     }
+    result = BRAND_CANON[result.toLowerCase()] || result;
     _brandCache.set(s, result);
     return result;
 }
