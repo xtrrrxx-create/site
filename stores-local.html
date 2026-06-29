@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stores — Local Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="coldmode-config.js"></script>
+<style>html{visibility:hidden}html.ready{visibility:visible}</style>
+<script>
+  // Arăt pagina doar după ce fontul ȘI conținutul (Firestore) sunt gata → fără salt.
+  (function () {
+    let fontsOk = false, contentOk = false;
+    window.__reveal = () => { if (fontsOk && contentOk) document.documentElement.classList.add('ready'); };
+    window.cmContentReady = () => { contentOk = true; window.__reveal(); };
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { fontsOk = true; window.__reveal(); });
+    else fontsOk = true;
+    // Fallback: arăt oricum după 2.5s dacă ceva întârzie.
+    setTimeout(() => { fontsOk = true; contentOk = true; window.__reveal(); }, 2500);
+  })();
+  // Palete de accent — fiecare schimbă toată schema (carduri, texte, butoane).
+  const PALETTES = {
+    blue:   { bg:'#F2F2F2', surface:'#6085A6', muted:'#A0B9D9', border:'#024873', accent:'#D0DCF2', hover:'#8aa9cf', card:'#cdddec' },
+    indigo: { bg:'#F1F3F8', surface:'#5b78c2', muted:'#aab8e0', border:'#1e3a8a', accent:'#5b8cf7', hover:'#7e96d6', card:'#d4ddf4' },
+    cyan:   { bg:'#F0F5F8', surface:'#3f86a8', muted:'#a8c8d9', border:'#0b3a4a', accent:'#2bbfe0', hover:'#7fa9c0', card:'#cce5ef' },
+    teal:   { bg:'#F0F6F5', surface:'#3f8f87', muted:'#a8d0cb', border:'#0b4a44', accent:'#2bd4c0', hover:'#7fb3ad', card:'#cce8e3' },
+    green:  { bg:'#F1F5F2', surface:'#4f9170', muted:'#a9cfb9', border:'#0b4a2f', accent:'#2bd47a', hover:'#7fb393', card:'#cee8d8' },
+    lime:   { bg:'#F4F6EF', surface:'#7a9b3f', muted:'#c7d9a0', border:'#3a4a0b', accent:'#9fd42b', hover:'#a3b97f', card:'#e0ecc6' },
+    amber:  { bg:'#F8F6F0', surface:'#c2a23e', muted:'#e8dba0', border:'#5e4a0e', accent:'#f5c531', hover:'#d4c163', card:'#f3ead0' },
+    orange: { bg:'#F8F4F0', surface:'#c07a3e', muted:'#e8c39a', border:'#6b3a10', accent:'#ff9f1a', hover:'#d49a63', card:'#f3e0cb' },
+    red:    { bg:'#F8F2F1', surface:'#a85f5f', muted:'#d9b0b0', border:'#6b1e1e', accent:'#f56b6b', hover:'#c08282', card:'#f3d6d6' },
+    pink:   { bg:'#F8F1F5', surface:'#aa5e8c', muted:'#d9b0c8', border:'#6b1e4a', accent:'#f56fb0', hover:'#c082a0', card:'#f3d6e6' },
+    purple: { bg:'#F4F1F8', surface:'#7e5fae', muted:'#c2b0d9', border:'#3b1e6b', accent:'#b06bff', hover:'#9a82c0', card:'#e3d6f3' },
+    mono:   { bg:'#F4F4F5', surface:'#6b7280', muted:'#c4c8cf', border:'#1f2937', accent:'#d4d8df', hover:'#9aa0aa', card:'#e4e6ea' },
+  };
+  window.PALETTES = PALETTES;
+  function applyPalette(key) {
+    const p = PALETTES[key] || PALETTES.blue;
+    const r = document.documentElement.style;
+    r.setProperty('--bg-color', p.bg);
+    r.setProperty('--surface', p.surface);
+    r.setProperty('--nav-bg', p.surface);
+    r.setProperty('--muted', p.muted);
+    r.setProperty('--border-color', p.border);
+    r.setProperty('--accent-color', p.accent);
+    r.setProperty('--muted-hover', p.hover);
+    r.setProperty('--card-bg', p.card);
+  }
+  window.applyPalette = applyPalette;
+  try { applyPalette(localStorage.getItem('preferredAccent') || 'blue'); } catch (e) {}
+</script>
+<style>
+  /* ── Paleta ta, mapată peste design tokens reale ── */
+  :root {
+    --bg-color: #F2F2F2;
+    --nav-bg: #6085A6;
+    --border-color: #024873;
+    --text-primary: #F2F2F2;
+    --text-secondary: #F2F2F2;
+    --accent-color: #D0DCF2;
+    --surface: #6085A6;     /* card seller */
+    --muted: #A0B9D9;
+    --muted-hover: #8aa9cf;
+  }
+  * { box-sizing: border-box; }
+  ::selection { background: var(--surface); color: #F2F2F2; }
+  ::-moz-selection { background: var(--surface); color: #F2F2F2; }
+  body {
+    margin: 0;
+    background: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Inter Tight', system-ui, -apple-system, sans-serif;
+    padding-bottom: 4rem;
+  }
+
+  /* ── EXACT din storesCss (app.js) ── */
+  .hc-carousel-wrap { position: relative; }
+  .hc-carousel { display: flex; gap: 16px; padding: 24px 0; margin: -24px 0; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; scrollbar-width: none; -ms-overflow-style: none; cursor: grab; }
+  .hc-carousel:active { cursor: grabbing; }
+  .hc-carousel::-webkit-scrollbar { display: none; }
+  .hc-card { flex-shrink: 0; width: 243.2px; display: flex; flex-direction: column; }
+  .hc-card .product-image { height: auto; aspect-ratio: 1; }
+  .hc-arrow { position: absolute; top: 45%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: var(--border-color); border: 1px solid var(--border-color); color: var(--text-primary); display: none; align-items: center; justify-content: center; cursor: pointer; z-index: 5; transition: background 0.15s; backdrop-filter: blur(4px); }
+  .hc-carousel-wrap:hover .hc-arrow { display: flex; }
+  .hc-arrow:hover { opacity: 0.9; }
+  .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
+  .stores-page-head { max-width: 1280px; margin: 0.5rem auto 1rem; padding: 0; }
+  .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--border-color); margin-bottom: 0.4rem; }
+  .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: var(--card-bg, var(--surface)); border: none; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 6px 18px -4px var(--border-color); }
+  .store-page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0; }
+  .store-section-card .store-icon { width: 48px; height: 48px; font-size: 1.2rem; border: 3px solid var(--bg-color); }
+  .store-section-divider { height: 1px; background: rgba(2,72,115,.35); margin: 16px 20px 0; }
+  .store-section-card .hc-carousel { padding: 16px 20px 14px; margin: 0; }
+  .store-section-card .hc-arrow-left { left: 8px; }
+  .store-section-card .hc-arrow-right { right: 8px; }
+  .store-view-btn-sm { width: auto; margin-top: 0; padding: 0 1.4rem; height: 36px; }
+
+  /* ── HERO (Home) ── */
+  .pl-hero { text-align: center; padding: 2.25rem 24px 1.25rem; max-width: 1280px; margin: 0 auto; }
+  .pl-hero-title { font-family: 'Inter Tight', system-ui, sans-serif; font-size: clamp(32px, 5vw, 42px); font-weight: 600; letter-spacing: -0.025em; line-height: 1.5; color: var(--border-color); margin: 0 0 0.5rem; }
+  .pl-accent { font-weight: 800; color: var(--surface); }
+  .pl-hero-sub { font-family: 'Inter Tight', system-ui, sans-serif; color: var(--border-color); opacity: 0.85; font-size: clamp(14px, 1.5vw, 16px); margin: 0 0 1.75rem; }
+  .pl-hero .pl-search-wrap { max-width: 541px; height: auto; padding: 18px 20px; margin: 0 auto; }
+  .search-host { position: relative; max-width: 541px; margin: 0 auto 1.5rem; }
+  .search-panel { position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 60; text-align: left; background: var(--card-bg, #fff); border: 1px solid var(--border-color); border-radius: 18px; padding: 1rem 1.1rem; box-shadow: 0 16px 50px #02487340; max-height: 70vh; overflow-y: auto; }
+  .sp-section { margin-bottom: 1rem; } .sp-section:last-child { margin-bottom: 0; }
+  .sp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.6rem; font-size: 0.95rem; font-weight: 700; color: var(--border-color); }
+  .sp-clear { background: none; border: none; color: var(--border-color); opacity: .7; font-size: 0.8rem; cursor: pointer; font-weight: 600; font-family: inherit; }
+  .sp-clear:hover { opacity: 1; }
+  .sp-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .sp-chip { display: inline-flex; align-items: center; gap: 6px; padding: 0.45rem 0.85rem; background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 9999px; color: var(--border-color); font-size: 0.85rem; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.15s; }
+  .sp-chip:hover { background: var(--muted); }
+  .sp-chip svg { width: 13px; height: 13px; opacity: .7; flex-shrink: 0; }
+  .sp-thumbs { display: flex; gap: 0.5rem; overflow-x: auto; scrollbar-width: none; }
+  .sp-thumbs::-webkit-scrollbar { display: none; }
+  .sp-thumb { flex: 0 0 auto; width: 72px; height: 72px; border-radius: 10px; overflow: hidden; background: var(--muted); cursor: pointer; border: 1px solid var(--border-color); }
+  .sp-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .sp-empty { font-size: .82rem; color: var(--border-color); opacity: .6; }
+  .pl-hero .pl-search-input { font-size: 0.95rem; }
+  .pl-hero .pl-search-icon, .pl-hero .pl-search-paste svg { width: 18px; height: 18px; }
+  .pl-explore-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--accent-color); color: var(--border-color); border: 1px solid var(--border-color); border-radius: 9999px; padding: 12px 26px; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px -4px var(--border-color); transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .pl-explore-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 18px -5px var(--border-color); }
+
+  /* ── NAVBAR (exact din site, în albastru, fără Stores/Products) ── */
+  .nav-container { width: 100%; position: sticky; top: 0; z-index: 100; background: var(--bg-color); backdrop-filter: blur(4px); border: none; }
+  .navbar { height: 77px; padding: 0 4%; background: transparent; border: none; box-shadow: none; width: 100%; box-sizing: border-box; }
+  .navbar-inner { display: flex; align-items: center; justify-content: space-between; position: relative; height: 77px; gap: 1.5rem; max-width: 1280px; margin: 0 auto; width: 100%; }
+  .nav-left { display: flex; align-items: center; gap: 1.5rem; flex: 1 1 0; min-width: 0; }
+  .nav-burger { display: none; align-items: center; justify-content: center; width: 40px; height: 40px; margin-left: -8px; background: transparent; border: none; color: var(--border-color); border-radius: 10px; flex: 0 0 auto; }
+  .nav-logo { display: inline-flex; align-items: center; flex-shrink: 0; }
+  .nav-logo img { height: 40px; width: auto; display: block; }
+  .nav-link { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.9rem; color: var(--border-color); text-decoration: none; font-weight: 500; padding: 4px 8px; border-radius: 6px; transition: color 0.15s ease, background 0.15s ease; }
+  .nav-link:hover, .nav-link.active { color: var(--border-color); background: var(--muted-hover); }
+  .nav-center { display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .navbar .nav-search-wrap { position: relative; flex: 0 1 520px; width: 520px; max-width: 100%; height: 48px; margin: 0 auto; }
+  .pl-search-wrap { position: relative; display: flex; align-items: center; gap: 0.2rem; background: var(--surface); border: none; border-radius: 9999px; padding: 0 20px; height: 48px; box-shadow: 0 2px 4px #02487322, 0 8px 16px #02487333; }
+  .pl-search-wrap::before { content: ""; position: absolute; inset: 0; border-radius: inherit; border: 1px solid var(--border-color); border-bottom: 0; pointer-events: none; }
+  .pl-search-icon { color: var(--text-primary); flex-shrink: 0; }
+  .pl-search-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 0.95rem; padding: 0 0.75rem; font-family: 'Inter Tight', system-ui, sans-serif; }
+  .pl-search-input::placeholder { color: var(--text-primary); opacity: 0.8; }
+  .pl-search-paste { background: transparent; border: none; color: var(--text-primary); cursor: pointer; padding: 0.25rem; display: flex; align-items: center; transition: opacity 0.2s; }
+  .pl-search-paste:hover { opacity: 0.7; }
+  .nav-right { display: flex; align-items: center; justify-content: flex-end; gap: 1.4rem; flex: 1 1 0; min-width: 0; }
+  .nav-more-wrap { position: relative; }
+  .nav-more-btn { display: flex; align-items: center; gap: 4px; cursor: pointer; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; font-weight: 600; color: var(--border-color); background: transparent; border: none; white-space: nowrap; padding: 4px 8px; border-radius: 6px; transition: color 0.15s ease, background 0.15s ease; }
+  .nav-more-wrap:hover .nav-more-btn, .nav-more-btn:hover { color: var(--text-primary); background: var(--muted-hover); }
+  .nav-more-chev { transition: transform 0.2s ease; }
+  .nav-more-wrap:hover .nav-more-chev { transform: rotate(180deg); }
+  .nav-more-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 1200; min-width: 176px; padding: 6px; background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 16px 40px #02487355; transform-origin: top right; transition: opacity 0.25s, transform 0.25s; opacity: 0; transform: scale(0.97) translateY(-6px); pointer-events: none; }
+  .nav-more-menu::before { content: ''; position: absolute; left: 0; right: 0; top: -10px; height: 10px; }
+  .nav-more-wrap:hover .nav-more-menu { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+  .nav-more-item { display: block; padding: 9px 12px; border-radius: 8px; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 14px; color: var(--text-primary); text-decoration: none; white-space: nowrap; transition: background 0.15s ease; }
+  .nav-more-item:hover { background: var(--muted-hover); }
+  .nav-gear-btn { width: 36px; height: 36px; border: none; flex-shrink: 0; background: transparent; color: var(--border-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+  .nav-gear-btn:hover { background: var(--muted-hover); color: var(--text-primary); }
+  .nav-gear-btn .gear-icon { transition: transform 0.4s ease; }
+  .nav-gear-btn:hover .gear-icon { transform: rotate(90deg); }
+
+  /* ── Preferences dropdown (ca la jarvis-finder) ── */
+  .settings-wrap { position: relative; display: inline-flex; }
+  .settings-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 256px; max-width: calc(100vw - 24px); background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 16px 40px #02487355; z-index: 200; overflow: hidden; transform-origin: top right; opacity: 0; transform: scale(0.97) translateY(-6px); pointer-events: none; transition: opacity 0.18s cubic-bezier(0.16,1,0.3,1), transform 0.18s cubic-bezier(0.16,1,0.3,1); }
+  .settings-menu.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+  .settings-menu-head { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+  .settings-menu-head h3 { font-size: 0.82rem; font-weight: 700; color: #F2F2F2; margin: 0; }
+  .settings-menu-body, .settings-submenu { padding: 6px; }
+  .settings-row, .settings-option, .settings-back { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border: none; background: transparent; border-radius: 8px; cursor: pointer; text-align: left; font-family: 'Inter Tight', system-ui, sans-serif; transition: background 0.15s ease; }
+  .settings-row:hover, .settings-option:hover, .settings-back:hover { background: var(--muted-hover); }
+  .settings-row-label { font-size: 0.78rem; font-weight: 600; color: #dce6f2; }
+  .settings-row-val { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 600; color: #F2F2F2; }
+  .settings-chev { width: 14px; height: 14px; color: #dce6f2; flex-shrink: 0; }
+  .settings-agent-icon { width: 16px; height: 16px; border-radius: 4px; object-fit: contain; flex-shrink: 0; }
+  .settings-back { justify-content: flex-start; gap: 6px; color: #dce6f2; font-size: 0.8rem; font-weight: 700; margin-bottom: 2px; }
+  .settings-back svg { width: 14px; height: 14px; }
+  .settings-options { display: flex; flex-direction: column; gap: 2px; }
+  .settings-option { justify-content: flex-start; }
+  .settings-option-label { font-size: 0.82rem; font-weight: 500; color: #F2F2F2; flex: 1; }
+  .settings-option .settings-agent-icon { width: 20px; height: 20px; border-radius: 6px; }
+  .settings-check { width: 16px; height: 16px; color: #F2F2F2; flex-shrink: 0; }
+  .theme-dot { width: 16px; height: 16px; border-radius: 4px; flex-shrink: 0; border: 1px solid #024873; }
+  /* swatch-uri de accent (rând orizontal de buline) */
+  .accent-swatches { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px 10px 4px; }
+  .accent-swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .accent-swatch.active { border-color: #F2F2F2; }
+  .accent-swatch svg { width: 13px; height: 13px; color: #16273a; }
+
+  /* ── EXACT din style.css ── */
+  .store-header { display: flex; align-items: center; gap: 0.75rem; }
+  .store-icon { position: relative; width: 56px; height: 56px; border-radius: 50%; background: var(--muted); color: var(--border-color); font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 6px 16px var(--border-color); }
+  .store-icon::after { content: ''; position: absolute; right: -1px; bottom: -1px; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--surface); background: var(--accent-color) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23024873' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E") center / 9px no-repeat; }
+  .store-icon img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .store-meta { display: flex; flex-direction: column; min-width: 0; }
+  .store-name { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.95rem; font-weight: 700; color: var(--border-color); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .store-sub { font-size: 0.78rem; color: var(--border-color); opacity: 0.7; }
+  .store-head-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .store-view-btn { margin-top: auto; width: 100%; background: var(--accent-color); color: var(--border-color); border: none; border-radius: 9999px; height: 32px; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; transition: opacity 0.15s ease; }
+  .store-view-btn:hover { opacity: 0.9; }
+
+  .product-card { background: var(--muted); border: none; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px -3px var(--border-color); display: flex; flex-direction: column; height: 100%; cursor: pointer; transition: transform 0.18s ease, box-shadow 0.18s ease; }
+  .product-card:hover { transform: translateY(-6px); box-shadow: 0 14px 26px -6px var(--border-color); }
+  .product-image { width: 100%; aspect-ratio: 1; background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--border-color); overflow: hidden; position: relative; }
+  .product-info { padding: 8px 10px 10px; display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; }
+  .product-batch-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; min-width: 0; overflow: hidden; }
+  .product-store-badge { background: var(--border-color); color: var(--text-primary); font-size: 0.6rem; font-weight: 700; width: 20px; height: 20px; border-radius: 9999px; border: 2px solid var(--surface); overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .product-store-name { font-size: 12px; color: var(--border-color); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .product-title { font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 500; margin-bottom: 4px; font-size: 15px; color: #16273a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 18.75px; }
+  .product-price { color: var(--border-color); font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 600; font-size: 16px; line-height: 24px; margin-bottom: 8px; }
+  .product-actions { display: flex; gap: 6px; margin-top: auto; }
+  .card-btn-buy { background: var(--accent-color); color: var(--border-color); border: none; padding: 0; border-radius: 9999px; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 600; font-size: 12px; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; height: 28px; flex: 1; white-space: nowrap; transition: opacity 160ms ease; }
+  .card-btn-buy:hover { opacity: 0.85; }
+  .card-btn-qc { background: var(--surface); border-radius: 9999px; color: var(--text-primary); border: none; padding: 0; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; height: 28px; flex: 1; white-space: nowrap; transition: opacity 160ms ease; }
+  .card-btn-qc:hover { opacity: 0.8; }
+
+  /* ── Cont Discord în meniul Preferences ── */
+  .settings-auth { border-top: 1px solid var(--border-color); margin-top: 4px; padding: 8px 6px 4px; }
+  .discord-login-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: #5865F2; color: #fff; border: none; border-radius: 9px; padding: 10px 12px; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 600; font-size: 0.82rem; cursor: pointer; transition: opacity .15s; }
+  .discord-login-btn:hover { opacity: .9; }
+  .discord-login-btn svg { width: 18px; height: 18px; }
+  .auth-user { display: flex; align-items: center; gap: 10px; padding: 6px 6px; }
+  .auth-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; background: var(--muted); flex-shrink: 0; }
+  .auth-name { font-size: 0.85rem; font-weight: 700; color: #F2F2F2; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .auth-logout { background: transparent; border: 1px solid #F2F2F2; color: #F2F2F2; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .auth-logout:hover { background: rgba(255,255,255,.12); }
+  .auth-logout svg { width: 15px; height: 15px; }
+</style>
+</head>
+<body>
+  <div class="nav-container">
+    <nav class="navbar">
+      <div class="navbar-inner">
+        <div class="nav-left">
+          <button class="nav-burger" type="button" aria-label="Menu">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <a href="#" class="nav-link">Home</a>
+        </div>
+        <div class="nav-right">
+          <div class="settings-wrap">
+            <button class="nav-gear-btn" id="gear-btn" aria-label="Settings" aria-haspopup="true" aria-expanded="false">
+              <svg class="gear-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+            <div class="settings-menu" id="settings-menu" role="menu">
+              <div class="settings-menu-head"><h3>Preferences</h3></div>
+              <div class="settings-menu-body" id="settings-main">
+                <button class="settings-row" id="set-row-agent" role="menuitem">
+                  <span class="settings-row-label">Agent</span>
+                  <span class="settings-row-val"><img id="set-agent-icon" class="settings-agent-icon" alt=""><span id="set-agent-val">Kakobuy</span>
+                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                  </span>
+                </button>
+                <button class="settings-row" id="set-row-currency" role="menuitem">
+                  <span class="settings-row-label">Currency</span>
+                  <span class="settings-row-val"><span id="set-cur-val">¥ CNY</span>
+                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                  </span>
+                </button>
+                <button class="settings-row" id="set-row-accent" role="menuitem">
+                  <span class="settings-row-label">Accent</span>
+                  <span class="settings-row-val"><span id="set-accent-dot" class="theme-dot" style="border-radius:50%;background:var(--accent-color);"></span>
+                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                  </span>
+                </button>
+                <div class="settings-auth" id="set-auth-mount"></div>
+              </div>
+              <div class="settings-submenu" id="settings-sub" hidden>
+                <button class="settings-back" id="settings-back">
+                  <svg viewBox="0 0 20 20" fill="currentColor" style="transform:rotate(180deg)"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                  <span id="settings-sub-title">Agent</span>
+                </button>
+                <div class="settings-options" id="settings-options"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <div class="pl-hero">
+    <h1 class="pl-hero-title">Your Go-to <span class="pl-accent">Spreadsheet</span></h1>
+    <p class="pl-hero-sub">Find It. Check It. Buy It Through Your Favorite Agent.</p>
+    <div class="search-host">
+      <div class="pl-search-wrap">
+        <svg class="pl-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="search" type="text" class="pl-search-input" placeholder="Search brands or products..." autocomplete="off" spellcheck="false" maxlength="100">
+        <button class="pl-search-paste" aria-label="Paste">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+      <div class="search-panel" id="search-panel" hidden></div>
+    </div>
+  </div>
+  <div class="stores-page-head"><h1>Products</h1></div>
+  <div id="stores"></div>
+
+  <script>
+    const aL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
+    const aR = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+
+    const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+    // ── Currency (prețuri stocate în CNY) ──
+    // rate = unități din moneda respectivă pentru 1 ¥ CNY (aprox.)
+    const CURRENCIES = [
+      { code: 'CNY', label: '¥ CNY', symbol: '¥',  rate: 1,     dec: 0 },
+      { code: 'USD', label: '$ USD', symbol: '$',  rate: 0.14,  dec: 2 },
+      { code: 'EUR', label: '€ EUR', symbol: '€',  rate: 0.13,  dec: 2 },
+      { code: 'GBP', label: '£ GBP', symbol: '£',  rate: 0.11,  dec: 2 },
+      { code: 'RON', label: 'lei RON', symbol: 'lei', rate: 0.64, dec: 2 },
+      { code: 'PLN', label: 'zł PLN', symbol: 'zł', rate: 0.51,  dec: 2 },
+      { code: 'AUD', label: '$ AUD', symbol: 'A$', rate: 0.21,  dec: 2 },
+      { code: 'CAD', label: '$ CAD', symbol: 'C$', rate: 0.19,  dec: 2 },
+    ];
+    const CUR_KEY = 'preferredCurrency';
+    function currentCurrency() { return CURRENCIES.find(c => c.code === (localStorage.getItem(CUR_KEY) || 'CNY')) || CURRENCIES[0]; }
+    function formatPrice(cny) {
+      if (cny === null || cny === undefined || cny === '') return '';
+      const c = currentCurrency();
+      const v = Number(cny) * c.rate;
+      const num = c.dec ? v.toFixed(c.dec) : Math.round(v);
+      return c.code === 'CNY' ? `¥${num}` : (c.symbol === 'lei' || c.symbol === 'zł' ? `${num} ${c.symbol}` : `${c.symbol}${num}`);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  AGENT ROUTING (identic cu jarvis-finder — aceiași agenți + coduri aff)
+    // ════════════════════════════════════════════════════════════
+    const favicon = d => `https://www.google.com/s2/favicons?domain=${d}&sz=64`;
+    const AGENTS = [
+      { id: 'kakobuy',  name: 'Kakobuy',  icon: 'https://kakobuy.com/favicon.ico',      domain: 'kakobuy.com' },
+      { id: 'oopbuy',   name: 'Oopbuy',   icon: 'https://www.oopbuy.com/favicon.ico',   domain: 'oopbuy.com' },
+      { id: 'acbuy',    name: 'ACBuy',    icon: 'https://www.acbuy.com/favicon.ico',    domain: 'acbuy.com' },
+      { id: 'mulebuy',  name: 'Mulebuy',  icon: 'https://www.mulebuy.com/favicon.ico',  domain: 'mulebuy.com' },
+      { id: 'superbuy', name: 'Superbuy', icon: 'https://www.superbuy.com/favicon.ico', domain: 'superbuy.com' },
+      { id: 'joyagoo',  name: 'Joyagoo',  icon: 'https://joyagoo.com/favicon.ico',      domain: 'joyagoo.com' },
+      { id: 'usfans',   name: 'USFans',   icon: 'https://usfans.com/favicon.ico',       domain: 'usfans.com' },
+    ];
+    const PREFERRED_AGENT_KEY = 'preferredAgent';
+
+    function safeExternalUrl(rawUrl) {
+      const v = String(rawUrl || '').trim();
+      if (!v) return '#';
+      try { const u = new URL(v); return (u.protocol === 'http:' || u.protocol === 'https:') ? u.toString() : '#'; }
+      catch { return '#'; }
+    }
+    function extractWeidianItemId(kakobuyUrl) {
+      try {
+        const p = new URL(kakobuyUrl);
+        const nested = p.searchParams.get('url') || p.searchParams.get('link');
+        if (!nested) return null;
+        const s = new URL(decodeURIComponent(nested));
+        return s.searchParams.get('itemID') || s.searchParams.get('itemId') || null;
+      } catch { return null; }
+    }
+    function appendAffcodeIfMissing(rawUrl) {
+      const clean = safeExternalUrl(rawUrl);
+      if (clean === '#') return '#';
+      try {
+        const p = new URL(clean), host = p.hostname.toLowerCase();
+        const m = h => host === h || host.endsWith('.' + h);
+        if ((m('ikako.vip') || m('kakobuy.com')) && !p.searchParams.has('affcode')) p.searchParams.set('affcode', 'keviinn');
+        return p.toString();
+      } catch { return '#'; }
+    }
+    function buildAgentUrl(agentId, kakobuyRaw) {
+      const clean = safeExternalUrl(kakobuyRaw || '#');
+      if (clean === '#') return '#';
+      if (agentId === 'kakobuy') return appendAffcodeIfMissing(clean);
+      const itemId = extractWeidianItemId(clean);
+      if (!itemId) return appendAffcodeIfMissing(clean);
+      const enc = encodeURIComponent(`https://weidian.com/item.html?itemID=${itemId}`);
+      switch (agentId) {
+        case 'oopbuy':   return `https://oopbuy.com/product/2/${itemId}`;
+        case 'acbuy':    return `https://www.acbuy.com/en/page/buy/?url=${enc}`;
+        case 'mulebuy':  return `https://www.mulebuy.com/product/?url=${enc}`;
+        case 'superbuy': return `https://www.superbuy.com/en/page/buy/?url=${enc}`;
+        case 'joyagoo':  return `https://joyagoo.com/product?id=${itemId}&platform=WEIDIAN`;
+        case 'usfans':   return `https://usfans.com/product?url=${enc}`;
+        default:         return appendAffcodeIfMissing(clean);
+      }
+    }
+    function parseSourcePlatform(pickslyRaw) {
+      const m = String(pickslyRaw || '').match(/\/item\/(WD|TB|AL)(\d+)/i);
+      if (!m) return null;
+      const map = { WD: 'weidian', TB: 'taobao', AL: '1688' };
+      const platform = map[m[1].toUpperCase()];
+      return platform ? { platform, id: m[2] } : null;
+    }
+    function buildAgentUrlFromSource(agentId, platform, id) {
+      if (!id || !platform) return null;
+      const enc = {
+        weidian: encodeURIComponent(`https://weidian.com/item.html?itemID=${id}`),
+        taobao:  encodeURIComponent(`https://item.taobao.com/item.htm?id=${id}`),
+        '1688':  encodeURIComponent(`https://detail.1688.com/offer/${id}.html`),
+      };
+      const T = {
+        kakobuy:  { weidian:`https://www.kakobuy.com/item/details?url=${enc.weidian}&affcode=keviinn`, taobao:`https://www.kakobuy.com/item/details?url=${enc.taobao}&affcode=keviinn`, '1688':`https://www.kakobuy.com/item/details?url=${enc['1688']}&affcode=keviinn` },
+        acbuy:    { weidian:`https://www.acbuy.com/product?id=${id}&source=WD&u=3R6HXS`, '1688':`https://www.acbuy.com/product?id=${id}&source=AL&u=3R6HXS`, taobao:`https://www.acbuy.com/product?id=${id}&source=TB&u=3R6HXS` },
+        superbuy: { weidian:`https://www.superbuy.com/en/page/buy/?platform=WD&id=${id}&partnercode=kevnek`, '1688':`https://www.superbuy.com/en/page/buy/?platform=ALIBABA&id=${id}&partnercode=kevnek`, taobao:`https://www.superbuy.com/en/page/buy/?platform=TMALL&id=${id}&partnercode=kevnek` },
+        usfans:   { weidian:`https://usfans.com/product/3/${id}?ref=SDXCQX`, '1688':`https://usfans.com/product/1/${id}?ref=SDXCQX`, taobao:`https://usfans.com/product/2/${id}?ref=SDXCQX` },
+        oopbuy:   { weidian:`https://oopbuy.com/product/weidian/${id}?inviteCode=KVK77PNEM`, '1688':`https://oopbuy.com/product/0/${id}?inviteCode=KVK77PNEM`, taobao:`https://oopbuy.com/product/1/${id}?inviteCode=KVK77PNEM` },
+        mulebuy:  { weidian:`https://mulebuy.com/product?id=${id}&platform=WEIDIAN&ref=200541300`, '1688':`https://mulebuy.com/product?id=${id}&platform=ALI_1688&ref=200541300`, taobao:`https://mulebuy.com/product?id=${id}&platform=TAOBAO&ref=200541300` },
+        joyagoo:  { weidian:`https://joyagoo.com/product?id=${id}&platform=WEIDIAN&ref=301005780`, '1688':`https://joyagoo.com/product?id=${id}&platform=ALI_1688&ref=301005780`, taobao:`https://joyagoo.com/product?id=${id}&platform=TAOBAO&ref=301005780` },
+      };
+      return (T[agentId] && T[agentId][platform]) || null;
+    }
+    function withRef(rawUrl) {
+      const clean = safeExternalUrl(rawUrl);
+      if (clean === '#') return '#';
+      if (/[?&]ref=keviinn\b/.test(clean)) return clean;
+      return clean + (clean.includes('?') ? '&' : '?') + 'ref=keviinn';
+    }
+    // Parsează un link BRUT de marketplace (weidian / taobao / tmall / 1688)
+    // → { platform, id }. Asta pun în admin la "Link Buy Now".
+    function parseMarketplace(raw) {
+      const s = String(raw || '').trim();
+      if (!s) return null;
+      let u; try { u = new URL(s); } catch { return null; }
+      const host = u.hostname.toLowerCase();
+      const q = u.searchParams;
+      if (host.includes('weidian.com')) {
+        const id = q.get('itemID') || q.get('itemId') || (u.pathname.match(/(\d{6,})/) || [])[1];
+        if (id) return { platform: 'weidian', id };
+      }
+      if (host.includes('taobao.com') || host.includes('tmall.com')) {
+        const id = q.get('id') || (u.pathname.match(/(\d{6,})/) || [])[1];
+        if (id) return { platform: 'taobao', id };
+      }
+      if (host.includes('1688.com')) {
+        const id = (u.pathname.match(/offer\/(\d+)/) || [])[1] || q.get('id') || (u.pathname.match(/(\d{6,})/) || [])[1];
+        if (id) return { platform: '1688', id };
+      }
+      return null;
+    }
+    function resolveBuyUrl(pickslyRaw, kakobuyRaw, agentId) {
+      agentId = (agentId || localStorage.getItem(PREFERRED_AGENT_KEY) || '').toLowerCase();
+      if (!agentId) return null;
+      // 1. link picks.ly (/item/WD…)  2. link brut weidian/taobao/1688  3. fallback
+      const src = parseSourcePlatform(pickslyRaw) || parseMarketplace(pickslyRaw) || parseMarketplace(kakobuyRaw);
+      if (src) { const u = buildAgentUrlFromSource(agentId, src.platform, src.id); if (u) return u; }
+      return buildAgentUrl(agentId, kakobuyRaw);
+    }
+    // Deschide un URL de agent doar dacă e pe un domeniu permis (anti-abuz).
+    function openAgentUrl(url) {
+      if (!url || url === '#') return;
+      try {
+        const host = new URL(url).hostname.toLowerCase();
+        const ok = AGENTS.some(a => host === a.domain || host.endsWith('.' + a.domain)) ||
+                   host === 'ikako.vip' || host.endsWith('.ikako.vip');
+        if (ok) window.open(url, '_blank', 'noopener,noreferrer');
+      } catch {}
+    }
+    function showAgentPopup(pickslyRaw, kakobuyRaw) {
+      const old = document.getElementById('agent-popup-overlay'); if (old) old.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'agent-popup-overlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(2,72,115,0.45);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);animation:apFadeIn .2s ease;';
+      overlay.innerHTML = `
+        <style>
+          @keyframes apFadeIn { from{opacity:0;} to{opacity:1;} }
+          @keyframes apSlideUp { from{transform:translateY(20px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+          .ap-modal { position:relative;background:var(--surface);border:1px solid var(--border-color);border-radius:16px;padding:1.5rem;width:380px;max-width:92vw;animation:apSlideUp .25s ease;box-shadow:0 18px 40px -8px var(--border-color); }
+          .ap-title { font-family:'Inter Tight',system-ui,sans-serif;font-size:18px;font-weight:700;color:#F2F2F2;margin-bottom:0.25rem; }
+          .ap-sub { font-size:13px;color:#dce6f2;margin-bottom:1.25rem; }
+          .ap-grid { display:grid;grid-template-columns:1fr 1fr;gap:0.5rem; }
+          .ap-btn { display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid var(--border-color);background:var(--muted);color:#16273a;font-family:'Inter Tight',system-ui,sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:transform .12s,background .15s;text-decoration:none; }
+          .ap-btn:hover { background:var(--accent-color);transform:translateY(-2px); }
+          .ap-btn img { width:20px;height:20px;border-radius:4px;object-fit:contain; }
+          .ap-close { position:absolute;top:12px;right:14px;background:none;border:none;color:#dce6f2;font-size:20px;cursor:pointer;line-height:1; }
+          .ap-close:hover { color:#F2F2F2; }
+          .ap-raw { margin-top:0.6rem;width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 14px;border-radius:12px;border:1px dashed #F2F2F2;background:transparent;color:#F2F2F2;font-family:'Inter Tight',system-ui,sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s; }
+          .ap-raw:hover { background:rgba(255,255,255,.12); }
+        </style>
+        <div class="ap-modal">
+          <button class="ap-close" id="ap-close">&times;</button>
+          <div class="ap-title">Select Your Agent</div>
+          <div class="ap-sub">Choose your agent once — we'll remember it for next time.</div>
+          <div class="ap-grid">
+            ${AGENTS.map(a => `<a class="ap-btn" data-agent="${a.id}" href="#"><img src="${esc(a.icon)}" alt="" onerror="this.onerror=null;this.src='${favicon(a.domain)}'">${esc(a.name)}</a>`).join('')}
+          </div>
+          <button class="ap-raw" id="ap-raw">Raw Link (Weidian / Taobao / 1688)</button>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+      overlay.querySelector('#ap-close').addEventListener('click', () => overlay.remove());
+      overlay.querySelector('#ap-raw').addEventListener('click', () => {
+        const raw = safeExternalUrl(kakobuyRaw || pickslyRaw);
+        if (raw !== '#') window.open(raw, '_blank', 'noopener,noreferrer');
+        overlay.remove();
+      });
+      overlay.querySelectorAll('.ap-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.preventDefault();
+          const agentId = btn.getAttribute('data-agent');
+          localStorage.setItem(PREFERRED_AGENT_KEY, agentId);
+          openAgentUrl(resolveBuyUrl(pickslyRaw, kakobuyRaw, agentId));
+          overlay.remove();
+        });
+      });
+    }
+
+    // Framing imagine (identic cu Jarvis admin): fragment "#ro=&oy=&z=" în URL.
+    // ro = rotire reală (prin proxy wsrv.nl), oy = poziție verticală, z = zoom.
+    function cmSplitImg(img) {
+      img = String(img || '');
+      const h = img.indexOf('#');
+      if (h < 0) return { base: img, rot: 0, oy: 50, z: 100 };
+      const base = img.slice(0, h), frag = img.slice(h + 1);
+      const ro = (frag.match(/ro=(\d+)/) || [])[1];
+      const oy = (frag.match(/oy=(\d+)/) || [])[1];
+      const z  = (frag.match(/z=(\d+)/) || [])[1];
+      return { base, rot: parseInt(ro||'0',10)||0, oy: oy!=null?parseInt(oy,10):50, z: z!=null?parseInt(z,10):100 };
+    }
+    function cmProxied(base, ro) {
+      base = String(base || '').replace(/#.*$/, '');
+      if (!base) return '';
+      let url = `https://wsrv.nl/?url=${encodeURIComponent(base)}&w=700&output=webp&q=85&we`;
+      if (ro) url += `&ro=${ro % 360}`;
+      return url;
+    }
+    function cmThumbStyle(ci) {
+      if (ci.z < 100) return `width:100%;height:100%;object-fit:contain;object-position:50% ${ci.oy}%;`;
+      let s = `width:100%;height:100%;object-fit:cover;object-position:50% ${ci.oy}%;`;
+      if (ci.z !== 100) s += `transform:scale(${ci.z/100});transform-origin:50% ${ci.oy}%;`;
+      return s;
+    }
+
+    // Un card de produs. Date reale din DB sau placeholder.
+    function buildProductCard(p) {
+      const brand = esc(p.brand || '');
+      const title = esc(p.title || 'Untitled');
+      const price = esc(formatPrice(p.price));
+      const ci = cmSplitImg(p.img);
+      const img = ci.base
+        ? `<img src="${esc(ci.rot ? cmProxied(ci.base, ci.rot) : ci.base)}" alt="${title}" style="${cmThumbStyle(ci)}" loading="lazy" />`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
+      const qc = p.qc_link ? `href="${esc(withRef(p.qc_link))}" target="_blank" rel="noopener"` : '';
+      return `<div class="hc-card product-card">
+        <div class="product-image" style="overflow:hidden;position:relative;">${img}</div>
+        <div class="product-info">
+          <div class="product-batch-row"><span class="product-store-badge">店</span><span class="product-store-name">${brand}</span></div>
+          <h3 class="product-title">${title}</h3>
+          <div class="product-price">${price}</div>
+          <div class="product-actions">
+            <button class="card-btn-buy" data-buy="${esc(p.buy_link || '')}">Buy Now</button>
+            <a class="card-btn-qc" ${qc}>View QC</a>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // Logo per brand (din colecția "brands" din Firestore). name → img.
+    window.brandLogos = window.brandLogos || {};
+
+    // O secțiune (carusel) per brand.
+    function buildBrandSection(brand, items, si) {
+      const id = 'st-' + si;
+      const cards = items.map(buildProductCard).join('');
+      const logo = window.brandLogos[brand];
+      const icon = logo
+        ? `<img src="${esc(logo)}" alt="${esc(brand)}" loading="lazy">`
+        : esc(brand.charAt(0).toUpperCase());
+      return `<div class="store-section-card">
+        <div class="store-page-header">
+          <div class="store-header">
+            <div class="store-icon">${icon}</div>
+            <div class="store-meta">
+              <span class="store-name">${esc(brand)}</span>
+              <span class="store-sub">${items.length} product${items.length === 1 ? '' : 's'}</span>
+            </div>
+          </div>
+          <div class="store-head-actions">
+            <button class="store-view-btn store-view-btn-sm">View Brand</button>
+          </div>
+        </div>
+        <div class="store-section-divider"></div>
+        <div class="hc-carousel-wrap">
+          <button class="hc-arrow hc-arrow-left" data-carousel="${id}" data-dir="-1">${aL}</button>
+          <div class="hc-carousel" id="${id}">${cards}</div>
+          <button class="hc-arrow hc-arrow-right" data-carousel="${id}" data-dir="1">${aR}</button>
+        </div>
+      </div>`;
+    }
+
+    // Grupează produsele pe brand și randează.
+    function render(products) {
+      window.cmProducts = products;
+      const map = new Map();
+      products.forEach(p => {
+        const b = (p.brand || 'Other').trim() || 'Other';
+        if (!map.has(b)) map.set(b, []);
+        map.get(b).push(p);
+      });
+      const html = [...map.entries()].map(([brand, items], si) => buildBrandSection(brand, items, si)).join('');
+      document.getElementById('stores').innerHTML = html || '<p style="text-align:center;opacity:.7;padding:3rem;">Niciun produs încă.</p>';
+      wireCarousels();
+    }
+
+    // Buy Now → pop-up de agent (delegare, o singură dată).
+    document.addEventListener('click', e => {
+      const btn = e.target.closest('.card-btn-buy');
+      if (!btn) return;
+      e.preventDefault();
+      const link = btn.getAttribute('data-buy') || '';
+      const card = btn.closest('.product-card');
+      if (card && window.cmPushViewed) {
+        window.cmPushViewed({
+          title: card.querySelector('.product-title')?.textContent || '',
+          img: card.querySelector('.product-image img')?.getAttribute('src') || ''
+        });
+      }
+      // Dacă agentul e deja ales, mergem direct (fără pop-up).
+      const saved = (localStorage.getItem(PREFERRED_AGENT_KEY) || '').toLowerCase();
+      if (saved === 'rawlink') { const raw = safeExternalUrl(link); if (raw !== '#') window.open(raw, '_blank', 'noopener,noreferrer'); }
+      else if (saved) openAgentUrl(resolveBuyUrl(link, link, saved));
+      else showAgentPopup(link, link);
+    });
+
+    // ── Preferences dropdown (Agent + Currency) ──
+    (function settingsMenu() {
+      const gear = document.getElementById('gear-btn');
+      const menu = document.getElementById('settings-menu');
+      const main = document.getElementById('settings-main');
+      const sub = document.getElementById('settings-sub');
+      const opts = document.getElementById('settings-options');
+      const subTitle = document.getElementById('settings-sub-title');
+      const back = document.getElementById('settings-back');
+      const check = '<svg class="settings-check" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>';
+
+      const rawIconSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--border-color)"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+      function currentAgent() { return (localStorage.getItem(PREFERRED_AGENT_KEY) || 'kakobuy').toLowerCase(); }
+      function updateRows() {
+        const cur = currentAgent();
+        const ic = document.getElementById('set-agent-icon');
+        if (cur === 'rawlink') {
+          ic.removeAttribute('src'); ic.style.display = 'none';
+          document.getElementById('set-agent-val').textContent = 'Raw Link';
+        } else {
+          const a = AGENTS.find(x => x.id === cur) || AGENTS[0];
+          ic.style.display = '';
+          ic.onerror = () => { ic.onerror = null; ic.src = favicon(a.domain); };
+          ic.src = a.icon;
+          document.getElementById('set-agent-val').textContent = a.name;
+        }
+        document.getElementById('set-cur-val').textContent = currentCurrency().label;
+        const pal = (window.PALETTES && window.PALETTES[localStorage.getItem('preferredAccent') || 'blue']) || null;
+        if (pal) document.getElementById('set-accent-dot').style.background = pal.surface;
+      }
+
+      function renderAgentOptions() {
+        const cur = currentAgent();
+        const agentsHtml = AGENTS.map(a => `
+          <button class="settings-option ${a.id === cur ? 'active' : ''}" data-agent="${a.id}">
+            <img class="settings-agent-icon" src="${esc(a.icon)}" alt="" onerror="this.onerror=null;this.src='${favicon(a.domain)}'">
+            <span class="settings-option-label">${esc(a.name)}</span>
+            ${a.id === cur ? check : ''}
+          </button>`).join('');
+        const rawHtml = `
+          <button class="settings-option ${cur === 'rawlink' ? 'active' : ''}" data-agent="rawlink">
+            <span class="settings-agent-icon" style="display:flex;align-items:center;justify-content:center;">${rawIconSvg}</span>
+            <span class="settings-option-label">Raw Link</span>
+            ${cur === 'rawlink' ? check : ''}
+          </button>`;
+        opts.innerHTML = agentsHtml + rawHtml;
+        opts.querySelectorAll('.settings-option').forEach(b => b.onclick = () => {
+          localStorage.setItem(PREFERRED_AGENT_KEY, b.dataset.agent);
+          updateRows(); closeMenu();
+        });
+      }
+      function renderCurrencyOptions() {
+        const cur = currentCurrency().code;
+        opts.innerHTML = CURRENCIES.map(c => `
+          <button class="settings-option ${c.code === cur ? 'active' : ''}" data-cur="${c.code}">
+            <span class="settings-option-label">${esc(c.label)}</span>
+            ${c.code === cur ? check : ''}
+          </button>`).join('');
+        opts.querySelectorAll('.settings-option').forEach(b => b.onclick = () => {
+          localStorage.setItem(CUR_KEY, b.dataset.cur);
+          updateRows();
+          if (window.cmProducts) render(window.cmProducts); // re-randează prețurile
+          closeMenu();
+        });
+      }
+
+      // Palete complete de accent (schimbă fundal carduri, texte, butoane, umbre).
+      function currentAccent() { return localStorage.getItem('preferredAccent') || 'blue'; }
+      function renderAccentOptions() {
+        const cur = currentAccent();
+        opts.innerHTML = `<div class="accent-swatches">${Object.entries(PALETTES).map(([key, p]) => `
+          <button class="accent-swatch ${key === cur ? 'active' : ''}" data-accent="${key}" style="background:${p.surface};" aria-label="${key}">
+            ${key === cur ? check : ''}
+          </button>`).join('')}</div>`;
+        opts.querySelectorAll('.accent-swatch').forEach(b => b.onclick = () => {
+          applyPalette(b.dataset.accent);
+          localStorage.setItem('preferredAccent', b.dataset.accent);
+          document.getElementById('set-accent-dot').style.background = (PALETTES[b.dataset.accent] || PALETTES.blue).surface;
+          renderAccentOptions();
+        });
+      }
+
+      function showMain() { main.hidden = false; sub.hidden = true; }
+      function showSub(kind) {
+        main.hidden = true; sub.hidden = false;
+        if (kind === 'currency') { subTitle.textContent = 'Currency'; renderCurrencyOptions(); }
+        else if (kind === 'accent') { subTitle.textContent = 'Accent'; renderAccentOptions(); }
+        else { subTitle.textContent = 'Agent'; renderAgentOptions(); }
+      }
+      function openMenu() { menu.classList.add('open'); gear.setAttribute('aria-expanded', 'true'); }
+      function closeMenu() { menu.classList.remove('open'); gear.setAttribute('aria-expanded', 'false'); showMain(); }
+
+      gear.addEventListener('click', e => { e.stopPropagation(); menu.classList.contains('open') ? closeMenu() : openMenu(); });
+      document.getElementById('set-row-agent').addEventListener('click', () => showSub('agent'));
+      document.getElementById('set-row-currency').addEventListener('click', () => showSub('currency'));
+      document.getElementById('set-row-accent').addEventListener('click', () => showSub('accent'));
+      back.addEventListener('click', showMain);
+      menu.addEventListener('click', e => e.stopPropagation());
+      document.addEventListener('click', () => { if (menu.classList.contains('open')) closeMenu(); });
+      updateRows();
+    })();
+
+    // ── Login cu Discord (OAuth2 implicit — fără backend) ──
+    (function discordAuth() {
+      const cfg = window.COLDMODE || {};
+      const CLIENT_ID = cfg.DISCORD_CLIENT_ID || '';
+      const mount = document.getElementById('set-auth-mount');
+      const redirectUri = location.origin + location.pathname; // trebuie înregistrat în Discord
+      const dLogo = '<svg viewBox="0 0 127.14 96.36" fill="currentColor"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>';
+      const outSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+
+      function getUser() { try { return JSON.parse(localStorage.getItem('cm_discord') || 'null'); } catch { return null; } }
+      function avatarUrl(u) { return u.avatar ? `https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png?size=64` : `https://cdn.discordapp.com/embed/avatars/0.png`; }
+
+      function renderAuth() {
+        const u = getUser();
+        if (u) {
+          mount.innerHTML = `<div class="auth-user">
+            <img class="auth-avatar" src="${esc(avatarUrl(u))}" alt="">
+            <span class="auth-name">${esc(u.global_name || u.username)}</span>
+            <button class="auth-logout" id="dc-logout" title="Log out">${outSvg}</button>
+          </div>`;
+          mount.querySelector('#dc-logout').onclick = (e) => { e.stopPropagation(); localStorage.removeItem('cm_discord'); renderAuth(); };
+        } else {
+          mount.innerHTML = `<button class="discord-login-btn" id="dc-login">${dLogo}Login with Discord</button>`;
+          mount.querySelector('#dc-login').onclick = (e) => {
+            e.stopPropagation();
+            if (!CLIENT_ID) { alert('Discord neconfigurat: pune DISCORD_CLIENT_ID în coldmode-config.js.'); return; }
+            const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=identify`;
+            location.href = url;
+          };
+        }
+      }
+
+      // La revenirea din Discord: token în fragmentul URL (#access_token=...)
+      async function handleRedirect() {
+        if (!location.hash.includes('access_token')) return;
+        const params = new URLSearchParams(location.hash.slice(1));
+        const token = params.get('access_token');
+        history.replaceState(null, '', location.pathname + location.search); // curăț URL-ul
+        if (!token) return;
+        try {
+          const res = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: 'Bearer ' + token } });
+          if (res.ok) { localStorage.setItem('cm_discord', JSON.stringify(await res.json())); }
+        } catch (_) {}
+        renderAuth();
+      }
+
+      renderAuth();
+      handleRedirect();
+    })();
+
+    // Date placeholder cât timp DB-ul e gol / neconfigurat.
+    function placeholderData() {
+      const BRANDS = ['BALENCIAGA', 'Brand 2', 'Brand 3', 'Brand 4', 'Brand 5', 'Brand 6', 'Brand 7', 'Brand 8', 'Brand 9', 'Brand 10'];
+      let pid = 0, out = [];
+      BRANDS.forEach(brand => {
+        for (let i = 0; i < 10; i++) { pid++; out.push({ brand, title: 'Product ' + pid, price: 10 + (pid * 7) % 90, img: '' }); }
+      });
+      return out;
+    }
+
+    function wireCarousels() {
+      document.querySelectorAll('.hc-arrow').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const car = document.getElementById(btn.dataset.carousel);
+          car.scrollBy({ left: 259 * Number(btn.dataset.dir), behavior: 'smooth' });
+        });
+      });
+    }
+
+    // Expun pentru modulul Firebase de mai jos.
+    window.cmRender = render;
+    window.cmPlaceholder = placeholderData;
+    // Fără placeholder: pagina pornește goală, iar modulul Firestore de jos
+    // afișează produsele reale când există (adăugate din Coldmode Admin).
+    render([]);
+    // Dacă Firebase NU e configurat, conținutul e gata acum (nu mai vine fetch).
+    {
+      const _c = window.COLDMODE || {};
+      if (!(_c.firebaseConfig && _c.firebaseConfig.projectId)) window.cmContentReady && window.cmContentReady();
+    }
+
+    // Search: filtrează secțiuni după brand, sau cardurile după titlu produs.
+    document.getElementById('search').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      document.querySelectorAll('.store-section-card').forEach(sec => {
+        const seller = sec.querySelector('.store-name').textContent.toLowerCase();
+        const sellerMatch = !q || seller.includes(q);
+        let visibleCards = 0;
+        sec.querySelectorAll('.product-card').forEach(card => {
+          const title = card.querySelector('.product-title').textContent.toLowerCase();
+          const show = sellerMatch || !q || title.includes(q);
+          card.style.display = show ? '' : 'none';
+          if (show) visibleCards++;
+        });
+        sec.style.display = (sellerMatch || visibleCards > 0) ? '' : 'none';
+      });
+    });
+
+    // ── Search focus panel (Recent / Trending / Recently viewed) ──
+    (function searchPanel() {
+      const input = document.getElementById('search');
+      const panel = document.getElementById('search-panel');
+      const host = input.closest('.search-host');
+      const clockSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+      const boltSvg = '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
+
+      const getRecent = () => { try { return JSON.parse(localStorage.getItem('cm_recent') || '[]'); } catch { return []; } };
+      const setRecent = a => localStorage.setItem('cm_recent', JSON.stringify(a.slice(0, 8)));
+      window.cmPushRecent = (q) => { q = (q || '').trim(); if (!q) return; const a = getRecent().filter(x => x.toLowerCase() !== q.toLowerCase()); a.unshift(q); setRecent(a); };
+      const getViewed = () => { try { return JSON.parse(localStorage.getItem('cm_viewed') || '[]'); } catch { return []; } };
+      window.cmPushViewed = (p) => { if (!p || !p.title) return; const a = getViewed().filter(x => x.title !== p.title); a.unshift({ title: p.title, img: p.img || '', purl: p.purl || '' }); localStorage.setItem('cm_viewed', JSON.stringify(a.slice(0, 12))); };
+
+      function trending() {
+        const prods = window.cmProducts || [];
+        const seen = new Set(), out = [];
+        prods.forEach(p => { const b = (p.brand || '').trim(); if (b && !seen.has(b.toLowerCase())) { seen.add(b.toLowerCase()); out.push(b); } });
+        // completez cu cuvinte din titluri
+        prods.forEach(p => (p.title || '').split(/\s+/).forEach(w => { w = w.replace(/[^\w]/g, ''); if (w.length > 2 && !seen.has(w.toLowerCase())) { seen.add(w.toLowerCase()); out.push(w); } }));
+        return out.slice(0, 10);
+      }
+
+      function applyQuery(q) {
+        input.value = q;
+        input.dispatchEvent(new Event('input'));
+        window.cmPushRecent(q);
+        hide();
+        document.querySelector('.stores-page-head')?.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      function build() {
+        const recent = getRecent(), trend = trending(), viewed = getViewed();
+        let html = '';
+        if (recent.length) {
+          html += `<div class="sp-section"><div class="sp-head">Recent <button class="sp-clear" id="sp-clear">Clear</button></div>
+            <div class="sp-chips">${recent.map(q => `<button class="sp-chip" data-q="${esc(q)}">${clockSvg}${esc(q)}</button>`).join('')}</div></div>`;
+        }
+        if (trend.length) {
+          html += `<div class="sp-section"><div class="sp-head">Trending</div>
+            <div class="sp-chips">${trend.map(q => `<button class="sp-chip" data-q="${esc(q)}">${boltSvg}${esc(q)}</button>`).join('')}</div></div>`;
+        }
+        if (viewed.length) {
+          html += `<div class="sp-section"><div class="sp-head">Recently viewed</div>
+            <div class="sp-thumbs">${viewed.map(v => `<div class="sp-thumb" data-purl="${esc(v.purl)}" title="${esc(v.title)}">${v.img ? `<img src="${esc(v.img)}" alt="">` : ''}</div>`).join('')}</div></div>`;
+        }
+        if (!html) html = '<div class="sp-empty">Type to search brands or products…</div>';
+        panel.innerHTML = html;
+        const clr = panel.querySelector('#sp-clear');
+        if (clr) clr.onclick = (e) => { e.stopPropagation(); localStorage.removeItem('cm_recent'); build(); };
+        panel.querySelectorAll('.sp-chip').forEach(c => c.onclick = () => applyQuery(c.dataset.q));
+        panel.querySelectorAll('.sp-thumb').forEach(t => t.onclick = () => { if (t.dataset.purl) window.open(t.dataset.purl, '_blank', 'noopener'); });
+      }
+      function show() { build(); panel.hidden = false; }
+      function hide() { panel.hidden = true; }
+
+      input.addEventListener('focus', show);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') { window.cmPushRecent(input.value); hide(); } if (e.key === 'Escape') hide(); });
+      document.addEventListener('click', e => { if (!host.contains(e.target)) hide(); });
+    })();
+  </script>
+
+  <!-- Firestore: încarcă produsele reale dacă firebaseConfig e completat -->
+  <script type="module">
+    const cfg = window.COLDMODE || {};
+    const fb = cfg.firebaseConfig || {};
+    if (fb.projectId) {
+      try {
+        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+        const { getFirestore, collection, getDocs, orderBy, query } =
+          await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+        const app = initializeApp(fb);
+        const db = getFirestore(app);
+        // Logo-uri de brand (colecția "brands") → window.brandLogos[name] = img
+        try {
+          const bsnap = await getDocs(collection(db, 'brands'));
+          window.brandLogos = window.brandLogos || {};
+          bsnap.docs.forEach(d => { const b = d.data(); if (b && b.name && b.img) window.brandLogos[b.name] = b.img; });
+        } catch (_) {}
+        const snap = await getDocs(query(collection(db, cfg.COLLECTION || 'products'), orderBy('brand')));
+        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        window.cmRender(items);
+      } catch (e) {
+        console.error('Firestore fetch failed:', e);
+      } finally {
+        window.cmContentReady && window.cmContentReady(); // arăt pagina după ce conținutul e gata
+      }
+    } else {
+      window.cmContentReady && window.cmContentReady();
+    }
+  </script>
+</body>
+</html>
