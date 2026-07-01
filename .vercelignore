@@ -8,6 +8,7 @@
 
 # 2) un-ignore the directories the site actually serves
 !index.html
+!coldmode-config.js
 !vercel.json
 !og-image.png
 !favicon.ico
