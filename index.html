@@ -326,6 +326,12 @@
                     <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
                   </span>
                 </button>
+                <button class="settings-row" id="set-row-qc" role="menuitem">
+                  <span class="settings-row-label">QC Checker</span>
+                  <span class="settings-row-val"><span id="set-qc-val">Doppel.fit</span>
+                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                  </span>
+                </button>
                 <div class="settings-auth" id="set-auth-mount"></div>
               </div>
               <div class="settings-submenu" id="settings-sub" hidden>
@@ -900,8 +906,9 @@
       if (url && url !== '#') window.open(url, '_blank', 'noopener,noreferrer');
     }
     function showQcPopup(doppelUrl) {
-      const saved = (localStorage.getItem(QC_KEY) || '').toLowerCase();
-      if (saved === 'picksly' || saved === 'doppel') { openQc(doppelUrl, saved); return; }
+      // Sursa QC se alege din Preferences → QC Checker (default Doppel.fit).
+      const saved = (localStorage.getItem(QC_KEY) || 'doppel').toLowerCase();
+      openQc(doppelUrl, saved === 'picksly' ? 'picksly' : 'doppel'); return;
       const overlay = document.createElement('div');
       overlay.className = 'ap-overlay';
       overlay.innerHTML = `
@@ -973,6 +980,23 @@
         document.getElementById('set-cur-val').textContent = currentCurrency().label;
         const pal = (window.PALETTES && window.PALETTES[localStorage.getItem('preferredAccent') || 'mono']) || null;
         if (pal) document.getElementById('set-accent-dot').style.background = pal.surface;
+        document.getElementById('set-qc-val').textContent = QC_SOURCES.find(s => s.id === currentQc()).name;
+      }
+
+      // QC Checker: sursa pentru "View QC" (Doppel.fit primul, apoi Picks.ly).
+      const QC_SOURCES = [{ id: 'doppel', name: 'Doppel.fit' }, { id: 'picksly', name: 'Picks.ly' }];
+      function currentQc() { return (localStorage.getItem(QC_KEY) || 'doppel').toLowerCase() === 'picksly' ? 'picksly' : 'doppel'; }
+      function renderQcOptions() {
+        const cur = currentQc();
+        opts.innerHTML = QC_SOURCES.map(s => `
+          <button class="settings-option ${s.id === cur ? 'active' : ''}" data-qc="${s.id}">
+            <span class="settings-option-label">${esc(s.name)}</span>
+            ${s.id === cur ? check : ''}
+          </button>`).join('');
+        opts.querySelectorAll('.settings-option').forEach(b => b.onclick = () => {
+          localStorage.setItem(QC_KEY, b.dataset.qc);
+          updateRows(); closeMenu();
+        });
       }
 
       function renderAgentOptions() {
@@ -1031,6 +1055,7 @@
         main.hidden = true; sub.hidden = false;
         if (kind === 'currency') { subTitle.textContent = 'Currency'; renderCurrencyOptions(); }
         else if (kind === 'accent') { subTitle.textContent = 'Accent'; renderAccentOptions(); }
+        else if (kind === 'qc') { subTitle.textContent = 'QC Checker'; renderQcOptions(); }
         else { subTitle.textContent = 'Agent'; renderAgentOptions(); }
       }
       function openMenu() { menu.classList.add('open'); gear.setAttribute('aria-expanded', 'true'); }
@@ -1040,6 +1065,7 @@
       document.getElementById('set-row-agent').addEventListener('click', () => showSub('agent'));
       document.getElementById('set-row-currency').addEventListener('click', () => showSub('currency'));
       document.getElementById('set-row-accent').addEventListener('click', () => showSub('accent'));
+      document.getElementById('set-row-qc').addEventListener('click', () => showSub('qc'));
       back.addEventListener('click', showMain);
       menu.addEventListener('click', e => e.stopPropagation());
       document.addEventListener('click', () => { if (menu.classList.contains('open')) closeMenu(); });
