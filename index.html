@@ -113,8 +113,20 @@
   .hc-carousel-wrap:hover .hc-arrow { display: flex; }
   .hc-arrow:hover { opacity: 0.9; }
   .hc-arrow-left { left: 8px; } .hc-arrow-right { right: 8px; }
-  .stores-page-head { max-width: 1280px; margin: 0.5rem auto 1rem; padding: 0; }
-  .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--border-color); margin-bottom: 0.4rem; }
+  .stores-page-head { max-width: 1280px; margin: 0.5rem auto 1rem; padding: 0; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .stores-page-head h1 { font-family: 'Inter Tight', system-ui, sans-serif; font-size: 32px; font-weight: 700; color: var(--border-color); margin: 0; }
+  /* Filtru categorie (dropdown lângă titlu, în stilul meniului de setări) */
+  .cat-filter { position: relative; flex-shrink: 0; }
+  .cat-filter-btn { display: flex; align-items: center; gap: 8px; background: var(--surface); color: #F2F2F2; border: none; border-radius: 9999px; height: 40px; padding: 0 16px; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 2px 6px -2px var(--border-color); transition: opacity .15s ease; }
+  .cat-filter-btn:hover { opacity: .9; }
+  .cat-filter-btn .cf-chev { transition: transform .2s ease; }
+  .cat-filter.open .cf-chev { transform: rotate(180deg); }
+  .cat-filter-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 200; min-width: 210px; padding: 6px; background: var(--surface); border: 1px solid var(--border-color); border-radius: 14px; box-shadow: 0 16px 40px -8px var(--border-color); }
+  .cat-filter-menu[hidden] { display: none; }
+  .cat-filter-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-align: left; padding: 9px 12px; border: none; background: transparent; border-radius: 9px; font-family: inherit; font-size: 14px; font-weight: 600; color: #F2F2F2; cursor: pointer; }
+  .cat-filter-item:hover, .cat-filter-item.active { background: var(--muted-hover); }
+  .cat-filter-item .cf-check { opacity: 0; flex-shrink: 0; }
+  .cat-filter-item.active .cf-check { opacity: 1; }
   .store-section-card { max-width: 1280px; margin: 0 auto 1.5rem; background: var(--card-bg, var(--surface)); border: none; border-radius: 16px; padding: 0; overflow: hidden; box-shadow: 0 6px 18px -4px var(--border-color); }
   .store-page-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 0; }
   .store-section-card .store-icon { width: 48px; height: 48px; font-size: 1.2rem; border: 3px solid var(--bg-color); }
@@ -343,7 +355,17 @@
       <div class="search-panel" id="search-panel" hidden></div>
     </div>
   </div>
-  <div class="stores-page-head"><h1>Products</h1></div>
+  <div class="stores-page-head">
+    <h1>Products</h1>
+    <div class="cat-filter" id="cat-filter">
+      <button class="cat-filter-btn" id="cat-filter-btn" aria-haspopup="true" aria-expanded="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+        <span id="cat-filter-label">Filter</span>
+        <svg class="cf-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="cat-filter-menu" id="cat-filter-menu" hidden></div>
+    </div>
+  </div>
   <div id="stores"></div>
 
   <script>
@@ -669,9 +691,16 @@
       if (/\bhat|cap\b|beanie|belt|sock|scarf|glove|sunglass|glasses|necklace|bracelet|\bring\b|\bbag\b|backpack|wallet/.test(t)) return 'Accessories';
       return 'Other';
     }
+    function cmCatOf(p) {
+      return (p.category && CAT_ORDER[p.category] != null) ? p.category : cmInferCat(p);
+    }
     function cmCatRank(p) {
-      const c = (p.category && CAT_ORDER[p.category] != null) ? p.category : cmInferCat(p);
-      return CAT_ORDER[c] != null ? CAT_ORDER[c] : 9;
+      return CAT_ORDER[cmCatOf(p)] != null ? CAT_ORDER[cmCatOf(p)] : 9;
+    }
+    // Filtrul de categorie din header (buton dropdown lângă "Products").
+    window.cmCat = 'all';
+    function cmCatFilterList(products) {
+      return (window.cmCat && window.cmCat !== 'all') ? products.filter(p => cmCatOf(p) === window.cmCat) : products;
     }
 
     // Salvează produsele și randează ruta curentă (toate brandurile sau un seller).
@@ -682,7 +711,7 @@
 
     // Vederea normală: produsele grupate pe brand.
     function renderAllBrands() {
-      const products = window.cmProducts || [];
+      const products = cmCatFilterList(window.cmProducts || []);
       const map = new Map();
       products.forEach(p => {
         const b = (p.brand || 'Other').trim() || 'Other';
@@ -704,7 +733,7 @@
     // Vederea "Sellers": ca home, dar grupat pe seller (o secțiune per seller),
     // sortat A→Z, apoi cei care încep cu cifră, apoi "Other" la final.
     function renderAllSellers() {
-      const products = window.cmProducts || [];
+      const products = cmCatFilterList(window.cmProducts || []);
       const map = new Map();
       products.forEach(p => {
         const s = (String(p.seller || '').trim() || p.brand || 'Other').trim() || 'Other';
@@ -724,7 +753,7 @@
 
     // Vederea de seller: EXACT aceeași interfață, dar o singură secțiune cu numele sellerului.
     function renderSeller(name) {
-      const products = window.cmProducts || [];
+      const products = cmCatFilterList(window.cmProducts || []);
       const lc = String(name || '').trim().toLowerCase();
       const items = products
         .filter(p => String((p.seller || '').trim() || p.brand || '').toLowerCase() === lc)
@@ -781,6 +810,31 @@
       e.preventDefault(); e.stopPropagation();
       cmGoSeller(s.dataset.seller || s.textContent);
     });
+    // Dropdown filtru categorie (lângă titlul "Products").
+    (function catFilter() {
+      const wrap = document.getElementById('cat-filter');
+      const btn = document.getElementById('cat-filter-btn');
+      const menu = document.getElementById('cat-filter-menu');
+      const label = document.getElementById('cat-filter-label');
+      if (!wrap || !btn || !menu) return;
+      const cats = ['all', ...Object.keys(CAT_ORDER)];
+      const nice = { all: 'Toate', Shoes: 'Shoes', Slides: 'Slides (papuci)', Shorts: 'Shorts', 'T-shirts': 'T-shirts', Pants: 'Pants', 'Long-sleeve': 'Long-sleeve', Hoodies: 'Hoodies', Jackets: 'Jackets', Accessories: 'Accessories', Other: 'Other' };
+      const check = '<svg class="cf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      function build() {
+        menu.innerHTML = cats.map(c => `<button class="cat-filter-item${window.cmCat === c ? ' active' : ''}" data-cat="${c}"><span>${nice[c] || c}</span>${check}</button>`).join('');
+        menu.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => {
+          window.cmCat = b.dataset.cat;
+          label.textContent = window.cmCat === 'all' ? 'Filter' : (nice[window.cmCat] || window.cmCat);
+          close();
+          if (window.cmRoute) window.cmRoute();
+        });
+      }
+      const open = () => { build(); menu.hidden = false; wrap.classList.add('open'); btn.setAttribute('aria-expanded', 'true'); };
+      const close = () => { menu.hidden = true; wrap.classList.remove('open'); btn.setAttribute('aria-expanded', 'false'); };
+      btn.addEventListener('click', e => { e.stopPropagation(); menu.hidden ? open() : close(); });
+      document.addEventListener('click', e => { if (!wrap.contains(e.target)) close(); });
+    })();
+
     // Link-urile din navbar (Home / Sellers).
     document.querySelectorAll('.nav-left .nav-link').forEach(a => a.addEventListener('click', e => {
       e.preventDefault();
