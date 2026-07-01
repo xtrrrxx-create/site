@@ -314,6 +314,12 @@
                     <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
                   </span>
                 </button>
+                <button class="settings-row" id="set-row-qc" role="menuitem">
+                  <span class="settings-row-label">QC Checker</span>
+                  <span class="settings-row-val"><span id="set-qc-val">Doppel.fit</span>
+                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
+                  </span>
+                </button>
                 <button class="settings-row" id="set-row-currency" role="menuitem">
                   <span class="settings-row-label">Currency</span>
                   <span class="settings-row-val"><span id="set-cur-val">¥ CNY</span>
@@ -323,12 +329,6 @@
                 <button class="settings-row" id="set-row-accent" role="menuitem">
                   <span class="settings-row-label">Accent</span>
                   <span class="settings-row-val"><span id="set-accent-dot" class="theme-dot" style="border-radius:50%;background:var(--accent-color);"></span>
-                    <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
-                  </span>
-                </button>
-                <button class="settings-row" id="set-row-qc" role="menuitem">
-                  <span class="settings-row-label">QC Checker</span>
-                  <span class="settings-row-val"><span id="set-qc-val">Doppel.fit</span>
                     <svg class="settings-chev" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg>
                   </span>
                 </button>
@@ -1386,7 +1386,6 @@
     })();
   </script>
 
-  <!-- Firestore: încarcă produsele reale dacă firebaseConfig e completat -->
   <script type="module">
     const cfg = window.COLDMODE || {};
     const fb = cfg.firebaseConfig || {};
