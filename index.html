@@ -244,7 +244,7 @@
   .product-card:hover { transform: translateY(-6px); box-shadow: 0 14px 26px -6px var(--border-color); }
   .product-image { width: 100%; aspect-ratio: 1; background: var(--muted); display: flex; align-items: center; justify-content: center; color: var(--border-color); overflow: hidden; position: relative; }
   /* Shimmer „loading" sub imagine cât se încarcă (dispare instant când e gata). */
-  .product-image::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, var(--muted) 30%, rgba(255,255,255,0.45) 50%, var(--muted) 70%); background-size: 200% 100%; animation: cmshimmer 1.1s linear infinite; z-index: 0; }
+  .product-image::before { content: ""; position: absolute; inset: 0; background: var(--muted); z-index: 0; }
   .product-image.loaded::before { display: none; }
   .product-image img { position: relative; z-index: 1; opacity: 0; transition: opacity .25s ease; }
   .product-image img.loaded { opacity: 1; }
@@ -708,6 +708,46 @@
     function cmCatFilterList(products) {
       return (window.cmCat && window.cmCat !== 'all') ? products.filter(p => cmCatOf(p) === window.cmCat) : products;
     }
+    // Filtrul de search (pe DATE, nu ascunde carduri) — ca să nu ținem tot în DOM.
+    window.cmQuery = '';
+    function cmSearchFilterList(products) {
+      const q = (window.cmQuery || '').toLowerCase().trim();
+      if (!q) return products;
+      return products.filter(p =>
+        String(p.title || '').toLowerCase().includes(q) ||
+        String(p.seller || '').toLowerCase().includes(q) ||
+        String(p.brand || '').toLowerCase().includes(q));
+    }
+    function cmVisibleList(products) { return cmSearchFilterList(cmCatFilterList(products)); }
+
+    // Randare progresivă a secțiunilor (câteva odată, restul pe scroll) — altfel
+    // ~2800 produse deodată = zeci de mii de noduri și crash de memorie pe iPhone.
+    let _sectionIO = null;
+    function paintSections(entries, opts) {
+      opts = opts || {};
+      const host = document.getElementById('stores');
+      if (_sectionIO) { _sectionIO.disconnect(); _sectionIO = null; }
+      host.innerHTML = '';
+      if (!entries.length) { host.innerHTML = `<p style="text-align:center;opacity:.7;padding:3rem;">${opts.empty || 'Niciun produs.'}</p>`; return; }
+      const BATCH = 6;
+      let i = 0;
+      const sentinel = document.createElement('div');
+      sentinel.style.cssText = 'height:1px;grid-column:1/-1;';
+      host.appendChild(sentinel);
+      function renderBatch() {
+        const slice = entries.slice(i, i + BATCH);
+        const html = slice.map(([name, items], k) => buildBrandSection(name, items, i + k, opts.section)).join('');
+        sentinel.insertAdjacentHTML('beforebegin', html);
+        i += slice.length;
+        wireCarousels();
+        if (i >= entries.length) { if (_sectionIO) { _sectionIO.disconnect(); _sectionIO = null; } sentinel.remove(); }
+      }
+      renderBatch();
+      if (i < entries.length) {
+        _sectionIO = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) renderBatch(); }, { rootMargin: '1000px' });
+        _sectionIO.observe(sentinel);
+      }
+    }
 
     // Salvează produsele și randează ruta curentă (toate brandurile sau un seller).
     function render(products) {
@@ -717,7 +757,7 @@
 
     // Vederea normală: produsele grupate pe brand.
     function renderAllBrands() {
-      const products = cmCatFilterList(window.cmProducts || []);
+      const products = cmVisibleList(window.cmProducts || []);
       const map = new Map();
       products.forEach(p => {
         const b = (p.brand || 'Other').trim() || 'Other';
@@ -729,17 +769,14 @@
       // Ordine: "Unbranded"/"Other" mereu ultimele, apoi brandurile care încep cu cifră, restul în ordine.
       const rank = (b) => (b === 'Unbranded' || b === 'Other') ? 2 : (/^\d/.test(b) ? 1 : 0);
       const entries = [...map.entries()].sort((a, b) => rank(a[0]) - rank(b[0]));
-      const html = entries.map(([brand, items], si) => buildBrandSection(brand, items, si)).join('');
-      document.getElementById('stores').innerHTML = html || '<p style="text-align:center;opacity:.7;padding:3rem;">Niciun produs încă.</p>';
       document.querySelector('.stores-page-head h1').textContent = 'Products';
-      wireCarousels();
-      if (window.cmApplySearchFromUrl) window.cmApplySearchFromUrl();
+      paintSections(entries, { empty: 'Niciun produs încă.' });
     }
 
     // Vederea "Sellers": ca home, dar grupat pe seller (o secțiune per seller),
     // sortat A→Z, apoi cei care încep cu cifră, apoi "Other" la final.
     function renderAllSellers() {
-      const products = cmCatFilterList(window.cmProducts || []);
+      const products = cmVisibleList(window.cmProducts || []);
       const map = new Map();
       products.forEach(p => {
         const s = (String(p.seller || '').trim() || p.brand || 'Other').trim() || 'Other';
@@ -750,16 +787,13 @@
       const rank = (s) => s === 'Other' ? 2 : (/^\d/.test(s) ? 1 : 0);
       const entries = [...map.entries()].sort((a, b) =>
         rank(a[0]) - rank(b[0]) || a[0].toLowerCase().localeCompare(b[0].toLowerCase()));
-      const html = entries.map(([seller, items], si) => buildBrandSection(seller, items, si, { btn: 'View Seller' })).join('');
-      document.getElementById('stores').innerHTML = html || '<p style="text-align:center;opacity:.7;padding:3rem;">Niciun seller încă.</p>';
       document.querySelector('.stores-page-head h1').textContent = 'Sellers';
-      wireCarousels();
-      if (window.cmApplySearchFromUrl) window.cmApplySearchFromUrl();
+      paintSections(entries, { empty: 'Niciun seller încă.', section: { btn: 'View Seller' } });
     }
 
     // Vederea de seller: EXACT aceeași interfață, dar o singură secțiune cu numele sellerului.
     function renderSeller(name) {
-      const products = cmCatFilterList(window.cmProducts || []);
+      const products = cmVisibleList(window.cmProducts || []);
       const lc = String(name || '').trim().toLowerCase();
       const items = products
         .filter(p => String((p.seller || '').trim() || p.brand || '').toLowerCase() === lc)
@@ -807,8 +841,13 @@
       const onSellers = /^\/sellers\/?$/.test(location.pathname) || location.hash === '#sellers';
       const seller = readSellerUrl();
       const cat = readCatUrl();
-      // Sursa de adevăr pentru filtru = URL-ul.
+      // Sursa de adevăr pentru filtru + search = URL-ul.
       window.cmCat = cat || 'all';
+      window.cmQuery = (typeof readSearchUrl === 'function' ? readSearchUrl() : '') || '';
+      const _si = document.getElementById('search');
+      if (_si && document.activeElement !== _si && _si.value !== window.cmQuery) _si.value = window.cmQuery;
+      const _ni = document.getElementById('nav-search');
+      if (_ni && document.activeElement !== _ni && _ni.value !== window.cmQuery) _ni.value = window.cmQuery;
       if (onSellers) renderAllSellers();
       else if (seller) renderSeller(seller);
       else renderAllBrands();
@@ -1271,44 +1310,15 @@
       return m ? decodeURIComponent(m[1]) : '';
     }
 
+    // Search bazat pe DATE: scrie termenul în URL și re-randează filtrat
+    // (nu mai ascunde carduri — ca să nu ținem tot catalogul în DOM).
     function runSearch(val) {
-      const q = (val || '').toLowerCase().trim();
-      document.querySelectorAll('.store-section-card').forEach(sec => {
-        const seller = sec.querySelector('.store-name').textContent.toLowerCase();
-        const sellerMatch = !q || seller.includes(q);
-        let visibleCards = 0;
-        sec.querySelectorAll('.product-card').forEach(card => {
-          const title = card.querySelector('.product-title').textContent.toLowerCase();
-          const show = sellerMatch || !q || title.includes(q);
-          card.style.display = show ? '' : 'none';
-          if (show) visibleCards++;
-        });
-        sec.style.display = (sellerMatch || visibleCards > 0) ? '' : 'none';
-      });
-      updateSearchUrl(q);
+      updateSearchUrl((val || '').trim());
+      cmRoute();
     }
-
-    // Aplică termenul din URL (deep-link / refresh / back-forward).
-    function applySearchFromUrl() {
-      const q = readSearchUrl();
-      const input = document.getElementById('search');
-      if (input.value !== q) input.value = q;
-      runSearchNoUrl(q);
-    }
-    // Ca runSearch, dar fără a rescrie URL-ul (evită bucla la popstate/load).
-    function runSearchNoUrl(val) {
-      const q = (val || '').toLowerCase().trim();
-      document.querySelectorAll('.store-section-card').forEach(sec => {
-        const seller = sec.querySelector('.store-name').textContent.toLowerCase();
-        const sellerMatch = !q || seller.includes(q);
-        let vis = 0;
-        sec.querySelectorAll('.product-card').forEach(card => {
-          const show = sellerMatch || !q || card.querySelector('.product-title').textContent.toLowerCase().includes(q);
-          card.style.display = show ? '' : 'none'; if (show) vis++;
-        });
-        sec.style.display = (sellerMatch || vis > 0) ? '' : 'none';
-      });
-    }
+    // Aplică termenul din URL (deep-link / refresh / back-forward) — cmRoute
+    // citește deja query-ul din URL și re-randează.
+    function applySearchFromUrl() { cmRoute(); }
     window.addEventListener('popstate', () => { if (window.cmRoute) window.cmRoute(); else applySearchFromUrl(); });
     window.cmApplySearchFromUrl = applySearchFromUrl;
 
