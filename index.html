@@ -790,12 +790,27 @@
       cmRoute();
     }
     // Decide ce vedere se randează în funcție de URL.
+    // Categoria din URL: /products/<slug> (ex. /products/shoes, /products/t-shirts).
+    function readCatUrl() {
+      const m = location.pathname.match(/^\/products\/([^/?#]+)/);
+      if (!m) return '';
+      const slug = decodeURIComponent(m[1]).toLowerCase();
+      return Object.keys(CAT_ORDER).find(k => k.toLowerCase() === slug) || '';
+    }
     function cmRoute() {
       const onSellers = /^\/sellers\/?$/.test(location.pathname) || location.hash === '#sellers';
       const seller = readSellerUrl();
+      const cat = readCatUrl();
+      // Sursa de adevăr pentru filtru = URL-ul.
+      window.cmCat = cat || 'all';
       if (onSellers) renderAllSellers();
       else if (seller) renderSeller(seller);
       else renderAllBrands();
+      // Titlul paginii = categoria, dacă e un link /products/<cat>.
+      if (cat) { const h = document.querySelector('.stores-page-head h1'); if (h) h.textContent = cat; }
+      // Eticheta butonului de filtru.
+      const lbl = document.getElementById('cat-filter-label');
+      if (lbl) lbl.textContent = (window.cmCat === 'all') ? 'Filter' : window.cmCat;
       // Marchează link-ul activ din navbar.
       const active = onSellers ? 'sellers' : 'home';
       document.querySelectorAll('.nav-left .nav-link').forEach(a =>
@@ -823,8 +838,9 @@
       function build() {
         menu.innerHTML = cats.map(c => `<button class="cat-filter-item${window.cmCat === c ? ' active' : ''}" data-cat="${c}"><span>${nice[c] || c}</span>${check}</button>`).join('');
         menu.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => {
-          window.cmCat = b.dataset.cat;
-          label.textContent = window.cmCat === 'all' ? 'Filter' : (nice[window.cmCat] || window.cmCat);
+          const c = b.dataset.cat;
+          const url = (c === 'all') ? '/' : '/products/' + encodeURIComponent(c.toLowerCase());
+          try { history.pushState({}, '', url); } catch (_) { location.hash = ''; }
           close();
           if (window.cmRoute) window.cmRoute();
         });
