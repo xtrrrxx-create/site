@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Coldmode-Home</title>
+<title>Jarvis Finder</title>
+<link rel="icon" href="/images/coldmode-logo.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Inter+Tight:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<script src="coldmode-config.js"></script>
+<script src="/coldmode-config.js"></script>
 <style>
   /* Conținutul e ascuns până e gata, dar arătăm un loader (nu ecran alb gol). */
   body > :not(#cm-loader) { opacity: 0; }
@@ -589,7 +590,7 @@
       else if (/weidian\.com/i.test(s)) key = 'weidian';
       else if (/taobao\.com|tmall\.com/i.test(s)) key = 'taobao';
       else if (/1688\.com/i.test(s)) key = '1688';
-      if (key) return `<span class="product-store-badge"><img src="images/${key}.png" alt="${key}" loading="lazy"></span>`;
+      if (key) return `<span class="product-store-badge"><img src="/images/${key}.png" alt="${key}" loading="lazy"></span>`;
       return '<span class="product-store-badge">店</span>';
     }
 
