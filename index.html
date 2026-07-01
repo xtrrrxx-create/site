@@ -1155,11 +1155,18 @@
           requestAnimationFrame(animate);
         }
         el.addEventListener('wheel', e => {
-          if (!e.deltaY || el.scrollWidth <= el.clientWidth) return;
+          if (el.scrollWidth <= el.clientWidth) return;
+          // Preia DOAR gesturile orizontale (touchpad două degete stânga/dreapta,
+          // sau rotiță cu Shift). Scroll-ul vertical rămâne al paginii — altfel
+          // pe touchpad pagina „nu mai derula" cât stăteai peste un carusel.
+          const horizontal = e.deltaX !== 0 || e.shiftKey;
+          if (!horizontal) return;
+          const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
+          if (!delta) return;
           e.preventDefault();
           const max = el.scrollWidth - el.clientWidth;
           if (!animating) target = el.scrollLeft; // resync dacă a fost oprit
-          target = Math.max(0, Math.min(max, target + (e.deltaY + e.deltaX) * SPEED));
+          target = Math.max(0, Math.min(max, target + delta * SPEED));
           if (!animating) { animating = true; el.style.scrollBehavior = 'auto'; requestAnimationFrame(animate); }
         }, { passive: false });
 
