@@ -1295,28 +1295,52 @@
     const cfg = window.COLDMODE || {};
     const fb = cfg.firebaseConfig || {};
     if (fb.projectId) {
+      // ── Cache client-side (localStorage) ca să NU mai citim din Firestore la
+      // fiecare vizită/refresh. Cu ~2800 produse, un fetch = ~2800 reads; planul
+      // gratuit are 50k/zi. Cât timp cache-ul e proaspăt (TTL), zero reads. ──
+      const CACHE_KEY = 'cm_products_cache_v1';
+      const TTL = 60 * 60 * 1000; // 60 min
+
+      const forceFresh = /(?:\?|&)fresh\b/.test(location.search);
+      let served = false;
       try {
-        const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-        const { getFirestore, collection, getDocs, orderBy, query } =
-          await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-        const app = initializeApp(fb);
-        const db = getFirestore(app);
-        // Logo-uri de brand (colecția "brands") → window.brandLogos[name] = img
+        const raw = forceFresh ? null : localStorage.getItem(CACHE_KEY);
+        if (raw) {
+          const c = JSON.parse(raw);
+          if (c && Array.isArray(c.items) && (Date.now() - c.t) < TTL) {
+            window.brandLogos = c.brandLogos || {};
+            window.cmRender(c.items);
+            window.cmContentReady && window.cmContentReady();
+            served = true;
+          }
+        }
+      } catch (_) {}
+
+      if (!served) {
         try {
-          const bsnap = await getDocs(collection(db, 'brands'));
+          const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
+          const { getFirestore, collection, getDocs } =
+            await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+          const db = getFirestore(initializeApp(fb));
           window.brandLogos = window.brandLogos || {};
-          bsnap.docs.forEach(d => { const b = d.data(); if (b && b.name && b.img) window.brandLogos[b.name] = b.img; });
-        } catch (_) {}
-        // Fără orderBy('brand'): Firestore exclude documentele care n-au câmpul `brand`,
-        // deci produsele unbranded dispăreau complet. Iau tot și sortez pe client.
-        const snap = await getDocs(collection(db, cfg.COLLECTION || 'products'));
-        const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        items.sort((a, b) => String(a.brand || '').localeCompare(String(b.brand || '')));
-        window.cmRender(items);
-      } catch (e) {
-        console.error('Firestore fetch failed:', e);
-      } finally {
-        window.cmContentReady && window.cmContentReady(); // arăt pagina după ce conținutul e gata
+          // Logo-uri de brand (colecția "brands") → window.brandLogos[name] = img
+          try {
+            const bsnap = await getDocs(collection(db, 'brands'));
+            bsnap.docs.forEach(d => { const b = d.data(); if (b && b.name && b.img) window.brandLogos[b.name] = b.img; });
+          } catch (_) {}
+          // Fără orderBy('brand'): Firestore exclude documentele care n-au câmpul `brand`,
+          // deci produsele unbranded dispăreau complet. Iau tot și sortez pe client.
+          const snap = await getDocs(collection(db, cfg.COLLECTION || 'products'));
+          const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          items.sort((a, b) => String(a.brand || '').localeCompare(String(b.brand || '')));
+          window.cmRender(items);
+          // Salvez în cache pentru vizitele/refresh-urile următoare.
+          try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), items, brandLogos: window.brandLogos })); } catch (_) {}
+        } catch (e) {
+          console.error('Firestore fetch failed:', e);
+        } finally {
+          window.cmContentReady && window.cmContentReady(); // arăt pagina după ce conținutul e gata
+        }
       }
     } else {
       window.cmContentReady && window.cmContentReady();
