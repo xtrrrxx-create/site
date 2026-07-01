@@ -818,7 +818,7 @@
       const label = document.getElementById('cat-filter-label');
       if (!wrap || !btn || !menu) return;
       const cats = ['all', ...Object.keys(CAT_ORDER)];
-      const nice = { all: 'Toate', Shoes: 'Shoes', Slides: 'Slides (papuci)', Shorts: 'Shorts', 'T-shirts': 'T-shirts', Pants: 'Pants', 'Long-sleeve': 'Long-sleeve', Hoodies: 'Hoodies', Jackets: 'Jackets', Accessories: 'Accessories', Other: 'Other' };
+      const nice = { all: 'All' };
       const check = '<svg class="cf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       function build() {
         menu.innerHTML = cats.map(c => `<button class="cat-filter-item${window.cmCat === c ? ' active' : ''}" data-cat="${c}"><span>${nice[c] || c}</span>${check}</button>`).join('');
