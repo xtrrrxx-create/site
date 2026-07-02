@@ -655,10 +655,10 @@
       opts = opts || {};
       const id = 'st-' + si;
       const cards = items.map(buildProductCard).join('');
-      const isNewSec = brand === '🆕 Newly Added Links';
+      const isNewSec = brand === 'Newly Added Links';
       const logo = window.brandLogos[brand];
       const icon = isNewSec
-        ? '🆕'
+        ? 'N'
         : (logo ? `<img src="${esc(logo)}" alt="${esc(brand)}" loading="lazy">` : esc(brand.charAt(0).toUpperCase()));
       return `<div class="store-section-card">
         <div class="store-page-header">
@@ -757,7 +757,7 @@
     }
 
     // Secțiunea "Newly Added Links": produsele adăugate recent, fixate SUS.
-    const NEW_SECTION = '🆕 Newly Added Links';
+    const NEW_SECTION = 'Newly Added Links';
     const NEW_SINCE = Date.parse('2026-07-02T00:00:00Z'); // tot ce e adăugat de la această dată
     function cmCreatedMs(p) {
       const c = p && p.created_at;
