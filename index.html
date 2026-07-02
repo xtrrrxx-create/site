@@ -683,7 +683,7 @@
 
     // Ordinea categoriilor în fiecare brand: hainele întâi, accessories + restul la final.
     // Folosește câmpul `category` salvat; fallback pe deducere din titlu.
-    const CAT_ORDER = { 'Shoes':0,'Slides':1,'Shorts':2,'T-shirts':3,'Pants':4,'Long-sleeve':5,'Hoodies':6,'Jackets':7,'Accessories':8,'Other':9 };
+    const CAT_ORDER = { 'Shoes':0,'Slides':1,'Shorts':2,'T-shirts':3,'Pants':4,'Long-sleeve':5,'Hoodies':6,'Jackets':7,'Sets':8,'Blanks':9,'Accessories':10,'Other':11 };
     function cmInferCat(p) {
       const t = ((p.title || '') + ' ' + (p.brand || '')).toLowerCase();
       if (/\bslides?\b|sandal|papuc/.test(t)) return 'Slides';
@@ -877,7 +877,9 @@
       const menu = document.getElementById('cat-filter-menu');
       const label = document.getElementById('cat-filter-label');
       if (!wrap || !btn || !menu) return;
-      const cats = ['all', ...Object.keys(CAT_ORDER)];
+      // Doar categoriile care chiar au produse (evită filtre goale, ex. Sets/Blanks).
+      const present = new Set((window.cmProducts || []).map(p => cmCatOf(p)));
+      const cats = ['all', ...Object.keys(CAT_ORDER).filter(c => present.has(c))];
       const nice = { all: 'All' };
       const check = '<svg class="cf-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
       function build() {
