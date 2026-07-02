@@ -1219,13 +1219,8 @@
     }
 
     function wireCarousels() {
-      document.querySelectorAll('.hc-arrow').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const car = document.getElementById(btn.dataset.carousel);
-          car.scrollBy({ left: 259 * Number(btn.dataset.dir), behavior: 'smooth' });
-        });
-      });
-      // Scroll cu rotița mouse-ului (vertical → orizontal) + drag cu mouse-ul.
+      // Rotița mouse-ului + săgeți + drag. Totul prin același sistem de animație
+      // pe carusel (o singură sursă de adevăr pentru poziția de scroll).
       document.querySelectorAll('.hc-carousel').forEach(el => {
         if (el._scrollBound) return;
         el._scrollBound = true;
@@ -1240,6 +1235,19 @@
           el.scrollLeft += diff * EASE;
           requestAnimationFrame(animate);
         }
+        function scrollByAmount(amount) {
+          if (el.scrollWidth <= el.clientWidth) return;
+          const max = el.scrollWidth - el.clientWidth;
+          if (!animating) target = el.scrollLeft; // resync dacă a fost oprit
+          target = Math.max(0, Math.min(max, target + amount));
+          if (!animating) { animating = true; el.style.scrollBehavior = 'auto'; requestAnimationFrame(animate); }
+        }
+        // Săgețile (frați ai caruselului) folosesc același animate — legate o
+        // singură dată (altfel randarea progresivă dubla listenerii).
+        const wrap = el.closest('.hc-carousel-wrap');
+        if (wrap) wrap.querySelectorAll('.hc-arrow').forEach(btn => {
+          btn.addEventListener('click', () => scrollByAmount(259 * Number(btn.dataset.dir)));
+        });
         el.addEventListener('wheel', e => {
           if (el.scrollWidth <= el.clientWidth) return;
           // Preia DOAR rotița de mouse clasic (pași mari/discreți, fără deltaX)
@@ -1250,10 +1258,7 @@
           const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
           if (!delta) return;
           e.preventDefault();
-          const max = el.scrollWidth - el.clientWidth;
-          if (!animating) target = el.scrollLeft; // resync dacă a fost oprit
-          target = Math.max(0, Math.min(max, target + delta * SPEED));
-          if (!animating) { animating = true; el.style.scrollBehavior = 'auto'; requestAnimationFrame(animate); }
+          scrollByAmount(delta * SPEED);
         }, { passive: false });
 
         // Drag cu butonul stâng: tragi caruselul cu mouse-ul (mousemove/up sunt globale).
