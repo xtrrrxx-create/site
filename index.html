@@ -200,6 +200,25 @@
   .nav-gear-btn:hover { background: var(--muted-hover); color: var(--text-primary); }
   .nav-gear-btn .gear-icon { transition: transform 0.4s ease; }
   .nav-gear-btn:hover .gear-icon { transform: rotate(90deg); }
+  /* Meniu burger (mobil) — Home / Sellers, în stilul dropdown-ului de setări. */
+  .nav-burger-wrap { position: relative; display: none; }
+  .nav-burger-menu { position: absolute; left: 0; top: calc(100% + 8px); z-index: 1200; min-width: 180px; padding: 6px; background: var(--surface); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 16px 40px #02487355; transform-origin: top left; opacity: 0; transform: scale(0.97) translateY(-6px); pointer-events: none; transition: opacity 0.18s cubic-bezier(0.16,1,0.3,1), transform 0.18s cubic-bezier(0.16,1,0.3,1); }
+  .nav-burger-menu[hidden] { display: none; }
+  .nav-burger-menu.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
+  .nav-burger-item { display: block; padding: 10px 12px; border-radius: 9px; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px; font-weight: 600; color: #F2F2F2; text-decoration: none; transition: background 0.15s ease; }
+  .nav-burger-item:hover, .nav-burger-item.active { background: var(--muted-hover); }
+  /* ── MOBIL ── */
+  @media (max-width: 768px) {
+    .nav-desktop-link { display: none; }
+    .nav-burger-wrap { display: inline-flex; }
+    .nav-center { display: none; }
+    .navbar { padding: 0 16px; }
+    .navbar-inner { gap: 0.75rem; }
+    .pl-hero { padding: 1.75rem 16px 1rem; }
+    .stores-page-head { padding: 0 16px; margin: 0.5rem auto 0.85rem; }
+    .store-section-card { margin-left: 12px; margin-right: 12px; }
+    #stores { overflow-x: hidden; }
+  }
 
   /* ── Preferences dropdown (ca la jarvis-finder) ── */
   .settings-wrap { position: relative; display: inline-flex; }
@@ -286,11 +305,17 @@
     <nav class="navbar">
       <div class="navbar-inner">
         <div class="nav-left">
-          <button class="nav-burger" type="button" aria-label="Menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <a href="/" class="nav-link" data-nav="home">Home</a>
-          <a href="/sellers" class="nav-link" data-nav="sellers">Sellers</a>
+          <div class="nav-burger-wrap">
+            <button class="nav-burger" id="nav-burger-btn" type="button" aria-label="Menu" aria-haspopup="true" aria-expanded="false">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <div class="nav-burger-menu" id="nav-burger-menu" role="menu" hidden>
+              <a href="/" class="nav-link nav-burger-item" data-nav="home" role="menuitem">Home</a>
+              <a href="/sellers" class="nav-link nav-burger-item" data-nav="sellers" role="menuitem">Sellers</a>
+            </div>
+          </div>
+          <a href="/" class="nav-link nav-desktop-link" data-nav="home">Home</a>
+          <a href="/sellers" class="nav-link nav-desktop-link" data-nav="sellers">Sellers</a>
         </div>
         <div class="nav-center">
           <div class="nav-search-wrap">
@@ -946,10 +971,34 @@
     // Link-urile din navbar (Home / Sellers).
     document.querySelectorAll('.nav-left .nav-link').forEach(a => a.addEventListener('click', e => {
       e.preventDefault();
+      closeBurger();
       if (a.dataset.nav === 'sellers') { cmGoSellers(); return; }
       try { history.pushState({}, '', '/'); } catch (_) { location.hash = ''; }
       cmRoute();
     }));
+
+    // Meniul burger (mobil): deschide/închide dropdown-ul cu Home / Sellers.
+    const burgerBtn = document.getElementById('nav-burger-btn');
+    const burgerMenu = document.getElementById('nav-burger-menu');
+    function closeBurger() {
+      if (!burgerMenu || burgerMenu.hidden) return;
+      burgerMenu.classList.remove('open');
+      burgerBtn && burgerBtn.setAttribute('aria-expanded', 'false');
+      setTimeout(() => { burgerMenu.hidden = true; }, 180);
+    }
+    function openBurger() {
+      if (!burgerMenu) return;
+      burgerMenu.hidden = false;
+      requestAnimationFrame(() => burgerMenu.classList.add('open'));
+      burgerBtn && burgerBtn.setAttribute('aria-expanded', 'true');
+    }
+    if (burgerBtn) burgerBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      (burgerMenu.hidden || !burgerMenu.classList.contains('open')) ? openBurger() : closeBurger();
+    });
+    document.addEventListener('click', e => {
+      if (burgerMenu && !burgerMenu.hidden && !e.target.closest('.nav-burger-wrap')) closeBurger();
+    });
 
     // Buy Now → pop-up de agent (delegare, o singură dată).
     document.addEventListener('click', e => {
