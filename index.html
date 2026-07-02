@@ -594,17 +594,25 @@
       const z  = (frag.match(/z=(\d+)/) || [])[1];
       return { base, rot: parseInt(ro||'0',10)||0, oy: oy!=null?parseInt(oy,10):50, z: z!=null?parseInt(z,10):100 };
     }
+    // wsrv.nl blochează unele domenii (alicdn / Taobao CDN) → alea se încarcă
+    // direct, iar rotația se face în CSS (vezi cmThumbStyle).
+    const CM_WSRV_BLOCKED = /(^|\.)alicdn\.com/i;
     function cmProxied(base, ro) {
       base = String(base || '').replace(/#.*$/, '');
       if (!base) return '';
+      if (CM_WSRV_BLOCKED.test(base)) return base; // wsrv nu servește alicdn
       let url = `https://wsrv.nl/?url=${encodeURIComponent(base)}&w=700&output=webp&q=85&we`;
       if (ro) url += `&ro=${ro % 360}`;
       return url;
     }
     function cmThumbStyle(ci) {
-      if (ci.z < 100) return `width:100%;height:100%;object-fit:contain;object-position:50% ${ci.oy}%;`;
+      // Rotație CSS doar când imaginea e încărcată direct (wsrv ocolit) — altfel
+      // rotația e deja "coaptă" de proxy.
+      const rot = (ci.rot && CM_WSRV_BLOCKED.test(String(ci.base || ''))) ? ` rotate(${ci.rot % 360}deg)` : '';
+      if (ci.z < 100) return `width:100%;height:100%;object-fit:contain;object-position:50% ${ci.oy}%;${rot ? `transform:${rot.trim()};` : ''}`;
       let s = `width:100%;height:100%;object-fit:cover;object-position:50% ${ci.oy}%;`;
-      if (ci.z !== 100) s += `transform:scale(${ci.z/100});transform-origin:50% ${ci.oy}%;`;
+      const tf = (ci.z !== 100 ? `scale(${ci.z/100})` : '') + rot;
+      if (tf.trim()) s += `transform:${tf.trim()};transform-origin:50% ${ci.oy}%;`;
       return s;
     }
 
