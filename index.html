@@ -655,10 +655,11 @@
       opts = opts || {};
       const id = 'st-' + si;
       const cards = items.map(buildProductCard).join('');
+      const isNewSec = brand === '🆕 Newly Added Links';
       const logo = window.brandLogos[brand];
-      const icon = logo
-        ? `<img src="${esc(logo)}" alt="${esc(brand)}" loading="lazy">`
-        : esc(brand.charAt(0).toUpperCase());
+      const icon = isNewSec
+        ? '🆕'
+        : (logo ? `<img src="${esc(logo)}" alt="${esc(brand)}" loading="lazy">` : esc(brand.charAt(0).toUpperCase()));
       return `<div class="store-section-card">
         <div class="store-page-header">
           <div class="store-header">
@@ -669,7 +670,7 @@
             </div>
           </div>
           <div class="store-head-actions">
-            <button class="store-view-btn store-view-btn-sm">${esc(opts.btn || 'View Brand')}</button>
+            ${isNewSec ? '' : `<button class="store-view-btn store-view-btn-sm">${esc(opts.btn || 'View Brand')}</button>`}
           </div>
         </div>
         <div class="store-section-divider"></div>
@@ -755,6 +756,19 @@
       cmRoute();
     }
 
+    // Secțiunea "Newly Added Links": produsele adăugate recent, fixate SUS.
+    const NEW_SECTION = '🆕 Newly Added Links';
+    const NEW_SINCE = Date.parse('2026-07-02T00:00:00Z'); // tot ce e adăugat de la această dată
+    function cmCreatedMs(p) {
+      const c = p && p.created_at;
+      if (!c) return 0;
+      if (typeof c === 'string') return Date.parse(c) || 0;
+      if (typeof c.toMillis === 'function') return c.toMillis();
+      if (typeof c.seconds === 'number') return c.seconds * 1000;
+      return 0;
+    }
+    const cmIsNew = p => cmCreatedMs(p) >= NEW_SINCE;
+
     // Vederea normală: produsele grupate pe brand.
     function renderAllBrands() {
       const products = cmVisibleList(window.cmProducts || []);
@@ -769,6 +783,11 @@
       // Ordine: "Unbranded"/"Other" mereu ultimele, apoi brandurile care încep cu cifră, restul în ordine.
       const rank = (b) => (b === 'Unbranded' || b === 'Other') ? 2 : (/^\d/.test(b) ? 1 : 0);
       const entries = [...map.entries()].sort((a, b) => rank(a[0]) - rank(b[0]));
+      // Fixează secțiunea "Newly Added Links" în vârf (doar pe vederea completă, fără filtre).
+      if (window.cmCat === 'all' && !(window.cmQuery || '').trim()) {
+        const fresh = products.filter(cmIsNew).sort((a, b) => cmCreatedMs(b) - cmCreatedMs(a));
+        if (fresh.length) entries.unshift([NEW_SECTION, fresh]);
+      }
       document.querySelector('.stores-page-head h1').textContent = 'Products';
       paintSections(entries, { empty: 'Niciun produs încă.' });
     }
