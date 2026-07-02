@@ -215,21 +215,20 @@
   /* ── Modal Report ── */
   .rp-overlay { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); }
   .rp-overlay.open { display: flex; }
-  .rp-modal { width: min(420px, 94vw); max-height: 88vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 24px 60px #02487355; animation: apSlideUp .22s ease; }
+  .rp-modal { width: min(420px, 94vw); max-height: 88vh; overflow: hidden auto; background: var(--surface); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 24px 60px #02487355; animation: apSlideUp .22s ease; }
   .rp-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border-color); }
   .rp-head h3 { margin: 0; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 1rem; font-weight: 700; color: #F2F2F2; }
   .rp-close { background: transparent; border: none; color: var(--text-primary); cursor: pointer; padding: 4px; display: flex; border-radius: 8px; }
   .rp-close:hover { background: var(--muted-hover); }
-  .rp-body { padding: 8px; }
-  .rp-opt { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 12px 12px; border: none; background: transparent; border-radius: 10px; cursor: pointer; color: #F2F2F2; font-family: inherit; }
-  .rp-opt:hover { background: var(--muted-hover); }
-  .rp-radio { flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--text-secondary); position: relative; }
-  .rp-opt.sel .rp-radio { border-color: var(--accent-color); }
-  .rp-opt.sel .rp-radio::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--accent-color); }
-  .rp-opt-label { font-size: 0.95rem; font-weight: 700; }
-  .rp-note { margin: 4px 8px 8px; }
-  .rp-note textarea { width: 100%; box-sizing: border-box; min-height: 64px; resize: vertical; background: var(--card-bg, var(--bg-color)); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; padding: 8px 10px; }
-  .rp-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--border-color); }
+  .rp-body { padding: 16px 18px 6px; }
+  .rp-field-label { display: block; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--text-secondary); margin: 0 0 8px; }
+  .rp-select-wrap { position: relative; }
+  .rp-select { -webkit-appearance: none; appearance: none; width: 100%; box-sizing: border-box; height: 46px; padding: 0 40px 0 14px; background: var(--card-bg, var(--bg-color)); border: 1px solid var(--border-color); border-radius: 11px; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+  .rp-select:focus { outline: none; border-color: var(--accent-color); }
+  .rp-select-chev { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; }
+  .rp-note { margin: 12px 0 4px; }
+  .rp-note textarea { width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; background: var(--card-bg, var(--bg-color)); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; padding: 8px 10px; }
+  .rp-foot { display: flex; justify-content: center; gap: 12px; padding: 16px 18px; border-top: 1px solid var(--border-color); }
   .rp-btn { border: none; border-radius: 9999px; height: 40px; padding: 0 20px; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; }
   .rp-btn-cancel { background: var(--muted-hover); color: var(--text-primary); }
   .rp-btn-submit { background: var(--accent-color); color: var(--border-color); }
@@ -440,9 +439,22 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div class="rp-body" id="rp-body"></div>
-      <div class="rp-note" id="rp-note" hidden>
-        <textarea id="rp-note-input" placeholder="Describe the issue..." maxlength="300"></textarea>
+      <div class="rp-body" id="rp-body">
+        <label class="rp-field-label" for="rp-reason-select">Reason</label>
+        <div class="rp-select-wrap">
+          <select class="rp-select" id="rp-reason-select">
+            <option value="" disabled selected>Select a reason…</option>
+            <option value="out_of_stock">Out of stock</option>
+            <option value="price_wrong">Price not corresponding</option>
+            <option value="qc_broken">QC link not working</option>
+            <option value="link_broken">Link not working</option>
+            <option value="other">Other</option>
+          </select>
+          <svg class="rp-select-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="rp-note" id="rp-note" hidden>
+          <textarea id="rp-note-input" placeholder="Describe the issue..." maxlength="300"></textarea>
+        </div>
       </div>
       <div class="rp-foot">
         <button class="rp-btn rp-btn-cancel" id="rp-cancel">Cancel</button>
@@ -1066,12 +1078,12 @@
         { key: 'other',         label: 'Other' },
       ];
       const overlay = document.getElementById('rp-overlay');
-      const body = document.getElementById('rp-body');
+      const select = document.getElementById('rp-reason-select');
       const note = document.getElementById('rp-note');
       const noteInput = document.getElementById('rp-note-input');
       const submitBtn = document.getElementById('rp-submit');
       if (!overlay) return;
-      let ctx = null, selected = null;
+      let ctx = null;
 
       let _db = null;
       async function getDb() {
@@ -1084,28 +1096,18 @@
         return _db;
       }
       function refreshSubmit() {
-        const ok = !!selected && (selected !== 'other' || noteInput.value.trim().length > 0);
+        const v = select.value;
+        const ok = !!v && (v !== 'other' || noteInput.value.trim().length > 0);
         submitBtn.disabled = !ok;
-      }
-      function renderOptions() {
-        body.innerHTML = REASONS.map(r =>
-          `<button class="rp-opt" data-reason="${r.key}"><span class="rp-radio"></span><span class="rp-opt-label">${r.label}</span></button>`
-        ).join('');
-        body.querySelectorAll('.rp-opt').forEach(b => b.addEventListener('click', () => {
-          selected = b.dataset.reason;
-          body.querySelectorAll('.rp-opt').forEach(x => x.classList.toggle('sel', x === b));
-          note.hidden = selected !== 'other';
-          refreshSubmit();
-        }));
       }
       function open(id, title) {
         ctx = { id, title };
-        selected = null; noteInput.value = ''; note.hidden = true;
+        select.value = ''; noteInput.value = ''; note.hidden = true;
         submitBtn.disabled = true; submitBtn.textContent = 'Submit Report';
-        renderOptions();
         overlay.classList.add('open');
       }
       function close() { overlay.classList.remove('open'); ctx = null; }
+      select.addEventListener('change', () => { note.hidden = select.value !== 'other'; refreshSubmit(); });
 
       // Deschide din butonul de pe card.
       document.addEventListener('click', e => {
@@ -1120,6 +1122,7 @@
       noteInput.addEventListener('input', refreshSubmit);
 
       submitBtn.addEventListener('click', async () => {
+        const selected = select.value;
         if (!selected || !ctx) return;
         const reasonLabel = (REASONS.find(r => r.key === selected) || {}).label || selected;
         submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
