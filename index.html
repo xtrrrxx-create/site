@@ -750,8 +750,26 @@
       }
     }
 
+    // Prețurile de pe Discord (importurile din 2 iul) sunt în USD, dar site-ul
+    // stochează CNY. Corectez la încărcare, mărginit strict la fereastra 2 iul,
+    // ca să nu ating produsele adăugate ulterior (care sunt deja în CNY).
+    const USD_FIX_FROM = Date.parse('2026-07-02T00:00:00Z');
+    const USD_FIX_TO   = Date.parse('2026-07-03T00:00:00Z');
+    function cmFixUsdPrices(products) {
+      for (const p of products) {
+        if (!p || p._usdFixed) continue;
+        const ms = cmCreatedMs(p);
+        const n = Number(p.price);
+        if (ms >= USD_FIX_FROM && ms < USD_FIX_TO && p.price != null && !isNaN(n) && n > 0) {
+          p.price = Math.round(n / 0.14); // USD -> CNY (site: 1 CNY = 0.14 USD)
+          p._usdFixed = true;
+        }
+      }
+    }
+
     // Salvează produsele și randează ruta curentă (toate brandurile sau un seller).
     function render(products) {
+      cmFixUsdPrices(products);
       window.cmProducts = products;
       cmRoute();
     }
