@@ -1242,10 +1242,12 @@
         }
         el.addEventListener('wheel', e => {
           if (el.scrollWidth <= el.clientWidth) return;
-          // Preia DOAR gesturile orizontale (touchpad două degete stânga/dreapta,
-          // sau rotiță cu Shift). Scroll-ul vertical rămâne al paginii — altfel
-          // pe touchpad pagina „nu mai derula" cât stăteai peste un carusel.
-          const horizontal = e.deltaX !== 0 || e.shiftKey;
+          // Preia gesturile orizontale (touchpad două degete, Shift+rotiță) ȘI
+          // rotița de mouse clasic (pași mari/discreți, fără deltaX) — aceea
+          // derulează caruselul orizontal. Scroll-ul vertical de touchpad (deltaY
+          // mici) rămâne al paginii, altfel pagina „nu mai derula" peste carusel.
+          const mouseWheel = e.deltaX === 0 && (e.deltaMode === 1 || Math.abs(e.deltaY) >= 50);
+          const horizontal = e.deltaX !== 0 || e.shiftKey || mouseWheel;
           if (!horizontal) return;
           const delta = e.deltaX !== 0 ? e.deltaX : e.deltaY;
           if (!delta) return;
