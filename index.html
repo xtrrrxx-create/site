@@ -207,32 +207,6 @@
   .nav-burger-menu.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: auto; }
   .nav-burger-item { display: block; padding: 10px 12px; border-radius: 9px; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 15px; font-weight: 600; color: #F2F2F2; text-decoration: none; transition: background 0.15s ease; }
   .nav-burger-item:hover, .nav-burger-item.active { background: var(--muted-hover); }
-  /* ── Buton Report pe card ── */
-  .card-report-btn { position: absolute; top: 8px; right: 8px; z-index: 3; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; padding: 0; border: none; border-radius: 8px; background: rgba(0,0,0,0.42); color: #fff; cursor: pointer; opacity: 0; transition: opacity .15s ease, background .15s ease; }
-  .product-card:hover .card-report-btn, .card-report-btn:focus-visible { opacity: 1; }
-  .card-report-btn:hover { background: rgba(0,0,0,0.68); }
-  @media (hover: none) { .card-report-btn { opacity: 0.85; } }
-  /* ── Modal Report ── */
-  .rp-overlay { position: fixed; inset: 0; z-index: 3000; display: none; align-items: center; justify-content: center; padding: 16px; background: rgba(0,0,0,0.55); backdrop-filter: blur(2px); }
-  .rp-overlay.open { display: flex; }
-  .rp-modal { width: min(420px, 94vw); max-height: 88vh; overflow: hidden auto; background: var(--surface); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 24px 60px #02487355; animation: apSlideUp .22s ease; }
-  .rp-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--border-color); }
-  .rp-head h3 { margin: 0; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 1rem; font-weight: 700; color: #F2F2F2; }
-  .rp-close { background: transparent; border: none; color: var(--text-primary); cursor: pointer; padding: 4px; display: flex; border-radius: 8px; }
-  .rp-close:hover { background: var(--muted-hover); }
-  .rp-body { padding: 16px 18px 6px; }
-  .rp-field-label { display: block; font-family: 'Inter Tight', system-ui, sans-serif; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; color: var(--text-secondary); margin: 0 0 8px; }
-  .rp-select-wrap { position: relative; }
-  .rp-select { -webkit-appearance: none; appearance: none; width: 100%; box-sizing: border-box; height: 46px; padding: 0 40px 0 14px; background: var(--card-bg, var(--bg-color)); border: 1px solid var(--border-color); border-radius: 11px; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
-  .rp-select:focus { outline: none; border-color: var(--accent-color); }
-  .rp-select-chev { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; }
-  .rp-note { margin: 12px 0 4px; }
-  .rp-note textarea { width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; background: var(--card-bg, var(--bg-color)); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); font-family: inherit; font-size: 0.9rem; padding: 8px 10px; }
-  .rp-foot { display: flex; justify-content: center; gap: 12px; padding: 16px 18px; border-top: 1px solid var(--border-color); }
-  .rp-btn { border: none; border-radius: 9999px; height: 40px; padding: 0 20px; font-family: 'Inter Tight', system-ui, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; }
-  .rp-btn-cancel { background: var(--muted-hover); color: var(--text-primary); }
-  .rp-btn-submit { background: var(--accent-color); color: var(--border-color); }
-  .rp-btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
   /* ── MOBIL ── */
   @media (max-width: 768px) {
     .nav-desktop-link { display: none; }
@@ -429,39 +403,6 @@
     </div>
   </div>
   <div id="stores"></div>
-
-  <!-- Modal Report produs -->
-  <div class="rp-overlay" id="rp-overlay" role="dialog" aria-modal="true" aria-labelledby="rp-title">
-    <div class="rp-modal">
-      <div class="rp-head">
-        <h3 id="rp-title">Report Item</h3>
-        <button class="rp-close" id="rp-close" aria-label="Close">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="rp-body" id="rp-body">
-        <label class="rp-field-label" for="rp-reason-select">Reason</label>
-        <div class="rp-select-wrap">
-          <select class="rp-select" id="rp-reason-select">
-            <option value="" disabled selected>Select a reason…</option>
-            <option value="out_of_stock">Out of stock</option>
-            <option value="price_wrong">Price not corresponding</option>
-            <option value="qc_broken">QC link not working</option>
-            <option value="link_broken">Link not working</option>
-            <option value="other">Other</option>
-          </select>
-          <svg class="rp-select-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-        <div class="rp-note" id="rp-note" hidden>
-          <textarea id="rp-note-input" placeholder="Describe the issue..." maxlength="300"></textarea>
-        </div>
-      </div>
-      <div class="rp-foot">
-        <button class="rp-btn rp-btn-cancel" id="rp-cancel">Cancel</button>
-        <button class="rp-btn rp-btn-submit" id="rp-submit" disabled>Submit Report</button>
-      </div>
-    </div>
-  </div>
 
   <script>
     const aL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>';
@@ -731,11 +672,7 @@
         ? `<img src="${esc(ci.rot ? cmProxied(ci.base, ci.rot) : ci.base)}" alt="${title}" style="${cmThumbStyle(ci)}" loading="lazy" onload="this.classList.add('loaded');this.parentNode.classList.add('loaded')" onerror="this.parentNode.classList.add('loaded')" />`
         : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:0.7rem;">No img</div>`;
       return `<div class="hc-card product-card">
-        <div class="product-image" style="overflow:hidden;position:relative;">${img}
-          <button class="card-report-btn" data-report-id="${esc(p.id || '')}" data-report-title="${title}" title="Report item" aria-label="Report item">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
-          </button>
-        </div>
+        <div class="product-image" style="overflow:hidden;position:relative;">${img}</div>
         <div class="product-info">
           <div class="product-batch-row">${cmPlatformBadge(p)}<span class="product-store-name seller-link" data-seller="${sellerLabel}" role="button" tabindex="0">${sellerLabel}</span></div>
           <h3 class="product-title">${title}</h3>
@@ -858,7 +795,7 @@
     const USD_FIX_TO   = Date.parse('2026-07-03T00:00:00Z');
     function cmFixUsdPrices(products) {
       for (const p of products) {
-        if (!p || p._usdFixed) continue;
+        if (!p || p._usdFixed || p.usd_fixed) continue; // usd_fixed = deja migrat din admin
         const ms = cmCreatedMs(p);
         const n = Number(p.price);
         if (ms >= USD_FIX_FROM && ms < USD_FIX_TO && p.price != null && !isNaN(n) && n > 0) {
@@ -1067,80 +1004,6 @@
     document.addEventListener('click', e => {
       if (burgerMenu && !burgerMenu.hidden && !e.target.closest('.nav-burger-wrap')) closeBurger();
     });
-
-    // ── Report Item ──
-    (function reportFeature() {
-      const REASONS = [
-        { key: 'out_of_stock',  label: 'Out of stock' },
-        { key: 'price_wrong',   label: 'Price not corresponding' },
-        { key: 'qc_broken',     label: 'QC link not working' },
-        { key: 'link_broken',   label: 'Link not working' },
-        { key: 'other',         label: 'Other' },
-      ];
-      const overlay = document.getElementById('rp-overlay');
-      const select = document.getElementById('rp-reason-select');
-      const note = document.getElementById('rp-note');
-      const noteInput = document.getElementById('rp-note-input');
-      const submitBtn = document.getElementById('rp-submit');
-      if (!overlay) return;
-      let ctx = null;
-
-      let _db = null;
-      async function getDb() {
-        if (_db) return _db;
-        const cfg = (window.COLDMODE || {}).firebaseConfig;
-        if (!cfg || !cfg.projectId) throw new Error('firebase not configured');
-        const { initializeApp, getApps } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js');
-        const { getFirestore } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-        _db = getFirestore(getApps().length ? getApps()[0] : initializeApp(cfg));
-        return _db;
-      }
-      function refreshSubmit() {
-        const v = select.value;
-        const ok = !!v && (v !== 'other' || noteInput.value.trim().length > 0);
-        submitBtn.disabled = !ok;
-      }
-      function open(id, title) {
-        ctx = { id, title };
-        select.value = ''; noteInput.value = ''; note.hidden = true;
-        submitBtn.disabled = true; submitBtn.textContent = 'Submit Report';
-        overlay.classList.add('open');
-      }
-      function close() { overlay.classList.remove('open'); ctx = null; }
-      select.addEventListener('change', () => { note.hidden = select.value !== 'other'; refreshSubmit(); });
-
-      // Deschide din butonul de pe card.
-      document.addEventListener('click', e => {
-        const btn = e.target.closest('.card-report-btn');
-        if (!btn) return;
-        e.preventDefault(); e.stopPropagation();
-        open(btn.dataset.reportId || '', btn.dataset.reportTitle || '');
-      });
-      document.getElementById('rp-close').addEventListener('click', close);
-      document.getElementById('rp-cancel').addEventListener('click', close);
-      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-      noteInput.addEventListener('input', refreshSubmit);
-
-      submitBtn.addEventListener('click', async () => {
-        const selected = select.value;
-        if (!selected || !ctx) return;
-        const reasonLabel = (REASONS.find(r => r.key === selected) || {}).label || selected;
-        submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
-        const report = { reason: selected, reason_label: reasonLabel, note: noteInput.value.trim() || null, at: new Date().toISOString() };
-        try {
-          if (!ctx.id) throw new Error('no product id');
-          const db = await getDb();
-          const { doc, updateDoc, arrayUnion } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
-          await updateDoc(doc(db, 'products', ctx.id), { reports: arrayUnion(report), reported: true });
-          submitBtn.textContent = 'Reported ✓';
-          setTimeout(close, 900);
-        } catch (err) {
-          console.error('report failed:', err);
-          submitBtn.textContent = 'Failed — retry';
-          submitBtn.disabled = false;
-        }
-      });
-    })();
 
     // Buy Now → pop-up de agent (delegare, o singură dată).
     document.addEventListener('click', e => {
